@@ -10,6 +10,8 @@ An experimental, inspectable CPU linear-programming prototype for this submissio
 - `benchmarks/run_netlib.py`: example command-line runner to parse an MPS file and report objective, residual, iterations and elapsed time. You supply the input MPS files; they are not included here.
 - `results/netlib_25_cases.jsonl`: 25 selected LP run records with own objective, HiGHS objective, published reference, primal residual, iterations, CPU time and pass flag, as received from the test run.
 - `results/netlib_wider_sweep_*.jsonl`, `results/netlib_agg.jsonl`, `results/netlib_scfxm*.jsonl`: additional passes and recorded failed attempts. Separate FIT1D, GFRD-PNC and STANDMPS/MODSZK1 records are included alongside them.
+- `milp/branch_and_bound.py`, `milp/synthetic_3_cases.jsonl`: a minimal B&B prototype and three synthetic test records, not MIPLIB results.
+- `examples/illustrative_refinery.py`, `examples/illustrative_refinery_result.json`: synthetic refinery LP and retained result.
 - `results/highs_same_machine_14_cases.csv`: a **separate, 14-case** same-machine process-CPU comparison with three measurements per solver and their medians. Do not conflate its denominator with the 25-case ledger.
 
 ## Measured status
@@ -22,7 +24,7 @@ Other attempted cases not counted as verified include SCORPION (singular basis),
 
 The separate 14-case same-machine CSV reports HiGHS faster on **all 14 tested cases**; the median ratio of our CPU time to HiGHS CPU time across the 14 rows is about **52.7x**. This is an experimental correctness-focused prototype with a substantial performance gap. Timings are process CPU measurements from the supplied CSV, not a universal speed claim. HiGHS is a reference comparator, not part of our solver core.
 
-There is **no GPU LP solve**, MILP solver, or QP solver here. Matrix-operation GPU experiments, if added later, must not be presented as LP solves. The CPU implementation densifies the model and refactorizes a basis, so large refinery models are out of present scope. There is no refinery field data in the checked-in files; any illustrative refinery case should be labelled as synthetic.
+There is **no GPU LP solve** or QP solver here. A separate small, pure-integer/binary MILP branch-and-bound prototype is included in `milp/`; its three **synthetic** cases match HiGHS in the attached ledger. That is not MIPLIB coverage and not a large-instance MILP guarantee. Matrix-operation GPU experiments, if added later, must not be presented as LP solves. The CPU implementation densifies the model and refactorizes a basis, so large refinery models are out of present scope. There is no refinery field data in the checked-in files; any illustrative refinery case should be labelled as synthetic.
 
 ## Try the solver on an MPS LP
 
@@ -35,8 +37,14 @@ python benchmarks/run_netlib.py path/to/model.mps
 
 The runner reports its own result; it does **not** assert a Netlib pass without a separately supplied reference and independently checked model semantics. The parser covers a subset of MPS conventions, and unsupported or malformed cases may fail. Fixed-field formatting and variable bounds matter. Keep the original models and solver environment with any benchmark publication.
 
+## Synthetic refinery example
+
+`examples/illustrative_refinery.py` is a synthetic six-variable refinery LP with two crude streams, capacity, yield, blend-quality and demand constraints. The retained `examples/illustrative_refinery_result.json` reports the same gross margin for the prototype and HiGHS (about $1.19 million/day in its assumed units). Its coefficients are illustrative assumptions, **not refinery operational data**; the figure is not a measured refinery margin or savings estimate.
+
+Run it with `python -m examples.illustrative_refinery` from the repository root after installing NumPy and SciPy.
+
 ## Next work
 
-Keep matrices sparse, broaden verified problem coverage, add a fully reproducible harness with inputs and reference provenance, build and measure a GPU LP path, then tackle MILP and QP separately. None of these planned items is counted as implemented.
+Keep matrices sparse, broaden verified problem coverage, add a fully reproducible harness with inputs and reference provenance, build and measure a GPU LP path, then broaden MILP beyond three synthetic tests and tackle QP separately. These planned items are not counted as implemented.
 
 No license has been selected yet. The repository remains private until its owner chooses otherwise.
