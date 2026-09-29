@@ -2,7 +2,7 @@
 No cuts, warm starts, large-instance guarantees or GPU path. All x>=0.
 """
 import numpy as np, math, heapq, time
-from engine.revised_simplex import solve_lp
+from engine.solver_lu_relfeas import solve_lp
 
 def branch_and_bound(A,b,c,kinds,integer_indices,node_limit=10000,integrality_tol=1e-7):
  A=np.asarray(A,float);b=np.asarray(b,float);c=np.asarray(c,float)
