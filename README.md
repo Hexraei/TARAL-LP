@@ -10,8 +10,8 @@ An experimental, inspectable CPU linear-programming prototype for this submissio
 - `parsers/mps_free.py`: extension that splits free variables into positive and negative nonnegative columns. It imports `mps_fixed` from the same directory.
 - `benchmarks/run_netlib.py`: example command-line runner to parse an MPS file and report objective, residual, iterations and elapsed time. You supply the input MPS files; they are not included here.
 - `results/consolidated_partial_sweep.csv`: canonical consolidated **partial** sweep ledger, 44 rows (39 passes and five failures). It is not a complete failure inventory. The separate SCSD8 addendum is also counted; the canonical CSV has not yet been regenerated with that row. `results/netlib_all_runs.jsonl` is a prior assembly of the supplied per-case records and is superseded by the CSV.
-- `milp/branch_and_bound.py`, `milp/synthetic_3_cases.jsonl`: a minimal B&B prototype and three synthetic test records, not MIPLIB results.
-- `qp/projected_gradient.py`, `qp/synthetic_3_cases.jsonl`: positive-definite convex box-bounded projected-gradient QP prototype and three synthetic checks against SciPy. No general linear constraints and no public QP benchmark coverage.
+- `milp/branch_and_bound.py`, `milp/synthetic_3_cases.jsonl`, `milp/property_tests.py`, `milp/property_results.json`: a minimal B&B prototype, three fixed synthetic tests, and 30 randomized small synthetic property tests checked against brute force and SciPy/HiGHS. No MIPLIB coverage.
+- `qp/projected_gradient.py`, `qp/synthetic_3_cases.jsonl`, `qp/property_tests.py`, `qp/property_results.json`: positive-definite convex box-bounded projected-gradient QP prototype, three fixed synthetic checks and 30 randomized SPD box-QP synthetic property tests against SciPy. No general linear constraints or public QP benchmark coverage.
 - `examples/illustrative_refinery.py`, `examples/illustrative_refinery_result.json`: synthetic refinery LP and retained result, now run on the same LU engine of record as the LP sweep.
 - `results/highs_same_machine_14_cases.csv`: a **separate, 14-case** same-machine process-CPU comparison with three measurements per solver and their medians. Do not conflate its denominator with the 40-case LP ledger.
 
@@ -25,7 +25,7 @@ Other attempted cases not counted as verified include SCORPION (singular basis),
 
 The separate 14-case same-machine CSV benchmarked the **earlier pre-LU engine**, not the current LU engine. It reports HiGHS faster on **all 14 tested cases**; the median ratio of our CPU time to HiGHS CPU time across the 14 rows is about **52.7x**. This is an experimental correctness-focused prototype with a substantial performance gap. Timings are process CPU measurements from the supplied CSV, not a universal speed claim. HiGHS is a reference comparator, not part of our solver core.
 
-There is **no GPU LP solve** or general QP solver here. A separate small, pure-integer/binary MILP branch-and-bound prototype is included in `milp/`; its three **synthetic** cases match HiGHS in the attached ledger. That is not MIPLIB coverage and not a large-instance MILP guarantee. The separate QP prototype covers only positive-definite convex box-bounded problems; its three synthetic results match SciPy objectives, but are not general QP or public benchmark coverage. Matrix-operation GPU experiments, if added later, must not be presented as LP solves. The CPU implementation densifies the model and refactorizes a basis, so large refinery models are out of present scope. There is no refinery field data in the checked-in files; any illustrative refinery case should be labelled as synthetic.
+There is **no GPU LP solve** or general QP solver here. A separate small, pure-integer/binary MILP branch-and-bound prototype is included in `milp/`; its three fixed **synthetic** cases match HiGHS. A seeded property test adds 30/30 randomized small synthetic cases matching brute force and SciPy/HiGHS. These are not MIPLIB coverage or a large-instance MILP guarantee. The separate QP prototype covers only positive-definite convex box-bounded problems; its three fixed synthetic cases and 30/30 seeded randomized SPD box-QP property tests match SciPy objectives. These do not establish general QP or public benchmark coverage. Matrix-operation GPU experiments, if added later, must not be presented as LP solves. The CPU implementation densifies the model and refactorizes a basis, so large refinery models are out of present scope. There is no refinery field data in the checked-in files; any illustrative refinery case should be labelled as synthetic.
 
 ## Try the solver on an MPS LP
 
@@ -46,6 +46,6 @@ Run it with `python -m examples.illustrative_refinery` from the repository root 
 
 ## Next work
 
-Keep matrices sparse, broaden verified problem coverage, add a fully reproducible harness with inputs and reference provenance, build and measure a GPU LP path, then broaden MILP and QP beyond their three synthetic tests each. These planned items are not counted as implemented.
+Keep matrices sparse, broaden verified problem coverage, add a fully reproducible harness with inputs and reference provenance, build and measure a GPU LP path, then broaden MILP and QP beyond small synthetic tests. These planned items are not counted as implemented.
 
 No license has been selected yet. The repository remains private until its owner chooses otherwise.
