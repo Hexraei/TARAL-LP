@@ -246,8 +246,8 @@
   },
   "objective_difference_usd_per_day": 0.0,
   "max_decision_difference_kbd": 1.4210854715202004e-14,
-  "ours_cpu_s": 0.0016193889999999989,
-  "highs_cpu_s": 0.001616767000000019,
+  "ours_cpu_s": 0.001044981999999972,
+  "highs_cpu_s": 0.0019085030000000058,
   "highs_status": 0,
   "iterations": {
     "phase1": 10,
