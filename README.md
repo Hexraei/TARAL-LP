@@ -5,19 +5,19 @@ An experimental, inspectable CPU linear-programming prototype for this submissio
 ## What is in this repository
 
 - `engine/revised_simplex.py` / `engine/solver_lu_relfeas.py`: identical copies of the LU-based engine of record for the 25-case regression and wider sweeps, using NumPy arrays and SciPy LU factorization for linear algebra. SciPy's optimization solvers are **not** called by the core.
-- `engine/solver_dantzig_relative.py`: earlier revised-simplex variant used for the illustrative refinery case, not the engine of record for the 39-case LP ledger.
+- `engine/solver_dantzig_relative.py`: earlier revised-simplex variant retained for provenance, no longer imported by the refinery example and not the engine of record.
 - `parsers/mps_fixed.py`: fixed-field MPS parser for rows, RHS, ranges and bounds; it transforms finite lower and upper bounds into nonnegative standard-form variables and extra constraints.
 - `parsers/mps_free.py`: extension that splits free variables into positive and negative nonnegative columns. It imports `mps_fixed` from the same directory.
 - `benchmarks/run_netlib.py`: example command-line runner to parse an MPS file and report objective, residual, iterations and elapsed time. You supply the input MPS files; they are not included here.
-- `results/consolidated_partial_sweep.csv`: canonical consolidated **partial** sweep ledger, 44 rows (39 passes and five failures). It is not a complete failure inventory. `results/netlib_all_runs.jsonl` is a prior assembly of the supplied per-case records and is superseded by the CSV.
+- `results/consolidated_partial_sweep.csv`: canonical consolidated **partial** sweep ledger, 45 rows (40 passes and five failures). It is not a complete failure inventory. `results/netlib_all_runs.jsonl` is a prior assembly of the supplied per-case records and is superseded by the CSV.
 - `milp/branch_and_bound.py`, `milp/synthetic_3_cases.jsonl`: a minimal B&B prototype and three synthetic test records, not MIPLIB results.
 - `qp/projected_gradient.py`, `qp/synthetic_3_cases.jsonl`: positive-definite convex box-bounded projected-gradient QP prototype and three synthetic checks against SciPy. No general linear constraints and no public QP benchmark coverage.
-- `examples/illustrative_refinery.py`, `examples/illustrative_refinery_result.json`: synthetic refinery LP and retained result.
-- `results/highs_same_machine_14_cases.csv`: a **separate, 14-case** same-machine process-CPU comparison with three measurements per solver and their medians. Do not conflate its denominator with the 39-case LP ledger.
+- `examples/illustrative_refinery.py`, `examples/illustrative_refinery_result.json`: synthetic refinery LP and retained result, now run on the same LU engine of record as the LP sweep.
+- `results/highs_same_machine_14_cases.csv`: a **separate, 14-case** same-machine process-CPU comparison with three measurements per solver and their medians. Do not conflate its denominator with the 40-case LP ledger.
 
 ## Measured status
 
-The consolidated partial sweep ledger `results/consolidated_partial_sweep.csv`, show **39 distinct passing LP instances**: 25/25 selected cases in the first ledger and 14 additional passes in wider-sweep and separate-result files. The retained results match HiGHS objectives and published Netlib reference objectives, with reported maximum primal residual 3.79e-10 across those passes. The five failed rows are not the full inventory of attempts. This is the retained result ledger, not a fresh independent rerun from the checked-in files. The original MPS inputs, reference source links, environment capture and complete run script were not included in the handoff, so the numerical results cannot yet be fully reproduced from this repository alone. Add those artifacts before claiming end-to-end reproducibility.
+The consolidated partial sweep ledger `results/consolidated_partial_sweep.csv` records **40 distinct passing LP instances**: 25/25 selected cases in the first ledger and 15 additional passes in wider-sweep and separate-result files, including SCSD8. SHIP04S hit a run limit and is not counted. The retained results match HiGHS objectives and published Netlib reference objectives, with reported maximum primal residual 3.79e-10 across those passes. The five failed rows are not the full inventory of attempts. This is the retained result ledger, not a fresh independent rerun from the checked-in files. The original MPS inputs, reference source links, environment capture and complete run script were not included in the handoff, so the numerical results cannot yet be fully reproduced from this repository alone. Add those artifacts before claiming end-to-end reproducibility.
 
 FIT1D is a separate result file with objective -9146.378092420928 versus HiGHS -9146.378092420926 and published reference -9146.3780924; its own 42.45 CPU seconds versus HiGHS 0.0223 seconds underlines the performance gap.
 
