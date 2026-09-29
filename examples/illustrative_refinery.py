@@ -5,7 +5,7 @@ synthetic indices. All coefficients and limits are assumptions, not refinery fac
 import numpy as np
 from scipy.optimize import linprog
 import time, json
-from engine.revised_simplex import solve_lp
+from engine.solver_dantzig_relative import solve_lp
 # Crude L/H, each split into gasoline/diesel/residue by fixed yields.
 crudes=['Light','Heavy'];products=['Gasoline','Diesel']
 yields=np.array([[.42,.35,.18],[.27,.43,.25]]) # leftover 5% loss for each crude
