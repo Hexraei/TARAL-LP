@@ -1,0 +1,256 @@
+{
+  "case": "Illustrative refinery-flavored refinery LP, wholly synthetic",
+  "variables": [
+    "L",
+    "H",
+    "gL",
+    "gH",
+    "dL",
+    "dH"
+  ],
+  "objective_min_cost_per_kbd": [
+    38.75,
+    30.75,
+    -67.0,
+    -67.0,
+    -60.0,
+    -60.0
+  ],
+  "constraints": [
+    {
+      "label": "CDU throughput <= 100 kbd",
+      "coefficients": [
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sense": "L",
+      "rhs": 100.0
+    },
+    {
+      "label": "Light supply <= 70 kbd",
+      "coefficients": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sense": "L",
+      "rhs": 70.0
+    },
+    {
+      "label": "Heavy supply <= 70 kbd",
+      "coefficients": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sense": "L",
+      "rhs": 70.0
+    },
+    {
+      "label": "Gasoline unit <= 40 kbd",
+      "coefficients": [
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "sense": "L",
+      "rhs": 40.0
+    },
+    {
+      "label": "Diesel unit <= 42 kbd",
+      "coefficients": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "sense": "L",
+      "rhs": 42.0
+    },
+    {
+      "label": "Gasoline demand >= 33 kbd",
+      "coefficients": [
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "sense": "G",
+      "rhs": 33.0
+    },
+    {
+      "label": "Diesel demand >= 35 kbd",
+      "coefficients": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "sense": "G",
+      "rhs": 35.0
+    },
+    {
+      "label": "Light gasoline yield",
+      "coefficients": [
+        -0.42,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sense": "L",
+      "rhs": 0.0
+    },
+    {
+      "label": "Light diesel yield",
+      "coefficients": [
+        -0.35,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "sense": "L",
+      "rhs": 0.0
+    },
+    {
+      "label": "Heavy gasoline yield",
+      "coefficients": [
+        0.0,
+        -0.27,
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "sense": "L",
+      "rhs": 0.0
+    },
+    {
+      "label": "Heavy diesel yield",
+      "coefficients": [
+        0.0,
+        -0.43,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "sense": "L",
+      "rhs": 0.0
+    },
+    {
+      "label": "Gasoline RON >= 91",
+      "coefficients": [
+        0.0,
+        0.0,
+        3.0,
+        -3.0,
+        0.0,
+        0.0
+      ],
+      "sense": "G",
+      "rhs": 0.0
+    },
+    {
+      "label": "Diesel sulfur <= 14 ppm",
+      "coefficients": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -6.0,
+        4.0
+      ],
+      "sense": "L",
+      "rhs": 0.0
+    }
+  ],
+  "crude_yields": [
+    [
+      0.42,
+      0.35,
+      0.18
+    ],
+    [
+      0.27,
+      0.43,
+      0.25
+    ]
+  ],
+  "prices_usd_per_bbl": [
+    102.0,
+    95.0,
+    35.0
+  ],
+  "crude_cost_usd_per_bbl": [
+    72.0,
+    64.0
+  ],
+  "ours": {
+    "decision_kbd": {
+      "L": 45.0261780104712,
+      "H": 54.9738219895288,
+      "gL": 18.910994764397902,
+      "gH": 14.842931937172777,
+      "dL": 15.759162303664922,
+      "dH": 23.638743455497384
+    },
+    "gross_margin_usd_per_day": 1190178.0104712043,
+    "gasoline_kbd": 33.75392670157068,
+    "diesel_kbd": 39.397905759162306,
+    "fixed_residue_kbd": 21.848167539267017,
+    "total_byproduct_kbd": 21.848167539267024,
+    "gasoline_ron": 91.36156351791531,
+    "diesel_sulfur_ppm": 14.0,
+    "max_constraint_violation_kbd": 3.552713678800501e-15
+  },
+  "highs": {
+    "decision_kbd": {
+      "L": 45.02617801047121,
+      "H": 54.97382198952879,
+      "gL": 18.91099476439791,
+      "gH": 14.842931937172773,
+      "dL": 15.759162303664924,
+      "dH": 23.638743455497377
+    },
+    "gross_margin_usd_per_day": 1190178.0104712043,
+    "gasoline_kbd": 33.753926701570684,
+    "diesel_kbd": 39.3979057591623,
+    "fixed_residue_kbd": 21.848167539267017,
+    "total_byproduct_kbd": 21.848167539267024,
+    "gasoline_ron": 91.3615635179153,
+    "diesel_sulfur_ppm": 14.0,
+    "max_constraint_violation_kbd": 0.0
+  },
+  "objective_difference_usd_per_day": 0.0,
+  "max_decision_difference_kbd": 1.4210854715202004e-14,
+  "ours_cpu_s": 0.0016193889999999989,
+  "highs_cpu_s": 0.001616767000000019,
+  "highs_status": 0,
+  "iterations": {
+    "phase1": 10,
+    "phase2": 2
+  }
+}
