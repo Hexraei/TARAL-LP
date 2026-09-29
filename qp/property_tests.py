@@ -1,4 +1,4 @@
-from qp_projected import solve_box_qp
+from qp.projected_gradient import solve_box_qp
 from scipy.optimize import minimize,Bounds
 import numpy as np,json
 rng=np.random.default_rng(26000+119);failed=[];maxerr=0
