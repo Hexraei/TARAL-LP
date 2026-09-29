@@ -1,6 +1,10 @@
 # TARAL-LP
 
-An experimental, inspectable CPU linear-programming prototype for this submission. The current core is a two-phase revised simplex solver for small LPs, with an MPS parser path. It is not a production refinery planner or a replacement for HiGHS, CPLEX, or Xpress.
+TARAL-LP is proprietary. Only official competition judges and organizers may read it, solely to evaluate this submission.
+No copying, changes, redistribution, commercial use, or use as AI/ML training data or input. No automated scraping or analysis except non-AI evaluation by competition organizers.
+See LICENSE for the full terms.
+
+An experimental, inspectable CPU linear-programming prototype for refinery planning. The current core is a two-phase revised simplex solver for small LPs, with an MPS parser path. It is not a production refinery planner or a replacement for HiGHS, CPLEX, or Xpress.
 
 ## What is in this repository
 
@@ -48,4 +52,4 @@ Run it with `python -m examples.illustrative_refinery` from the repository root 
 
 Keep matrices sparse, broaden verified problem coverage, add a fully reproducible harness with inputs and reference provenance, build and measure a GPU LP path, then broaden MILP and QP beyond small synthetic tests. These planned items are not counted as implemented.
 
-No license has been selected yet. The repository remains private until its owner chooses otherwise.
+The repository remains private until its owner chooses otherwise.
