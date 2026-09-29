@@ -1,0 +1,1 @@
+{"name": "scsd8", "reference": 904.99999993, "rows": 397, "columns": 2750, "offset": 0.0, "highs_status": 0, "highs_objective": 904.9999999254643, "highs_cpu_s": 0.06279333099999995, "own_objective": 904.9999999254647, "own_residual": 5.540706782269922e-15, "own_cpu_s": 65.480921757, "phase1_iterations": 7280, "phase2_iterations": 1137, "pass": true}
