@@ -61,7 +61,7 @@ The crashed jobs are not claimed as numerical failures or recoveries: their caus
 
 A separate sequential, single-BLAS-thread check used the unchanged v18 engine and the same pinned MPS files for 16 passing cases. Kaggle/local solver-wall time had a **1.974x median**: Kaggle took about twice as long in this sample. The 10th-90th percentile range was 1.763-2.507x; the full range was 1.711-11.062x, with tiny AFIRO the overhead-heavy outlier.
 
-This is an environment comparison, not a hardware-only speed test. Runtime/library versions, startup and load can contribute. It does not mix the patched local engine with old Kaggle timings. Applying that factor to the concurrent-load recovery times is only a rough scenario, not an executed result: CZPROB, GANGES, SHIP08L and SHIP12L have room under 60 seconds; FIT1P is borderline; SCTAP2, STOCFOR2, SCTAP3, SIERRA and 25FV47 are at risk. Scaling parse time with a solver-time factor adds uncertainty. Only the saved rerun can settle the Kaggle count.
+This is an environment comparison, not a hardware-only speed test. Runtime/library versions, startup and load can contribute. It does not mix the patched local engine with old Kaggle timings. Applying that factor to the concurrent-load recovery times is only a rough scenario, not an executed result: CZPROB, GANGES, SHIP08L and SHIP12L have room under 60 seconds; FIT1P is borderline; SCTAP2, STOCFOR2, SCTAP3, SIERRA and 25FV47 are at risk. Scaling parse time with a solver-time factor adds uncertainty. The executed v19 results below now settle that run's count; the scenario was not a guaranteed forecast.
 
 ## Executed Kaggle CPU benchmarks
 
@@ -75,21 +75,37 @@ These results come from saved, executed CPU runs. The notebook is private, so no
 - **30/30 small synthetic MILP tests and 30/30 small synthetic QP tests executed and passed.** The MILP prototype is limited branch-and-bound; the QP prototype handles positive-definite convex box-bounded problems. These are not MIPLIB or general QP coverage.
 - **12/42 local KKT checks** cover a subset of the selected LP set. KKT checks test optimality conditions; this local subset is not a 42-case certificate claim or an executed Kaggle certificate result.
 
-### Latest completed full-corpus run - v18
+### Latest completed full-corpus run - v19
 
-<!-- Keep this full-corpus block versioned. Replace all counts, pair denominator, ratio, residual and named exceptions together only after the next saved run is verified. Keep v16 and local results separate. -->
+<!-- Keep this full-corpus block versioned. Update all counts, pair denominator, ratio, residual and named exceptions together when a later saved run is verified. Keep v16 and local results separate. -->
 
-- Attempted: **93 Netlib cases** from the pinned feasible corpus.
-- Result: **57 passes, 35 timeouts, 1 solver failure (DEGEN2)**.
-- Median TARAL-LP/HiGHS wall-time ratio: **29.98x across 57 passing pairs**. The passing subset differs from v16, so this is not a like-for-like speedup claim.
-- Maximum reported primal residual across the 57 passes: **9.31e-10**.
-- Both solvers had a **60-second parse + solve budget per case**. This is the harness's budget, not Kaggle's platform time limit. Timing ratios use the recorded solver-wall fields; timeouts are excluded from the paired median.
+- Attempted: **93 Netlib cases** from the pinned feasible corpus. Saved-run ID: `354036358`; run duration: **29 minutes 12 seconds**.
+- Result: **68 of 93 attempted cases passed**, with **16 timeouts, 7 `solver_failed` and 2 `highs_failed` classifications**. This is not a 68/68 selected-set claim.
+- Median TARAL-LP/HiGHS wall-time ratio: **12.478x across 68 passing pairs**. TARAL-LP was slower by that median factor. The passing subset differs from v16 and v18, so comparing their medians is not a like-for-like speedup claim.
+- Maximum reported primal residual across the 68 passes: **9.31e-10 (GROW15)**.
+- Both solvers had a **60-second parse + solve budget per case**. This is the harness's budget, not Kaggle's platform time limit. Timing ratios use the recorded solver-wall fields; unsuccessful cases are excluded from the paired median.
 
-**Named v18 timeouts:** 25FV47, 80BAU3B, BNL1, BNL2, CYCLE, CZPROB, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT1P, FIT2D, FIT2P, GANGES, GREENBEA, GREENBEB, MAROS, MAROS-R7, MODSZK1, NESM, PEROLD, PILOT, PILOT.JA, PILOT.WE, PILOT4, PILOT87, PILOTNOV, SCTAP2, SCTAP3, SHIP08L, SHIP12L, SIERRA, STOCFOR2, WOOD1P, WOODW.
+**Named v19 timeouts:** 80BAU3B, BNL1, BNL2, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT2D, FIT2P, GREENBEA, GREENBEB, MAROS-R7, PEROLD, PILOT, PILOT87, WOODW.
 
-**Named v18 solver failure:** DEGEN2, lost primal feasibility. These are the full run's unsuccessful cases, not hidden exclusions from a selected-set headline.
+**Named v19 `solver_failed` cases:**
 
-The patched full-corpus v19 rerun is pending verification. No local recovery or projection is counted as a v19 pass here.
+- CYCLE: iteration limit.
+- DEGEN2: lost primal feasibility.
+- MAROS: lost primal feasibility.
+- MODSZK1: lost primal feasibility.
+- PILOT.JA: lost primal feasibility.
+- PILOTNOV: lost primal feasibility.
+- WOOD1P: iteration limit.
+
+**Named v19 `highs_failed` cases:** PILOT.WE and PILOT4. These labels mean the comparison could not establish a pass because the HiGHS reference did not return a usable optimum. They do not mean TARAL-LP succeeded: PILOT.WE also hit TARAL-LP's iteration limit; PILOT4 also lost primal feasibility. HiGHS reported a solve error for PILOT.WE and an unbounded model for PILOT4. PEROLD is classified as a TARAL-LP timeout even though its HiGHS attempt also returned a solve error. Reference/parser/model semantics need investigation before drawing conclusions about these cases.
+
+### What changed from v18 to v19
+
+All **57 prior passing cases stayed passing**. Eleven former timeouts became passes: 25FV47, CZPROB, FIT1P, GANGES, NESM, SCTAP2, SCTAP3, SHIP08L, SHIP12L, SIERRA, STOCFOR2.
+
+Six former timeouts became `solver_failed`: CYCLE, MAROS, MODSZK1, PILOT.JA, PILOTNOV and WOOD1P. Two became `highs_failed`: PILOT.WE and PILOT4. These are unresolved outcomes, not recoveries. DEGEN2 remained `solver_failed` with lost primal feasibility. No prior pass became a failure or timeout.
+
+For historical comparison, v18 attempted the same 93 cases and returned **57 passes, 35 timeouts and 1 solver failure (DEGEN2)**, with a **29.98x median over 57 passing pairs** and a **9.31e-10 maximum passing residual**. The v19 saved result replaces the earlier pending-run statement; the local measurements above remain a separate concurrent-load test, not a forecast substituted for this run.
 
 The full-corpus input source is [the pinned Netlib MPS collection](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files). The new local and Kaggle ledgers are separate from the older checked-in partial CSVs below. This README update reports the measurements; it does not itself replace the checked-in engine, parser or result files with the patched run artifacts.
 
