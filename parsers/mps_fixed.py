@@ -39,29 +39,30 @@ def read_mps_extended(path):
    else:raise NotImplementedError(f'bound {typ}')
    bounds[name]=old
  names=list(columns);rnames=list(rows)
- A=np.array([[columns[x].get(r,0.) for x in names] for r in rnames],float)
- b=np.array([rhs.get(r,0.) for r in rnames],float)
  c=np.array([columns[x].get(obj,0.) for x in names],float)
- kinds=list(rows.values());lower=np.array([bounds.get(x,[0,np.inf])[0] for x in names]);upper=np.array([bounds.get(x,[0,np.inf])[1] for x in names])
+ lower=np.array([bounds.get(x,[0,np.inf])[0] for x in names]);upper=np.array([bounds.get(x,[0,np.inf])[1] for x in names])
  if not np.all(np.isfinite(lower)):raise NotImplementedError('nonfinite lower variable bounds')
  if np.any(upper<lower):raise ValueError('inconsistent bounds')
- if ranges:
-  rows2=[];b2=[];k2=[]
-  for i,r in enumerate(rnames):
-   rows2.append(A[i]);b2.append(b[i]);k2.append(kinds[i])
-   if r not in ranges:continue
-   t=ranges[r];v=abs(t)
-   if kinds[i]=='L':rows2.append(A[i]);b2.append(b[i]-v);k2.append('G')
-   elif kinds[i]=='G':rows2.append(A[i]);b2.append(b[i]+v);k2.append('L')
-   else:
-    # Replace equality by the appropriate first inequality; add other side.
-    if t>=0:k2[-1]='G';rows2.append(A[i]);b2.append(b[i]+v);k2.append('L')
-    else:k2[-1]='L';rows2.append(A[i]);b2.append(b[i]-v);k2.append('G')
-  A=np.array(rows2);b=np.array(b2);kinds=k2
- # Substitute x = y+lower, y>=0. Add finite y<=upper-lower constraints.
- offset=float(c@lower);b=b-A@lower
- finite=np.where(np.isfinite(upper))[0]
- for j in finite:
-  row=np.zeros(len(c));row[j]=1
-  A=np.vstack((A,row));b=np.r_[b,upper[j]-lower[j]];kinds.append('L')
+ # Build row semantics first, preserving the original range-row order.
+ rowmap={};bs=[];kinds=[]
+ for r in rnames:
+  kind=rows[r];value=rhs.get(r,0.);inds=[len(bs)];bs.append(value);kinds.append(kind)
+  if r in ranges:
+   t=ranges[r];v=abs(t);inds.append(len(bs))
+   if kind=='L':bs.append(value-v);kinds.append('G')
+   elif kind=='G':bs.append(value+v);kinds.append('L')
+   elif t>=0:kinds[-1]='G';bs.append(value+v);kinds.append('L')
+   else:kinds[-1]='L';bs.append(value-v);kinds.append('G')
+  rowmap[r]=inds
+ finite=np.where(np.isfinite(upper))[0];mcore=len(bs)
+ # One dense allocation only; populate stored MPS entries, not m*n dict lookups.
+ A=np.zeros((mcore+len(finite),len(names)),float)
+ for j,name in enumerate(names):
+  for r,value in columns[name].items():
+   if r in rowmap:
+    for i in rowmap[r]:A[i,j]=value
+ b=np.array(bs+[upper[j]-lower[j] for j in finite],float)
+ offset=float(c@lower);b[:mcore]-=A[:mcore]@lower
+ if len(finite):A[mcore+np.arange(len(finite)),finite]=1
+ kinds.extend(['L']*len(finite))
  return A,b,c,kinds,names,offset,lower
