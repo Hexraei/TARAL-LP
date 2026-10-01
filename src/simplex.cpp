@@ -15,7 +15,9 @@ constexpr double kPrimalTol = 1e-9;
 constexpr double kDualTol = 1e-9;
 constexpr double kPivotTol = 1e-9;  // relative to the largest |alpha|
 constexpr size_t kRefactorEvery = 100;
-constexpr int kPerturbAfter = 3000;  // iterations without objective progress before bounds are perturbed
+constexpr int kPerturbAfter = 3000;    // iterations without objective progress count as a stall
+constexpr int kMaxPerturbations = 6;   // stall remedies per solve, so perturb/restore cannot loop forever
+constexpr bool kPerturbAtStart = false;
 constexpr long kMaxIterations = 50'000'000;
 
 enum Where : char { kBasic, kLower, kUpper, kZero };  // kZero: free nonbasic held at 0
@@ -146,17 +148,19 @@ Result Simplex::run(double time_limit_s) {
     bool fresh = true;  // no eta updates since the last refactor
     int stalled = 0;              // iterations since either phase objective last improved
     double best[2] = {kInf, kInf};  // best phase-2 / phase-1 objective seen; flipping phases is no progress
-    bool perturbed = false, perturb_used = false;
+    int level = 0, perturbations = 0;
     // Anti-stalling (idea from the M3 reference engine): widen every non-fixed bound by a tiny
-    // deterministic random amount so tied ratios separate. True bounds are restored at the
-    // perturbed optimum and the solve continues from that basis, so the answer is unperturbed.
-    auto apply_bounds = [&](bool perturb) {
-        std::mt19937_64 rng(12345);
+    // deterministic random amount so tied ratios separate; a stall while perturbed retries with
+    // a fresh pattern ten times larger. True bounds (level 0) are restored at the perturbed
+    // optimum and the solve continues from that basis, so the answer is unperturbed.
+    auto apply_bounds = [&](int lvl) {
+        std::mt19937_64 rng(12345 + perturbations);
+        double scale = lvl ? std::pow(10.0, lvl - 1) : 0.0;
         for (int j = 0; j < N; ++j) {
             double lo = j < n_ ? md_.col_lo[j] : md_.row_lo[j - n_];
             double up = j < n_ ? md_.col_up[j] : md_.row_up[j - n_];
-            if (perturb && lo != up) {
-                double shift = 1e-7 + 1e-6 * double(rng() % 1000000) / 1e6;
+            if (lvl && lo != up) {
+                double shift = scale * (1e-7 + 1e-6 * double(rng() % 1000000) / 1e6);
                 if (std::isfinite(lo)) lo -= shift * (1 + std::abs(lo));
                 if (std::isfinite(up)) up += shift * (1 + std::abs(up));
             }
@@ -164,10 +168,17 @@ Result Simplex::run(double time_limit_s) {
             if (where_[j] == kLower) x_[j] = lo;
             else if (where_[j] == kUpper) x_[j] = up;
         }
-        perturbed = perturb;
+        level = lvl;
         stalled = 0, best[0] = best[1] = kInf;
         return refactor();  // also recomputes x_B
     };
+    if (kPerturbAtStart) {
+        ++perturbations;
+        if (!apply_bounds(1)) {
+            res.message = "perturbed basis could not be factored";
+            return res;
+        }
+    }
     std::vector<double> cb(m_), y, alpha, col(m_);
     for (;;) {
         if (elapsed() > time_limit_s) {
@@ -197,11 +208,11 @@ Result Simplex::run(double time_limit_s) {
             for (int j = 0; j < N; ++j) obj += c_[j] * x_[j];
         }
         double& b = best[phase1];
-        if (obj < b - 1e-12 * (1 + std::abs(b))) b = obj, stalled = 0;
+        if (!(b < kInf) || obj < b - 1e-12 * (1 + std::abs(b))) b = obj, stalled = 0;
         else ++stalled;
-        if (stalled > kPerturbAfter && !perturb_used) {
-            perturb_used = true;
-            if (!apply_bounds(true)) break;
+        if (stalled > kPerturbAfter && perturbations < kMaxPerturbations) {
+            ++perturbations;
+            if (!apply_bounds(std::min(level + 1, 3))) break;
             fresh = true;
             continue;
         }
@@ -222,8 +233,8 @@ Result Simplex::run(double time_limit_s) {
                 fresh = true;
                 continue;
             }
-            if (perturbed) {
-                if (!apply_bounds(false)) break;
+            if (level > 0) {
+                if (!apply_bounds(0)) break;
                 continue;
             }
             if (phase1) {
