@@ -1,5 +1,5 @@
 // Sparse LU factorization written from first principles (no external library).
-// Right-looking elimination on an active row-wise submatrix; pivots chosen by Markowitz
+// Right-looking elimination on the active submatrix; pivots chosen by Markowitz
 // cost (r-1)(c-1) among the sparsest few rows and columns, subject to a column threshold
 // |a_pq| >= kThreshold * max_i |a_iq| that bounds the multipliers.
 #include <algorithm>
@@ -13,10 +13,19 @@ constexpr double kThreshold = 0.1;
 constexpr double kTiny = 1e-11;  // below this a pivot is treated as zero (rank deficiency)
 constexpr int kCandidates = 4;
 
-double value_at(const std::vector<Entry>& row, int col) {
-    for (const Entry& e : row)
-        if (e.index == col) return e.value;
-    return 0;
+double& value_in(std::vector<Entry>& v, int index) {  // entry must exist
+    for (Entry& e : v)
+        if (e.index == index) return e.value;
+    throw std::logic_error("LU: missing active entry");
+}
+
+void erase_from(std::vector<Entry>& v, int index) {
+    for (size_t t = 0; t < v.size(); ++t)
+        if (v[t].index == index) {
+            v[t] = v.back();
+            v.pop_back();
+            return;
+        }
 }
 }  // namespace
 
@@ -25,28 +34,21 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
     prow_.clear(), pcol_.clear(), piv_.clear(), L_.clear(), U_.clear();
     bad_pos.clear(), bad_rows.clear();
 
-    std::vector<std::vector<Entry>> rows(m);  // active rows: (position, value)
-    std::vector<std::vector<int>> colrows(m);
+    // The active submatrix is kept both row-wise (position, value) and column-wise
+    // (row, value), so pivot search reads column values without scanning long rows.
+    std::vector<std::vector<Entry>> rows(m), acol(m);
     for (int p = 0; p < m; ++p)
         for (const Entry& e : cols[p])
             if (e.value != 0) {
                 rows[e.index].push_back({p, e.value});
-                colrows[p].push_back(e.index);
+                acol[p].push_back({e.index, e.value});
             }
     std::vector<char> row_done(m, 0), col_done(m, 0);
     std::vector<int> where(m, -1);
 
-    auto erase_from = [](std::vector<int>& v, int x) {
-        for (size_t t = 0; t < v.size(); ++t)
-            if (v[t] == x) {
-                v[t] = v.back();
-                v.pop_back();
-                return;
-            }
-    };
     auto col_max = [&](int q) {
         double mx = 0;
-        for (int i : colrows[q]) mx = std::max(mx, std::abs(value_at(rows[i], q)));
+        for (const Entry& e : acol[q]) mx = std::max(mx, std::abs(e.value));
         return mx;
     };
 
@@ -59,10 +61,10 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
             else return;
             for (int t = cnt - 1; t > 0 && size_of(best[t]) < size_of(best[t - 1]); --t) std::swap(best[t], best[t - 1]);
         };
-        auto csize = [&](int q) { return colrows[q].size(); };
+        auto csize = [&](int q) { return acol[q].size(); };
         auto rsize = [&](int i) { return rows[i].size(); };
         for (int q = 0; q < m; ++q)
-            if (!col_done[q] && !colrows[q].empty()) keep(bc, nc, q, colrows[q].size(), csize);
+            if (!col_done[q] && !acol[q].empty()) keep(bc, nc, q, acol[q].size(), csize);
         for (int i = 0; i < m; ++i)
             if (!row_done[i] && !rows[i].empty()) keep(br, nr, i, rows[i].size(), rsize);
 
@@ -70,26 +72,20 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
         double pv = 0, best_cost = 0;
         auto consider = [&](int i, int j, double v, double cmax) {
             if (std::abs(v) < kTiny || std::abs(v) < kThreshold * cmax) return;
-            double cost = double(rows[i].size() - 1) * double(colrows[j].size() - 1);
+            double cost = double(rows[i].size() - 1) * double(acol[j].size() - 1);
             if (p < 0 || cost < best_cost || (cost == best_cost && std::abs(v) > std::abs(pv)))
                 p = i, q = j, pv = v, best_cost = cost;
         };
-        for (int t = 0; t < nc; ++t) {
-            int j = bc[t];
+        auto consider_col = [&](int j) {
             double cmax = col_max(j);
-            for (int i : colrows[j]) consider(i, j, value_at(rows[i], j), cmax);
-        }
-        for (int t = 0; t < nr; ++t) {
-            int i = br[t];
-            for (const Entry& e : rows[i]) consider(i, e.index, e.value, col_max(e.index));
-        }
-        if (p < 0) {  // full scan before declaring rank deficiency
-            for (int j = 0; j < m; ++j) {
-                if (col_done[j]) continue;
-                double cmax = col_max(j);
-                for (int i : colrows[j]) consider(i, j, value_at(rows[i], j), cmax);
-            }
-        }
+            for (const Entry& e : acol[j]) consider(e.index, j, e.value, cmax);
+        };
+        for (int t = 0; t < nc; ++t) consider_col(bc[t]);
+        for (int t = 0; t < nr; ++t)
+            for (const Entry& e : rows[br[t]]) consider(br[t], e.index, e.value, col_max(e.index));
+        if (p < 0)  // full scan before declaring rank deficiency
+            for (int j = 0; j < m; ++j)
+                if (!col_done[j]) consider_col(j);
         if (p < 0) break;
 
         prow_.push_back(p), pcol_.push_back(q), piv_.push_back(pv);
@@ -99,20 +95,22 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
         U_.push_back(urow);
 
         std::vector<Entry> lcol;
-        std::vector<int> targets = colrows[q];
-        for (int i : targets) {
+        for (const Entry& t : acol[q]) {
+            int i = t.index;
             if (i == p) continue;
             std::vector<Entry>& r = rows[i];
-            for (size_t t = 0; t < r.size(); ++t) where[r[t].index] = int(t);
-            double l = r[where[q]].value / pv;
+            for (size_t s = 0; s < r.size(); ++s) where[r[s].index] = int(s);
+            double l = t.value / pv;
             lcol.push_back({i, l});
             for (const Entry& e : urow) {
+                double delta = -l * e.value;
                 if (where[e.index] >= 0) {
-                    r[where[e.index]].value -= l * e.value;
+                    r[where[e.index]].value += delta;
+                    value_in(acol[e.index], i) += delta;
                 } else {
                     where[e.index] = int(r.size());
-                    r.push_back({e.index, -l * e.value});
-                    colrows[e.index].push_back(i);
+                    r.push_back({e.index, delta});
+                    acol[e.index].push_back({i, delta});
                 }
             }
             int at = where[q];
@@ -121,8 +119,8 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
             r.pop_back();
         }
         L_.push_back(lcol);
-        for (const Entry& e : urow) erase_from(colrows[e.index], p);
-        colrows[q].clear();
+        for (const Entry& e : urow) erase_from(acol[e.index], p);
+        acol[q].clear();
         rows[p].clear();
         row_done[p] = col_done[q] = 1;
     }
