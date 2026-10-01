@@ -21,7 +21,7 @@ Latest executed CPU result: **Kaggle v23, October 1, 2026** (saved-run ID `35428
 
 **Five added passes, no lost v19 baseline passes:** BNL1, BNL2 and MAROS-R7 changed from timeout to pass; MODSZK1 and WOOD1P changed from solver failure to pass. MAROS-R7 is the added pass since v21's 72/93. The selected regression remains **42/42**; executed small synthetic checks remain **30/30 MILP and 30/30 QP** (QP maximum objective error **3.197e-13**). These are limited prototypes, not general MILP/QP coverage. Other executed selected gates: **EXTRA_NETLIB 7/7**, **CPU_LP 6/7**. The latter is not all-green; these separate gates do not change the 93-case denominator.
 
-Ratios above 1 mean TARAL-LP took longer than HiGHS. The paired sets changed, so the medians are **not a like-for-like speed comparison**. This is one executed run, not a repeated timing study. Both solvers had a 60-second parse + solve budget on Kaggle CPU. The Kaggle comparison uses the same parser for both solvers. A separate local original-MPS diagnostic run verified the same v23 engine on all 73 passing cases; it is not a Kaggle-executed or full-corpus verification gate and does not cover the 20 non-passing cases. No GPU LP solve is claimed.
+Ratios above 1 mean TARAL-LP took longer than HiGHS. The paired sets changed, so the medians are **not a like-for-like speed comparison**. The figures above cite canonical v23. Three executed Kaggle runs of the same v23 engine code produced identical per-case statuses on all 93 cases; the median TARAL-LP / HiGHS solver-wall ratio varied by about 2% between runs. Both solvers had a 60-second parse + solve budget on Kaggle CPU. The Kaggle comparison uses the same parser for both solvers. A separate local original-MPS diagnostic run verified the same v23 engine on all 73 passing cases; it is not a Kaggle-executed or full-corpus verification gate and does not cover the 20 non-passing cases. No GPU LP solve is claimed.
 
 ## Local benchmarks - patched CPU engine (September 30, 2026)
 
@@ -98,7 +98,7 @@ These results come from saved, executed CPU runs. The notebook is private, so no
 - Result: **73 of 93 attempted cases passed**, **13 timeouts**, **5 `solver_failed`**, **2 `highs_failed`**.
 - Median TARAL-LP/HiGHS solver-wall ratio: **5.828x over 73 passing pairs only**. TARAL-LP is slower by this median factor. No like-for-like speed change is claimed against earlier medians with different pair sets.
 - Maximum passing primal residual: **9.31e-10 (LOTFI)**.
-- Saved-run ID: `354282101`. One executed run, no repeats yet. Both solvers had **60 seconds per case for parse + solve**; paired ratios use solver-wall fields.
+- Saved-run ID: `354282101`. Figures in this section are from canonical v23; the three-run per-case status check is described above. Both solvers had **60 seconds per case for parse + solve**; paired ratios use solver-wall fields.
 - The Kaggle run checks shared-parser formulation/objective match. A separate local original-MPS diagnostic run is described below; it does not widen the Kaggle gate.
 
 **Named v23 timeouts:** 80BAU3B, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT2D, FIT2P, GREENBEA, GREENBEB, PEROLD, PILOT, PILOT87, WOODW.
