@@ -6,6 +6,23 @@ See LICENSE for the full terms.
 
 An experimental CPU linear-programming prototype for refinery planning. It uses a two-phase revised simplex solver and reads MPS model files. It is not a production refinery planner or a replacement for HiGHS, CPLEX, or Xpress.
 
+## Improved since Sep 30
+
+Latest executed CPU result: **Kaggle v21, October 1, 2026** (saved-run ID `354274174`). This block is replaced when verified results change, not extended with daily logs.
+
+| Measurement | Sep 30 baseline (v19) | Latest (v21) |
+| --- | ---: | ---: |
+| Passing cases / attempted | 68 / 93 | 72 / 93 |
+| Timeouts | 16 | 14 |
+| Solver-failed classifications | 7 | 5 |
+| HiGHS-failed classifications | 2 | 2 |
+| Maximum passing primal residual | 9.31e-10 | 8.15e-10 |
+| Median TARAL-LP / HiGHS solver-wall ratio | 12.478x over 68 pairs | 8.4156x over 72 pairs |
+
+**Four added passes, no lost baseline passes:** BNL1 and BNL2 changed from timeout to pass; MODSZK1 and WOOD1P changed from solver failure to pass. The selected regression remains **42/42**; executed small synthetic checks remain **30/30 MILP and 30/30 QP**. These are limited prototypes, not general MILP/QP coverage.
+
+Ratios above 1 mean TARAL-LP took longer than HiGHS. The paired sets changed, so the two medians are **not a like-for-like speed comparison**. This is one executed run, not a repeated timing study. Both solvers had a 60-second parse + solve budget on Kaggle CPU. The comparison uses the same parser for both solvers; an independent original-model checker has not been built yet. No GPU LP solve is claimed.
+
 ## Local benchmarks - patched CPU engine (September 30, 2026)
 
 A linear-programming solver finds the best value of an objective while respecting linear constraints. TARAL-LP is a prototype of that solver. The newest local checks kept **42/42 selected baseline cases passing** and recovered **10 of the 35 cases that timed out in Kaggle v18**. These are measured local results, not ten new Kaggle passes and not a full 93-case local result.
@@ -61,7 +78,7 @@ The crashed jobs are not claimed as numerical failures or recoveries: their caus
 
 A separate sequential, single-BLAS-thread check used the unchanged v18 engine and the same pinned MPS files for 16 passing cases. Kaggle/local solver-wall time had a **1.974x median**: Kaggle took about twice as long in this sample. The 10th-90th percentile range was 1.763-2.507x; the full range was 1.711-11.062x, with tiny AFIRO the overhead-heavy outlier.
 
-This is an environment comparison, not a hardware-only speed test. Runtime/library versions, startup and load can contribute. It does not mix the patched local engine with old Kaggle timings. Applying that factor to the concurrent-load recovery times is only a rough scenario, not an executed result: CZPROB, GANGES, SHIP08L and SHIP12L have room under 60 seconds; FIT1P is borderline; SCTAP2, STOCFOR2, SCTAP3, SIERRA and 25FV47 are at risk. Scaling parse time with a solver-time factor adds uncertainty. The executed v19 results below now settle that run's count; the scenario was not a guaranteed forecast.
+This is an environment comparison, not a hardware-only speed test. Runtime/library versions, startup and load can contribute. It does not mix the patched local engine with old Kaggle timings. Applying that factor to the concurrent-load recovery times is only a rough scenario, not an executed result: CZPROB, GANGES, SHIP08L and SHIP12L have room under 60 seconds; FIT1P is borderline; SCTAP2, STOCFOR2, SCTAP3, SIERRA and 25FV47 are at risk. Scaling parse time with a solver-time factor adds uncertainty. The saved v19 run settled that historical count; the scenario was not a guaranteed forecast.
 
 ## Executed Kaggle CPU benchmarks
 
@@ -75,43 +92,32 @@ These results come from saved, executed CPU runs. The notebook is private, so no
 - **30/30 small synthetic MILP tests and 30/30 small synthetic QP tests executed and passed.** The MILP prototype is limited branch-and-bound; the QP prototype handles positive-definite convex box-bounded problems. These are not MIPLIB or general QP coverage.
 - **12/42 local KKT checks** cover a subset of the selected LP set. KKT checks test optimality conditions; this local subset is not a 42-case certificate claim or an executed Kaggle certificate result.
 
-### Latest completed full-corpus run - v19
+### Latest completed full-corpus run - v21
 
-<!-- Keep this full-corpus block versioned. Update all counts, pair denominator, ratio, residual and named exceptions together when a later saved run is verified. Keep v16 and local results separate. -->
+- Attempted: **93 Netlib cases**, pinned corpus commit `56257eea85b433ce6aa67d26156b36385318fd6f`.
+- Result: **72 of 93 attempted cases passed**, **14 timeouts**, **5 `solver_failed`**, **2 `highs_failed`**.
+- Median TARAL-LP/HiGHS solver-wall ratio: **8.4156x over 72 passing pairs only**. TARAL-LP is slower by this median factor. No like-for-like speed change is claimed against v19's 68 pairs.
+- Maximum passing primal residual: **8.15e-10**.
+- Saved-run ID: `354274174`. One executed run, no repeats yet. Both solvers had **60 seconds per case for parse + solve**; paired ratios use solver-wall fields.
+- The comparison shares the parser and transformed formulation. It does not establish independent original-model verification; that checker is not built yet.
 
-- Attempted: **93 Netlib cases** from the pinned feasible corpus. Saved-run ID: `354036358`; run duration: **29 minutes 12 seconds**.
-- Result: **68 of 93 attempted cases passed**, with **16 timeouts, 7 `solver_failed` and 2 `highs_failed` classifications**. This is not a 68/68 selected-set claim.
-- Median TARAL-LP/HiGHS wall-time ratio: **12.478x across 68 passing pairs**. TARAL-LP was slower by that median factor. The passing subset differs from v16 and v18, so comparing their medians is not a like-for-like speedup claim.
-- Maximum reported primal residual across the 68 passes: **9.31e-10 (GROW15)**.
-- Both solvers had a **60-second parse + solve budget per case**. This is the harness's budget, not Kaggle's platform time limit. Timing ratios use the recorded solver-wall fields; unsuccessful cases are excluded from the paired median.
+**Named v21 timeouts:** 80BAU3B, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT2D, FIT2P, GREENBEA, GREENBEB, MAROS-R7, PEROLD, PILOT, PILOT87, WOODW.
 
-**Named v19 timeouts:** 80BAU3B, BNL1, BNL2, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT2D, FIT2P, GREENBEA, GREENBEB, MAROS-R7, PEROLD, PILOT, PILOT87, WOODW.
+**Named v21 `solver_failed` cases:** CYCLE (iteration limit); DEGEN2, MAROS, PILOT.JA and PILOTNOV (lost primal feasibility).
 
-**Named v19 `solver_failed` cases:**
+**Named v21 `highs_failed` cases:** PILOT.WE (HiGHS Status 4; TARAL-LP iteration limit) and PILOT4 (HiGHS reported unbounded; TARAL-LP lost primal feasibility). Neither is counted as a pass. PEROLD is classified as timeout, but its HiGHS attempt also failed. Thus three cases lack a usable HiGHS optimum in this run, leaving **90 of 93 comparable with HiGHS** until the reference/model issues are resolved. Keep the headline denominator at 93 attempted, not 90 or 72 selected successes.
 
-- CYCLE: iteration limit.
-- DEGEN2: lost primal feasibility.
-- MAROS: lost primal feasibility.
-- MODSZK1: lost primal feasibility.
-- PILOT.JA: lost primal feasibility.
-- PILOTNOV: lost primal feasibility.
-- WOOD1P: iteration limit.
+### What changed from v19 to v21
 
-**Named v19 `highs_failed` cases:** PILOT.WE and PILOT4. These labels mean the comparison could not establish a pass because the HiGHS reference did not return a usable optimum. They do not mean TARAL-LP succeeded: PILOT.WE also hit TARAL-LP's iteration limit; PILOT4 also lost primal feasibility. HiGHS reported a solve error for PILOT.WE and an unbounded model for PILOT4. PEROLD is classified as a TARAL-LP timeout even though its HiGHS attempt also returned a solve error. Reference/parser/model semantics need investigation before drawing conclusions about these cases.
+All **68 v19 passing cases remained passing**. BNL1 and BNL2 changed from timeout to pass; MODSZK1 and WOOD1P changed from `solver_failed` to pass. The selected **42/42 regression**, **30/30 synthetic MILP** and **30/30 synthetic QP** checks remained green. The improved pass count does not erase the 21 named non-passing outcomes.
 
-### What changed from v18 to v19
+Historical v19: **68/93 passing, 16 timeout, 7 solver_failed, 2 highs_failed**, median **12.478x over 68 passing pairs**, maximum passing residual **9.31e-10**. Historical v18: **57/93 passing, 35 timeout, 1 solver_failed**, median **29.98x over 57 passing pairs**, maximum passing residual **9.31e-10**. These are different passing sets, not a controlled speedup series.
 
-All **57 prior passing cases stayed passing**. Eleven former timeouts became passes: 25FV47, CZPROB, FIT1P, GANGES, NESM, SCTAP2, SCTAP3, SHIP08L, SHIP12L, SIERRA, STOCFOR2.
-
-Six former timeouts became `solver_failed`: CYCLE, MAROS, MODSZK1, PILOT.JA, PILOTNOV and WOOD1P. Two became `highs_failed`: PILOT.WE and PILOT4. These are unresolved outcomes, not recoveries. DEGEN2 remained `solver_failed` with lost primal feasibility. No prior pass became a failure or timeout.
-
-For historical comparison, v18 attempted the same 93 cases and returned **57 passes, 35 timeouts and 1 solver failure (DEGEN2)**, with a **29.98x median over 57 passing pairs** and a **9.31e-10 maximum passing residual**. The v19 saved result replaces the earlier pending-run statement; the local measurements above remain a separate concurrent-load test, not a forecast substituted for this run.
-
-The full-corpus input source is [the pinned Netlib MPS collection](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files). The new local and Kaggle ledgers are separate from the older checked-in partial CSVs below. This README update reports the measurements; it does not itself replace the checked-in engine, parser or result files with the patched run artifacts.
+The full-corpus input source is [the pinned Netlib MPS collection](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files). The new local and Kaggle ledgers are separate from the older checked-in partial CSVs below. The checked-in engine is synced to the executed v21 solve path, and the parser retains the v19 bulk-construction path. The older checked-in result ledgers below are not the new full-run ledger.
 
 ## What is in this repository
 
-- `engine/revised_simplex.py` / `engine/solver_lu_relfeas.py`: identical copies of the LU-based engine of record for the 25-case regression and wider sweeps, using NumPy arrays and SciPy LU factorization for linear algebra. SciPy's optimization solvers are **not** called by the core.
+- `engine/revised_simplex.py` / `engine/solver_lu_relfeas.py`: matching copies of the executed v21 solve path (sparse basis LU, Harris ratio handling, conservative presolve and dense fallback), using NumPy arrays and SciPy LU factorization for linear algebra. SciPy's optimization solvers are **not** called by the core.
 - `engine/solver_dantzig_relative.py`: earlier revised-simplex variant retained for provenance, no longer imported by the refinery example and not the engine of record.
 - `parsers/mps_fixed.py`: fixed-field MPS parser for rows, RHS, ranges and bounds; it transforms finite lower and upper bounds into nonnegative standard-form variables and extra constraints.
 - `parsers/mps_free.py`: extension that splits free variables into positive and negative nonnegative columns. It imports `mps_fixed` from the same directory.
@@ -150,9 +156,5 @@ The runner reports its own result; it does **not** assert a Netlib pass without 
 `examples/illustrative_refinery.py` is a synthetic six-variable refinery LP with two crude streams, capacity, yield, blend-quality and demand constraints. The retained `examples/illustrative_refinery_result.json` reports the same gross margin for the prototype and HiGHS (about $1.19 million/day in its assumed units). Its coefficients are illustrative assumptions, **not refinery operational data**; the figure is not a measured refinery margin or savings estimate.
 
 Run it with `python -m examples.illustrative_refinery` from the repository root after installing NumPy and SciPy.
-
-## Next work
-
-Keep matrices sparse, broaden verified problem coverage, add a fully reproducible harness with inputs and reference provenance, build and measure a GPU LP path, then broaden MILP and QP beyond small synthetic tests. These planned items are not counted as implemented.
 
 The repository remains private until its owner chooses otherwise.
