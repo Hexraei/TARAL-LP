@@ -52,6 +52,12 @@ int main(int argc, char** argv) {
         std::printf("status parse_error: %s\n", e.what());
         return 0;
     }
+    if (md.has_integers() || !md.qobj.empty()) {  // explicit, never a silent LP relaxation
+        std::string why = md.has_integers() ? "integer variables need the MILP solver" : "quadratic objective needs the QP solver";
+        if (json) write_json(json, "unsupported", nullptr, wall(), why);
+        std::printf("status unsupported: %s\n", why.c_str());
+        return 0;
+    }
     Result r = solve(md, limit - wall());
     double w = wall();
     if (json) write_json(json, status_name(r.status), &r, w, r.message);

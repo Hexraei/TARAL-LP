@@ -12,13 +12,23 @@ struct Entry {
     double value;
 };
 
-// min cost'x + obj_const  subject to  row_lo <= A x <= row_up,  col_lo <= x <= col_up.
+struct QEntry {
+    int row, col;  // row >= col; Q is symmetric, so each off-diagonal pair is stored once
+    double value;
+};
+
+// min (or max) cost'x + 0.5 x'Qx + obj_const  subject to  row_lo <= A x <= row_up,  col_lo <= x <= col_up,
+// x_j integer where is_int[j].
 struct Model {
     std::string name;
     std::vector<std::string> row_names, col_names;
     std::vector<std::vector<Entry>> cols;  // column-wise A: (row, value), rows ascending
     std::vector<double> cost, col_lo, col_up, row_lo, row_up;
-    double obj_const = 0;  // minus the RHS given on the objective row
+    double obj_const = 0;   // minus the RHS given on the objective row
+    bool maximize = false;  // OBJSENSE MAX
+    std::vector<char> is_int;   // MARKER INTORG..INTEND columns and BV/LI/UI bounds
+    std::vector<QEntry> qobj;   // QUADOBJ / QMATRIX / QSECTION on the objective row
+    bool has_integers() const;
 };
 
 struct ParseError : std::runtime_error {

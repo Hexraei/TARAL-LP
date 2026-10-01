@@ -335,7 +335,15 @@ Result Simplex::run(double time_limit_s) {
 
 }  // namespace
 
-Result solve(const Model& model, double time_limit_s) { return Simplex(model).run(time_limit_s); }
+Result solve(const Model& model, double time_limit_s) {
+    if (!model.maximize) return Simplex(model).run(time_limit_s);
+    Model neg = model;  // maximise f  ==  minimise -f
+    for (double& c : neg.cost) c = -c;
+    neg.obj_const = -neg.obj_const;
+    Result r = Simplex(neg).run(time_limit_s);
+    r.objective = -r.objective;
+    return r;
+}
 
 const char* status_name(Status s) {
     switch (s) {
