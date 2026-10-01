@@ -133,35 +133,52 @@ _HARRIS={'on':True}
 
 
 def _sparse_revised(A,b,c,basis,allowed=None,max_iter=10000,tol=1e-9):
- m,n=A.shape;basis=list(basis);allowed=set(range(n)) if allowed is None else set(allowed)
+ m,n=A.shape;basis=list(basis)
  if m==0:raise ValueError('empty basis')
- stall=0
+ allow=np.ones(n,bool) if allowed is None else np.zeros(n,bool)
+ if allowed is not None:allow[list(allowed)]=True
+ Acsc=A.tocsc();AT=A.T.tocsr();stall=0;etas=[];lu=None
  for it in range(max_iter):
-  lu=splu(A[:,basis].tocsc());xB=lu.solve(b)
-  if np.min(xB)<-max(1e-7,1e-12*np.max(np.abs(b))):raise ArithmeticError('lost primal feasibility')
-  pi=lu.solve(c[basis],trans='T');reduced=c-np.asarray(A.T@pi).ravel()
-  basic_set=set(basis); candidate=min((j for j in sorted(allowed) if j not in basic_set and reduced[j]<-tol),key=lambda j:(reduced[j],j),default=None)
-  if candidate is None:
+  if lu is None or len(etas)>=(40 if _HARRIS['on'] else 1):
+   lu=splu(Acsc[:,basis].tocsc());etas=[]
+  def ftran(v):
+   y=lu.solve(v)
+   for p,d in etas:
+    yp=y[p]/d[p];y=y-d*yp;y[p]=yp
+   return y
+  def btran(v):
+   v=v.copy()
+   for p,d in reversed(etas):
+    v[p]=(v[p]-(d@v-d[p]*v[p]))/d[p]
+   return lu.solve(v,trans='T')
+  xB=ftran(b)
+  if np.min(xB)<-max(1e-7,1e-12*np.max(np.abs(b))):
+   if etas:
+    lu=None;continue
+   raise ArithmeticError('lost primal feasibility')
+  pi=btran(c[basis]);reduced=c-np.asarray(AT@pi).ravel()
+  mask=allow&(reduced<-tol);mask[basis]=False
+  if not mask.any():
    x=np.zeros(n);x[basis]=xB
    return x,float(c@x),basis,it
-  d=lu.solve(A[:,candidate].toarray().ravel())
+  cand=np.flatnonzero(mask);candidate=int(cand[np.argmin(reduced[cand])])
+  d=ftran(Acsc[:,candidate].toarray().ravel())
   pivot_cutoff=max(1e-8,1e-7*np.max(np.abs(d)))
   pos=np.flatnonzero(d>pivot_cutoff)
   if len(pos)==0:raise ArithmeticError('unbounded')
-  # Harris two-pass ratio test: pass 1 finds the max step allowed with a small
-  # feasibility tolerance; pass 2 picks the largest pivot among rows within it.
   xp=np.maximum(xB[pos],0.);dp=d[pos];ftol=1e-9
   if not _HARRIS['on']:
    leave=int(min(((xp[t]/dp[t],basis[pos[t]],int(pos[t])) for t in range(len(pos))))[2])
   elif stall>=30:
-   # Degenerate stall: fall back to the plain minimum-ratio rule (ties by basis index).
    leave=int(min(((xp[t]/dp[t],basis[pos[t]],int(pos[t])) for t in range(len(pos))))[2])
   else:
    step=np.min((xp+ftol)/dp)
-   cand=pos[(xp/dp)<=step]
-   leave=int(cand[np.argmax(d[cand])])
+   cand2=pos[(xp/dp)<=step]
+   leave=int(cand2[np.argmax(d[cand2])])
+  if etas and abs(d[leave])<1e-5:
+   lu=None;continue  # small pivot through eta chain: refactor and recompute before accepting
   stall=stall+1 if xp[list(pos).index(leave)]/d[leave]<=1e-12 else 0
-  basis[leave]=candidate
+  etas.append((leave,d.copy()));basis[leave]=candidate
  raise ArithmeticError('iteration limit')
 
 
@@ -213,20 +230,21 @@ def _sparse_solve_lp(A,b,c,kinds):
  # Never mark the sparse failure itself a pass; the dense retry must solve.
  try:
   return _sparse_core_lp(A,b,c,kinds)
- except ArithmeticError as exc:
-  if str(exc) not in ('lost primal feasibility','iteration limit'):
+ except (ArithmeticError,RuntimeError) as exc:
+  if isinstance(exc,ArithmeticError) and str(exc) not in ('lost primal feasibility','iteration limit'):
    raise
-  # Retry the sparse path once with the plain minimum-ratio rule (the v19 behavior).
+  # Retry the sparse path once with plain minimum-ratio pivoting (v19 rule) before the dense core.
   _HARRIS['on']=False
   try:
    r=_sparse_core_lp(A,b,c,kinds)
    return dict(r,harris_retry=True)
-  except ArithmeticError as exc2:
+  except (ArithmeticError,RuntimeError) as exc2:
    exc=exc2
-   if str(exc) != 'lost primal feasibility':
+   if isinstance(exc,ArithmeticError) and str(exc) != 'lost primal feasibility':
     raise
   finally:
    _HARRIS['on']=True
+  # RuntimeError here is SuperLU 'Factor is exactly singular': same dense retry, never a sparse pass.
   result=_validated_dense_core(A,b,c,kinds)
   return dict(result,sparse_fallback=True,sparse_fallback_reason=str(exc))
 
