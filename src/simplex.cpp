@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <random>
 
 #include "taral.hpp"
 
@@ -14,6 +15,7 @@ constexpr double kPrimalTol = 1e-9;
 constexpr double kDualTol = 1e-9;
 constexpr double kPivotTol = 1e-9;  // relative to the largest |alpha|
 constexpr size_t kRefactorEvery = 100;
+constexpr int kPerturbAfter = 3000;  // iterations without objective progress before bounds are perturbed
 constexpr long kMaxIterations = 50'000'000;
 
 enum Where : char { kBasic, kLower, kUpper, kZero };  // kZero: free nonbasic held at 0
@@ -142,6 +144,30 @@ Result Simplex::run(double time_limit_s) {
     }
 
     bool fresh = true;  // no eta updates since the last refactor
+    int stalled = 0;              // iterations since either phase objective last improved
+    double best[2] = {kInf, kInf};  // best phase-2 / phase-1 objective seen; flipping phases is no progress
+    bool perturbed = false, perturb_used = false;
+    // Anti-stalling (idea from the M3 reference engine): widen every non-fixed bound by a tiny
+    // deterministic random amount so tied ratios separate. True bounds are restored at the
+    // perturbed optimum and the solve continues from that basis, so the answer is unperturbed.
+    auto apply_bounds = [&](bool perturb) {
+        std::mt19937_64 rng(12345);
+        for (int j = 0; j < N; ++j) {
+            double lo = j < n_ ? md_.col_lo[j] : md_.row_lo[j - n_];
+            double up = j < n_ ? md_.col_up[j] : md_.row_up[j - n_];
+            if (perturb && lo != up) {
+                double shift = 1e-7 + 1e-6 * double(rng() % 1000000) / 1e6;
+                if (std::isfinite(lo)) lo -= shift * (1 + std::abs(lo));
+                if (std::isfinite(up)) up += shift * (1 + std::abs(up));
+            }
+            lo_[j] = lo, up_[j] = up;
+            if (where_[j] == kLower) x_[j] = lo;
+            else if (where_[j] == kUpper) x_[j] = up;
+        }
+        perturbed = perturb;
+        stalled = 0, best[0] = best[1] = kInf;
+        return refactor();  // also recomputes x_B
+    };
     std::vector<double> cb(m_), y, alpha, col(m_);
     for (;;) {
         if (elapsed() > time_limit_s) {
@@ -160,6 +186,25 @@ Result Simplex::run(double time_limit_s) {
         }
         if (!phase1)
             for (int p = 0; p < m_; ++p) cb[p] = c_[head_[p]];
+        double obj = 0;  // phase objective: sum of infeasibilities, or the true cost
+        if (phase1) {
+            for (int p = 0; p < m_; ++p) {
+                int j = head_[p];
+                if (cb[p] < 0) obj += lo_[j] - x_[j];
+                else if (cb[p] > 0) obj += x_[j] - up_[j];
+            }
+        } else {
+            for (int j = 0; j < N; ++j) obj += c_[j] * x_[j];
+        }
+        double& b = best[phase1];
+        if (obj < b - 1e-12 * (1 + std::abs(b))) b = obj, stalled = 0;
+        else ++stalled;
+        if (stalled > kPerturbAfter && !perturb_used) {
+            perturb_used = true;
+            if (!apply_bounds(true)) break;
+            fresh = true;
+            continue;
+        }
         btran(cb, y);
 
         int q = -1;
@@ -175,6 +220,10 @@ Result Simplex::run(double time_limit_s) {
             if (!fresh) {
                 if (!refactor()) break;
                 fresh = true;
+                continue;
+            }
+            if (perturbed) {
+                if (!apply_bounds(false)) break;
                 continue;
             }
             if (phase1) {
