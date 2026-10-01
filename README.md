@@ -8,20 +8,20 @@ An experimental CPU linear-programming prototype for refinery planning. It uses 
 
 ## Improved since Sep 30
 
-Latest executed CPU result: **Kaggle v21, October 1, 2026** (saved-run ID `354274174`). This block is replaced when verified results change, not extended with daily logs.
+Latest executed CPU result: **Kaggle v23, October 1, 2026** (saved-run ID `354282101`). This block is replaced when verified results change, not extended with daily logs.
 
-| Measurement | Sep 30 baseline (v19) | Latest (v21) |
+| Measurement | Sep 30 baseline (v19) | Latest (v23) |
 | --- | ---: | ---: |
-| Passing cases / attempted | 68 / 93 | 72 / 93 |
-| Timeouts | 16 | 14 |
+| Passing cases / attempted | 68 / 93 | 73 / 93 |
+| Timeouts | 16 | 13 |
 | Solver-failed classifications | 7 | 5 |
 | HiGHS-failed classifications | 2 | 2 |
-| Maximum passing primal residual | 9.31e-10 | 8.15e-10 |
-| Median TARAL-LP / HiGHS solver-wall ratio | 12.478x over 68 pairs | 8.4156x over 72 pairs |
+| Maximum passing primal residual | 9.31e-10 | 9.31e-10 |
+| Median TARAL-LP / HiGHS solver-wall ratio | 12.478x over 68 pairs | 5.828x over 73 pairs |
 
-**Four added passes, no lost baseline passes:** BNL1 and BNL2 changed from timeout to pass; MODSZK1 and WOOD1P changed from solver failure to pass. The selected regression remains **42/42**; executed small synthetic checks remain **30/30 MILP and 30/30 QP**. These are limited prototypes, not general MILP/QP coverage.
+**Five added passes, no lost v19 baseline passes:** BNL1, BNL2 and MAROS-R7 changed from timeout to pass; MODSZK1 and WOOD1P changed from solver failure to pass. MAROS-R7 is the added pass since v21's 72/93. The selected regression remains **42/42**; executed small synthetic checks remain **30/30 MILP and 30/30 QP** (QP maximum objective error **3.197e-13**). These are limited prototypes, not general MILP/QP coverage. Other executed selected gates: **EXTRA_NETLIB 7/7**, **CPU_LP 6/7**. The latter is not all-green; these separate gates do not change the 93-case denominator.
 
-Ratios above 1 mean TARAL-LP took longer than HiGHS. The paired sets changed, so the two medians are **not a like-for-like speed comparison**. This is one executed run, not a repeated timing study. Both solvers had a 60-second parse + solve budget on Kaggle CPU. The comparison uses the same parser for both solvers; an independent original-model checker has not been built yet. No GPU LP solve is claimed.
+Ratios above 1 mean TARAL-LP took longer than HiGHS. The paired sets changed, so the medians are **not a like-for-like speed comparison**. This is one executed run, not a repeated timing study. Both solvers had a 60-second parse + solve budget on Kaggle CPU. The comparison uses the same parser for both solvers; an independent original-MPS checker has not been built yet. No GPU LP solve is claimed.
 
 ## Local benchmarks - patched CPU engine (September 30, 2026)
 
@@ -92,32 +92,32 @@ These results come from saved, executed CPU runs. The notebook is private, so no
 - **30/30 small synthetic MILP tests and 30/30 small synthetic QP tests executed and passed.** The MILP prototype is limited branch-and-bound; the QP prototype handles positive-definite convex box-bounded problems. These are not MIPLIB or general QP coverage.
 - **12/42 local KKT checks** cover a subset of the selected LP set. KKT checks test optimality conditions; this local subset is not a 42-case certificate claim or an executed Kaggle certificate result.
 
-### Latest completed full-corpus run - v21
+### Latest completed full-corpus run - v23
 
 - Attempted: **93 Netlib cases**, pinned corpus commit `56257eea85b433ce6aa67d26156b36385318fd6f`.
-- Result: **72 of 93 attempted cases passed**, **14 timeouts**, **5 `solver_failed`**, **2 `highs_failed`**.
-- Median TARAL-LP/HiGHS solver-wall ratio: **8.4156x over 72 passing pairs only**. TARAL-LP is slower by this median factor. No like-for-like speed change is claimed against v19's 68 pairs.
-- Maximum passing primal residual: **8.15e-10**.
-- Saved-run ID: `354274174`. One executed run, no repeats yet. Both solvers had **60 seconds per case for parse + solve**; paired ratios use solver-wall fields.
-- The comparison shares the parser and transformed formulation. It does not establish independent original-model verification; that checker is not built yet.
+- Result: **73 of 93 attempted cases passed**, **13 timeouts**, **5 `solver_failed`**, **2 `highs_failed`**.
+- Median TARAL-LP/HiGHS solver-wall ratio: **5.828x over 73 passing pairs only**. TARAL-LP is slower by this median factor. No like-for-like speed change is claimed against earlier medians with different pair sets.
+- Maximum passing primal residual: **9.31e-10 (LOTFI)**.
+- Saved-run ID: `354282101`. One executed run, no repeats yet. Both solvers had **60 seconds per case for parse + solve**; paired ratios use solver-wall fields.
+- Shared-parser formulation/objective match is the verification scope. An independent original-MPS checker has not been built yet.
 
-**Named v21 timeouts:** 80BAU3B, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT2D, FIT2P, GREENBEA, GREENBEB, MAROS-R7, PEROLD, PILOT, PILOT87, WOODW.
+**Named v23 timeouts:** 80BAU3B, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT2D, FIT2P, GREENBEA, GREENBEB, PEROLD, PILOT, PILOT87, WOODW.
 
-**Named v21 `solver_failed` cases:** CYCLE (iteration limit); DEGEN2, MAROS, PILOT.JA and PILOTNOV (lost primal feasibility).
+**Named v23 `solver_failed` cases:** CYCLE, DEGEN2, MAROS, PILOT.JA, PILOTNOV.
 
-**Named v21 `highs_failed` cases:** PILOT.WE (HiGHS Status 4; TARAL-LP iteration limit) and PILOT4 (HiGHS reported unbounded; TARAL-LP lost primal feasibility). Neither is counted as a pass. PEROLD is classified as timeout, but its HiGHS attempt also failed. Thus three cases lack a usable HiGHS optimum in this run, leaving **90 of 93 comparable with HiGHS** until the reference/model issues are resolved. Keep the headline denominator at 93 attempted, not 90 or 72 selected successes.
+**Named v23 `highs_failed` cases:** PILOT.WE and PILOT4. PEROLD is classified as timeout, but its HiGHS attempt also failed. None of these counts as a pass. Three cases lack a usable HiGHS optimum in this run, leaving **90 of 93 comparable with HiGHS** until reference/model issues are resolved. Keep the headline denominator at 93 attempted, not 90 or 73 selected successes.
 
-### What changed from v19 to v21
+### What changed from the baseline
 
-All **68 v19 passing cases remained passing**. BNL1 and BNL2 changed from timeout to pass; MODSZK1 and WOOD1P changed from `solver_failed` to pass. The selected **42/42 regression**, **30/30 synthetic MILP** and **30/30 synthetic QP** checks remained green. The improved pass count does not erase the 21 named non-passing outcomes.
+All **68 v19 passing cases remained passing**. The five gains are BNL1, BNL2, MAROS-R7, MODSZK1 and WOOD1P. Relative to v21, MAROS-R7 is newly passing. The **42/42 regression**, **30/30 synthetic MILP** and **30/30 synthetic QP** checks remained green, with QP maximum objective error **3.197e-13**. Separate selected gates are **EXTRA_NETLIB 7/7** and **CPU_LP 6/7**; CPU_LP is not an all-pass result. These do not erase the 20 named non-passing full-corpus outcomes.
 
-Historical v19: **68/93 passing, 16 timeout, 7 solver_failed, 2 highs_failed**, median **12.478x over 68 passing pairs**, maximum passing residual **9.31e-10**. Historical v18: **57/93 passing, 35 timeout, 1 solver_failed**, median **29.98x over 57 passing pairs**, maximum passing residual **9.31e-10**. These are different passing sets, not a controlled speedup series.
+Historical v21: **72/93 passing, 14 timeout, 5 solver_failed, 2 highs_failed**, median **8.4156x over 72 passing pairs**, maximum passing residual **8.15e-10**. Historical v19: **68/93 passing, 16 timeout, 7 solver_failed, 2 highs_failed**, median **12.478x over 68 pairs**, maximum passing residual **9.31e-10**. Historical v18: **57/93 passing, 35 timeout, 1 solver_failed**, median **29.98x over 57 pairs**, maximum passing residual **9.31e-10**. Different passing sets do not make a controlled speedup series.
 
-The full-corpus input source is [the pinned Netlib MPS collection](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files). The new local and Kaggle ledgers are separate from the older checked-in partial CSVs below. The checked-in engine is synced to the executed v21 solve path, and the parser retains the v19 bulk-construction path. The older checked-in result ledgers below are not the new full-run ledger.
+The full-corpus input source is [the pinned Netlib MPS collection](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files). The new local and Kaggle ledgers are separate from the older checked-in partial CSVs below. The checked-in engine is synced to the executed v23 solve path, and the parser retains the v19 bulk-construction path. The older checked-in result ledgers below are not the new full-run ledger.
 
 ## What is in this repository
 
-- `engine/revised_simplex.py` / `engine/solver_lu_relfeas.py`: matching copies of the executed v21 solve path (sparse basis LU, Harris ratio handling, conservative presolve and dense fallback), using NumPy arrays and SciPy LU factorization for linear algebra. SciPy's optimization solvers are **not** called by the core.
+- `engine/revised_simplex.py` / `engine/solver_lu_relfeas.py`: matching copies of the executed v23 solve path (product-form basis updates, vectorized pricing, Harris ratio handling, conservative presolve and v19-rule fallback), using NumPy arrays and SciPy LU factorization for linear algebra. SciPy's optimization solvers are **not** called by the core.
 - `engine/solver_dantzig_relative.py`: earlier revised-simplex variant retained for provenance, no longer imported by the refinery example and not the engine of record.
 - `parsers/mps_fixed.py`: fixed-field MPS parser for rows, RHS, ranges and bounds; it transforms finite lower and upper bounds into nonnegative standard-form variables and extra constraints.
 - `parsers/mps_free.py`: extension that splits free variables into positive and negative nonnegative columns. It imports `mps_fixed` from the same directory.
@@ -138,7 +138,7 @@ In that older sweep, attempted cases not counted as verified included SCORPION (
 
 The separate 14-case same-machine CSV benchmarked the **earlier pre-LU engine**, not the current LU engine. It reports HiGHS faster on **all 14 tested cases**; the median ratio of our CPU time to HiGHS CPU time across the 14 rows is about **52.7x**. This is an experimental correctness-focused prototype with a substantial performance gap. Timings are process CPU measurements from the supplied CSV, not a universal speed claim. HiGHS is a reference comparator, not part of our solver core.
 
-There is **no GPU LP solve** or general QP solver here. A separate small, pure-integer/binary MILP branch-and-bound prototype is included in `milp/`; its three fixed **synthetic** cases match HiGHS. A seeded property test adds 30/30 randomized small synthetic cases matching brute force and SciPy/HiGHS. These are not MIPLIB coverage or a large-instance MILP guarantee. The separate QP prototype covers only positive-definite convex box-bounded problems; its three fixed synthetic cases and 30/30 seeded randomized SPD box-QP property tests match SciPy objectives. These do not establish general QP or public benchmark coverage. Matrix-operation GPU experiments, if added later, must not be presented as LP solves. The CPU implementation densifies the model and refactorizes a basis, so large refinery models are out of present scope. There is no refinery field data in the checked-in files; any illustrative refinery case should be labelled as synthetic.
+There is **no GPU LP solve** or general QP solver here. A separate small, pure-integer/binary MILP branch-and-bound prototype is included in `milp/`; its three fixed **synthetic** cases match HiGHS. A seeded property test adds 30/30 randomized small synthetic cases matching brute force and SciPy/HiGHS. These are not MIPLIB coverage or a large-instance MILP guarantee. The separate QP prototype covers only positive-definite convex box-bounded problems; its three fixed synthetic cases and 30/30 seeded randomized SPD box-QP property tests match SciPy objectives. These do not establish general QP or public benchmark coverage. Matrix-operation GPU experiments, if added later, must not be presented as LP solves. The CPU implementation uses sparse basis LU with product-form updates, plus dense fallback. Large refinery models remain out of present verified scope. There is no refinery field data in the checked-in files; any illustrative refinery case should be labelled as synthetic.
 
 ## Try the solver on an MPS LP
 
