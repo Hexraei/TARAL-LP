@@ -1,6 +1,6 @@
-"""Illustrative refinery planning LP, independently authored, not refinery operational data.
+"""Illustrative refinery planning LP, independently authored, not operational data.
 Units: thousand barrels per day (kbd), USD per barrel; quality scores are
-synthetic indices. All coefficients and limits are assumptions, not refinery facts.
+synthetic indices. All coefficients and limits are assumptions, not operational facts.
 """
 import numpy as np
 from scipy.optimize import linprog
@@ -55,7 +55,7 @@ if __name__=='__main__':
    'gasoline_ron':float((94*gL+88*gH)/(gL+gH)),
    'diesel_sulfur_ppm':float((8*dL+18*dH)/(dL+dH)),
    'max_constraint_violation_kbd':float(max([0]+[max(0,((a@v-rhs) if op=='L' else (rhs-a@v))) for a,rhs,op in zip(A,b,kind)]))}
- print(json.dumps({'case':'Illustrative refinery-flavored refinery LP, wholly synthetic',
+ print(json.dumps({'case':'Illustrative refinery planning LP, wholly synthetic',
   'variables':names,'objective_min_cost_per_kbd':c.tolist(),
   'constraints':[{'label':l,'coefficients':a.tolist(),'sense':k,'rhs':float(t)} for l,a,k,t in zip(labels,A,kind,b)],
   'crude_yields':yields.tolist(),'prices_usd_per_bbl':product_price.tolist(),
