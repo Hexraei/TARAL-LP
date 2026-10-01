@@ -129,9 +129,13 @@ from scipy import sparse
 from scipy.sparse.linalg import splu
 
 
+_HARRIS={'on':True}
+
+
 def _sparse_revised(A,b,c,basis,allowed=None,max_iter=10000,tol=1e-9):
  m,n=A.shape;basis=list(basis);allowed=set(range(n)) if allowed is None else set(allowed)
  if m==0:raise ValueError('empty basis')
+ stall=0
  for it in range(max_iter):
   lu=splu(A[:,basis].tocsc());xB=lu.solve(b)
   if np.min(xB)<-max(1e-7,1e-12*np.max(np.abs(b))):raise ArithmeticError('lost primal feasibility')
@@ -142,9 +146,22 @@ def _sparse_revised(A,b,c,basis,allowed=None,max_iter=10000,tol=1e-9):
    return x,float(c@x),basis,it
   d=lu.solve(A[:,candidate].toarray().ravel())
   pivot_cutoff=max(1e-8,1e-7*np.max(np.abs(d)))
-  ratios=[(max(0.,xB[i])/d[i],basis[i],i) for i in range(m) if d[i]>pivot_cutoff]
-  if not ratios:raise ArithmeticError('unbounded')
-  _,_,leave=min(ratios);basis[leave]=candidate
+  pos=np.flatnonzero(d>pivot_cutoff)
+  if len(pos)==0:raise ArithmeticError('unbounded')
+  # Harris two-pass ratio test: pass 1 finds the max step allowed with a small
+  # feasibility tolerance; pass 2 picks the largest pivot among rows within it.
+  xp=np.maximum(xB[pos],0.);dp=d[pos];ftol=1e-9
+  if not _HARRIS['on']:
+   leave=int(min(((xp[t]/dp[t],basis[pos[t]],int(pos[t])) for t in range(len(pos))))[2])
+  elif stall>=30:
+   # Degenerate stall: fall back to the plain minimum-ratio rule (ties by basis index).
+   leave=int(min(((xp[t]/dp[t],basis[pos[t]],int(pos[t])) for t in range(len(pos))))[2])
+  else:
+   step=np.min((xp+ftol)/dp)
+   cand=pos[(xp/dp)<=step]
+   leave=int(cand[np.argmax(d[cand])])
+  stall=stall+1 if xp[list(pos).index(leave)]/d[leave]<=1e-12 else 0
+  basis[leave]=candidate
  raise ArithmeticError('iteration limit')
 
 
@@ -197,8 +214,19 @@ def _sparse_solve_lp(A,b,c,kinds):
  try:
   return _sparse_core_lp(A,b,c,kinds)
  except ArithmeticError as exc:
-  if str(exc) != 'lost primal feasibility':
+  if str(exc) not in ('lost primal feasibility','iteration limit'):
    raise
+  # Retry the sparse path once with the plain minimum-ratio rule (the v19 behavior).
+  _HARRIS['on']=False
+  try:
+   r=_sparse_core_lp(A,b,c,kinds)
+   return dict(r,harris_retry=True)
+  except ArithmeticError as exc2:
+   exc=exc2
+   if str(exc) != 'lost primal feasibility':
+    raise
+  finally:
+   _HARRIS['on']=True
   result=_validated_dense_core(A,b,c,kinds)
   return dict(result,sparse_fallback=True,sparse_fallback_reason=str(exc))
 
