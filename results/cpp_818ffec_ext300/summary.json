@@ -1,0 +1,31 @@
+{
+ "protocol": "300s extended-cap",
+ "cases_run": 93,
+ "denominator": 93,
+ "passes": 92,
+ "strict_passes": 91,
+ "wrong_answers": [],
+ "failures": {
+  "dfl001": "time_limit"
+ },
+ "extra_outside_denominator": {
+  "truss": "pass"
+ },
+ "engine_binary": "out/head_taral",
+ "repo_commit": "818ffec",
+ "src_has_uncommitted_changes": null,
+ "corpus": "ozy4dm/lp-data-netlib@56257eea85b433ce6aa67d26156b36385318fd6f (94 files, SHA-256 verified)",
+ "tolerances": {
+  "objective": "max(1e-6, 1e-7|ref|)",
+  "row_rel": 1e-06,
+  "bound": 1e-06,
+  "strict": 1e-08
+ },
+ "environment": {
+  "platform": "Linux-6.17.0-1030-oem-x86_64-with-glibc2.39",
+  "processor": "x86_64",
+  "cpu_count": 16,
+  "python": "3.12.3",
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+ }
+}
