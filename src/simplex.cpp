@@ -1,5 +1,5 @@
 // Bounded-variable primal revised simplex with a composite phase 1 (minimise the sum of
-// infeasibilities, then the true cost), Dantzig pricing, a Harris two-pass ratio test,
+// infeasibilities, then the true cost), Devex pricing, a Harris two-pass ratio test,
 // bound flips, product-form (eta) basis updates and periodic refactorization.
 // Variables 0..n-1 are structural; n+i is the logical of row i with column -e_i, so its
 // value equals the activity of row i and its bounds are the row bounds.
@@ -179,7 +179,8 @@ Result Simplex::run(double time_limit_s) {
             return res;
         }
     }
-    std::vector<double> cb(m_), y, alpha, col(m_);
+    std::vector<double> cb(m_), y, alpha, col(m_), unit, rho;
+    std::vector<double> weight(N, 1.0);  // Devex reference weights (approximate edge lengths squared)
     for (;;) {
         if (elapsed() > time_limit_s) {
             res.status = Status::TimeLimit;
@@ -219,13 +220,13 @@ Result Simplex::run(double time_limit_s) {
         btran(cb, y);
 
         int q = -1;
-        double dq = 0;
+        double dq = 0, best_score = 0;
         for (int j = 0; j < N; ++j) {
             if (where_[j] == kBasic || lo_[j] == up_[j]) continue;
             double d = (phase1 ? 0.0 : c_[j]) - dot_col(j, y);
             bool improving = (where_[j] == kLower && d < -kDualTol) || (where_[j] == kUpper && d > kDualTol) ||
                              (where_[j] == kZero && std::abs(d) > kDualTol);
-            if (improving && std::abs(d) > std::abs(dq)) q = j, dq = d;
+            if (improving && d * d > best_score * weight[j]) q = j, dq = d, best_score = d * d / weight[j];
         }
         if (q < 0) {
             if (!fresh) {
@@ -296,6 +297,19 @@ Result Simplex::run(double time_limit_s) {
             where_[q] = to_upper ? kUpper : kLower;
             x_[q] = to_upper ? up_[q] : lo_[q];
             continue;
+        }
+        {  // Devex weight update from the pivot row of the outgoing basis
+            unit.assign(m_, 0.0);
+            unit[r] = 1.0;
+            btran(unit, rho);
+            double ar = alpha[r], wq = weight[q];
+            for (int j = 0; j < N; ++j) {
+                if (where_[j] == kBasic || j == q) continue;
+                double a = dot_col(j, rho) / ar;
+                if (a != 0) weight[j] = std::max(weight[j], a * a * wq);
+            }
+            weight[head_[r]] = std::max(wq / (ar * ar), 1.0);
+            if (weight[head_[r]] > 1e6) std::fill(weight.begin(), weight.end(), 1.0);  // new reference framework
         }
         for (int p = 0; p < m_; ++p) x_[head_[p]] -= dir * theta * alpha[p];
         x_[q] += dir * theta;
