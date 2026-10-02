@@ -25,8 +25,9 @@ struct Cell {
 };
 }  // namespace
 
-bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
+bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock::time_point deadline) {
     m_ = m;
+    timed_out = false;
     prow_.clear(), pcol_.clear(), piv_.clear(), L_.clear(), U_.clear();
     bad_pos.clear(), bad_rows.clear();
 
@@ -66,6 +67,10 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
     };
 
     for (int k = 0; k < m; ++k) {
+        if (Clock::now() > deadline) {  // one clock read per pivot: a dense nucleus makes pivots slow
+            timed_out = true;
+            return false;
+        }
         int p = -1, q = -1;
         double pv = 0, best_cost = 0;
         auto consider = [&](int i, int j, double v, double cmax) {

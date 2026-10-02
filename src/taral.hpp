@@ -1,5 +1,6 @@
 // TARAL-LP engine: shared types and module interfaces. C++17 standard library only.
 #pragma once
+#include <chrono>
 #include <limits>
 #include <stdexcept>
 #include <string>
@@ -40,12 +41,15 @@ Model read_mps(const std::string& path);  // throws ParseError
 // Sparse LU of a square basis matrix with Markowitz pivoting and a column threshold.
 class SparseLU {
 public:
+    using Clock = std::chrono::steady_clock;
     // cols[p] = entries (row, value) of basis column p. Returns false if rank deficient;
-    // the unpivoted positions and rows are then left in bad_pos / bad_rows.
-    bool factor(int m, const std::vector<std::vector<Entry>>& cols);
+    // the unpivoted positions and rows are then left in bad_pos / bad_rows. Returns false with
+    // timed_out set (bad_pos empty) when `deadline` passes first; the default never expires.
+    bool factor(int m, const std::vector<std::vector<Entry>>& cols, Clock::time_point deadline = Clock::time_point::max());
     void ftran(std::vector<double>& rhs_rows, std::vector<double>& out_pos) const;  // B x = rhs
     void btran(std::vector<double>& rhs_pos, std::vector<double>& out_rows) const;  // B'y = rhs
     std::vector<int> bad_pos, bad_rows;
+    bool timed_out = false;
 
 private:
     int m_ = 0;

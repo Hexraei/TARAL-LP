@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <random>
 
 #include "taral.hpp"
@@ -43,6 +44,7 @@ public:
     long iterations = 0;
     std::vector<char> basis;
     std::string message;
+    std::string note;  // warm-start fallback, kept apart from the later status messages
 
 private:
     const Model& md_;
@@ -55,6 +57,8 @@ private:
     std::vector<std::vector<Entry>> rows_;  // row-wise structural part of A: (column, value)
     SparseLU lu_;
     std::vector<Eta> etas_;
+    SparseLU::Clock::time_point deadline_ = SparseLU::Clock::time_point::max();
+    bool timed_out_ = false;  // a factorization hit deadline_
 
     template <class F>
     void for_col(int j, F f) const {
@@ -106,7 +110,8 @@ bool Dual::factor() {
         std::vector<std::vector<Entry>> cols(m_);
         for (int p = 0; p < m_; ++p) for_col(head_[p], [&](int i, double v) { cols[p].push_back({i, v}); });
         etas_.clear();
-        if (lu_.factor(m_, cols)) return true;
+        if (lu_.factor(m_, cols, deadline_)) return true;
+        if (lu_.timed_out) return timed_out_ = true, false;
         for (int p : lu_.bad_pos) where_[head_[p]] = kLower;  // placed properly after compute_dual
         for (size_t t = 0; t < lu_.bad_pos.size(); ++t) {
             int j = n_ + lu_.bad_rows[t];
@@ -192,15 +197,34 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
         for (const Entry& e : md_.cols[j]) rows_[e.index].push_back({j, e.value});
 
     lo_ = tlo_, up_ = tup_;
-    if (warm && int(warm->size()) == N && std::count(warm->begin(), warm->end(), char(kBasic)) == m_) {
+    auto slack_basis = [&] {
+        std::fill(where_.begin(), where_.end(), kLower);
+        for (int i = 0; i < m_; ++i) head_[i] = n_ + i, where_[n_ + i] = kBasic;
+    };
+    const auto start = SparseLU::Clock::now();
+    const auto limit = std::chrono::duration_cast<SparseLU::Clock::duration>(std::chrono::duration<double>(time_limit_s));
+    deadline_ = start + limit;
+    bool warmed = warm && int(warm->size()) == N && std::count(warm->begin(), warm->end(), char(kBasic)) == m_;
+    if (warmed) {
         for (int j = 0, p = 0; j < N; ++j) {
             where_[j] = Where((*warm)[j]);
             if (where_[j] == kBasic) head_[p++] = j;
         }
+        deadline_ = start + limit / 4;  // a warm basis gets a quarter of the limit to factor
     } else {
-        for (int i = 0; i < m_; ++i) head_[i] = n_ + i, where_[n_ + i] = kBasic;
+        slack_basis();
     }
-    if (!factor()) {
+    bool factored = factor();
+    if (!factored && warmed && timed_out_) {
+        note = "warm basis not factored within " + std::to_string(time_limit_s / 4) + " s, slack basis used";
+        std::fprintf(stderr, "dual: %s\n", note.c_str());
+        slack_basis();
+        deadline_ = start + limit;
+        timed_out_ = false;
+        factored = factor();
+    } else deadline_ = start + limit;
+    if (!factored) {
+        if (timed_out_) return Outcome::TimeLimit;
         message = "initial basis could not be factored";
         return Outcome::Fallback;
     }
@@ -456,8 +480,9 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
         fresh = false;
         if (etas_.size() >= kRefactorEvery && !refresh()) break;
     }
-    message = "basis could not be refactored";
     keep_basis();
+    if (timed_out_) return Outcome::TimeLimit;
+    message = "basis could not be refactored";
     return Outcome::Fallback;
 }
 
@@ -487,13 +512,15 @@ Result solve_lp_dual(const Model& model, const std::vector<double>& col_lo, cons
     if (out == Outcome::TimeLimit) {
         r.status = Status::TimeLimit;
         r.iterations = dual.iterations;
+        r.message = dual.note;
         return r;
     }
     // Primal clean-up from the dual basis with the true costs; it certifies the answer.
     double left = time_limit_s - std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
     r = solve_lp(*mp, col_lo, col_up, dual.basis.empty() ? warm_basis : &dual.basis, left);
     std::string what = "dual " + std::to_string(dual.iterations) + " + primal " + std::to_string(r.iterations) +
-                       " iterations" + (dual.message.empty() ? "" : " (" + dual.message + ")");
+                       " iterations" + (dual.message.empty() ? "" : " (" + dual.message + ")") +
+                       (dual.note.empty() ? "" : "; " + dual.note);
     r.message = r.message.empty() ? what : r.message + "; " + what;
     r.iterations += dual.iterations;
     if (model.maximize) r.objective = -r.objective;

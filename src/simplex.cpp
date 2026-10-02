@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <random>
 
 #include "taral.hpp"
@@ -44,6 +45,8 @@ private:
     std::vector<Where> where_;
     SparseLU lu_;
     std::vector<Eta> etas_;
+    SparseLU::Clock::time_point deadline_ = SparseLU::Clock::time_point::max();
+    bool timed_out_ = false;  // a factorization hit deadline_
 
     template <class F>
     void for_col(int j, F f) const {
@@ -86,7 +89,7 @@ private:
             std::vector<std::vector<Entry>> cols(m_);
             for (int p = 0; p < m_; ++p) for_col(head_[p], [&](int i, double v) { cols[p].push_back({i, v}); });
             etas_.clear();
-            if (lu_.factor(m_, cols)) {
+            if (lu_.factor(m_, cols, deadline_)) {
                 std::vector<double> rhs(m_, 0.0), xb;
                 for (int j = 0; j < n_ + m_; ++j)
                     if (where_[j] != kBasic && x_[j] != 0) for_col(j, [&](int i, double v) { rhs[i] -= v * x_[j]; });
@@ -94,6 +97,7 @@ private:
                 for (int p = 0; p < m_; ++p) x_[head_[p]] = xb[p];
                 return true;
             }
+            if (lu_.timed_out) return timed_out_ = true, false;
             for (int p : lu_.bad_pos) set_nonbasic(head_[p]);
             for (size_t t = 0; t < lu_.bad_pos.size(); ++t) {
                 int j = n_ + lu_.bad_rows[t];
@@ -143,7 +147,18 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             res.message = "inconsistent bounds";
             return res;
         }
-    if (warm && int(warm->size()) == N && std::count(warm->begin(), warm->end(), char(kBasic)) == m_) {
+    const auto start = SparseLU::Clock::now();
+    const auto limit = std::chrono::duration_cast<SparseLU::Clock::duration>(std::chrono::duration<double>(time_limit_s));
+    deadline_ = start + limit;
+    auto slack_basis = [&] {
+        std::fill(where_.begin(), where_.end(), kBasic);
+        std::fill(x_.begin(), x_.end(), 0.0);
+        for (int i = 0; i < m_; ++i) head_[i] = n_ + i;
+        for (int j = 0; j < n_; ++j) set_nonbasic(j);
+    };
+    bool warmed = warm && int(warm->size()) == N && std::count(warm->begin(), warm->end(), char(kBasic)) == m_;
+    if (warmed) {
+        deadline_ = start + limit / 4;  // a warm basis gets a quarter of the limit to factor
         // Warm start: nonbasics go to their (possibly new) bounds; basics violating a tightened
         // bound are repaired by the composite phase 1.
         for (int j = 0, p = 0; j < N; ++j) {
@@ -156,8 +171,18 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
     } else {
         for (int j = 0; j < n_; ++j) set_nonbasic(j);
     }
-    if (!refactor()) {
-        res.message = "initial basis could not be factored";
+    bool factored = refactor();
+    if (!factored && warmed && timed_out_) {
+        res.message = "warm basis not factored within " + std::to_string(time_limit_s / 4) + " s, slack basis used";
+        std::fprintf(stderr, "primal: %s\n", res.message.c_str());
+        slack_basis();
+        deadline_ = start + limit;
+        timed_out_ = false;
+        factored = refactor();
+    } else deadline_ = start + limit;
+    if (!factored) {
+        if (timed_out_) res.status = Status::TimeLimit;
+        else res.message = "initial basis could not be factored";
         return res;
     }
 
@@ -191,7 +216,8 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
     if (kPerturbAtStart) {
         ++perturbations;
         if (!apply_bounds(1)) {
-            res.message = "perturbed basis could not be factored";
+            if (timed_out_) res.status = Status::TimeLimit;
+            else res.message = "perturbed basis could not be factored";
             return res;
         }
     }
@@ -344,8 +370,8 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             fresh = true;
         }
     }
-    res.status = Status::NumericalFailure;
-    if (res.message.empty()) res.message = "basis could not be refactored";
+    res.status = timed_out_ ? Status::TimeLimit : Status::NumericalFailure;
+    if (res.message.empty() && !timed_out_) res.message = "basis could not be refactored";
     return res;
 }
 
