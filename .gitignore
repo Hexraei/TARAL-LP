@@ -3,3 +3,6 @@ graphify-out/
 /taral
 corpus/
 out/
+
+__pycache__/
+*.pyc
