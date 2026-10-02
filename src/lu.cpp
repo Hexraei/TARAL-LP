@@ -15,20 +15,14 @@ constexpr double kThreshold = 0.1;
 constexpr double kTiny = 1e-11;  // below this a pivot is treated as zero (rank deficiency)
 constexpr int kCandidates = 4;
 
-double& value_in(std::vector<Entry>& v, int index) {  // entry must exist
-    for (Entry& e : v)
-        if (e.index == index) return e.value;
-    throw std::logic_error("LU: missing active entry");
-}
-
-void erase_from(std::vector<Entry>& v, int index) {
-    for (size_t t = 0; t < v.size(); ++t)
-        if (v[t].index == index) {
-            v[t] = v.back();
-            v.pop_back();
-            return;
-        }
-}
+// One matrix entry as stored in the active submatrix. It exists twice, once in its row (index = column)
+// and once in its column (index = row); `pos` is where the twin sits in the other list, so an update or a
+// removal never searches a list.
+struct Cell {
+    int index;
+    double value;
+    int pos;
+};
 }  // namespace
 
 bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
@@ -38,12 +32,13 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
 
     // The active submatrix is kept both row-wise (position, value) and column-wise
     // (row, value), so pivot search reads column values without scanning long rows.
-    std::vector<std::vector<Entry>> rows(m), acol(m);
+    std::vector<std::vector<Cell>> rows(m), acol(m);
     for (int p = 0; p < m; ++p)
         for (const Entry& e : cols[p])
             if (e.value != 0) {
-                rows[e.index].push_back({p, e.value});
-                acol[p].push_back({e.index, e.value});
+                int rpos = int(rows[e.index].size()), cpos = int(acol[p].size());
+                rows[e.index].push_back({p, e.value, cpos});
+                acol[p].push_back({e.index, e.value, rpos});
             }
     std::vector<char> row_done(m, 0), col_done(m, 0);
     std::vector<int> where(m, -1);
@@ -60,10 +55,14 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
     for (int i = 0; i < m; ++i)
         if (!rows[i].empty()) rset.insert({rows[i].size(), i});
 
+    std::vector<double> cmax(m, -1);  // cached max |value| per active column, -1 = stale
     auto col_max = [&](int q) {
-        double mx = 0;
-        for (const Entry& e : acol[q]) mx = std::max(mx, std::abs(e.value));
-        return mx;
+        if (cmax[q] < 0) {
+            double mx = 0;
+            for (const Cell& e : acol[q]) mx = std::max(mx, std::abs(e.value));
+            cmax[q] = mx;
+        }
+        return cmax[q];
     };
 
     for (int k = 0; k < m; ++k) {
@@ -77,7 +76,7 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
         };
         auto consider_col = [&](int j) {
             double cmax = col_max(j);
-            for (const Entry& e : acol[j]) consider(e.index, j, e.value, cmax);
+            for (const Cell& e : acol[j]) consider(e.index, j, e.value, cmax);
         };
 
         while (p < 0 && !col_single.empty()) {
@@ -96,7 +95,7 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
             for (auto it = rset.begin(); it != rset.end() && nr < kCandidates; ++it) br[nr++] = it->second;
             for (int t = 0; t < nc; ++t) consider_col(bc[t]);
             for (int t = 0; t < nr; ++t)
-                for (const Entry& e : rows[br[t]]) consider(br[t], e.index, e.value, col_max(e.index));
+                for (const Cell& e : rows[br[t]]) consider(br[t], e.index, e.value, col_max(e.index));
             if (p < 0)  // full scan before declaring rank deficiency
                 for (int j = 0; j < m; ++j)
                     if (!col_done[j]) consider_col(j);
@@ -106,42 +105,52 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
         prow_.push_back(p), pcol_.push_back(q), piv_.push_back(pv);
         // Only the pivot row/column and the rows of column q / columns of row p change counts.
         std::vector<int> mrows, mcols;
-        for (const Entry& t : acol[q]) mrows.push_back(t.index), rset.erase({rows[t.index].size(), t.index});
-        for (const Entry& e : rows[p]) mcols.push_back(e.index), cset.erase({acol[e.index].size(), e.index});
-        std::vector<Entry> urow;
-        for (const Entry& e : rows[p])
+        for (const Cell& t : acol[q]) mrows.push_back(t.index), rset.erase({rows[t.index].size(), t.index});
+        for (const Cell& e : rows[p]) mcols.push_back(e.index), cset.erase({acol[e.index].size(), e.index});
+        std::vector<Cell> urow;  // pos = where row p sits in that column's list
+        for (const Cell& e : rows[p])
             if (e.index != q) urow.push_back(e);
-        U_.push_back(urow);
+        U_.emplace_back();
+        U_.back().reserve(urow.size());
+        for (const Cell& e : urow) U_.back().push_back({e.index, e.value});
 
         std::vector<Entry> lcol;
-        for (const Entry& t : acol[q]) {
+        lcol.reserve(acol[q].size());
+        for (const Cell& t : acol[q]) {
             int i = t.index;
             if (i == p) continue;
-            std::vector<Entry>& r = rows[i];
+            std::vector<Cell>& r = rows[i];
             for (size_t s = 0; s < r.size(); ++s) where[r[s].index] = int(s);
             double l = t.value / pv;
             lcol.push_back({i, l});
-            for (const Entry& e : urow) {
+            for (const Cell& e : urow) {
                 double delta = -l * e.value;
                 if (where[e.index] >= 0) {
-                    r[where[e.index]].value += delta;
-                    value_in(acol[e.index], i) += delta;
+                    Cell& c = r[where[e.index]];
+                    c.value += delta;
+                    acol[e.index][c.pos].value += delta;
                 } else {
                     where[e.index] = int(r.size());
-                    r.push_back({e.index, delta});
-                    acol[e.index].push_back({i, delta});
+                    std::vector<Cell>& col = acol[e.index];
+                    r.push_back({e.index, delta, int(col.size())});
+                    col.push_back({i, delta, int(r.size()) - 1});
                 }
             }
             int at = where[q];
-            for (const Entry& e : r) where[e.index] = -1;
+            for (const Cell& e : r) where[e.index] = -1;
             r[at] = r.back();
             r.pop_back();
+            if (at < int(r.size())) acol[r[at].index][r[at].pos].pos = at;  // the moved entry's twin
             if (r.size() == 1) row_single.push_back(i);
         }
         L_.push_back(lcol);
-        for (const Entry& e : urow) {
-            erase_from(acol[e.index], p);
-            if (acol[e.index].size() == 1) col_single.push_back(e.index);
+        for (const Cell& e : urow) {
+            cmax[e.index] = -1;  // values changed by the update above, and row p leaves the column
+            std::vector<Cell>& col = acol[e.index];
+            col[e.pos] = col.back();
+            col.pop_back();
+            if (e.pos < int(col.size())) rows[col[e.pos].index][col[e.pos].pos].pos = e.pos;
+            if (col.size() == 1) col_single.push_back(e.index);
         }
         acol[q].clear();
         rows[p].clear();
