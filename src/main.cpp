@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
     const char *model = nullptr, *sol = nullptr, *json = nullptr;
     double limit = 60;
     long node_limit = std::numeric_limits<long>::max();
-    std::string method = "simplex";  // "ipm" selects the interior-point method for LPs
+    std::string method = "simplex";  // "ipm": interior point; "dual": dual simplex (LPs)
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--time-limit") && i + 1 < argc) limit = std::atof(argv[++i]);
         else if (!std::strcmp(argv[i], "--sol") && i + 1 < argc) sol = argv[++i];
@@ -129,7 +129,8 @@ int main(int argc, char** argv) {
                     w, r.message.c_str());
         return 0;
     }
-    Result r = solve(md, limit - wall());
+    Result r = method == "dual" ? solve_lp_dual(md, md.col_lo, md.col_up, nullptr, limit - wall())
+                                  : solve(md, limit - wall());
     double w = wall();
     if (json) write_json(json, status_name(r.status), &r, w, r.message);
     if (sol && r.status == Status::Optimal) write_sol(sol, md, r.x);
