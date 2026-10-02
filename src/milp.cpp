@@ -13,6 +13,8 @@
 // With an incumbent, reduced-cost fixing tightens the bounds of nonbasic integer columns whose
 // reduced cost proves that moving them further cannot beat the incumbent. Like propagation, these
 // tightenings belong to the node's subtree only; a box they empty holds no improving point.
+// The call refactorizes the basis, so it backs off (skips 1, 3, 7, then 15 later calls) while calls fix
+// nothing; a new incumbent resets it. Skipping a fixing is always valid.
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -34,6 +36,7 @@ constexpr double kPropMax = 1e9;   // a derived bound beyond this is numerical n
 constexpr double kPropPivot = 1e-9;  // coefficients below this are not used to derive bounds
 constexpr double kRcMin = 1e-7;      // never fix on a reduced cost with a smaller magnitude
 constexpr double kRcDualTol = 1e-7;  // dual infeasibility (scaled by 1 + max|cost|) that voids a basis for fixing
+constexpr int kRcMaxBackoff = 4;     // after a call that fixes nothing, skip up to 2^4 - 1 later calls
 
 double tol_at(double z) { return kGapTol * std::max(1.0, std::abs(z)); }
 
@@ -131,6 +134,8 @@ private:
     std::vector<std::vector<Entry>> rows_;  // row-wise A: (column, value)
     std::vector<char> queued_, mark_;       // propagation scratch: row pending, column changed
     std::vector<int> work_, next_, changed_;
+    int rc_idle_ = 0;       // consecutive reduced-cost calls that fixed nothing (backoff exponent)
+    long rc_skip_left_ = 0; // calls still to skip; both reset when the incumbent improves
     double elapsed() const { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0_).count(); }
 
     bool propagate(std::vector<double>& lo, std::vector<double>& up, const std::vector<int>* seeds, int max_passes);
@@ -146,7 +151,7 @@ private:
         for (const std::vector<double>* c : {static_cast<const std::vector<double>*>(&r), &x}) {
             if (violation(md_, *c) > kFeasTol) continue;
             double v = objective_of(md_, *c);
-            if (!has_inc || v < z) has_inc = true, z = v, inc = *c;
+            if (!has_inc || v < z) has_inc = true, z = v, inc = *c, rc_idle_ = 0, rc_skip_left_ = 0;
             return true;
         }
         return false;
@@ -502,9 +507,18 @@ End Search::run() {
         }
         std::vector<int> seeds{bj};  // the children propagate from the branching and from any fixing
         if (has_inc && use_rc) {
-            size_t at = seeds.size();
-            fix_by_reduced_cost(r, lo, up, seeds);
-            for (size_t t = at; t < seeds.size(); ++t) cur.changes.push_back({seeds[t], lo[seeds[t]], up[seeds[t]]});
+            // Each call refactorizes the basis. When calls keep fixing nothing, back off exponentially;
+            // skipping a fixing is always valid, it only forgoes a tightening.
+            if (rc_skip_left_ > 0) {
+                --rc_skip_left_;
+            } else {
+                size_t at = seeds.size();
+                fix_by_reduced_cost(r, lo, up, seeds);
+                for (size_t t = at; t < seeds.size(); ++t) cur.changes.push_back({seeds[t], lo[seeds[t]], up[seeds[t]]});
+                if (seeds.size() > at) rc_idle_ = 0;
+                else rc_idle_ = std::min(rc_idle_ + 1, kRcMaxBackoff);
+                rc_skip_left_ = (1L << rc_idle_) - 1;
+            }
         }
         auto basis = std::make_shared<const std::vector<char>>(std::move(r.basis));
         double v = r.x[bj], fl = std::floor(v);
