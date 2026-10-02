@@ -20,4 +20,5 @@ fuzz_mixed       LP    43000 43249 250
 tolerance_edge   LP    44000 44099 100
 large_sparse     LP    45000 45059 60
 knapsack         MILP  46000 46079 80
-# total LP 2840  MILP 80
+general_int      MILP  47000 47079 80
+# total LP 2840  MILP 160
