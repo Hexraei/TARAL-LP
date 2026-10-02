@@ -5,4 +5,5 @@ dup_coef         LP    28000 28149 150
 dup_empty_zero   LP    29000 29199 200
 free_fixed       LP    30000 30149 150
 huge_bounds      LP    31000 31149 150
-# total LP 950  MILP 0
+negzero          LP    32000 32059 60
+# total LP 1010  MILP 0
