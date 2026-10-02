@@ -21,7 +21,7 @@ constexpr double kPrimalTol = 1e-9;   // leaving-row infeasibility
 constexpr double kDualTol = 1e-9;     // reduced-cost feasibility (Harris tolerance)
 constexpr double kPivotTol = 1e-9;    // smallest |alpha_rj| considered in the ratio test
 constexpr double kPerturb = 5e-7;     // relative cost perturbation
-constexpr size_t kRefactorEvery = 60;
+constexpr size_t kRefactorEvery = 120;
 constexpr long kMaxIterations = 50'000'000;
 constexpr long kStallIterations = 10000;  // without dual objective progress: hand over to the primal
 
