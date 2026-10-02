@@ -95,3 +95,5 @@ equality_int-55006	both_time_limit	-	REF_UNRESOLVED: reference status time_limit
 equality_int-55029	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
 equality_int-55039	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
 equality_int-55055	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+big_values-57025	big_values_numfail	big_values_numfail.mps	NOANS: engine numerical_failure (root LP failed: final point violates constraints by 0.000000) vs reference optimal (presolve-off optimal)
+big_values-57027	big_values_numfail	big_values_numfail.mps	NOANS: engine time_limit (node LP numerical_failure: final point violates constraints by 0.000001) vs reference optimal (presolve-off optimal)

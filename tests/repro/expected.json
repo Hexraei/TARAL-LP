@@ -1,4 +1,14 @@
 {
+ "big_values_numfail.mps": {
+  "category": "big_values",
+  "source": "big_values-57025 (shrunk)",
+  "expected_status": "optimal",
+  "expected_objective": -8782000000.0,
+  "expected_basis": "exhaustive enumeration over the integer columns in exact rational arithmetic gives -4391/5 x 1e7 = -8.782e9; HiGHS at default options agrees",
+  "known_failing": true,
+  "observed_bad": "numerical_failure after 14 nodes although its incumbent (-8.782e9) is already the exact optimum",
+  "report": "A 5-integer, 1-continuous MIP with coefficients and costs of order 1e7 (objective about -8.8e9). Exhaustive enumeration in exact rational arithmetic gives the optimum -8.782e9 (C = 6,5,24,1,16 and C5 = 10.4) and HiGHS at default options returns the same. The engine finds exactly that incumbent but ends with numerical_failure ('node LP numerical_failure: final point violates constraints by 0.000000') and a best bound of -8.851e9, so it cannot prove optimality; the same happens with --method dual and --method ipm because the node LP path is shared. Side finding about the reference: HiGHS 1.15.1 with mip_feasibility_tolerance set to 1e-9 returns -8.256e9 (and -8.678e9 with some other options), both worse than the true optimum, which is why the harness leaves HiGHS tolerances at their defaults. Engine side not root-caused."
+ },
  "coef_range_false_infeasible.mps": {
   "category": "coef_range",
   "source": "coef_range-38039 (shrunk)",
