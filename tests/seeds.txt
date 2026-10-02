@@ -7,4 +7,5 @@ free_fixed       LP    30000 30149 150
 huge_bounds      LP    31000 31149 150
 negzero          LP    32000 32059 60
 rank_deficient   LP    33000 33149 150
-# total LP 1160  MILP 0
+redundant_eq     LP    34000 34099 100
+# total LP 1260  MILP 0
