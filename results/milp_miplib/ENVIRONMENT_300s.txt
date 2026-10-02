@@ -1,0 +1,1 @@
+cloud container: Intel(R) Xeon(R) Processor @ 2.80GHz, 4 cores; taral built from 5552f4c src/ with g++ -O3 -march=native -std=c++17; 300 s limit; another benchmark job ran concurrently on the same container
