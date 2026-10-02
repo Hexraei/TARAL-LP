@@ -1,0 +1,32 @@
+name: Solver CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: solver-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  smoke:
+    name: Build and correctness smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: ci/requirements.txt
+      - name: Install pinned test-only dependencies
+        run: python -m pip install -r ci/requirements.txt
+      - name: Build, differential and adversarial smoke
+        run: bash ci/smoke.sh
