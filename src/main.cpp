@@ -73,6 +73,16 @@ void write_sol(const char* path, const Model& md, const std::vector<double>& x) 
         std::fclose(f);
     }
 }
+// Exit codes: 0 definitive answer (optimal, infeasible, unbounded, ...), 2 usage, 3 parse error,
+// 4 stopped at a time/iteration/node limit, 5 any other failure (numerical, unsupported, nonconvex).
+int exit_code(const std::string& status) {
+    if (status == "optimal" || status == "infeasible" || status == "unbounded" || status == "dual_infeasible" ||
+        status == "unbounded_relaxation")
+        return 0;
+    if (status == "parse_error") return 3;
+    if (status == "time_limit" || status == "iteration_limit" || status == "node_limit") return 4;
+    return 5;
+}
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -100,7 +110,7 @@ int main(int argc, char** argv) {
     } catch (const ParseError& e) {
         if (json) write_json(json, "parse_error", nullptr, wall(), e.what());
         std::printf("status parse_error: %s\n", e.what());
-        return 0;
+        return exit_code("parse_error");
     }
     if ((!md.qobj.empty() || method == "ipm") && !md.has_integers()) {  // convex QP, or LP by interior point
         IpmOptions opt;
@@ -111,13 +121,13 @@ int main(int argc, char** argv) {
         if (sol && r.status == IpmStatus::Optimal) write_sol(sol, md, r.x);
         std::printf("status %s objective %.12g iterations %ld wall %.3fs %s\n", ipm_status_name(r.status), r.objective,
                     r.iterations, w, r.message.c_str());
-        return 0;
+        return exit_code(ipm_status_name(r.status));
     }
     if (!md.qobj.empty()) {  // quadratic objective with integer variables: never a silent relaxation
         std::string why = "mixed-integer quadratic models are not supported";
         if (json) write_json(json, "unsupported", nullptr, wall(), why);
         std::printf("status unsupported: %s\n", why.c_str());
-        return 0;
+        return exit_code("unsupported");
     }
     if (md.has_integers()) {
         MilpResult r = solve_milp(md, limit - wall(), node_limit);
@@ -127,7 +137,7 @@ int main(int argc, char** argv) {
         std::printf("status %s objective %.12g best_bound %.12g gap %.3g nodes %ld iterations %ld wall %.3fs %s\n",
                     r.status.c_str(), r.has_solution ? r.objective : NAN, r.best_bound, r.gap, r.nodes, r.lp_iterations,
                     w, r.message.c_str());
-        return 0;
+        return exit_code(r.status);
     }
     Result r = method == "dual" ? solve_lp_dual(md, md.col_lo, md.col_up, nullptr, limit - wall())
                                   : solve(md, limit - wall());
@@ -136,5 +146,5 @@ int main(int argc, char** argv) {
     if (sol && r.status == Status::Optimal) write_sol(sol, md, r.x);
     std::printf("status %s objective %.12g iterations %ld wall %.3fs %s\n", status_name(r.status), r.objective,
                 r.iterations, w, r.message.c_str());
-    return 0;
+    return exit_code(status_name(r.status));
 }

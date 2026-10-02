@@ -113,6 +113,8 @@ g++ -O3 -march=native -std=c++17 -o taral src/*.cpp
 
 The engine has no external solver or linear-algebra dependency. The C++ API is in [`src/taral.hpp`](src/taral.hpp). JSON reports status, objective, iterations, wall time and message. A solution file reports original variable values for an optimal LP. Time limits, numerical failures, unsupported inputs and parse errors must not be read as solved cases.
 
+Exit codes: 0 definitive answer (optimal, infeasible, unbounded), 2 usage error, 3 model parse error, 4 time/iteration/node limit, 5 other failure (numerical, unsupported, nonconvex).
+
 ## Verification and reproduction
 
 The fixed Netlib pass rule requires optimal status from both engines, objective error <= `max(1e-6, 1e-7 * abs(HiGHS objective))`, independently recomputed objective agreement, relative row violation <= `1e-6` and bound violation <= `1e-6`. Strict results use the tighter check separately. Each other benchmark retains its own ledger/protocol; “measured” does not replace its solve-quality checks.
