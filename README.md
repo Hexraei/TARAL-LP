@@ -13,7 +13,7 @@ Experimental CPU solver. Not ready for production; Kaggle verification is pendin
 | 60 seconds, `--method dual` (separate line) | 91/93 passes, 0 wrong answers, STRICT 90/91 | Local; engine commit `0bad060`; DFL001 passes (about 14 s here); no case lost against the primal |
 | 300 seconds per case | 92/93 passes, 0 wrong answers | Local; separate extended-cap protocol |
 | MILP, 26 small MIPLIB instances | 19/26 solved at 300 s (14/26 at 30 s); 7 stop at the time limit, none wrong | 300 s run on a cloud container, 30 s run local; `results/milp_miplib/` |
-| Convex QP (interior point), 99 Maros-Meszaros instances | 71 pass, 28 fail: 5 wrong or narrowly missed objectives (one infeasible point, DPKLO1), 18 without a HiGHS reference, 4 numerical failures, 1 nonconvex | Cloud container, 60 s; `results/qp_maros_meszaros/`; a fix for the false-optimal cases is in progress |
+| Convex QP (interior point), 99 Maros-Meszaros instances | 71 pass, 28 fail under the stated rule: 5 objective mismatches (checked: 4 are the HiGHS default reference being the less accurate side or misreading the file, the fifth is uncertified; see `results/qp_maros_meszaros/NOTES.md`), 18 without a HiGHS reference, 4 numerical failures, 1 nonconvex | Cloud container, 60 s; ledger rows unchanged |
 
 At 60 seconds, DFL001 times out. PILOT.WE and PILOT4 lack usable HiGHS reference results in that protocol and remain excluded from the pass count; its ceiling is 91/93. They pass under the separate 300-second protocol; DFL001 still does not finish. TRUSS passes as an extra case outside the 93-case denominator.
 
