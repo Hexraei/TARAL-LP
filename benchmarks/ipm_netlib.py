@@ -1,6 +1,6 @@
 """IPM line on the pinned Netlib corpus (separate from the simplex headline).
 Usage: python benchmarks/ipm_netlib.py [--workers 4] [--limit 60] [case ...]
-Writes out/ipm/netlib_ipm.csv. Reference objectives: HiGHS on the original files (results/cpp_818ffec_60s/highs_reference.json).
+Writes out/ipm/netlib_ipm.csv. Reference objectives: HiGHS on the original files (results/cpp_a9e8218_60s/highs_reference.json).
 Objective rel error = |ipm - highs| / max(1, |highs|), objective recomputed independently by recheck().
 """
 import argparse, csv, json, sys
@@ -15,7 +15,7 @@ ap.add_argument("--limit", type=float, default=60.0)
 ap.add_argument("cases", nargs="*")
 args = ap.parse_args()
 ref = {k: {"status": v["status"], "objective": v["objective"]}
-       for k, v in json.loads((ROOT / "results" / "cpp_818ffec_60s" / "highs_reference.json").read_text()).items()}
+       for k, v in json.loads((ROOT / "results" / "cpp_a9e8218_60s" / "highs_reference.json").read_text()).items()}
 files = sorted((ROOT / "corpus").glob("*.mps"))
 if args.cases:
     files = [f for f in files if f.stem in args.cases]

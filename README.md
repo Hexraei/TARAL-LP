@@ -4,7 +4,7 @@ C++17 linear-programming solver with an MPS parser, sparse LU and bounded-variab
 
 ## Current status - October 2, 2026
 
-Experimental CPU solver. Not ready for production; Kaggle verification is pending. Local `src/` measurements use engine commit `1ba977a` and 93 Netlib cases from the [pinned corpus](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files).
+Experimental CPU solver. Not ready for production; Kaggle verification is pending. Local `src/` measurements use engine commit `c1f5694` and 93 Netlib cases from the [pinned corpus](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files).
 
 | Protocol | Result | Verification |
 | --- | --- | --- |
