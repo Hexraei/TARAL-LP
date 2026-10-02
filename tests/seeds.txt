@@ -15,4 +15,5 @@ coef_range       LP    38000 38199 200
 ranges           LP    39000 39199 200
 objconst_sense   LP    40000 40119 120
 neg_lower        LP    41000 41099 100
-# total LP 2330  MILP 0
+bound_types      LP    42000 42099 100
+# total LP 2430  MILP 0
