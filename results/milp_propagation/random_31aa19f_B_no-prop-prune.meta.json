@@ -3,10 +3,10 @@
  "engine": "/tmp/claude-0/-home-user-TARAL-LP/f2cee40f-1909-52aa-be7e-c5f74abd04d4/scratchpad/b31/taral_B",
  "time_limit_s": 60,
  "command_lines": [
-  "seed 26119: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(26119), k), k=0..99)",
+  "seed 26000+119: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(26000+119), k), k=0..99)",
   "seed 3: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(3), k), k=0..99)",
   "seed 7: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(7), k), k=0..99)",
-  "seed 26120: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(26120), k), k=0..99)",
+  "seed 26000+120: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(26000+120), k), k=0..99)",
   "seed 31: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(31), k), k=0..99)",
   "seed 47: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(47), k), k=0..99)"
  ],
@@ -20,10 +20,10 @@
  "cpus": 4,
  "note": "cloud container; timings are indicative only",
  "seeds": [
-  26119,
+  26000+119,
   3,
   7,
-  26120,
+  26000+120,
   31,
   47
  ],

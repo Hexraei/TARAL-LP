@@ -17,7 +17,12 @@ Cloud timings are indicative only; node counts are deterministic unless a run hi
 import argparse, csv, json, os, platform, random, subprocess, sys, tempfile, time
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-SEEDS = [26119, 3, 7, 26120, 31, 47]
+SEEDS = [26000 + 119, 3, 7, 26000 + 120, 31, 47]
+
+
+def label(seed):
+    """Seeds in the public 26000+N form, as in the README."""
+    return "26000+%d" % (seed - 26000) if seed >= 26000 else str(seed)
 CHECK = os.path.join(ROOT, "cpp-engine", "tools", "milp_check.py")
 FIELDS = ["family", "seed", "instance", "rows", "cols", "ints", "status", "objective", "best_bound", "nodes",
           "lp_iterations", "wall_s", "prop_tightened", "prop_crossed", "prop_crossed_lp_infeasible", "prop_pruned", "rc_fixed", "rc_skipped", "audit", "ref_status",
@@ -72,9 +77,9 @@ def run_random(a):
             js, sp = p + ".json", p + ".sol"
             cmd = [a.engine, p, "--time-limit", str(a.time_limit), "--json", js, "--sol", sp]
             if k == 0:
-                cmds.append("seed %d: %s  (model written by milp_check.write_mps from gen(random.Random(%d), k), k=0..%d)"
-                            % (seed, " ".join(["taral", "CASE.mps", "--time-limit", str(a.time_limit), "--json", "CASE.json",
-                                               "--sol", "CASE.sol"]), seed, a.n - 1))
+                cmds.append("seed %s: %s  (model written by milp_check.write_mps from gen(random.Random(%s), k), k=0..%d)"
+                            % (label(seed), " ".join(["taral", "CASE.mps", "--time-limit", str(a.time_limit), "--json", "CASE.json",
+                                                    "--sol", "CASE.sol"]), label(seed), a.n - 1))
             t0 = time.time()
             try:
                 subprocess.run(cmd, check=False, capture_output=True, timeout=a.time_limit * 3 + 30)
@@ -101,14 +106,14 @@ def run_random(a):
                 verdict, detail = "unsolved", r["status"]
             else:
                 verdict, detail = "WRONG", "taral %s vs reference %s %r %s" % (r["status"], hs, ho, r.get("message", ""))
-            rows.append(dict(family="random", seed=seed, instance=g["name"], rows=len(g["rows"]), cols=len(g["cols"]),
+            rows.append(dict(family="random", seed=label(seed), instance=g["name"], rows=len(g["rows"]), cols=len(g["cols"]),
                              ints=sum(1 for x in g["ints"] if x), status=r["status"], objective=r.get("objective"),
                              best_bound=r.get("best_bound"), nodes=r.get("nodes"), lp_iterations=r.get("iterations"),
                              wall_s=round(r["wall_s"], 4), ref_status=hs, ref_objective=ho, verdict=verdict, detail=detail,
                              audit=json.dumps(r["audit"]) if "audit" in r else "", **{c: r.get(c, "") for c in COUNTERS}))
         json.dump(cache, open(cache_path, "w"))
     write_csv(a.out, rows)
-    meta(a, cmds, {"seeds": a.seeds, "cases_per_seed": a.n, "reference": "scipy.optimize.milp (HiGHS) on generator data"})
+    meta(a, cmds, {"seeds": [label(x) for x in a.seeds], "cases_per_seed": a.n, "reference": "scipy.optimize.milp (HiGHS) on generator data"})
     summarize(rows)
 
 
