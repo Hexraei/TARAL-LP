@@ -559,6 +559,11 @@ Result solve_lp_dual(const Model& model, const std::vector<double>& col_lo, cons
                        " (first " + std::to_string(dual.first_factor_s) + " s)";
     r.message = r.message.empty() ? what : r.message + "; " + what;
     r.iterations += dual.iterations;
-    if (model.maximize) r.objective = -r.objective;
+    if (model.maximize) {
+        r.objective = -r.objective;
+        r.dual_objective = -r.dual_objective;
+        for (double& v : r.row_dual) v = -v;
+        for (double& v : r.reduced_cost) v = -v;
+    }
     return r;
 }

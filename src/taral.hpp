@@ -65,9 +65,21 @@ enum class Status { Optimal, Infeasible, Unbounded, TimeLimit, IterationLimit, N
 struct Result {
     Status status = Status::NumericalFailure;
     std::vector<double> x;  // structural values, valid when Optimal
+    std::string certificate_quality = "unknown";  // reporting only, strict 1e-8 KKT
+    std::vector<double> row_violation_abs, row_violation_magnitude_scaled, row_term_magnitude;
+    double max_row_violation_magnitude_scaled = 0;
     double objective = 0;   // includes obj_const
     long iterations = 0;
     std::string message;
+    // LP optimality certificate in model sense: reduced_cost = cost - A' row_dual.
+    // Multipliers in minimisation sense are positive at lower bounds, negative at upper
+    // bounds; maximise reverses these signs. solve_lp uses its supplied column bounds.
+    std::vector<double> row_activity, row_dual, reduced_cost;
+    double dual_objective = 0;  // includes obj_const
+    double primal_res = 0, dual_res = 0, gap = 0, complementarity = 0;
+    double max_row_viol = 0, max_bound_viol = 0;  // absolute violations
+    // Residuals: violation/(1+|violated bound|), sign violation/(1+||cost||inf),
+    // gap and max absolute multiplier*slack divided by (1+|objective|).
     std::vector<char> basis;  // when Optimal: per variable (structurals, then row logicals)
                               // 0 basic, 1 at lower, 2 at upper, 3 free at zero
 };

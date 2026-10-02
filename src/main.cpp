@@ -37,12 +37,45 @@ std::string json_escape(const std::string& s) {
     return o;
 }
 
+void num_or_null(std::FILE* f, double v);
+
 void write_json(const char* path, const char* status, const Result* r, double wall, const std::string& msg) {
     std::FILE* f = std::fopen(path, "w");
     if (!f) return;
     std::fprintf(f, "{\"status\": \"%s\", \"objective\": ", status);
     if (r && r->status == Status::Optimal) std::fprintf(f, "%.17g", r->objective);
     else std::fprintf(f, "null");
+    std::fprintf(f, ", \"certificate_quality\": \"%s\", \"certificate_tolerance\": 1e-8",
+                 r ? r->certificate_quality.c_str() : "unknown");
+    if (r && (r->status == Status::Optimal || !r->x.empty())) {
+        auto scalar = [&](const char* name, double value) {
+            std::fprintf(f, ", \"%s\": ", name);
+            num_or_null(f, value);
+        };
+        auto array = [&](const char* name, const std::vector<double>& values) {
+            std::fprintf(f, ", \"%s\": [", name);
+            for (size_t k = 0; k < values.size(); ++k) {
+                if (k) std::fprintf(f, ", ");
+                num_or_null(f, values[k]);
+            }
+            std::fprintf(f, "]");
+        };
+        scalar("dual_objective", r->dual_objective);
+        scalar("primal_res", r->primal_res);
+        scalar("dual_res", r->dual_res);
+        scalar("gap", r->gap);
+        scalar("complementarity", r->complementarity);
+        scalar("max_row_viol", r->max_row_viol);
+        scalar("max_bound_viol", r->max_bound_viol);
+        scalar("max_row_violation_magnitude_scaled", r->max_row_violation_magnitude_scaled);
+        array("row_violation_abs", r->row_violation_abs);
+        array("row_violation_magnitude_scaled", r->row_violation_magnitude_scaled);
+        array("row_term_magnitude", r->row_term_magnitude);
+        array("x", r->x);
+        array("row_activity", r->row_activity);
+        array("row_dual", r->row_dual);
+        array("reduced_cost", r->reduced_cost);
+    }
     std::fprintf(f, ", \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n", r ? r->iterations : 0L, wall,
                  json_escape(msg).c_str());
     std::fclose(f);

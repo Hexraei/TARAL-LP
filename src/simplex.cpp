@@ -110,23 +110,103 @@ private:
     Result finish(Result r);
 };
 
+// Shared with benchmarks/simplex_certificate_check.py (ENDPOINT_BAND).
+constexpr double kEndpointBand = 1e-12;
+
 Result Simplex::finish(Result r) {
     r.x.assign(x_.begin(), x_.begin() + n_);
     r.objective = md_.obj_const;
     for (int j = 0; j < n_; ++j) r.objective += md_.cost[j] * r.x[j];
-    // Never claim optimality for a point that fails its own feasibility check.
-    std::vector<double> act(m_, 0.0);
-    for (int j = 0; j < n_; ++j)
-        for (const Entry& e : md_.cols[j]) act[e.index] += e.value * r.x[j];
-    double worst = 0;
+    // Recompute the certificate from the final (unperturbed) basis and original
+    // coefficients, not the phase-1 costs or the last pricing vector.
+    std::vector<double> cb(m_);
+    for (int p = 0; p < m_; ++p) cb[p] = head_[p] < n_ ? md_.cost[head_[p]] : 0.0;
+    btran(cb, r.row_dual);
+    r.row_activity.assign(m_, 0.0);
+    r.row_term_magnitude.assign(m_, 0.0);
+    r.row_violation_abs.assign(m_, 0.0);
+    r.row_violation_magnitude_scaled.assign(m_, 0.0);
+    r.reduced_cost = md_.cost;
+    double cnorm = 0;
+    bool finite = std::isfinite(r.objective);
+    for (int j = 0; j < n_; ++j) {
+        finite = finite && std::isfinite(r.x[j]);
+        cnorm = std::max(cnorm, std::abs(md_.cost[j]));
+        for (const Entry& e : md_.cols[j]) {
+            r.row_activity[e.index] += e.value * r.x[j];
+            r.row_term_magnitude[e.index] += std::abs(e.value * r.x[j]);
+            r.reduced_cost[j] -= e.value * r.row_dual[e.index];
+        }
+    }
+    auto primal = [&](double v, double lo, double up, double& absolute) {
+        double a = std::max({0.0, lo - v, v - up});
+        absolute = std::max(absolute, a);
+        if (a > 0) r.primal_res = std::max(r.primal_res, a / (1 + std::abs(v < lo ? lo : up)));
+    };
+    r.dual_objective = md_.obj_const;
+    auto dual = [&](double v, double activity, double lo, double up) {
+        finite = finite && std::isfinite(v) && std::isfinite(activity);
+        if (v == 0) return;
+        double bound = v > 0 ? lo : up;
+        if (!std::isfinite(bound)) {
+            r.dual_res = std::max(r.dual_res, std::abs(v) / (1 + cnorm));
+        } else {
+            r.dual_objective += v * bound;
+            r.complementarity = std::max(r.complementarity, std::abs(v * (activity - bound)));
+        }
+    };
+    for (int i = 0; i < m_; ++i) {
+        double activity = r.row_activity[i], lo = md_.row_lo[i], up = md_.row_up[i];
+        double raw = std::max({0.0, lo-activity, activity-up});
+        // Use the violated finite endpoint as RHS; when feasible use zero.
+        // For equality it is the unique RHS; ranged rows use the violated endpoint.
+        // Roundoff-continuous: an activity within kEndpointBand (relative to the term
+        // magnitude plus the endpoint) of a finite endpoint counts as AT that endpoint
+        // whether it lands just inside or just outside, so summation-order or FMA
+        // differences in the last bit cannot add or drop the endpoint (the old rule jumped
+        // by |endpoint|). Genuine violations and exact equalities are unchanged.
+        double terms = r.row_term_magnitude[i];
+        double rhs = activity < lo ? lo : activity > up ? up : (lo == up ? lo : 0.0);
+        if (activity >= lo && activity <= up && lo != up) {
+            double dlo = std::isfinite(lo) ? activity - lo : kInf, dup = std::isfinite(up) ? up - activity : kInf;
+            if (dlo <= dup && dlo <= kEndpointBand * (terms + std::abs(lo))) rhs = lo;
+            else if (dup < dlo && dup <= kEndpointBand * (terms + std::abs(up))) rhs = up;
+        }
+        double magnitude = terms + std::abs(rhs);
+        r.row_term_magnitude[i] = magnitude;
+        r.row_violation_abs[i] = raw;
+        r.row_violation_magnitude_scaled[i] = magnitude > 0 ? raw/magnitude : raw;
+        r.max_row_violation_magnitude_scaled = std::max(r.max_row_violation_magnitude_scaled,
+                                                       r.row_violation_magnitude_scaled[i]);
+        primal(activity, lo, up, r.max_row_viol);
+        dual(r.row_dual[i], r.row_activity[i], md_.row_lo[i], md_.row_up[i]);
+    }
+    for (int j = 0; j < n_; ++j) {
+        primal(r.x[j], clo_[j], cup_[j], r.max_bound_viol);
+        dual(r.reduced_cost[j], r.x[j], clo_[j], cup_[j]);
+    }
+    r.gap = std::abs(r.objective - r.dual_objective) / (1 + std::abs(r.objective));
+    r.complementarity /= 1 + std::abs(r.objective);
+    finite = finite && std::isfinite(r.dual_objective) && std::isfinite(r.gap) &&
+             std::isfinite(r.complementarity) && std::isfinite(r.primal_res) && std::isfinite(r.dual_res);
+    constexpr double certificate_tol = 1e-8;
+    r.certificate_quality = !finite ? "unknown" :
+        std::max({r.primal_res, r.dual_res, r.gap, r.complementarity}) <= certificate_tol ? "pass" : "fail";
+    // Preserve baseline original-model acceptance. Strict KKT quality is separate.
+    double baseline_violation = 0;
     for (int i = 0; i < m_; ++i) {
         double scale = 1 + std::abs(std::isfinite(md_.row_lo[i]) ? md_.row_lo[i] : md_.row_up[i]);
-        worst = std::max({worst, (md_.row_lo[i] - act[i]) / scale, (act[i] - md_.row_up[i]) / scale});
+        baseline_violation = std::max({baseline_violation,
+            (md_.row_lo[i]-r.row_activity[i])/scale, (r.row_activity[i]-md_.row_up[i])/scale});
     }
-    for (int j = 0; j < n_; ++j) worst = std::max({worst, clo_[j] - r.x[j], r.x[j] - cup_[j]});
-    if (worst > 1e-7) {
+    for (int j = 0; j < n_; ++j)
+        baseline_violation = std::max({baseline_violation, clo_[j]-r.x[j], r.x[j]-cup_[j]});
+    bool primal_finite = std::isfinite(r.objective);
+    for (double v : r.x) primal_finite = primal_finite && std::isfinite(v);
+    for (double v : r.row_activity) primal_finite = primal_finite && std::isfinite(v);
+    if (!primal_finite || baseline_violation > 1e-7) {
         r.status = Status::NumericalFailure;
-        r.message = "final point violates constraints by " + std::to_string(worst);
+        r.message = "final point violates constraints by " + std::to_string(baseline_violation);
     }
     r.basis.assign(where_.begin(), where_.end());
     return r;
@@ -385,6 +465,9 @@ Result solve_lp(const Model& model, const std::vector<double>& col_lo, const std
     neg.obj_const = -neg.obj_const;
     Result r = Simplex(neg, col_lo, col_up).run(time_limit_s, warm_basis);
     r.objective = -r.objective;
+    r.dual_objective = -r.dual_objective;
+    for (double& v : r.row_dual) v = -v;
+    for (double& v : r.reduced_cost) v = -v;
     return r;
 }
 
