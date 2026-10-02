@@ -88,4 +88,7 @@ struct MilpResult {
     std::string message;
 };
 MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit);
+// Warm-start basis from an approximate primal point (src/crossover.cpp); *interior = variables farther than tol from a bound.
+std::vector<char> basis_from_point(const Model& model, const std::vector<double>& x,
+                                const std::vector<double>& row_duals, double tol, int* interior);
 const char* status_name(Status s);

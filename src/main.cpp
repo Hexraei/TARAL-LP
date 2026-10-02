@@ -4,6 +4,8 @@
 #include <limits>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
+#include <unordered_map>
 #include <string>
 
 #include "ipm.hpp"
@@ -89,6 +91,8 @@ int main(int argc, char** argv) {
     const char *model = nullptr, *sol = nullptr, *json = nullptr;
     double limit = 60;
     long node_limit = std::numeric_limits<long>::max();
+    const char *warm_sol = nullptr, *warm_dual = nullptr;
+    double cross_tol = 1e-3;
     std::string method = "simplex";  // "ipm": interior point; "dual": dual simplex (LPs)
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--time-limit") && i + 1 < argc) limit = std::atof(argv[++i]);
@@ -96,6 +100,9 @@ int main(int argc, char** argv) {
         else if (!std::strcmp(argv[i], "--json") && i + 1 < argc) json = argv[++i];
         else if (!std::strcmp(argv[i], "--node-limit") && i + 1 < argc) node_limit = std::atol(argv[++i]);
         else if (!std::strcmp(argv[i], "--method") && i + 1 < argc) method = argv[++i];
+        else if (!std::strcmp(argv[i], "--warm-sol") && i + 1 < argc) warm_sol = argv[++i];
+        else if (!std::strcmp(argv[i], "--warm-dual") && i + 1 < argc) warm_dual = argv[++i];
+        else if (!std::strcmp(argv[i], "--cross-tol") && i + 1 < argc) cross_tol = std::atof(argv[++i]);
         else model = argv[i];
     }
     if (!model) {
@@ -139,8 +146,30 @@ int main(int argc, char** argv) {
                     w, r.message.c_str());
         return exit_code(r.status);
     }
-    Result r = method == "dual" ? solve_lp_dual(md, md.col_lo, md.col_up, nullptr, limit - wall())
-                                  : solve(md, limit - wall());
+    std::vector<char> warm;  // crossover: start from the basis of an approximate (PDHG) primal point
+    if (warm_sol) {
+        std::unordered_map<std::string, double> val;
+        std::ifstream in(warm_sol);
+        std::string name;
+        double v;
+        while (in >> name >> v) val[name] = v;
+        std::vector<double> x(md.col_names.size(), 0.0);
+        for (size_t j = 0; j < x.size(); ++j) x[j] = val.count(md.col_names[j]) ? val[md.col_names[j]] : 0.0;
+        std::vector<double> y;  // optional row multipliers, in row order
+        if (warm_dual) {
+            std::unordered_map<std::string, double> yv;
+            std::ifstream din(warm_dual);
+            while (din >> name >> v) yv[name] = v;
+            for (const std::string& r : md.row_names) y.push_back(yv.count(r) ? yv[r] : 0.0);
+        }
+        int interior = 0;
+        warm = basis_from_point(md, x, y, cross_tol, &interior);
+        std::fprintf(stderr, "crossover: %d variables farther than %g from a bound, %zu rows (%.3fs)\n", interior, cross_tol,
+                     md.row_names.size(), wall());
+    }
+    const std::vector<char>* wp = warm.empty() ? nullptr : &warm;
+    Result r = method == "dual" ? solve_lp_dual(md, md.col_lo, md.col_up, wp, limit - wall())
+                                  : solve_lp(md, md.col_lo, md.col_up, wp, limit - wall());
     double w = wall();
     if (json) write_json(json, status_name(r.status), &r, w, r.message);
     if (sol && r.status == Status::Optimal) write_sol(sol, md, r.x);
