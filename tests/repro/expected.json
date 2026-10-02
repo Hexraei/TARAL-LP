@@ -49,6 +49,16 @@
   "observed_bad": "default simplex runs to the time limit (tens of millions of iterations in a few seconds) on a 3-row, 4-column LP",
   "report": "A 3 x 4 LP whose coefficients span 1e-4..3e4 (an exactly rescaled version of a well-behaved model). The default primal simplex spends the whole time limit (about 8e6 iterations per second, i.e. it is cycling or stalling, not slowly converging) while HiGHS and the engine's own --method dual (4 iterations, objective -32) and --method ipm solve it instantly. This is the dominant failure mode in the coef_range category (see docs/adversarial.md for counts). Not root-caused."
  },
+ "huge_bounds_sentinel_1e20_unbounded.mps": {
+  "category": "huge_bounds",
+  "source": "hand-written",
+  "expected_status": "unbounded",
+  "expected_objective": null,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "optimal, objective -1e+20",
+  "report": "No rows, one column with cost +1 and lower bound -1e20 (upper bound default +infinity). With the convention that |bound| >= 1e20 is infinity the LP is unbounded below; the engine's simplex and dual paths use -1e20 as a finite bound and answer optimal -1e20. Same root behaviour as huge_bounds_sentinel_unbounded, at the 1e20 spelling used by the common readers, HiGHS included."
+ },
  "huge_bounds_sentinel_numfail.mps": {
   "category": "huge_bounds",
   "source": "huge_bounds-31019 (shrunk, sentinel 1e20)",
