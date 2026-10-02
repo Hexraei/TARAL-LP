@@ -211,8 +211,22 @@ Model parse(const std::string& path, bool fixed) {
             }
             if (!set.empty() && !first_set(bound_set, set)) continue;
             auto it = col_id.find(col);
-            if (it == col_id.end()) throw ParseError("unknown column '" + col + "' in BOUNDS");
-            int j = it->second;
+            int j;
+            if (it == col_id.end()) {
+                // A column with no COLUMNS entry (an all-zero column dropped by a generator) that
+                // BOUNDS still names: a zero-cost column with no entries, as other readers accept.
+                if (col.empty()) throw ParseError("BOUNDS line without a column name");
+                j = static_cast<int>(md.col_names.size());
+                col_id[col] = j;
+                md.col_names.push_back(col);
+                md.cost.push_back(0);
+                md.is_int.push_back(0);
+                colmap.emplace_back();
+                md.col_lo.push_back(0);
+                md.col_up.push_back(kInf);
+            } else {
+                j = it->second;
+            }
             double v = no_value || val.empty() ? 0 : number(val);
             double &lo = md.col_lo[j], &up = md.col_up[j];
             if (type == "BV" || type == "LI" || type == "UI") md.is_int[j] = 1;
