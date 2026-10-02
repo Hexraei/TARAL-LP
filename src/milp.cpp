@@ -15,6 +15,8 @@
 // tightenings belong to the node's subtree only; a box they empty holds no improving point.
 // The call refactorizes the basis, so it backs off (skips 1, 3, 7, then 15 later calls) while calls fix
 // nothing; a new incumbent resets it. Skipping a fixing is always valid.
+// A node whose LP fails on its propagated box (neither Optimal nor Infeasible) is first solved on the box
+// without that propagation, which is a valid looser relaxation of the same node.
 // A node whose LP fails (neither Optimal nor Infeasible, after the cold retry) has its widest integer
 // column bisected instead of being left unresolved, at most 8 times in a row along one path; the halves
 // cover the box and each gets its own LP, so nothing is pruned on the failed solve.
@@ -444,10 +446,13 @@ End Search::run() {
         // its branching variable. The tightenings join the node's own change list (children copy
         // it, siblings do not see them).
         bool crossed = false;
+        const size_t kept = cur.changes.size();  // the node's changes before propagation
+        bool tightened = false;
         if (use_prop) {
             if (propagate(lo, up, is_root ? nullptr : &cur.seeds, is_root ? kRootPasses : kNodePasses)) {
                 for (int j : changed_) cur.changes.push_back({j, lo[j], up[j]});
                 prop_tightened += long(changed_.size());
+                tightened = !changed_.empty();
             } else {
                 // Empty integer domain. Restore the box the node had; the audit looks at it, then
                 // the node is pruned, or (no_prop_prune) the LP gets to say so.
@@ -464,12 +469,24 @@ End Search::run() {
         }
         // A child keeps its parent's optimal basis, which stays dual feasible under the tightened
         // bound: re-solve it with the dual simplex. The root and cold retries use the primal.
-        Result r = cur.basis ? solve_lp_dual(md_, lo, up, cur.basis.get(), limit_ - elapsed())
-                             : solve_lp(md_, lo, up, nullptr, limit_ - elapsed());
-        iters += r.iterations;
-        if (cur.basis && r.status != Status::Optimal && r.status != Status::Infeasible && r.status != Status::TimeLimit) {
-            r = solve_lp(md_, lo, up, nullptr, limit_ - elapsed());  // cold retry
-            iters += r.iterations;
+        auto solve_node = [&] {
+            Result q = cur.basis ? solve_lp_dual(md_, lo, up, cur.basis.get(), limit_ - elapsed())
+                                 : solve_lp(md_, lo, up, nullptr, limit_ - elapsed());
+            iters += q.iterations;
+            if (cur.basis && q.status != Status::Optimal && q.status != Status::Infeasible && q.status != Status::TimeLimit) {
+                q = solve_lp(md_, lo, up, nullptr, limit_ - elapsed());  // cold retry
+                iters += q.iterations;
+            }
+            return q;
+        };
+        Result r = solve_node();
+        if (tightened && r.status != Status::Optimal && r.status != Status::Infeasible && r.status != Status::TimeLimit) {
+            // The LP failed on the propagated box. The box without this node's propagation is a valid
+            // (looser) relaxation of the same node: drop the tightenings and solve that instead.
+            cur.changes.resize(kept);
+            lo = rlo_, up = rup_;
+            for (const Change& c : cur.changes) lo[c.j] = c.lo, up[c.j] = c.up;
+            r = solve_node();
         }
         if (r.status == Status::TimeLimit) {
             end = End::TimeLimit;
