@@ -24,7 +24,7 @@ FIELDS = ['case', 'rows', 'cols', 'nnz', 'device', 'threads', 'precision', 'tol'
           'objective_rel_error_vs_highs', 'rel_primal', 'rel_dual', 'rel_gap', 'max_row_violation', 'iterations',
           'restarts', 'setup_s', 'solve_s', 'total_s', 'total_s_min', 'total_s_max', 'repeats', 'device_mem_bytes',
           'highs_s', 'load_avg_1m', 'chk_objective', 'chk_row_viol_rel', 'chk_bound_viol', 'chk_dual_bound', 'chk_dual_obj_loose',
-          'chk_dual_infeas_rel', 'chk_dual_gap_rel', 'chk_dual_sign', 'chk_row_viol_rel_max_repeats', 'objective_identical_repeats']
+          'chk_dual_infeas_rel', 'chk_dual_gap_rel', 'chk_dual_sign', 'chk_row_viol_rel_max_repeats', 'objective_identical_repeats', 'chk_error']
 
 
 def highs_ref(path, cache, solver=None):
@@ -156,6 +156,10 @@ def main():
                                                 'chk_dual_obj_loose', 'chk_dual_infeas_rel', 'chk_dual_gap_rel', 'chk_dual_sign')},
                        chk_row_viol_rel_max_repeats=max((r.get('chk_row_viol_rel') or 0 for r in ok), default=None),
                        objective_identical_repeats=len({r.get('objective') for r in ok}) <= 1 if ok else None)
+            errs = sorted({r['chk_error'] for r in runs if r.get('chk_error')})
+            if errs:  # a run whose vectors could not be rechecked is vetoed, never reported as its solver status
+                row['chk_error'] = '; '.join(errs)
+                row['status'] = 'chk_failed (solver said %s)' % row['status']
             if len({r.get('iterations') for r in ok}) > 1:
                 row['status'] += ' (iterations differ across repeats)'
             rows.append(row)
