@@ -18,5 +18,35 @@
   "known_failing": true,
   "observed_bad": "optimal, objective -5e+30",
   "report": "No rows, one column with cost 5 and bounds [-1e30, 1e30]. By the common convention (CPLEX, Gurobi, HiGHS all treat |bound| >= 1e20 as infinity) the column is free, so the LP is unbounded below. The engine's simplex and dual paths treat 1e30 as a finite bound and report 'optimal' with objective -5e+30, a point nobody can use; only --method ipm reports unbounded. The MPS format itself does not define the sentinel, so this is a convention gap rather than a format violation, but returning 'optimal' with a 1e30 objective is a wrong answer under every common reading."
+ },
+ "near_singular_false_infeasible.mps": {
+  "category": "near_singular",
+  "source": "near_singular-37097",
+  "expected_status": "optimal",
+  "expected_objective": 9.999999989977592,
+  "expected_basis": "4x4 equality system with condition number ~1e11 and a unique solution that is nonnegative in exact rational arithmetic (generator proves it); objective c'x computed exactly",
+  "known_failing": true,
+  "observed_bad": "default simplex and --method dual return infeasible; --method ipm returns optimal 9.99999998998",
+  "report": "A 4 x 4 square equality system B x = b, x >= 0, with B of condition number about 1e11 (prescribed singular values) written with full 17-digit coefficients. In exact rational arithmetic the solution is unique and nonnegative, so the LP is feasible with objective 9.999999989977592. HiGHS (default tolerances) returns optimal 9.99999998251 (a point within its 1e-9 feasibility tolerance), the engine's --method ipm returns 9.99999998998, but the default simplex and the dual method declare the model infeasible. At this conditioning the feasibility verdict is tolerance-dependent; the reproducer records that the engine answers 'infeasible' for a model that is exactly feasible and that other solvers accept."
+ },
+ "near_singular_objective.mps": {
+  "category": "near_singular",
+  "source": "near_singular-37140",
+  "expected_status": "optimal",
+  "expected_objective": 38.0,
+  "expected_basis": "4x4 square system, condition number ~1e11, unique nonnegative solution in exact rational arithmetic; objective c'x = 38 exactly",
+  "known_failing": true,
+  "observed_bad": "optimal, objective 36.2183747274 instead of 38.0",
+  "report": "A 4 x 4 square equality system with condition number about 1e11, so the feasible set is a single point and the optimal objective is exactly 38. The engine returns optimal 36.2183747274 (relative error 0.047) and HiGHS returns 36.2172385 (also off by 0.047): both stop inside the cloud of points that satisfy the equalities to their 1e-9 feasibility tolerance. The engine's answer is infeasible by about 1e-9 relative to the data but is nowhere near the exact optimum, and it differs from HiGHS by 3e-5, above the 1e-6 differential gate. This reproducer documents an inherent limit of tolerance-based LP solvers at this conditioning, not a unique defect of the engine."
+ },
+ "near_singular_stall.mps": {
+  "category": "near_singular",
+  "source": "near_singular-37068",
+  "expected_status": "optimal",
+  "expected_objective": 14.999999242005337,
+  "expected_basis": "4x4 square system, condition number ~1e10, unique nonnegative solution in exact rational arithmetic; objective computed exactly",
+  "known_failing": true,
+  "observed_bad": "default simplex runs to the time limit (millions of iterations) on a 4x4 LP",
+  "report": "A 4 x 4 square equality system with condition number about 1e10 and a unique feasible point (objective 14.999999242). HiGHS solves it; the engine's default simplex iterates until the time limit (over 2 million iterations in 3 seconds), i.e. it cycles or stalls on a model that needs four pivots."
  }
 }
