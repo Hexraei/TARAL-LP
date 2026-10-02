@@ -10,4 +10,5 @@ rank_deficient   LP    33000 33149 150
 redundant_eq     LP    34000 34099 100
 infeasible       LP    35000 35149 150
 unbounded        LP    36000 36149 150
-# total LP 1560  MILP 0
+near_singular    LP    37000 37149 150
+# total LP 1710  MILP 0
