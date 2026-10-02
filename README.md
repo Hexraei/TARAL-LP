@@ -84,7 +84,7 @@ A local check of 3,600 small LPs with known optimal/infeasible/unbounded status 
 
 - Small MIPLIB selection: 26/26 runs recorded; 19 solved at the 300-second cap, seven reached that cap. The separate 30-second protocol solved fourteen. No wrong answer was found under those checks. See [`results/milp_miplib/`](results/milp_miplib/).
 - Convex-QP Maros-Meszaros set: 99/99 measured; 71 passed the stated rule. Remaining rows include five objective discrepancies, eighteen without a usable HiGHS reference, four numerical failures and one nonconvex rejection. Four objective discrepancies were traced to reference accuracy/parsing; the fifth remains uncertified. See the [unchanged ledger and notes](results/qp_maros_meszaros/NOTES.md).
-- Local small-MILP holdout at `442ca16`: 300/300 measured with seeds 26120, 31 and 47. 296 cleared the mismatch flag, including four separately recorded reference-objective discrepancies with feasible integral TARAL points. Three original inputs had undeclared-column parser errors; corrected inputs matched HiGHS. One flag was a reference-side presolve discrepancy. This was local, not Kaggle-gated or industrial-scale validation.
+- Local small-MILP holdout at `442ca16`: 300/300 measured with seeds 26000+120, 31 and 47. 296 cleared the mismatch flag, including four separately recorded reference-objective discrepancies with feasible integral TARAL points. Three original inputs had undeclared-column parser errors; corrected inputs matched HiGHS. One flag was a reference-side presolve discrepancy. This was local, not Kaggle-gated or industrial-scale validation.
 
 ## Approximate GPU LP results
 

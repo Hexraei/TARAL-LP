@@ -180,7 +180,7 @@ def main():
     with open(a.out + '.csv', 'w', newline='') as f:
         w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction='ignore')
         w.writeheader()
-        w.writerows(rows)
+        w.writerows({k: (float('%.12g' % v) if isinstance(v, float) else v) for k, v in r.items()} for r in rows)  # 12 significant digits
     with open(a.out + '.json', 'w') as f:
         json.dump(dict(tool='taral-pdhg bench (prototype, near-optimal; measured)', tol=a.tol, repeats=a.repeats,
                        time_limit=a.time_limit, fp32=a.fp32, rows=rows), f, indent=1)
