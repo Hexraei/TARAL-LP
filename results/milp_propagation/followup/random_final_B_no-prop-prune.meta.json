@@ -1,0 +1,32 @@
+{
+ "commit": "9c9e7b1",
+ "engine": "wrapFB.sh",
+ "time_limit_s": 60,
+ "command_lines": [
+  "seed 26000+119: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(26000+119), k), k=0..99)",
+  "seed 3: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(3), k), k=0..99)",
+  "seed 7: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(7), k), k=0..99)",
+  "seed 26000+120: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(26000+120), k), k=0..99)",
+  "seed 31: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(31), k), k=0..99)",
+  "seed 47: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(47), k), k=0..99)"
+ ],
+ "tool_command": "benchmarks/milp_ledger.py random --engine $SCRATCH/wrapFB.sh --commit FINAL --out $SCRATCH/fin3/random_B.csv --ref-cache $SCRATCH/led/ref600b.json",
+ "date": "2026-10-02 15:44:42 UTC",
+ "platform": "Linux-6.18.44-fc-v51-x86_64-with-glibc2.39",
+ "processor": "x86_64",
+ "python": "3.11.15",
+ "scipy": "1.17.1",
+ "highspy": "?",
+ "cpus": 4,
+ "note": "cloud container; node counts are the evidence, timings are indicative only; engine built from src/ at the commit named (cmp-verified against the tested build)",
+ "seeds": [
+  26000+119,
+  3,
+  7,
+  26000+120,
+  31,
+  47
+ ],
+ "cases_per_seed": 100,
+ "reference": "scipy.optimize.milp (HiGHS) on generator data"
+}

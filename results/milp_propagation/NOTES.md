@@ -17,12 +17,12 @@ Not touched: `src/lu.cpp dual.cpp simplex.cpp ipm.cpp`, the README, notebooks, t
 
 Reference stack here: scipy 1.17.1 / highspy 1.15.1 (the brief mentions scipy 1.15.3; its seed-31 RND39 false-infeasible did not appear).
 
-## a) Correctness (600 required cases: seeds 26119 3 7 26120 31 47, 100 each)
+## a) Correctness (600 required cases: seeds 26000+119 3 7 26000+120 31 47, 100 each)
 
-Commit 0 turns the three `parse_error` cases (seed 26120 RND63 = 87, RND64 = -165; seed 31 RND94 = 163) into matches.
+Commit 0 turns the three `parse_error` cases (seed 26000+120 RND63 = 87, RND64 = -165; seed 31 RND94 = 163) into matches.
 Every ledger below: **600/600 match HiGHS, 0 wrong, 0 reference-side cases** (no HiGHS-infeasible/taral-feasible,
 no taral-better-than-reference); 565 optimal, 35 infeasible; status and objective identical to `ac46975` on all 600.
-Two of the 600 have no integer column (seed 26119 RND65, seed 3 RND49): they go through the LP path and report no node count.
+Two of the 600 have no integer column (seed 26000+119 RND65, seed 3 RND49): they go through the LP path and report no node count.
 
 | binary | total nodes | wrong |
 |---|---|---|
@@ -32,8 +32,8 @@ Two of the 600 have no integer column (seed 26119 RND65, seed 3 RND49): they go 
 | `2346d62` + reduced-cost fixing, A (default) | **2423** | 0 |
 | `2346d62` `--no-prop-prune` (B) | 2432 | 0 |
 
-Per seed, before → after (`2346d62` A): 26119 448→307, 3 630→492, 7 548→425, 26120 559→381, 31 639→437, 47 520→381.
-Instances with fewer nodes: 247; more: 6 (largest RND27 of seed 26119, 6 → 13; none changes a result).
+Per seed, before → after (`2346d62` A): 26000+119 448→307, 3 630→492, 7 548→425, 26000+120 559→381, 31 639→437, 47 520→381.
+Instances with fewer nodes: 247; more: 6 (largest RND27 of seed 26000+119, 6 → 13; none changes a result).
 Supplementary, not an acceptance set: 2000 further cases (seeds 1001..1020 × 100), 0 wrong, nodes 11080 → 9005 → 8062;
 1000 larger models with equality rows (`benchmarks/milp_stress.py --seeds 1..10`), 0 wrong, nodes 208620 → 187959 → 159814.
 
@@ -55,7 +55,7 @@ for any point better than the incumbent. `--no-prop-prune` (Option B) discards t
 | 1000 stress | 4099 | 3487 | 612 | **0** | 121691 | **0** |
 
 At `31aa19f` (propagation only) on the 600: 56 prunes = 50 LP-infeasible + 6 LP-feasible/integer-empty, 0 integer-feasible.
-The six LP-feasible cases (one node each): seed 26119 RND90, seed 3 RND98, seed 26120 RND68, seed 31 RND1 and RND52, seed 47 RND50.
+The six LP-feasible cases (one node each): seed 26000+119 RND90, seed 3 RND98, seed 26000+120 RND68, seed 31 RND1 and RND52, seed 47 RND50.
 Reproduce: `python benchmarks/milp_ledger.py random --engine WRAPPER --commit HASH --out OUT.csv` where WRAPPER is a script
 running `taral --audit-prop "$@"`; the audit vector in the CSV is `[nodes, lp_infeasible, lp_feasible, lp_other, int_empty,
 int_feasible, undecided, cutoff_only, rc_checked, rc_bad]`. The 157 count above is for the final rule; an earlier draft that also pruned on a row-activity
@@ -133,7 +133,7 @@ Every CSV has a `.meta.json` next to it with the commit, the engine flags, the e
 `build`: `g++ -O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic -o taral src/*.cpp`
 
 ```
-python benchmarks/milp_ledger.py random --engine ./taral --commit HASH --out results/milp_propagation/random_HASH_A.csv      # seeds 26119 3 7 26120 31 47, 100 each, 60 s
+python benchmarks/milp_ledger.py random --engine ./taral --commit HASH --out results/milp_propagation/random_HASH_A.csv      # seeds 26000+119 3 7 26000+120 31 47, 100 each, 60 s
 python benchmarks/milp_ledger.py random ... --seeds 1001 ... 1020 --ref-cache REF.json                                         # extra2000_*
 python benchmarks/milp_ledger.py miplib --engine ./taral --commit HASH --out results/milp_propagation/miplib_HASH_A.csv        # 26 pinned instances, 60 s
 python benchmarks/milp_ledger.py compare BEFORE.csv AFTER.csv                                                                   # per-instance losses/gains
@@ -149,3 +149,146 @@ python benchmarks/netlib_gate.py --out OUT --engine WRAPPER_WITH_--method_dual -
 | `netlib/ledger_*`, `netlib/summary_*` | 93-case Netlib protocol, `442ca16` and `2346d62`, Run A and Run B |
 
 The stress runs (`benchmarks/milp_stress.py`) print one summary line and are not stored as CSV.
+
+---
+
+# e) Follow-up (C4): the four MIPLIB losses and the big-values `numerical_failure`
+
+Branch tip before this follow-up `05aaaa1`. The hashes in sections a)-d) are the names from before the authorship rewrite:
+`ac46975` = `aeec670`, `9a66928` = `f1bc952`, `31aa19f` = `d979350`, `2346d62` = `c3acc2f`. Same container class as before
+(4 cores); a faster machine than the one behind the ledgers above, so **node counts at a time limit are not comparable across the
+two machines** and every comparison below is made on one machine. The documented 600-case count reproduces exactly here
+(`c3acc2f` A = 2,423 nodes). No speed claim is made anywhere in this section.
+
+| commit | change |
+|---|---|
+| `6bc0ef2` | reduced-cost fixing backs off after calls that fix nothing (skip 1, 3, 7, then up to 15 calls; a fixing or a new incumbent resets it) |
+| `61dfed4` | a node whose LP ends neither Optimal nor Infeasible has its widest integer column bisected instead of being left unresolved; adds `cpp-engine/tests/milp/big_values_unresolved.mps` |
+| `f2fcfaf` | `--audit-prop` runs the nested plain search on every pruned node, LP-infeasible ones included |
+| `9674587` | tool `benchmarks/milp_bigvals.py` (large-magnitude generator) |
+| `9c9e7b1` | a node LP that fails on a propagated box is retried on the box without that propagation |
+| `4dc330e` | scrub: ledger seeds in the public 26000+N form |
+
+Only `src/milp.cpp` changed in the engine. Tolerance constants (`kIntTol kFeasTol kGapTol kPropEps kRcMin kRcDualTol` and the
+LP engine's own checks) are untouched.
+
+## e1) The four documented losses: diagnosis
+
+Everything below is in `followup/miplib_loss_diagnosis.csv`, `followup/reduced_cost_time_share.csv`, `followup/rc_backoff_cap_sweep.csv`.
+Builds of `aeec670 d979350 c3acc2f` and the final tree were each compiled three ways (`-O3 -march=native`, the same with
+`-ffp-contract=off`, and generic `-O2`); the node counts of a complete run are deterministic for a given build.
+
+**misc07 (worse incumbent at the limit): search-path luck, not a mechanism.** With a 12,000-node limit every build ends at 2810 (the
+HiGHS value). The node at which 2810 is first found depends on the floating-point build far more than on the commit:
+
+| commit | native | `-ffp-contract=off` |
+|---|---|---|
+| `aeec670` (before) | 6,703 | 1,743 |
+| `d979350` (propagation) | 11,243 | 5,778 |
+| `c3acc2f` (+ reduced-cost fixing) | 3,878 | 9,134 |
+| final (`9c9e7b1`) | 3,764 | 9,851 |
+
+Within one commit the spread (up to 6x) exceeds the spread between commits, and the 2865 in the 60 s ledger (9,245 nodes) does
+not reproduce here: this container's `c3acc2f` finds 2810 at node 3,878. The incumbent at a time limit on a hard instance is
+a lottery over the branching path; nothing in propagation or fixing worsens it systematically. No code change.
+
+**dcmulti (nodes 3,792 vs 4,079 in the ledger, 10.7 s vs 9.5 s): path noise in the nodes, overhead in the time.** Complete-run node
+counts (native / `-ffp-contract=off`): before 2,962 / 3,422, propagation 3,566 / 3,390, + fixing 3,227 / 3,517, final 3,088 / 3,398.
+A 15% swing between builds of one commit is as large as any commit-to-commit difference, so the node count says nothing here.
+The time difference is the reduced-cost refactorization: the timer inside `fix_by_reduced_cost` measured 0.63 s of 5.79 s.
+
+**stein27 (8.0 s -> 9.0 s) and khb05250 (1.9 s -> 2.4 s): per-node overhead of reduced-cost fixing, confirmed.** Nodes are flat
+(stein27 9,515 propagation vs 9,551 with fixing; khb05250 2,336 vs 2,300) while the timer measures
+
+| instance | `c3acc2f`: calls, fixings, seconds in the call / total | final: calls, fixings, seconds / total |
+|---|---|---|
+| stein27 | 4,770, 71, 0.60 / 5.63 | 313, 3, 0.04 / 5.18 |
+| khb05250 | 1,215, 1,070, 0.13 / 1.45 | 796, 1,041, 0.08 / 1.41 |
+| dcmulti | 1,729, 555, 0.63 / 5.79 | 609, 582, 0.21 / 5.09 |
+
+(a diagnostic timer, other jobs were running; it locates the cost, it is not a benchmark). stein27 fixed a bound in 1.5% of its
+calls. This is what `6bc0ef2` changes. It does not change the search for the better in any way I can claim: it removes fixings,
+so node counts move a little in both directions on the solved instances (same-machine, `c3acc2f` -> final: p0282 1,995 -> 2,343,
+rgn 2,795 -> 3,045, misc03 1,273 -> 819, lseu 8,504 -> 7,991, mod008 6,687 -> 6,367, khb05250 2,300 -> 2,354) and gt2 swings:
+
+gt2 is bimodal. With the back-off cap at 0 (= `c3acc2f`) it solves in 4,583 nodes, with cap 1 in 282,953, with cap 2 and 3 it hits
+the limit, with cap 4 (shipped) it solves in 37,752 (`followup/rc_backoff_cap_sweep.csv`); `aeec670` and `d979350` do not solve it at
+60 s on this machine. Any perturbation of the branching path flips it, so its `c3acc2f` result was not evidence of a mechanism and
+its final result is not evidence against one. Same-machine totals over the 16 instances solved at 60 s
+(`followup/miplib_*_solved16_samemachine.csv`): nodes 536,537 (`aeec670`, gt2 unsolved at 301,342), 566,294 (`d979350`),
+168,465 (`c3acc2f`), 211,192 (final); 16/16 optimal for the last two. All 26 at 60 s with the final tree
+(`followup/miplib_final_A.csv`): 16 optimal, 10 time-limited, **0 wrong**; every time-limited row keeps bound <= HiGHS <= incumbent
+(verdict `unsolved` = honest limit; misc07 ends at 2810 in 20,182 nodes here).
+
+## e2) The big-values `numerical_failure`
+
+The reproducer you mentioned is not in the repository or in this session, so I regenerated one of that shape with
+`benchmarks/milp_bigvals.py` (row scales up to 1e7, matrix entries up to 9e7, costs 1e3..1e9, integer columns and a known feasible
+point). Seed 504, case 17 of the `all` family = `cpp-engine/tests/milp/big_values_unresolved.mps` (15 columns, 12 rows). It
+**reaches the true optimum -1,820,000 (HiGHS: -1,820,000) and then ends `numerical_failure`** with one unresolved node: 51 nodes
+at `aeec670` (before any propagation), 50 at `d979350`, 46 at `c3acc2f`. So it predates this branch. If your own file is
+a different model, send it; it may need another look.
+
+Cause: the node LP message is `final point violates constraints by 0.000000`. `Simplex::finish` (`src/simplex.cpp`) rejects a point
+whose scaled violation exceeds 1e-7 and reports NumericalFailure; the value is below 5e-7 (the message prints six digits), within the
+MILP layer's 1e-6 check. `solve_lp_dual` and the cold retry fail the same way. The LP engine files are not touched on this branch, so
+the fix is in the search: `61dfed4` bisects the widest integer column of such a node. The halves cover the box, each gets an LP, and
+nothing is pruned on the failed solve. It ends `optimal -1820000` in 76 nodes (74 with the later `9c9e7b1`), with and without
+`--no-prop-prune`, under `--audit-prop`, and agrees with HiGHS. On this model the failure cleared within 5 consecutive bisections;
+the cap is 8 (256 leaves), past which, or with no integer column left to split, the node stays unresolved and the run still ends
+`numerical_failure` honestly.
+
+Soundness of the fallbacks was fault-injected with scratch builds (not committed): 3% / 10% of node LPs forced to NumericalFailure -
+0 wrong optimal/infeasible in either; all 600 still solve at 3%, at 10% four end `numerical_failure` at nodes with no integer column
+to split; 30% of propagated nodes forced to fail their first LP (exercises `9c9e7b1`): 600/600 match, audit 0 integer-feasible.
+
+## e3) What the large-magnitude hunt also found (not fixed here)
+
+`milp_bigvals.py` on families `mid wide row all`, seeds 500..515 x 40 (640 models each), final tree, 10 s: 0 wrong
+optimal/infeasible claims from the engine's side (the two flagged mismatches are reference-side, see below), 0 `numerical_failure`, 34 time limits (`followup/bigvals_sweep_final.txt`).
+
+* **Propagation exposed LP failures at the root** (`mixed` family, rows scaled 1e-3..1e7): seed 57 case 23 solves in 3 nodes before
+  propagation, ended "root LP failed" after `d979350`; `9c9e7b1` solves it again. Seed 57 case 8 does not fail but stalls (next point).
+* **LP-engine stall (src/dual.cpp / simplex.cpp, out of scope here).** The 34 time limits: 30 also time out at `aeec670`. Of the four
+  that `aeec670` solves in 10 s, `mid` seed 501 case 29 is only slower (153,666 nodes against 100,541; every build solves it in 20 s) and
+  three are new stalls (`all` seed 502 case 8 since `d979350`, `row` seed 503 case 37 since `c3acc2f`, `row` seed 511 case 21 in the final tree
+  only; `c3acc2f` solves that one in 11,761 nodes). Instrumented: the dual simplex finishes in 2-9 iterations, then the primal clean-up runs 3.6-4.4 million iterations on a
+  model of at most 25 columns until the time limit. That is cycling in the LP clean-up, and the path (box) decides whether a run meets it.
+  A per-node time cap in `milp.cpp` would be time-dependent and would also kill legitimate long root LPs on big models; not done.
+* **Tolerance edge, not changed.** The row tolerance is relative to `1 + |rhs|`, so with right-hand sides of 1e6..1e7 it admits absolute
+  violations of a few units. In the `range` family (`--family range`, e.g. seed 168 case 30) the engine reports
+  3,262,492 where HiGHS reports 3,262,355.6; the engine's point has relative row violation 6.6e-7 (HiGHS's: 0). Neither is wrong
+  under its own tolerance. In two `mid` cases the reference is wrong: seed 501 case 33 (HiGHS "infeasible"; the engine's point is exactly
+  feasible and integral) and seed 504 case 39 (the engine's exactly feasible point is better than HiGHS's by 4.6e-5 relative).
+* Five `mixed` models fail the root LP identically at `aeec670` (seeds 16, 60, 60, 61, 65): LP engine, not changed.
+
+## e4) Acceptance (final tree = `9c9e7b1` for src/; ledgers in `followup/`)
+
+600 required cases (seeds 26000+119 3 7 26000+120 31 47, 100 each), same reference stack as before:
+
+| binary | total nodes | wrong | status / objective |
+|---|---|---|---|
+| `c3acc2f` A, this machine | 2,423 | 0 | 565 optimal, 35 infeasible |
+| final, A (default) | **2,424** | 0 | identical to `c3acc2f` on all 600 |
+| final, B (`--no-prop-prune`) | **2,431** | 0 | identical |
+
+Per seed, A / B: 26000+119 307 / 309, 3 493 / 495, 7 425 / 425, 26000+120 381 / 382, 31 437 / 437, 47 381 / 383. Against `c3acc2f` one
+instance differs (seed 3, +1 node); A against B: 5 instances fewer, 1 more. **600/600 match HiGHS, 0 wrong, 0 reference-side.**
+
+Final-tree audit rerun (`--audit-prop`, every propagation-pruned node gets the nested plain search with propagation and fixing
+off; vector `[nodes, lp_infeasible, lp_feasible, lp_other, int_empty, int_feasible, undecided, cutoff_only, rc_checked, rc_bad]`):
+
+| set | pruned by propagation | LP infeasible | LP feasible, integer-empty by plain B&B | integer-feasible (a bug) | undecided | fixings audited | fixings wrong |
+|---|---|---|---|---|---|---|---|
+| 600 required | 154 | 148 | 6 | **0** | 0 | 1,489 | **0** |
+| 2000 extra (seeds 1001..1020 x 100; 2000/2000 match) | 482 | 459 | 23 | **0** | 0 | 4,764 | **0** |
+| 1000 stress (`milp_stress.py --seeds 1..10`; 0 wrong) | 4,024 | 3,421 | 603 | **0** | 0 | 117,287 | **0** |
+
+The 600 audit run also matches HiGHS on all 600, with the same 2,424 nodes as the plain run (the audit does not alter the search).
+The nested search on the LP-infeasible nodes starts from the same LP the audit just found infeasible, so it is a re-check of the LP
+engine rather than new evidence; it is run because every pruned node was asked for.
+
+Reproduce: `python benchmarks/milp_ledger.py random --engine WRAPPER --commit HASH --out OUT.csv` (WRAPPER runs `taral --audit-prop "$@"`
+or `--no-prop-prune`), `python benchmarks/milp_ledger.py miplib ...`, `python benchmarks/milp_bigvals.py --engine ./taral --family all --seeds 504 --n 18`
+(case 17 is the reproducer). Build: `g++ -O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic -o taral src/*.cpp`, warning-free at every commit
+(`6bc0ef2 61dfed4 f2fcfaf 9c9e7b1`); each stage binary was byte-compared with the build that was tested.

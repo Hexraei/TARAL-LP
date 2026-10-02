@@ -1,0 +1,17 @@
+family,seed,instance,rows,cols,ints,status,objective,best_bound,nodes,lp_iterations,wall_s,prop_tightened,prop_crossed,prop_crossed_lp_infeasible,prop_pruned,rc_fixed,rc_skipped,audit,ref_status,ref_objective,verdict,detail
+miplib,,p0033,16,33,33,optimal,3089,3089,1202,2677,0.057,,,,,,,,Optimal,3088.999999999999,match,
+miplib,,p0201,133,201,201,optimal,7615,7615,1359,23225,1.741,,,,,,,,Optimal,7614.999999997075,match,
+miplib,,p0282,241,282,282,optimal,258411,258411,4148,18854,2.285,,,,,,,,Optimal,258411.0,match,
+miplib,,egout,98,141,55,optimal,568.1007000000001,568.1002872180451,68482,52668,13.97,,,,,,,,Optimal,568.1007000000001,match,
+miplib,,flugpl,18,18,11,optimal,1201500,1201500,7702,6518,0.293,,,,,,,,Optimal,1201500.0,match,
+miplib,,lseu,28,89,89,optimal,1120,1120,11435,52335,1.085,,,,,,,,Optimal,1120.0000000000002,match,
+miplib,,mod008,6,319,319,optimal,307,306.9997366090321,18725,87276,1.627,,,,,,,,Optimal,306.99999999999767,match,
+miplib,,stein27,118,27,27,optimal,18,17.999999999999993,9847,50863,5.445,,,,,,,,Optimal,17.999999999999982,match,
+miplib,,bell3a,123,133,71,optimal,878430.3159999999,878429.602577778,71130,430644,38.564,,,,,,,,Optimal,878430.3159999981,match,
+miplib,,misc03,96,160,159,optimal,3360,3360,1125,21528,1.195,,,,,,,,Optimal,3359.9999999999955,match,
+miplib,,enigma,21,100,100,optimal,0,0,4925,129043,1.383,,,,,,,,Optimal,0.0,match,
+miplib,,gt2,29,188,188,time_limit,23851,21166,301342,2939374,60.174,,,,,,,,Optimal,21166.0,unsolved,not solved within 60s (incumbent)
+miplib,,khb05250,101,1350,24,optimal,106940226,106940226,2336,18510,1.335,,,,,,,,Optimal,106940226.0,match,
+miplib,,dcmulti,290,548,75,optimal,188182,188181.93157894735,2962,22590,4.478,,,,,,,,Optimal,188182.0,match,
+miplib,,rgn,24,180,100,optimal,82.19999923999998,82.19999903999997,5909,63507,0.821,,,,,,,,Optimal,82.19999923999991,match,
+miplib,,blend2,274,353,264,optimal,7.598985,7.598985,23908,499274,46.642,,,,,,,,Optimal,7.598985,match,

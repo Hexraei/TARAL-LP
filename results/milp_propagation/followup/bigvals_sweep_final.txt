@@ -1,0 +1,46 @@
+# benchmarks/milp_bigvals.py --engine taral(9c9e7b1) --family F --seeds 500..515 --n 40 (640 models per family), 10 s limit; HiGHS mip gaps 1e-9
+STATUS seed=501 case=29 engine=time_limit None nodes=110576 unresolved=0 reference=Time limit reached 582.5 msg='' file=mid/s501_29.mps
+STATUS seed=501 case=33 engine=optimal -72000 nodes=15 unresolved=0 reference=Infeasible inf msg='' file=mid/s501_33.mps
+OBJECTIVE seed=504 case=39 engine=optimal 14153305.785123967 nodes=10 unresolved=0 reference=Optimal 14153951.18311811 msg='' file=mid/s504_39.mps
+DONE family=mid statuses={'optimal': 639, 'time_limit': 1} flagged=3
+DONE family=wide statuses={'optimal': 640} flagged=0
+STATUS seed=500 case=1 engine=time_limit 175.77124183006532 nodes=438 unresolved=0 reference=Optimal 175.77124183006563 msg='' file=row/s500_1.mps
+STATUS seed=502 case=0 engine=time_limit 172.6178861788618 nodes=33 unresolved=0 reference=Optimal 172.61788617886305 msg='' file=row/s502_0.mps
+STATUS seed=502 case=5 engine=time_limit None nodes=96 unresolved=0 reference=Optimal 295.5 msg='' file=row/s502_5.mps
+STATUS seed=502 case=16 engine=time_limit None nodes=592 unresolved=0 reference=Optimal -1.0000000000000107 msg='' file=row/s502_16.mps
+STATUS seed=502 case=38 engine=time_limit -4.542857142857142 nodes=24 unresolved=0 reference=Optimal 1.221428571428576 msg='' file=row/s502_38.mps
+STATUS seed=503 case=7 engine=time_limit None nodes=5 unresolved=0 reference=Optimal 38.238713667285104 msg='' file=row/s503_7.mps
+STATUS seed=503 case=14 engine=time_limit None nodes=120 unresolved=0 reference=Optimal 43.27314814814823 msg='' file=row/s503_14.mps
+STATUS seed=503 case=15 engine=time_limit -21.000000000000007 nodes=77 unresolved=0 reference=Optimal -65.80000000000008 msg='' file=row/s503_15.mps
+STATUS seed=503 case=22 engine=time_limit None nodes=36 unresolved=0 reference=Optimal 208.85714285714286 msg='' file=row/s503_22.mps
+STATUS seed=503 case=37 engine=time_limit -118.5 nodes=36 unresolved=0 reference=Optimal -118.50000000000007 msg='' file=row/s503_37.mps
+STATUS seed=504 case=22 engine=time_limit None nodes=101 unresolved=0 reference=Optimal -78.9714285714289 msg='' file=row/s504_22.mps
+STATUS seed=505 case=2 engine=time_limit None nodes=19 unresolved=0 reference=Optimal -120.00000000000016 msg='' file=row/s505_2.mps
+STATUS seed=505 case=7 engine=time_limit None nodes=103 unresolved=0 reference=Optimal -19.277258566977544 msg='' file=row/s505_7.mps
+STATUS seed=505 case=30 engine=time_limit None nodes=37 unresolved=0 reference=Optimal 115.0 msg='' file=row/s505_30.mps
+STATUS seed=508 case=30 engine=time_limit None nodes=30 unresolved=0 reference=Optimal -331.9999999999998 msg='' file=row/s508_30.mps
+STATUS seed=509 case=24 engine=time_limit -239.85220125786162 nodes=31 unresolved=0 reference=Optimal -239.85220125786188 msg='' file=row/s509_24.mps
+STATUS seed=509 case=33 engine=time_limit None nodes=169 unresolved=0 reference=Optimal 221.5 msg='' file=row/s509_33.mps
+STATUS seed=510 case=15 engine=time_limit None nodes=24 unresolved=0 reference=Optimal -465.61538461538464 msg='' file=row/s510_15.mps
+STATUS seed=510 case=17 engine=time_limit 236.34775233248516 nodes=76 unresolved=0 reference=Optimal 240.43172179813402 msg='' file=row/s510_17.mps
+STATUS seed=510 case=21 engine=time_limit -256.6666666666667 nodes=192 unresolved=0 reference=Optimal -277.3555555555556 msg='' file=row/s510_21.mps
+STATUS seed=510 case=24 engine=time_limit None nodes=2 unresolved=0 reference=Optimal -77.48 msg='' file=row/s510_24.mps
+STATUS seed=511 case=21 engine=time_limit 345.9003673094587 nodes=5148 unresolved=0 reference=Optimal 349.2520661157046 msg='' file=row/s511_21.mps
+STATUS seed=511 case=22 engine=time_limit None nodes=4 unresolved=0 reference=Optimal 25.250793650794304 msg='' file=row/s511_22.mps
+STATUS seed=511 case=29 engine=time_limit None nodes=104 unresolved=0 reference=Optimal 188.4262032085569 msg='' file=row/s511_29.mps
+STATUS seed=512 case=17 engine=time_limit None nodes=16 unresolved=0 reference=Optimal 169.59259259259628 msg='' file=row/s512_17.mps
+STATUS seed=512 case=38 engine=time_limit None nodes=19 unresolved=0 reference=Optimal -270.0 msg='' file=row/s512_38.mps
+STATUS seed=513 case=9 engine=time_limit None nodes=805 unresolved=0 reference=Optimal 184.5 msg='' file=row/s513_9.mps
+STATUS seed=514 case=7 engine=time_limit -163.76666666666665 nodes=295 unresolved=0 reference=Optimal -303.5 msg='' file=row/s514_7.mps
+DONE family=row statuses={'optimal': 612, 'time_limit': 28} flagged=28
+STATUS seed=502 case=8 engine=time_limit None nodes=19 unresolved=0 reference=Optimal 187231231231.2312 msg='' file=all/s502_8.mps
+STATUS seed=504 case=39 engine=time_limit None nodes=33 unresolved=0 reference=Optimal -1780000000.0 msg='' file=all/s504_39.mps
+STATUS seed=510 case=12 engine=time_limit -260000 nodes=13638 unresolved=0 reference=Optimal -260000.00000000195 msg='' file=all/s510_12.mps
+STATUS seed=510 case=34 engine=time_limit -1140000.0000000002 nodes=11738 unresolved=0 reference=Optimal -1139999.9999999763 msg='' file=all/s510_34.mps
+STATUS seed=513 case=32 engine=time_limit -178771428571.4286 nodes=14 unresolved=0 reference=Optimal -184531092436.9748 msg='' file=all/s513_32.mps
+DONE family=all statuses={'optimal': 635, 'time_limit': 5} flagged=5
+
+# the 34 time_limit cases re-run at aeec670 (before any propagation), 10 s:
+#         4 optimal
+#        30 time_limit
+# node LP stalls, instrumented: dual simplex 2-9 iterations, then the primal clean-up runs millions of iterations until the limit (all/s502_8 node 19: 4386198 primal iterations in 10 s; row/s503_37 node 36: 3599585)
