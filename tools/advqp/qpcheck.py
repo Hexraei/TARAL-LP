@@ -75,6 +75,21 @@ def _csc(lp, M):
     lp.a_matrix_.value_ = np.array(val, dtype=float)
 
 
+def _solve_lp(lp):
+    """Solve a HiGHS LP, retrying with presolve off and then the interior-point solver when simplex reports an error."""
+    for opts in ({}, {"presolve": "off"}, {"solver": "ipm", "run_crossover": "off"}):
+        h = highspy.Highs()
+        h.setOptionValue("output_flag", False)
+        h.setOptionValue("threads", 1)
+        for k, v in opts.items():
+            h.setOptionValue(k, v)
+        h.passModel(lp)
+        h.run()
+        if h.modelStatusToString(h.getModelStatus()) == "Optimal":
+            return h
+    return None
+
+
 def dual_certificate(case, x):
     """Optimality certificate from the point alone: multipliers for ALL finite row sides and column bounds
     (y+ >= 0 on lower sides, y- >= 0 on upper sides, z+/z- on bounds), found by two LPs.
@@ -111,7 +126,6 @@ def dual_certificate(case, x):
         # rows: w_j (g_j - M_j.mult) <= t  and  >= -t  ->  w_j M_j.mult + t >= w_j g_j ; -w_j M_j.mult + t >= -w_j g_j
         Wm = M * w[:, None]
         A = np.vstack([np.hstack([Wm, np.ones((n, 1))]), np.hstack([-Wm, np.ones((n, 1))])])
-        h = highspy.Highs(); h.setOptionValue("output_flag", False); h.setOptionValue("threads", 1)
         lp = highspy.HighsLp()
         lp.num_col_, lp.num_row_ = k + 1, 2 * n
         lp.col_cost_ = np.array([0.0] * k + [1.0])
@@ -120,8 +134,8 @@ def dual_certificate(case, x):
         lp.row_lower_ = np.concatenate([w * g, -w * g])
         lp.row_upper_ = np.full(2 * n, highspy.kHighsInf)
         _csc(lp, A)
-        h.passModel(lp); h.run()
-        if h.modelStatusToString(h.getModelStatus()) != "Optimal":
+        h = _solve_lp(lp)
+        if h is None:
             res[mode] = (math.nan, None, None, None)
             continue
         t = max(0.0, h.getSolution().col_value[k])
@@ -129,17 +143,19 @@ def dual_certificate(case, x):
     stat_rel, lp, A, w = res["rel"]
     gap = math.nan
     cap = None
-    if lp is not None and k:
-        lp.col_cost_ = np.array(cost_gap + [0.0])
-        for cap in (max(2 * stat_rel, 1e-12), 1e-9, 1e-7):  # residual allowance; loosened only if the LP is numerically infeasible
+    if lp is not None and k and not math.isnan(stat_rel):
+        cg = np.array(cost_gap)
+        lp.col_cost_ = np.concatenate([np.where(cg < 1e-13, 0.0, cg), [0.0]])  # distances below 1e-13 are rounding noise
+        for cap in [max(2 * stat_rel, 1e-12)] + [10.0 ** (-9 + 0.5 * q) for q in range(13)]:  # loosened only if infeasible
             lp.col_upper_ = np.concatenate([np.full(k, highspy.kHighsInf), [cap]])
-            h = highspy.Highs(); h.setOptionValue("output_flag", False); h.setOptionValue("threads", 1)
-            h.passModel(lp); h.run()
-            if h.modelStatusToString(h.getModelStatus()) == "Optimal":
+            h = _solve_lp(lp)
+            if h is not None:
                 gap = max(0.0, float(h.getInfo().objective_function_value))
                 break
     elif lp is not None:
         gap = 0.0
+    if cap is not None and cap > 1e-9 and not math.isnan(gap):
+        stat_rel = max(stat_rel, cap)  # the first LP's 0 is within HiGHS' feasibility tolerance; report what was needed
     return dict(stat_rel=stat_rel, stat_abs=res["abs"][0], gap=gap, gap_cap=cap, g_inf=float(np.max(np.abs(g))) if n else 0.0)
 
 
