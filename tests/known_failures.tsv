@@ -97,3 +97,11 @@ equality_int-55039	both_time_limit	-	REF_UNRESOLVED: reference status time_limit
 equality_int-55055	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
 big_values-57025	big_values_numfail	big_values_numfail.mps	NOANS: engine numerical_failure (root LP failed: final point violates constraints by 0.000000) vs reference optimal (presolve-off optimal)
 big_values-57027	big_values_numfail	big_values_numfail.mps	NOANS: engine time_limit (node LP numerical_failure: final point violates constraints by 0.000001) vs reference optimal (presolve-off optimal)
+parser:missing_endata	parser_strictness	parser_missing_endata.mps	FAIL: see tests/repro/expected.json
+parser:dup_row_name	parser_strictness	parser_dup_row_name.mps	FAIL: see tests/repro/expected.json
+parser:dup_column_noncontiguous	parser_strictness	parser_dup_column_noncontiguous.mps	FAIL: see tests/repro/expected.json
+parser:dup_section_columns	parser_strictness	parser_dup_section_columns.mps	FAIL: see tests/repro/expected.json
+parser:num_nan_value	parser_strictness	parser_num_nan_value.mps	FAIL: see tests/repro/expected.json
+parser:num_hex_value	parser_strictness	parser_num_hex_value.mps	FAIL: see tests/repro/expected.json
+parser:num_inf_value	parser_strictness	parser_num_inf_value.mps	FAIL: see tests/repro/expected.json
+parser:num_overflow_1e400	parser_strictness	parser_num_overflow_1e400.mps	FAIL: see tests/repro/expected.json
