@@ -140,7 +140,10 @@ End Search::run() {
         ++nodes;
         lo = rlo_, up = rup_;
         for (const Change& c : cur.changes) lo[c.j] = c.lo, up[c.j] = c.up;
-        Result r = solve_lp(md_, lo, up, cur.basis.get(), limit_ - elapsed());
+        // A child keeps its parent's optimal basis, which stays dual feasible under the tightened
+        // bound: re-solve it with the dual simplex. The root and cold retries use the primal.
+        Result r = cur.basis ? solve_lp_dual(md_, lo, up, cur.basis.get(), limit_ - elapsed())
+                             : solve_lp(md_, lo, up, nullptr, limit_ - elapsed());
         iters += r.iterations;
         if (cur.basis && r.status != Status::Optimal && r.status != Status::Infeasible && r.status != Status::TimeLimit) {
             r = solve_lp(md_, lo, up, nullptr, limit_ - elapsed());  // cold retry
