@@ -23,4 +23,5 @@ knapsack         MILP  46000 46079 80
 general_int      MILP  47000 47079 80
 setcover         MILP  48000 48059 60
 parity           MILP  49000 49039 40
-# total LP 2840  MILP 260
+fixed_charge     MILP  50000 50059 60
+# total LP 2840  MILP 320
