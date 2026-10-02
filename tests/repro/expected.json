@@ -1,1 +1,22 @@
-{}
+{
+ "huge_bounds_sentinel_numfail.mps": {
+  "category": "huge_bounds",
+  "source": "huge_bounds-31019 (shrunk, sentinel 1e20)",
+  "expected_status": "optimal",
+  "expected_objective": -4.0,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "numerical_failure: final point violates constraints by 0.8889",
+  "report": "A 4 x 4 LP in which three columns are bounded by +-1e20 and two rows carry RANGES 1e20 (so one side of each is infinite by the 1e20 convention). HiGHS and the engine's --method dual / --method ipm return optimal -4. The default simplex treats the 1e20 values as finite data, runs 5 iterations and stops with numerical_failure ('final point violates constraints by 0.8889'): the huge finite bounds enter the arithmetic of the ratio test and destroy the basic solution. Same convention gap as the other huge_bounds reproducers; with 1e30 in place of 1e20 the failure is identical."
+ },
+ "huge_bounds_sentinel_unbounded.mps": {
+  "category": "huge_bounds",
+  "source": "huge_bounds-31000 (shrunk)",
+  "expected_status": "unbounded",
+  "expected_objective": null,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "optimal, objective -5e+30",
+  "report": "No rows, one column with cost 5 and bounds [-1e30, 1e30]. By the common convention (the common readers, HiGHS included, all treat |bound| >= 1e20 as infinity) the column is free, so the LP is unbounded below. The engine's simplex and dual paths treat 1e30 as a finite bound and report 'optimal' with objective -5e+30, a point nobody can use; only --method ipm reports unbounded. The MPS format itself does not define the sentinel, so this is a convention gap rather than a format violation, but returning 'optimal' with a 1e30 objective is a wrong answer under every common reading."
+ }
+}
