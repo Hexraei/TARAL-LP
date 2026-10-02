@@ -6,11 +6,16 @@ CPU backend of the same algorithm. PDHG is a near-optimal method: every result i
 against HiGHS on the original MPS file, never as an exact solve, and is a separate line from the simplex headline.
 
 Files
-- `netlib.csv/json`: seven Netlib cases, tol 1e-4, median of 3 runs, GPU versus 1 and 10 CPU threads (+ exact simplex time).
+- `netlib.csv/json`: seven Netlib cases, tol 1e-4, median of 3 runs (re-measured Oct 2), GPU versus 1 and 10 CPU threads (+ exact simplex time).
 - `synth_transport.csv/json`, `synth_packing_part1.log`, `packing_2000000_gpu.json`: synthetic instances from `gpu/gen_lp.py`
   (fixed seed; transport and packing LPs; clearly synthetic, not industrial data).
 - `netlib_94files_tol1e-4.csv`, `netlib_94files_tol1e-6.csv`: correctness sweep over all 94 corpus files (the 93 cases plus TRUSS, one row each) at two tolerances
-  (objective error versus HiGHS per case). At 1e-4: 92 near-optimal, 2 time limits; at 1e-6: 88 and 6.
+  (objective error versus HiGHS per case). At 1e-4: 92 near-optimal, 2 time limits (greenbea, pilot.ja); at 1e-6: 86 and 8.
+  Re-measured Oct 2 with the vector-check harness (every finished run rechecked on the original MPS, 3 repeats of every
+  config, `--repeat-all`; no recheck failure in any row). Versus the first sweep (88 and 6 at 1e-6) greenbeb and perold
+  now hit the 60 s limit: both sit at the edge, so the near-optimal counts at 1e-6 are not stable. Time-limited rows differ
+  in iterations across repeats by construction (wall-clock stop). At 1e-4 the worst objective error among the
+  near-optimal rows is 4.8e-2 (forplan; nine rows exceed 1e-3): the stopping test is scaled, read the error column.
 
 Measured crossover (GPU total time including setup and transfer versus the best CPU configuration)
 - Netlib cases tested (up to 73k nonzeros): the 10-thread CPU is faster on every case.
