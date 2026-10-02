@@ -1,0 +1,32 @@
+{
+ "commit": "ac46975",
+ "engine": "/tmp/claude-0/-home-user-TARAL-LP/f2cee40f-1909-52aa-be7e-c5f74abd04d4/scratchpad/c0/taral",
+ "time_limit_s": 60,
+ "command_lines": [
+  "seed 26119: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(26119), k), k=0..99)",
+  "seed 3: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(3), k), k=0..99)",
+  "seed 7: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(7), k), k=0..99)",
+  "seed 26120: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(26120), k), k=0..99)",
+  "seed 31: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(31), k), k=0..99)",
+  "seed 47: taral CASE.mps --time-limit 60 --json CASE.json --sol CASE.sol  (model written by milp_check.write_mps from gen(random.Random(47), k), k=0..99)"
+ ],
+ "tool_command": "benchmarks/milp_ledger.py random --engine /tmp/claude-0/-home-user-TARAL-LP/f2cee40f-1909-52aa-be7e-c5f74abd04d4/scratchpad/c0/taral --commit ac46975 --out results/milp_propagation/random_before_ac46975.csv",
+ "date": "2026-10-02 11:53:59 UTC",
+ "platform": "Linux-6.18.44-fc-v51-x86_64-with-glibc2.39",
+ "processor": "x86_64",
+ "python": "3.11.15",
+ "scipy": "1.17.1",
+ "highspy": "?",
+ "cpus": 4,
+ "note": "cloud container; timings are indicative only",
+ "seeds": [
+  26119,
+  3,
+  7,
+  26120,
+  31,
+  47
+ ],
+ "cases_per_seed": 100,
+ "reference": "scipy.optimize.milp (HiGHS) on generator data"
+}
