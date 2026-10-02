@@ -14,4 +14,5 @@ near_singular    LP    37000 37149 150
 coef_range       LP    38000 38199 200
 ranges           LP    39000 39199 200
 objconst_sense   LP    40000 40119 120
-# total LP 2230  MILP 0
+neg_lower        LP    41000 41099 100
+# total LP 2330  MILP 0
