@@ -169,6 +169,52 @@ RHS
  rhs r 1.0D1
 ENDATA
 """, "optimal", 7.5, "D exponents; 2x >= 10 so x=5, cost 1.5*5"),
+    "zero_column_bounded_free_format": ("""NAME ZEROCOL1
+ROWS
+ N obj
+ G r
+COLUMNS
+ x obj 1 r 1
+RHS
+ rhs r 2
+BOUNDS
+ UP bnd x 10
+ UP bnd z 5
+ENDATA
+""", "optimal", 2.0, "z appears only in BOUNDS: read as an empty column (zero cost, no rows), bounded 0..5; x=2"),
+    "zero_column_fixed_bound_makes_it_binding": ("""NAME ZEROCOL2
+ROWS
+ N obj
+ G r
+COLUMNS
+ x obj 1 r 1
+RHS
+ rhs r 2
+BOUNDS
+ LO bnd z 3
+ UP bnd z 1
+ENDATA
+""", "infeasible", None, "empty column z with lo 3 > up 1 is an infeasible variable even though it has no coefficients"),
+    "zero_column_free_and_integer_bounds": ("""NAME ZEROCOL3
+ROWS
+ N obj
+ G r
+COLUMNS
+ x obj 1 r 1
+RHS
+ rhs r 1
+BOUNDS
+ FR bnd w
+ BV bnd b
+ FX bnd f 4
+ENDATA
+""", "optimal", 1.0, "w free, b binary, f fixed at 4, all empty columns not in COLUMNS; objective is just x=1"),
+    "zero_column_fixed_names_with_spaces": ("\n".join([
+        "NAME ZEROCOL4", "ROWS", fixed("N", "obj"), fixed("G", "r1"), "COLUMNS",
+        fixed("", "x y", "obj", "1", "r1", "1"),
+        "RHS", fixed("", "rhs", "r1", "2"),
+        "BOUNDS", fixed("UP", "bnd", "z w", "7"), "ENDATA", ""]),
+        "optimal", 2.0, "fixed-column file: bound-only column name containing a space is still read via the fixed reading"),
     "integer_marker_solved_as_mip": ("""NAME INTS
 ROWS
  N obj

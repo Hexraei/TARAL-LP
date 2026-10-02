@@ -3,6 +3,7 @@
 // Supports OBJSENSE, RANGES, the usual bound types, integer MARKER blocks and quadratic
 // objective sections (QUADOBJ, QMATRIX, QSECTION on the objective row). Only the first
 // RHS / RANGES / BOUNDS set is used; later named sets are ignored, as the format specifies.
+// A BOUNDS column that never appears in COLUMNS is read as an empty (zero-column) variable.
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
@@ -53,7 +54,7 @@ std::vector<std::string> tokens(const std::string& line, const std::string& sect
     return t;
 }
 
-Model parse(const std::string& path, bool fixed) {
+Model parse(const std::string& path, bool fixed, bool allow_bound_only_cols) {
     std::ifstream in(path);
     if (!in) throw ParseError("cannot open " + path);
     Model md;
@@ -211,7 +212,22 @@ Model parse(const std::string& path, bool fixed) {
             }
             if (!set.empty() && !first_set(bound_set, set)) continue;
             auto it = col_id.find(col);
-            if (it == col_id.end()) throw ParseError("unknown column '" + col + "' in BOUNDS");
+            if (it == col_id.end()) {
+                // Zero-column convention: a BOUNDS column absent from COLUMNS is an empty column
+                // (zero cost, no coefficients), appended after the COLUMNS columns in order of first
+                // appearance. Only accepted once strict readings have failed (see read_mps), so a
+                // misparsed line in the wrong format still falls through to the other reading.
+                if (!allow_bound_only_cols || col.empty()) throw ParseError("unknown column '" + col + "' in BOUNDS");
+                int nj = static_cast<int>(md.col_names.size());
+                col_id[col] = nj;
+                md.col_names.push_back(col);
+                md.cost.push_back(0);
+                md.is_int.push_back(0);
+                colmap.emplace_back();
+                md.col_lo.push_back(0);
+                md.col_up.push_back(kInf);
+                it = col_id.find(col);
+            }
             int j = it->second;
             double v = no_value || val.empty() ? 0 : number(val);
             double &lo = md.col_lo[j], &up = md.col_up[j];
@@ -280,9 +296,19 @@ bool Model::has_integers() const {
 }
 
 Model read_mps(const std::string& path) {
+    // Strict readings first (free, then fixed); only if both fail, retry allowing BOUNDS columns
+    // that never appear in COLUMNS.
     try {
-        return parse(path, false);
+        return parse(path, false, false);
     } catch (const ParseError&) {
-        return parse(path, true);
+    }
+    try {
+        return parse(path, true, false);
+    } catch (const ParseError&) {
+    }
+    try {
+        return parse(path, false, true);
+    } catch (const ParseError&) {
+        return parse(path, true, true);
     }
 }
