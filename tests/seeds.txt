@@ -25,4 +25,5 @@ setcover         MILP  48000 48059 60
 parity           MILP  49000 49039 40
 fixed_charge     MILP  50000 50059 60
 int_free_neg     MILP  51000 51059 60
-# total LP 2840  MILP 380
+markers_mixed    MILP  52000 52079 80
+# total LP 2840  MILP 460
