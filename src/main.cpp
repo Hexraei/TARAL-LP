@@ -12,12 +12,27 @@
 #include "taral.hpp"
 
 namespace {
+// Escapes for a JSON string. Bytes that are not part of well-formed UTF-8 (model names are arbitrary bytes)
+// become '?', so the file is always valid JSON.
 std::string json_escape(const std::string& s) {
     std::string o;
-    for (char ch : s) {
-        if (ch == '"' || ch == '\\') o += '\\', o += ch;
-        else if (static_cast<unsigned char>(ch) < 0x20) o += ' ';
-        else o += ch;
+    for (size_t i = 0; i < s.size(); ++i) {
+        unsigned char ch = static_cast<unsigned char>(s[i]);
+        if (ch == '"' || ch == '\\') o += '\\', o += static_cast<char>(ch);
+        else if (ch < 0x20) o += ' ';
+        else if (ch < 0x80) o += static_cast<char>(ch);
+        else {
+            size_t len = ch >= 0xF0 ? 4 : ch >= 0xE0 ? 3 : ch >= 0xC2 ? 2 : 0;
+            bool ok = len > 0 && ch <= 0xF4 && i + len <= s.size();
+            for (size_t k = 1; ok && k < len; ++k) ok = (static_cast<unsigned char>(s[i + k]) & 0xC0) == 0x80;
+            if (ok && len > 2) {  // no overlong forms, surrogates or values above U+10FFFF
+                unsigned char c1 = static_cast<unsigned char>(s[i + 1]);
+                ok = !(ch == 0xE0 && c1 < 0xA0) && !(ch == 0xED && c1 > 0x9F) && !(ch == 0xF0 && c1 < 0x90) &&
+                     !(ch == 0xF4 && c1 > 0x8F);
+            }
+            if (ok) o.append(s, i, len), i += len - 1;
+            else o += '?';
+        }
     }
     return o;
 }
@@ -54,6 +69,11 @@ void write_milp_json(const char* path, const MilpResult& r, double wall) {
     std::fclose(f);
 }
 
+void sci_or_null(std::FILE* f, double v) {
+    if (std::isfinite(v)) std::fprintf(f, "%.3e", v);
+    else std::fprintf(f, "null");
+}
+
 void write_ipm_json(const char* path, const IpmResult& r, double wall) {
     std::FILE* f = std::fopen(path, "w");
     if (!f) return;
@@ -62,9 +82,17 @@ void write_ipm_json(const char* path, const IpmResult& r, double wall) {
     num_or_null(f, ok ? r.objective : kInf);
     std::fprintf(f, ", \"dual_objective\": ");
     num_or_null(f, ok ? r.dual_objective : kInf);
-    std::fprintf(f, ", \"primal_res\": %.3e, \"dual_res\": %.3e, \"gap\": %.3e, \"max_row_viol\": %.3e, "
-                 "\"max_bound_viol\": %.3e, \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n",
-                 r.primal_res, r.dual_res, r.gap, r.max_row_viol, r.max_bound_viol, r.iterations, wall,
+    std::fprintf(f, ", \"primal_res\": ");
+    sci_or_null(f, r.primal_res);
+    std::fprintf(f, ", \"dual_res\": ");
+    sci_or_null(f, r.dual_res);
+    std::fprintf(f, ", \"gap\": ");
+    sci_or_null(f, r.gap);
+    std::fprintf(f, ", \"max_row_viol\": ");
+    sci_or_null(f, r.max_row_viol);
+    std::fprintf(f, ", \"max_bound_viol\": ");
+    sci_or_null(f, r.max_bound_viol);
+    std::fprintf(f, ", \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n", r.iterations, wall,
                  json_escape(r.message).c_str());
     std::fclose(f);
 }
@@ -123,6 +151,8 @@ int main(int argc, char** argv) {
         IpmOptions opt;
         opt.time_limit = limit - wall();
         IpmResult r = ipm_solve(md, opt);
+        if (r.status == IpmStatus::Optimal && !std::isfinite(r.objective))
+            r.status = IpmStatus::NumericalFailure, r.message = "non-finite objective";
         double w = wall();
         if (json) write_ipm_json(json, r, w);
         if (sol && r.status == IpmStatus::Optimal) write_sol(sol, md, r.x);
@@ -138,6 +168,8 @@ int main(int argc, char** argv) {
     }
     if (md.has_integers()) {
         MilpResult r = solve_milp(md, limit - wall(), node_limit);
+        if (r.status == "optimal" && !std::isfinite(r.objective))
+            r.status = "numerical_failure", r.has_solution = false, r.message = "non-finite objective";
         double w = wall();
         if (json) write_milp_json(json, r, w);
         if (sol && r.has_solution) write_sol(sol, md, r.x);
@@ -170,6 +202,8 @@ int main(int argc, char** argv) {
     const std::vector<char>* wp = warm.empty() ? nullptr : &warm;
     Result r = method == "dual" ? solve_lp_dual(md, md.col_lo, md.col_up, wp, limit - wall())
                                   : solve_lp(md, md.col_lo, md.col_up, wp, limit - wall());
+    if (r.status == Status::Optimal && !std::isfinite(r.objective))
+        r.status = Status::NumericalFailure, r.message = "non-finite objective";
     double w = wall();
     if (json) write_json(json, status_name(r.status), &r, w, r.message);
     if (sol && r.status == Status::Optimal) write_sol(sol, md, r.x);

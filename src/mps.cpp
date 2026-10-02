@@ -3,6 +3,11 @@
 // Supports OBJSENSE, RANGES, the usual bound types, integer MARKER blocks and quadratic
 // objective sections (QUADOBJ, QMATRIX, QSECTION on the objective row). Only the first
 // RHS / RANGES / BOUNDS set is used; later named sets are ignored, as the format specifies.
+// Malformed input is an error, not a guess: a missing ENDATA, a repeated ROWS or COLUMNS section, a duplicate
+// row name, a column listed in two separate blocks and non-decimal numbers (hex, inf, nan) are all rejected.
+// Names must be declared before they are used: a BOUNDS, RHS or RANGES entry for a column or row that COLUMNS
+// or ROWS never declared is rejected (the format defines them over declared names; HiGHS silently ignores
+// the entry, which would hide a typo in the model).
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
@@ -16,13 +21,34 @@
 
 namespace {
 
+constexpr double kHugeBound = 1e20;
+
+// Every numeric field (coefficient, RHS, range, bound, quadratic term) must be a plain decimal,
+// [+-] digits [. digits] [(e|E|d|D) [+-] digits], and finite: "nan", "inf" and literals that overflow (1e400)
+// are parse errors, not values that turn into a NaN objective later. The grammar is spelled out because
+// strtod alone would also take hex floats ("0x10" reads as 16), which the format does not define.
 double number(const std::string& s) {
+    size_t i = 0, n = s.size();
+    auto digits = [&] {
+        size_t a = i;
+        while (i < n && std::isdigit(static_cast<unsigned char>(s[i]))) ++i;
+        return i - a;
+    };
+    if (i < n && (s[i] == '+' || s[i] == '-')) ++i;
+    size_t mantissa = digits();
+    if (i < n && s[i] == '.') ++i, mantissa += digits();
+    bool ok = mantissa > 0;
+    if (ok && i < n && (s[i] == 'e' || s[i] == 'E' || s[i] == 'd' || s[i] == 'D')) {
+        ++i;
+        if (i < n && (s[i] == '+' || s[i] == '-')) ++i;
+        ok = digits() > 0;
+    }
+    if (!ok || i != n) throw ParseError("bad number '" + s + "'");
     std::string t = s;
     for (char& ch : t)
         if (ch == 'D' || ch == 'd') ch = 'E';
-    char* end = nullptr;
-    double v = std::strtod(t.c_str(), &end);
-    if (t.empty() || *end) throw ParseError("bad number '" + s + "'");
+    double v = std::strtod(t.c_str(), nullptr);
+    if (!std::isfinite(v)) throw ParseError("number '" + s + "' is not finite");
     return v;
 }
 
@@ -66,6 +92,9 @@ Model parse(const std::string& path, bool fixed) {
     std::vector<char> has_range;
     std::vector<std::map<int, double>> colmap;
     bool in_int = false;
+    bool saw_endata = false;
+    int cur_col = -1;                              // column whose entries are being read
+    std::unordered_set<std::string> seen_sections;  // ROWS and COLUMNS may each appear once
     std::string rhs_set, range_set, bound_set;  // first named set of each kind
     std::map<std::pair<int, int>, double> q;      // (row >= col) -> Q value
     bool q_full = false;                          // QMATRIX/QSECTION list both triangles
@@ -99,6 +128,7 @@ Model parse(const std::string& path, bool fixed) {
             if (section == "NAME") {
                 md.name = arg;
             } else if (section == "ENDATA") {
+                saw_endata = true;
                 break;
             } else if (section == "OBJSENSE") {
                 if (!arg.empty()) {
@@ -117,6 +147,8 @@ Model parse(const std::string& path, bool fixed) {
                        section != "RANGES" && section != "BOUNDS") {
                 throw ParseError("unsupported section " + section);
             }
+            if ((section == "ROWS" || section == "COLUMNS") && !seen_sections.insert(section).second)
+                throw ParseError("section " + section + " appears twice");
             continue;
         }
         std::vector<std::string> t = tokens(line, section, fixed);
@@ -130,6 +162,8 @@ Model parse(const std::string& path, bool fixed) {
             // Exactly two fields; more means a name with spaces, which only the fixed-column reading handles.
             if (t.size() != 2 || t[1].empty()) throw ParseError("bad ROWS line");
             char type = t[0].empty() ? '?' : static_cast<char>(std::toupper(t[0][0]));
+            if (row_id.count(t[1]) || t[1] == obj_row || free_rows.count(t[1]))
+                throw ParseError("duplicate row name '" + t[1] + "'");
             if (type == 'N') {
                 if (obj_row.empty()) obj_row = t[1];
                 else free_rows.insert(t[1]);
@@ -160,7 +194,9 @@ Model parse(const std::string& path, bool fixed) {
                 colmap.emplace_back();
             } else {
                 j = it->second;
+                if (j != cur_col) throw ParseError("column '" + t[0] + "' is listed in two separate blocks");
             }
+            cur_col = j;
             for (size_t k = 1; k + 1 < t.size(); k += 2) {
                 int r = row_of(t[k]);
                 double v = number(t[k + 1]);
@@ -234,6 +270,7 @@ Model parse(const std::string& path, bool fixed) {
             q[{std::max(a, b), std::min(a, b)}] += v;
         }
     }
+    if (!saw_endata) throw ParseError("missing ENDATA");
     for (const auto& [rc, v] : q)
         if (v != 0) md.qobj.push_back({rc.first, rc.second, v});
     if (obj_row.empty()) throw ParseError("no objective row");
@@ -264,6 +301,15 @@ Model parse(const std::string& path, bool fixed) {
             up = has_range[i] ? b + std::abs(R) : kInf;
         }
     }
+    // |bound| >= 1e20 means infinity (the 1e20 / 1e30 sentinels written by CPLEX, Gurobi, HiGHS and others).
+    // Only the direction a sentinel can stand for is mapped: a lower bound <= -1e20 and an upper bound >= 1e20.
+    // The solvers branch on isinf(), so a sentinel left finite would be pivoted to as a real bound.
+    for (std::vector<double>* lo : {&md.col_lo, &md.row_lo})
+        for (double& v : *lo)
+            if (v <= -kHugeBound) v = -kInf;
+    for (std::vector<double>* up : {&md.col_up, &md.row_up})
+        for (double& v : *up)
+            if (v >= kHugeBound) v = kInf;
     md.cols.resize(n);
     for (size_t j = 0; j < n; ++j)
         for (auto [r, v] : colmap[j])
@@ -282,7 +328,12 @@ bool Model::has_integers() const {
 Model read_mps(const std::string& path) {
     try {
         return parse(path, false);
-    } catch (const ParseError&) {
-        return parse(path, true);
+    } catch (const ParseError& free_err) {
+        try {
+            return parse(path, true);
+        } catch (const ParseError& fixed_err) {  // report both readings, not just the fallback's
+            if (std::string(free_err.what()) == fixed_err.what()) throw;
+            throw ParseError(std::string(free_err.what()) + " (free format); " + fixed_err.what() + " (fixed columns)");
+        }
     }
 }
