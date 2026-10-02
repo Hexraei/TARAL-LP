@@ -6,6 +6,7 @@
 #include <cstring>
 #include <string>
 
+#include "ipm.hpp"
 #include "taral.hpp"
 
 namespace {
@@ -51,6 +52,21 @@ void write_milp_json(const char* path, const MilpResult& r, double wall) {
     std::fclose(f);
 }
 
+void write_ipm_json(const char* path, const IpmResult& r, double wall) {
+    std::FILE* f = std::fopen(path, "w");
+    if (!f) return;
+    bool ok = r.status == IpmStatus::Optimal;
+    std::fprintf(f, "{\"status\": \"%s\", \"objective\": ", ipm_status_name(r.status));
+    num_or_null(f, ok ? r.objective : kInf);
+    std::fprintf(f, ", \"dual_objective\": ");
+    num_or_null(f, ok ? r.dual_objective : kInf);
+    std::fprintf(f, ", \"primal_res\": %.3e, \"dual_res\": %.3e, \"gap\": %.3e, \"max_row_viol\": %.3e, "
+                 "\"max_bound_viol\": %.3e, \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n",
+                 r.primal_res, r.dual_res, r.gap, r.max_row_viol, r.max_bound_viol, r.iterations, wall,
+                 json_escape(r.message).c_str());
+    std::fclose(f);
+}
+
 void write_sol(const char* path, const Model& md, const std::vector<double>& x) {
     if (std::FILE* f = std::fopen(path, "w")) {
         for (size_t j = 0; j < md.col_names.size(); ++j) std::fprintf(f, "%s %.17g\n", md.col_names[j].c_str(), x[j]);
@@ -63,11 +79,13 @@ int main(int argc, char** argv) {
     const char *model = nullptr, *sol = nullptr, *json = nullptr;
     double limit = 60;
     long node_limit = std::numeric_limits<long>::max();
+    std::string method = "simplex";  // "ipm" selects the interior-point method for LPs
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--time-limit") && i + 1 < argc) limit = std::atof(argv[++i]);
         else if (!std::strcmp(argv[i], "--sol") && i + 1 < argc) sol = argv[++i];
         else if (!std::strcmp(argv[i], "--json") && i + 1 < argc) json = argv[++i];
         else if (!std::strcmp(argv[i], "--node-limit") && i + 1 < argc) node_limit = std::atol(argv[++i]);
+        else if (!std::strcmp(argv[i], "--method") && i + 1 < argc) method = argv[++i];
         else model = argv[i];
     }
     if (!model) {
@@ -84,8 +102,19 @@ int main(int argc, char** argv) {
         std::printf("status parse_error: %s\n", e.what());
         return 0;
     }
-    if (!md.qobj.empty()) {  // explicit, never a silent LP relaxation
-        std::string why = "quadratic objective needs the QP solver";
+    if ((!md.qobj.empty() || method == "ipm") && !md.has_integers()) {  // convex QP, or LP by interior point
+        IpmOptions opt;
+        opt.time_limit = limit - wall();
+        IpmResult r = ipm_solve(md, opt);
+        double w = wall();
+        if (json) write_ipm_json(json, r, w);
+        if (sol && r.status == IpmStatus::Optimal) write_sol(sol, md, r.x);
+        std::printf("status %s objective %.12g iterations %ld wall %.3fs %s\n", ipm_status_name(r.status), r.objective,
+                    r.iterations, w, r.message.c_str());
+        return 0;
+    }
+    if (!md.qobj.empty()) {  // quadratic objective with integer variables: never a silent relaxation
+        std::string why = "mixed-integer quadratic models are not supported";
         if (json) write_json(json, "unsupported", nullptr, wall(), why);
         std::printf("status unsupported: %s\n", why.c_str());
         return 0;

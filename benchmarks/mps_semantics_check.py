@@ -7,6 +7,8 @@ constant, multiple RHS/BOUNDS sets, OBJSENSE, fixed-column names containing spac
 quadratic objectives). Every case states the answer derived by hand; when highspy is installed the
 same original file is also solved by HiGHS and must agree. HiGHS is a reference only.
 
+Integer and quadratic-objective models are solved (branch and bound, interior point), never relaxed or dropped.
+
 Usage: python benchmarks/mps_semantics_check.py [--engine ./taral]   (exit code 1 on any failure)
 """
 import argparse, json, os, subprocess, sys, tempfile
@@ -167,7 +169,7 @@ RHS
  rhs r 1.0D1
 ENDATA
 """, "optimal", 7.5, "D exponents; 2x >= 10 so x=5, cost 1.5*5"),
-    "integer_marker_rejected_by_lp": ("""NAME INTS
+    "integer_marker_solved_as_mip": ("""NAME INTS
 ROWS
  N obj
  G r
@@ -180,8 +182,8 @@ RHS
 BOUNDS
  UP bnd x 10
 ENDATA
-""", "unsupported", None, "integer columns are never silently relaxed by the LP engine (MIP optimum would be 2)"),
-    "quadratic_objective_rejected_by_lp": ("""NAME QUAD
+""", "optimal", 2.0, "integer column: 2x >= 3 needs x = 2 (the LP relaxation would give 1.5)"),
+    "quadratic_objective_solved_as_qp": ("""NAME QUAD
 ROWS
  N obj
  G r
@@ -192,7 +194,7 @@ RHS
 QUADOBJ
  x x 2
 ENDATA
-""", "unsupported", None, "a quadratic objective is never silently dropped by the LP engine"),
+""", "optimal", 2.0, "QUADOBJ is read with the 0.5 factor: min x + 0.5*2*x^2 with x >= 1 gives 2 (the linear part alone would give 1)"),
 }
 
 
