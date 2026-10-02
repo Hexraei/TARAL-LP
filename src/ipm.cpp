@@ -992,6 +992,9 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     auto accept = [&](const Vec& z, const Vec& y) {
         to_orig(z, y, x, yo);
         Measures ms = measure(md, c, Q, clo, cup, rlo, rup, x, yo);
+        // With a ray column the original model has no dual solution (that column is dual infeasible
+        // by construction), so only primal feasibility can be confirmed here; the caller reports unbounded.
+        if (!ray_col.empty()) return ms.pres <= opt.tol;
         return ms.pres <= opt.tol && ms.dres <= opt.tol && ms.gap <= opt.tol;
     };
     RunOut ro;
@@ -1007,13 +1010,20 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     else x = x0, yo.assign(m0, 0);
     Measures ms = finish(x, yo);
     res.status = ro.status;
-    if (res.status == IpmStatus::Optimal) {
+    if (res.status == IpmStatus::Optimal && !ray_col.empty()) {
+        // The ray column is dual infeasible by construction, so only primal feasibility of the rest is
+        // checkable: feasible point plus a free improving ray means unbounded.
+        if (ms.pres <= opt.tol) {
+            res.status = IpmStatus::Unbounded;
+            res.message = "empty column " + ray_col + " is unbounded in its cost direction";
+        } else {
+            res.status = IpmStatus::NumericalFailure;
+            res.message = "feasibility of the reduced problem could not be confirmed";
+        }
+    } else if (res.status == IpmStatus::Optimal) {
         if (!(ms.pres <= opt.tol && ms.dres <= opt.tol && ms.gap <= opt.tol)) {  // e.g. the P.N == 0 path
             res.status = IpmStatus::NumericalFailure;
             res.message = "final original-model recheck failed";
-        } else if (!ray_col.empty()) {
-            res.status = IpmStatus::Unbounded;
-            res.message = "empty column " + ray_col + " is unbounded in its cost direction";
         }
     }
     (void)t0;
