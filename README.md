@@ -30,6 +30,15 @@ Scope:
 - No measured speed advantage over HiGHS.
 - GPU PDHG is a near-optimal prototype with its own ledgers in `results/gpu_pdhg`; Mittelmann and QPLIB are outside the tested coverage.
 
+## Local MILP holdout - October 2, 2026
+
+A fresh-seed test of `src/` at `442ca16` used 300 random small MILPs: seeds 26120, 31 and 47, 100 cases each. The hardened checker compared HiGHS and SciPy `milp` references and checked TARAL's returned points for bounds, integrality, rows and objective. This was a local run, without a Kaggle gate; it establishes neither MIPLIB coverage nor large-scale reliability.
+
+- 296/300 cases had clean agreement.
+- Three flags were parser errors: BOUNDS referenced an all-zero column omitted from COLUMNS by the generator. After explicitly declaring those columns, TARAL matched HiGHS. The original inputs remain parser failures, not passes.
+- One flag was a reference-side presolve discrepancy: HiGHS reported infeasible, while TARAL's point satisfied all rows and SciPy `milp` with presolve disabled agreed with TARAL.
+- No wrong numerical answer was found in the investigated cases. The undeclared-column parser gap remains open.
+
 ## GPU PDHG - Kaggle T4 check
 
 Approximate LP solver, separate from the 91/93 exact-simplex headline. A clean-room Kaggle run used `gpu/pdhg.cu` from `442ca16`, targeting the T4 with `sm_75`, at tolerance `1e-6`: three GPU repeats per case, a live SciPy/HiGHS reference and an independent point check on the original model.
