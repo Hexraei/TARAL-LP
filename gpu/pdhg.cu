@@ -13,7 +13,7 @@
 //
 // Build: nvcc -O3 -arch=sm_120 -std=c++17 -Xcompiler "-O3 -march=native -pthread" -o out/pdhg gpu/pdhg.cu src/mps.cpp
 // Run:   out/pdhg MODEL.mps --device gpu|cpu [--threads N] [--tol 1e-4] [--time-limit S] [--max-iter N]
-//                 [--json OUT.json] [--sol OUT.sol] [--fp32] [--eval-freq 64] [--no-graph] [--verbose]
+//                 [--json OUT.json] [--sol OUT.sol] [--dual OUT.dual] [--fp32] [--eval-freq 64] [--no-graph] [--verbose]
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -834,6 +834,8 @@ Outcome run(B& b, const Scaled& P, const Options& o, double time_budget) {
 }
 
 // ---------------------------------------------------------------- CLI
+static const char* g_dual_path = nullptr;  // --dual OUT: row multipliers for the independent dual-bound check
+
 struct Timings {
     double parse = 0, scale = 0, init = 0, transfer = 0;
 };
@@ -881,6 +883,13 @@ int finish(B& b, const Model& md, const Scaled& P, const Options& o, const Timin
     if (sol)
         if (std::FILE* f = std::fopen(sol, "w")) {
             for (int j = 0; j < P.n; ++j) std::fprintf(f, "%s %.17g\n", md.col_names[j].c_str(), x[j]);
+            std::fclose(f);
+        }
+    // Row multipliers in original row scale (y = Dr * z, minimisation form): any y gives a weak-duality bound that
+    // the benchmark harness recomputes independently of this program (gpu/vector_check.py).
+    if (g_dual_path)
+        if (std::FILE* f = std::fopen(g_dual_path, "w")) {
+            for (int i = 0; i < P.m; ++i) std::fprintf(f, "%s %.17g\n", md.row_names[i].c_str(), P.Dr[i] * r.z[i]);
             std::fclose(f);
         }
     return 0;
@@ -933,6 +942,7 @@ int main(int argc, char** argv) {
         else if (a == "--eval-freq") o.eval_freq = std::max(1, std::atoi(next()));
         else if (a == "--json") json = next();
         else if (a == "--sol") sol = next();
+        else if (a == "--dual") g_dual_path = next();
         else if (a == "--fp32") fp32 = true;
         else if (a == "--no-graph") o.graph = false;
         else if (a == "--verbose") o.verbose = true;

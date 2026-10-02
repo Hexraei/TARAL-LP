@@ -13,6 +13,9 @@ Writes NAME.csv and NAME.json (one row per case x config).
 """
 import argparse, csv, json, os, statistics, subprocess, sys, tempfile, time
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import vector_check
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PDHG = os.path.join(ROOT, 'out', 'gpu', 'pdhg')
 SIMPLEX = os.path.join(ROOT, 'out', 'gpu', 'taral_simplex')
@@ -20,7 +23,8 @@ CACHE = os.path.join(ROOT, 'out', 'gpu', 'highs_cache.json')
 FIELDS = ['case', 'rows', 'cols', 'nnz', 'device', 'threads', 'precision', 'tol', 'status', 'objective', 'highs_objective',
           'objective_rel_error_vs_highs', 'rel_primal', 'rel_dual', 'rel_gap', 'max_row_violation', 'iterations',
           'restarts', 'setup_s', 'solve_s', 'total_s', 'total_s_min', 'total_s_max', 'repeats', 'device_mem_bytes',
-          'highs_s', 'load_avg_1m']
+          'highs_s', 'load_avg_1m', 'chk_objective', 'chk_row_viol_rel', 'chk_bound_viol', 'chk_dual_bound', 'chk_dual_obj_loose',
+          'chk_dual_infeas_rel', 'chk_dual_gap_rel', 'chk_dual_sign', 'chk_row_viol_rel_max_repeats', 'objective_identical_repeats']
 
 
 def highs_ref(path, cache, solver=None):
@@ -59,7 +63,9 @@ def run_pdhg(path, device, threads, a):
     wait_load(a)
     with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as tf:
         out = tf.name
-    cmd = [PDHG, path, '--device', device, '--tol', str(a.tol), '--time-limit', str(a.time_limit), '--json', out]
+    sol, dual = out + '.sol', out + '.dual'
+    cmd = [PDHG, path, '--device', device, '--tol', str(a.tol), '--time-limit', str(a.time_limit), '--json', out,
+           '--sol', sol, '--dual', dual]
     if threads:
         cmd += ['--threads', str(threads)]
     if a.fp32:
@@ -67,12 +73,19 @@ def run_pdhg(path, device, threads, a):
     try:
         subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=a.time_limit + 120, check=True)
         with open(out) as f:
-            return json.load(f)
+            r = json.load(f)
+        # Independent recheck of the written vectors on the ORIGINAL model (gpu/vector_check.py).
+        try:
+            r.update(vector_check.check_files(path, sol, dual if os.path.exists(dual) else None))
+        except Exception as e:  # a failed check is recorded, never silently skipped
+            r['chk_error'] = str(e)[:200]
+        return r
     except (subprocess.SubprocessError, OSError, json.JSONDecodeError) as e:
         return dict(status='crash', error=str(e)[:200])
     finally:
-        if os.path.exists(out):
-            os.unlink(out)
+        for f in (out, sol, dual):
+            if os.path.exists(f):
+                os.unlink(f)
 
 
 def run_simplex(path, a):
@@ -111,6 +124,7 @@ def main():
     ap.add_argument('--time-limit', type=float, default=60)
     ap.add_argument('--simplex', action='store_true', help='also run the exact C++ simplex for context')
     ap.add_argument('--fp32', action='store_true')
+    ap.add_argument('--repeat-all', action='store_true', help='repeat every non-crashed config, also time-limited ones')
     ap.add_argument('--max-load', type=float, default=0, help='wait (up to 20 min) for 1-min load below this')
     a = ap.parse_args()
     cache = json.load(open(CACHE)) if os.path.exists(CACHE) else {}
@@ -122,7 +136,7 @@ def main():
             device, threads = ('gpu', 0) if cfg == 'gpu' else ('cpu', int(cfg[3:]))
             runs = [run_pdhg(path, device, threads, a)]
             # Repeat only finished runs: a time-limited or crashed config is not re-timed.
-            if runs[0].get('status') == 'near_optimal':
+            if runs[0].get('status') == 'near_optimal' or (a.repeat_all and runs[0].get('status') != 'crash'):
                 runs += [run_pdhg(path, device, threads, a) for _ in range(a.repeats - 1)]
             r0 = runs[0]
             ok = [r for r in runs if 'total_s' in r]
@@ -137,7 +151,11 @@ def main():
                        total_s=med('total_s'), total_s_min=min((r['total_s'] for r in ok), default=None),
                        total_s_max=max((r['total_s'] for r in ok), default=None), repeats=len(ok),
                        device_mem_bytes=r0.get('device_mem_bytes'), highs_s=ref['wall_s'],
-                       load_avg_1m=os.getloadavg()[0])
+                       load_avg_1m=os.getloadavg()[0],
+                       **{k: r0.get(k) for k in ('chk_objective', 'chk_row_viol_rel', 'chk_bound_viol', 'chk_dual_bound',
+                                                'chk_dual_obj_loose', 'chk_dual_infeas_rel', 'chk_dual_gap_rel', 'chk_dual_sign')},
+                       chk_row_viol_rel_max_repeats=max((r.get('chk_row_viol_rel') or 0 for r in ok), default=None),
+                       objective_identical_repeats=len({r.get('objective') for r in ok}) <= 1 if ok else None)
             if len({r.get('iterations') for r in ok}) > 1:
                 row['status'] += ' (iterations differ across repeats)'
             rows.append(row)
