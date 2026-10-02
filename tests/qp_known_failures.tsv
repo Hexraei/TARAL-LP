@@ -1,0 +1,107 @@
+# id	class	reproducer	detail   (regenerate with tools/advqp/qpknown.py; PARTIAL rows are correct-but-weaker verdicts)
+bounds_huge-82010	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+bounds_huge-82026	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: no progress in 30 iterations
+bounds_huge-82028	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+bounds_huge-82033	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+bounds_huge-82040	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: no progress in 30 iterations
+bounds_huge-82044	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+bounds_huge-82051	false_optimal_gap	qp_false_optimal_gap.mps	FAIL_KKT: certified duality gap 0.0638 (rel 0.00186); objective 33.2806249999 worse than target 33.34375 (rel 1.89e-03)
+bounds_huge-82056	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: no progress in 30 iterations
+bounds_huge-82068	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: no progress in 30 iterations
+bounds_huge-82074	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: no progress in 30 iterations
+bounds_huge-82075	numfail_huge_bounds	qp_numfail_huge_bounds.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+ill_cond-87002	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87003	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87006	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+ill_cond-87007	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87010	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87011	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87014	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87015	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87018	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87019	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87023	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87026	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87030	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87031	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87034	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+ill_cond-87035	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+ill_cond-87038	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87039	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87043	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87046	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+ill_cond-87047	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87051	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87054	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: converged on the scaled problem but not on the original model
+ill_cond-87055	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+ill_cond-87059	numfail_ill_cond	qp_numfail_ill_cond.mps	NOANS: numerical_failure: no progress in 30 iterations
+indef_convex_feasible-76000	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76001	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76002	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.03
+indef_convex_feasible-76003	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76004	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76005	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.02
+indef_convex_feasible-76006	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76007	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76008	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -2.99
+indef_convex_feasible-76009	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76010	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76011	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76012	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -2.99
+indef_convex_feasible-76013	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76014	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76015	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.02
+indef_convex_feasible-76016	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76017	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76018	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76019	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -2.99
+indef_convex_feasible-76020	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76021	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76022	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76023	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76024	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76025	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76026	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76027	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76028	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -2.99
+indef_convex_feasible-76029	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76030	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.02
+indef_convex_feasible-76031	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76032	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.02
+indef_convex_feasible-76033	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76034	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76035	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76036	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+indef_convex_feasible-76037	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76038	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+indef_convex_feasible-76039	refuses_indefinite_q_convex_on_feasible_set	qp_refuses_indefinite_q_convex_on_feasible_set.mps	NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+maximize-88059	numfail_other	qp_numfail_other.mps	NOANS: numerical_failure: no progress in 30 iterations
+near_psd-77031	reference_error_near_psd	-	REF_UNRESOLVED: reference other:Solve error; engine point feasible=True stationarity 0.00e+00
+near_psd-77042	reference_error_near_psd	-	REF_UNRESOLVED: reference not_set; engine point feasible=True stationarity 0.00e+00
+near_psd-77066	reference_error_near_psd	-	REF_UNRESOLVED: reference not_set; engine point feasible=True stationarity 0.00e+00
+scale_rows-86044	numfail_other	qp_numfail_other.mps	NOANS: numerical_failure: no progress in 30 iterations
+unbounded-73000	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73003	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73006	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73009	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73012	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73015	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73018	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73021	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73024	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73027	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73030	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73033	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73036	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73039	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73042	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73048	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73054	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73060	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73063	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73069	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73072	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73075	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73078	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73081	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+unbounded-73084	dual_infeasible_on_unbounded	qp_dual_infeasible_on_unbounded.mps	PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded

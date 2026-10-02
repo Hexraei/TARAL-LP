@@ -1,0 +1,34 @@
+NAME bounds_huge_82068
+ROWS
+ N OBJ
+COLUMNS
+    C0 OBJ -51.125
+    C1 OBJ -2.625
+    C2 OBJ -55.125
+    C3 OBJ -15.125
+    C4 OBJ -75.875
+RHS
+BOUNDS
+ FR BND C0
+ MI BND C1
+ UP BND C1 1e+19
+ LO BND C2 -1e+19
+ FX BND C3 -0.125
+ FR BND C4
+QUADOBJ
+    C0 C0 13
+    C0 C1 2
+    C0 C2 9
+    C0 C3 3
+    C0 C4 15
+    C1 C1 2
+    C1 C2 1
+    C1 C3 4
+    C1 C4 1
+    C2 C2 14
+    C2 C3 6
+    C2 C4 16
+    C3 C3 11
+    C3 C4 4
+    C4 C4 22
+ENDATA

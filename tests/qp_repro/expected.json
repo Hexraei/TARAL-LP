@@ -1,0 +1,56 @@
+{
+ "qp_dual_infeasible_on_unbounded.mps": {
+  "case": "unbounded-73012",
+  "category": "unbounded",
+  "class": "dual_infeasible_on_unbounded",
+  "known_failing": true,
+  "observed_bad": "PARTIAL: dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded",
+  "partial_ok": false,
+  "report": "dual_infeasible (ray verified, primal feasibility not established) for a feasible unbounded model"
+ },
+ "qp_false_optimal_gap.mps": {
+  "case": "bounds_huge-82051",
+  "category": "bounds_huge",
+  "class": "false_optimal_gap",
+  "known_failing": true,
+  "observed_bad": "FAIL_KKT: certified duality gap 0.0638 (rel 0.00186); objective 33.2806249999 worse than target 33.34375 (rel 1.89e-03)",
+  "partial_ok": false,
+  "report": "reports optimal with a certified duality gap far above its own tolerance (self-reported gap ~1e-10)"
+ },
+ "qp_numfail_huge_bounds.mps": {
+  "case": "bounds_huge-82068",
+  "category": "bounds_huge",
+  "class": "numfail_huge_bounds",
+  "known_failing": true,
+  "observed_bad": "NOANS: numerical_failure: no progress in 30 iterations",
+  "partial_ok": false,
+  "report": "numerical_failure on a convex QP with finite inactive bounds of size 1e6..1e19"
+ },
+ "qp_numfail_ill_cond.mps": {
+  "case": "ill_cond-87043",
+  "category": "ill_cond",
+  "class": "numfail_ill_cond",
+  "known_failing": true,
+  "observed_bad": "NOANS: numerical_failure: no progress in 30 iterations",
+  "partial_ok": false,
+  "report": "numerical_failure on a convex QP with Q condition number 1e10..1e12"
+ },
+ "qp_numfail_other.mps": {
+  "case": "maximize-88059",
+  "category": "maximize",
+  "class": "numfail_other",
+  "known_failing": true,
+  "observed_bad": "NOANS: numerical_failure: no progress in 30 iterations",
+  "partial_ok": false,
+  "report": "numerical_failure on a well-posed convex QP (see detail)"
+ },
+ "qp_refuses_indefinite_q_convex_on_feasible_set.mps": {
+  "case": "indef_convex_feasible-76003",
+  "category": "indef_convex_feasible",
+  "class": "refuses_indefinite_q_convex_on_feasible_set",
+  "known_failing": true,
+  "observed_bad": "NOANS: refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3",
+  "partial_ok": false,
+  "report": "nonconvex: Q indefinite but positive definite on the null space of the equality rows"
+ }
+}
