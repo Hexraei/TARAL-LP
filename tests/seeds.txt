@@ -22,4 +22,5 @@ large_sparse     LP    45000 45059 60
 knapsack         MILP  46000 46079 80
 general_int      MILP  47000 47079 80
 setcover         MILP  48000 48059 60
-# total LP 2840  MILP 220
+parity           MILP  49000 49039 40
+# total LP 2840  MILP 260
