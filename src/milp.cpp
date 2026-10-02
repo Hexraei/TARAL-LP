@@ -15,6 +15,9 @@
 // tightenings belong to the node's subtree only; a box they empty holds no improving point.
 // The call refactorizes the basis, so it backs off (skips 1, 3, 7, then 15 later calls) while calls fix
 // nothing; a new incumbent resets it. Skipping a fixing is always valid.
+// A node whose LP fails (neither Optimal nor Infeasible, after the cold retry) has its widest integer
+// column bisected instead of being left unresolved, at most 8 times in a row along one path; the halves
+// cover the box and each gets its own LP, so nothing is pruned on the failed solve.
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -36,6 +39,7 @@ constexpr double kPropMax = 1e9;   // a derived bound beyond this is numerical n
 constexpr double kPropPivot = 1e-9;  // coefficients below this are not used to derive bounds
 constexpr double kRcMin = 1e-7;      // never fix on a reduced cost with a smaller magnitude
 constexpr double kRcDualTol = 1e-7;  // dual infeasibility (scaled by 1 + max|cost|) that voids a basis for fixing
+constexpr int kMaxSplitDepth = 8;    // consecutive bisections of nodes whose LP failed, along one path
 constexpr int kRcMaxBackoff = 4;     // after a call that fixes nothing, skip up to 2^4 - 1 later calls
 
 double tol_at(double z) { return kGapTol * std::max(1.0, std::abs(z)); }
@@ -80,6 +84,7 @@ struct Node {
     int bj = -1;      // the branched variable
     int depth = 0;    // number of branchings from the root
     std::vector<int> seeds;  // columns whose bounds changed since the parent was propagated
+    int splits = 0;  // bisections in a row on this path (the node's LP failed, so its integer box was halved)
 };
 
 struct Worse {  // priority_queue keeps the smallest bound on top; deeper first on ties
@@ -471,7 +476,23 @@ End Search::run() {
                 note = r.message;
                 return r.status == Status::Unbounded ? End::RootUnbounded : End::RootFailed;
             }
-            // Unbounded below a bounded root is a numerical artefact; never prune on it.
+            // Unbounded below a bounded root is a numerical artefact; never prune on it. The node's
+            // box is split instead: the two halves cover it exactly, each half gets an LP of its own
+            // (nothing is pruned without a certified LP status), and the halves inherit this bound.
+            int sj = -1;
+            double range = 0;
+            for (int j = 0; j < n && cur.splits < kMaxSplitDepth; ++j)
+                if (md_.is_int[j] && std::isfinite(lo[j]) && std::isfinite(up[j]) && up[j] - lo[j] > range)
+                    sj = j, range = up[j] - lo[j];
+            if (sj >= 0) {
+                double mid = std::floor((lo[sj] + up[sj]) / 2);
+                Node a{cur.bound, cur.changes, cur.basis, 0, 0, -1, cur.depth + 1, {sj}, cur.splits + 1}, b = a;
+                a.changes.push_back({sj, lo[sj], mid});
+                b.changes.push_back({sj, mid + 1, up[sj]});
+                open.push(std::move(a));
+                open.push(std::move(b));
+                continue;
+            }
             ++unresolved;
             held.push_back(cur.bound);
             note = std::string("node LP ") + status_name(r.status) + (r.message.empty() ? "" : ": " + r.message);
