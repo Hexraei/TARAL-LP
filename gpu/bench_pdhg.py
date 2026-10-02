@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vector_check
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PDHG = os.path.join(ROOT, 'out', 'gpu', 'pdhg')
+PDHG = os.environ.get('TARAL_PDHG') or os.path.join(ROOT, 'out', 'gpu', 'pdhg')
 SIMPLEX = os.path.join(ROOT, 'out', 'gpu', 'taral_simplex')
 CACHE = os.path.join(ROOT, 'out', 'gpu', 'highs_cache.json')
 FIELDS = ['case', 'rows', 'cols', 'nnz', 'device', 'threads', 'precision', 'tol', 'status', 'objective', 'highs_objective',
@@ -75,10 +75,11 @@ def run_pdhg(path, device, threads, a):
         with open(out) as f:
             r = json.load(f)
         # Independent recheck of the written vectors on the ORIGINAL model (gpu/vector_check.py).
-        try:
-            r.update(vector_check.check_files(path, sol, dual if os.path.exists(dual) else None))
-        except Exception as e:  # a failed check is recorded, never silently skipped
-            r['chk_error'] = str(e)[:200]
+        if not a.no_check:
+            try:
+                r.update(vector_check.check_files(path, sol, dual if os.path.exists(dual) else None))
+            except Exception as e:  # a failed check is recorded, never silently skipped
+                r['chk_error'] = str(e)[:200]
         return r
     except (subprocess.SubprocessError, OSError, json.JSONDecodeError) as e:
         return dict(status='crash', error=str(e)[:200])
@@ -125,14 +126,17 @@ def main():
     ap.add_argument('--simplex', action='store_true', help='also run the exact C++ simplex for context')
     ap.add_argument('--simplex-methods', default='simplex', help='with --simplex: comma list of simplex, dual')
     ap.add_argument('--fp32', action='store_true')
+    ap.add_argument('--no-check', action='store_true', help='skip the vector recheck (models too large for the Python checker)')
+    ap.add_argument('--ref-json', help='JSON {case: objective or null}: use these references instead of running HiGHS')
     ap.add_argument('--repeat-all', action='store_true', help='repeat every non-crashed config, also time-limited ones')
     ap.add_argument('--max-load', type=float, default=0, help='wait (up to 20 min) for 1-min load below this')
     a = ap.parse_args()
     cache = json.load(open(CACHE)) if os.path.exists(CACHE) else {}
+    refs = json.load(open(a.ref_json)) if a.ref_json else None
     rows = []
     for path in a.cases:
         case = os.path.splitext(os.path.basename(path))[0]
-        ref = highs_ref(path, cache)
+        ref = dict(status='ref-json', objective=refs.get(case), wall_s=None) if refs is not None else highs_ref(path, cache)
         for cfg in a.configs.split(','):
             device, threads = ('gpu', 0) if cfg == 'gpu' else ('cpu', int(cfg[3:]))
             runs = [run_pdhg(path, device, threads, a)]
