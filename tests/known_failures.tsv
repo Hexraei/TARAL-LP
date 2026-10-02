@@ -87,3 +87,6 @@ coef_range-38193	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit 
 coef_range-38195	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
 coef_range-38196	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
 coef_range-38197	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+general_int-47018	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+general_int-47031	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+general_int-47057	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
