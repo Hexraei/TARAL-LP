@@ -1,5 +1,7 @@
 // CLI per the engine contract:  taral MODEL.mps --time-limit S --sol OUT.sol --json OUT.json
 #include <chrono>
+#include <cmath>
+#include <limits>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -27,19 +29,49 @@ void write_json(const char* path, const char* status, const Result* r, double wa
                  json_escape(msg).c_str());
     std::fclose(f);
 }
+
+void num_or_null(std::FILE* f, double v) {
+    if (std::isfinite(v)) std::fprintf(f, "%.17g", v);
+    else std::fprintf(f, "null");
+}
+
+void write_milp_json(const char* path, const MilpResult& r, double wall) {
+    std::FILE* f = std::fopen(path, "w");
+    if (!f) return;
+    std::fprintf(f, "{\"status\": \"%s\", \"objective\": ", r.status.c_str());
+    num_or_null(f, r.has_solution && r.status != "unbounded" ? r.objective : kInf);
+    std::fprintf(f, ", \"best_bound\": ");
+    num_or_null(f, r.best_bound);
+    std::fprintf(f, ", \"gap\": ");
+    num_or_null(f, r.has_solution && r.status != "unbounded" ? r.gap : kInf);
+    std::fprintf(f, ", \"nodes\": %ld, \"unresolved_nodes\": %ld, \"has_solution\": %s", r.nodes, r.unresolved_nodes,
+                 r.has_solution ? "true" : "false");
+    std::fprintf(f, ", \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n", r.lp_iterations, wall,
+                 json_escape(r.message).c_str());
+    std::fclose(f);
+}
+
+void write_sol(const char* path, const Model& md, const std::vector<double>& x) {
+    if (std::FILE* f = std::fopen(path, "w")) {
+        for (size_t j = 0; j < md.col_names.size(); ++j) std::fprintf(f, "%s %.17g\n", md.col_names[j].c_str(), x[j]);
+        std::fclose(f);
+    }
+}
 }  // namespace
 
 int main(int argc, char** argv) {
     const char *model = nullptr, *sol = nullptr, *json = nullptr;
     double limit = 60;
+    long node_limit = std::numeric_limits<long>::max();
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--time-limit") && i + 1 < argc) limit = std::atof(argv[++i]);
         else if (!std::strcmp(argv[i], "--sol") && i + 1 < argc) sol = argv[++i];
         else if (!std::strcmp(argv[i], "--json") && i + 1 < argc) json = argv[++i];
+        else if (!std::strcmp(argv[i], "--node-limit") && i + 1 < argc) node_limit = std::atol(argv[++i]);
         else model = argv[i];
     }
     if (!model) {
-        std::fprintf(stderr, "usage: taral MODEL.mps [--time-limit S] [--sol OUT.sol] [--json OUT.json]\n");
+        std::fprintf(stderr, "usage: taral MODEL.mps [--time-limit S] [--node-limit N] [--sol OUT.sol] [--json OUT.json]\n");
         return 2;
     }
     auto t0 = std::chrono::steady_clock::now();
@@ -52,21 +84,26 @@ int main(int argc, char** argv) {
         std::printf("status parse_error: %s\n", e.what());
         return 0;
     }
-    if (md.has_integers() || !md.qobj.empty()) {  // explicit, never a silent LP relaxation
-        std::string why = md.has_integers() ? "integer variables need the MILP solver" : "quadratic objective needs the QP solver";
+    if (!md.qobj.empty()) {  // explicit, never a silent LP relaxation
+        std::string why = "quadratic objective needs the QP solver";
         if (json) write_json(json, "unsupported", nullptr, wall(), why);
         std::printf("status unsupported: %s\n", why.c_str());
+        return 0;
+    }
+    if (md.has_integers()) {
+        MilpResult r = solve_milp(md, limit - wall(), node_limit);
+        double w = wall();
+        if (json) write_milp_json(json, r, w);
+        if (sol && r.has_solution) write_sol(sol, md, r.x);
+        std::printf("status %s objective %.12g best_bound %.12g gap %.3g nodes %ld iterations %ld wall %.3fs %s\n",
+                    r.status.c_str(), r.has_solution ? r.objective : NAN, r.best_bound, r.gap, r.nodes, r.lp_iterations,
+                    w, r.message.c_str());
         return 0;
     }
     Result r = solve(md, limit - wall());
     double w = wall();
     if (json) write_json(json, status_name(r.status), &r, w, r.message);
-    if (sol && r.status == Status::Optimal) {
-        if (std::FILE* f = std::fopen(sol, "w")) {
-            for (size_t j = 0; j < md.col_names.size(); ++j) std::fprintf(f, "%s %.17g\n", md.col_names[j].c_str(), r.x[j]);
-            std::fclose(f);
-        }
-    }
+    if (sol && r.status == Status::Optimal) write_sol(sol, md, r.x);
     std::printf("status %s objective %.12g iterations %ld wall %.3fs %s\n", status_name(r.status), r.objective,
                 r.iterations, w, r.message.c_str());
     return 0;

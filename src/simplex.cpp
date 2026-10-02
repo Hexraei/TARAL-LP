@@ -30,11 +30,14 @@ struct Eta {
 
 class Simplex {
 public:
-    explicit Simplex(const Model& md) : md_(md), m_(int(md.row_names.size())), n_(int(md.col_names.size())) {}
-    Result run(double time_limit_s);
+    // clo/cup replace the model's column bounds (solve() passes the model's own).
+    Simplex(const Model& md, const std::vector<double>& clo, const std::vector<double>& cup)
+        : md_(md), clo_(clo), cup_(cup), m_(int(md.row_names.size())), n_(int(md.col_names.size())) {}
+    Result run(double time_limit_s, const std::vector<char>* warm = nullptr);
 
 private:
     const Model& md_;
+    const std::vector<double>&clo_, &cup_;
     int m_, n_;
     std::vector<double> lo_, up_, c_, x_;
     std::vector<int> head_;
@@ -116,22 +119,23 @@ Result Simplex::finish(Result r) {
         double scale = 1 + std::abs(std::isfinite(md_.row_lo[i]) ? md_.row_lo[i] : md_.row_up[i]);
         worst = std::max({worst, (md_.row_lo[i] - act[i]) / scale, (act[i] - md_.row_up[i]) / scale});
     }
-    for (int j = 0; j < n_; ++j) worst = std::max({worst, md_.col_lo[j] - r.x[j], r.x[j] - md_.col_up[j]});
+    for (int j = 0; j < n_; ++j) worst = std::max({worst, clo_[j] - r.x[j], r.x[j] - cup_[j]});
     if (worst > 1e-7) {
         r.status = Status::NumericalFailure;
         r.message = "final point violates constraints by " + std::to_string(worst);
     }
+    r.basis.assign(where_.begin(), where_.end());
     return r;
 }
 
-Result Simplex::run(double time_limit_s) {
+Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
     auto t0 = std::chrono::steady_clock::now();
     auto elapsed = [&] { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(); };
     Result res;
     int N = n_ + m_;
     lo_.assign(N, 0), up_.assign(N, 0), c_.assign(N, 0), x_.assign(N, 0);
     where_.assign(N, kBasic), head_.resize(m_);
-    for (int j = 0; j < n_; ++j) lo_[j] = md_.col_lo[j], up_[j] = md_.col_up[j], c_[j] = md_.cost[j];
+    for (int j = 0; j < n_; ++j) lo_[j] = clo_[j], up_[j] = cup_[j], c_[j] = md_.cost[j];
     for (int i = 0; i < m_; ++i) lo_[n_ + i] = md_.row_lo[i], up_[n_ + i] = md_.row_up[i], head_[i] = n_ + i;
     for (int j = 0; j < N; ++j)
         if (lo_[j] > up_[j] + kPrimalTol) {
@@ -139,7 +143,19 @@ Result Simplex::run(double time_limit_s) {
             res.message = "inconsistent bounds";
             return res;
         }
-    for (int j = 0; j < n_; ++j) set_nonbasic(j);
+    if (warm && int(warm->size()) == N && std::count(warm->begin(), warm->end(), char(kBasic)) == m_) {
+        // Warm start: nonbasics go to their (possibly new) bounds; basics violating a tightened
+        // bound are repaired by the composite phase 1.
+        for (int j = 0, p = 0; j < N; ++j) {
+            where_[j] = Where((*warm)[j]);
+            if (where_[j] == kBasic) head_[p++] = j;
+            else if (where_[j] == kLower && std::isfinite(lo_[j])) x_[j] = lo_[j];
+            else if (where_[j] == kUpper && std::isfinite(up_[j])) x_[j] = up_[j];
+            else set_nonbasic(j);
+        }
+    } else {
+        for (int j = 0; j < n_; ++j) set_nonbasic(j);
+    }
     if (!refactor()) {
         res.message = "initial basis could not be factored";
         return res;
@@ -157,8 +173,8 @@ Result Simplex::run(double time_limit_s) {
         std::mt19937_64 rng(12345 + perturbations);
         double scale = lvl ? std::pow(10.0, lvl - 1) : 0.0;
         for (int j = 0; j < N; ++j) {
-            double lo = j < n_ ? md_.col_lo[j] : md_.row_lo[j - n_];
-            double up = j < n_ ? md_.col_up[j] : md_.row_up[j - n_];
+            double lo = j < n_ ? clo_[j] : md_.row_lo[j - n_];
+            double up = j < n_ ? cup_[j] : md_.row_up[j - n_];
             if (lvl && lo != up) {
                 double shift = scale * (1e-7 + 1e-6 * double(rng() % 1000000) / 1e6);
                 if (std::isfinite(lo)) lo -= shift * (1 + std::abs(lo));
@@ -335,14 +351,19 @@ Result Simplex::run(double time_limit_s) {
 
 }  // namespace
 
-Result solve(const Model& model, double time_limit_s) {
-    if (!model.maximize) return Simplex(model).run(time_limit_s);
+Result solve_lp(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
+                const std::vector<char>* warm_basis, double time_limit_s) {
+    if (!model.maximize) return Simplex(model, col_lo, col_up).run(time_limit_s, warm_basis);
     Model neg = model;  // maximise f  ==  minimise -f
     for (double& c : neg.cost) c = -c;
     neg.obj_const = -neg.obj_const;
-    Result r = Simplex(neg).run(time_limit_s);
+    Result r = Simplex(neg, col_lo, col_up).run(time_limit_s, warm_basis);
     r.objective = -r.objective;
     return r;
+}
+
+Result solve(const Model& model, double time_limit_s) {
+    return solve_lp(model, model.col_lo, model.col_up, nullptr, time_limit_s);
 }
 
 const char* status_name(Status s) {

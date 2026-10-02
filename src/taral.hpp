@@ -62,7 +62,26 @@ struct Result {
     double objective = 0;   // includes obj_const
     long iterations = 0;
     std::string message;
+    std::vector<char> basis;  // when Optimal: per variable (structurals, then row logicals)
+                              // 0 basic, 1 at lower, 2 at upper, 3 free at zero
 };
 
 Result solve(const Model& model, double time_limit_s);
+// solve() with the column bounds replaced by col_lo/col_up and, optionally, a warm start from the
+// basis of an earlier solve of the same model (any bounds).
+Result solve_lp(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
+                const std::vector<char>* warm_basis, double time_limit_s);
+
+// Branch and bound over solve_lp. Objective values are in the model's own sense.
+struct MilpResult {
+    std::string status;  // optimal infeasible unbounded unbounded_relaxation time_limit node_limit numerical_failure
+    bool has_solution = false;
+    std::vector<double> x;          // incumbent, checked against the original model
+    double objective = 0;           // incumbent objective
+    double best_bound = 0;          // proven bound (-inf/+inf when none)
+    double gap = kInf;              // |objective - best_bound| / max(1, |objective|)
+    long nodes = 0, lp_iterations = 0, unresolved_nodes = 0;
+    std::string message;
+};
+MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit);
 const char* status_name(Status s);
