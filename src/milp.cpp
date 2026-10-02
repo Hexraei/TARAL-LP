@@ -253,28 +253,37 @@ bool Search::propagate(std::vector<double>& lo, std::vector<double>& up, const s
 // Audit of one node whose propagated integer domain came out empty, given the box it had before
 // propagating. (1) the LP relaxation of the box: Infeasible agrees with the prune; Optimal only
 // means the emptiness came from integer rounding, which an LP cannot see, so it is not a
-// disagreement. (2) For those, a plain branch and bound (no propagation) over the same box with a
-// zero objective: an integer-feasible point there would make the prune wrong (audit_int_feasible,
+// disagreement. (2) For every pruned node, LP-infeasible ones included, a plain branch and bound
+// (no propagation) over the same box with a zero objective: an integer-feasible point there would
+// make the prune wrong (audit_int_feasible,
 // must stay 0) unless an incumbent exists and the box was cut by reduced-cost fixing, in which case
 // the prune only has to leave no point better than the incumbent: a second plain search with the
 // true objective and the incumbent as cutoff must come back empty (audit_cutoff counts those).
 void Search::audit_pruned(const std::vector<double>& lo, const std::vector<double>& up) {
     ++audit_nodes;
     Result r = solve_lp(md_, lo, up, nullptr, 60);
-    if (r.status == Status::Infeasible) {
+    const bool lp_infeasible = r.status == Status::Infeasible;
+    if (lp_infeasible) {
         ++audit_lp_infeasible;
-        return;
-    }
-    if (r.status != Status::Optimal) {
+    } else if (r.status != Status::Optimal) {
         ++audit_lp_other;
         return;
+    } else {
+        ++audit_lp_feasible;
     }
-    ++audit_lp_feasible;
+    // Every pruned node gets the nested search, including those the LP calls infeasible (there it
+    // must find nothing at its root); only the LP-feasible ones are counted as int_empty.
     Model feas = md_;
     std::fill(feas.cost.begin(), feas.cost.end(), 0.0);
     Search sub(feas, lo, up, 60, 2'000'000);
     sub.use_prop = false, sub.use_rc = false;
     End e = sub.run();
+    if (lp_infeasible && sub.has_inc) {
+        ++audit_int_feasible;
+        std::fprintf(stderr, "AUDIT FAILURE: a node pruned by propagation (LP infeasible) holds an integer-feasible point\n");
+        return;
+    }
+    if (lp_infeasible) return;
     if (!sub.has_inc && e == End::Complete && sub.unresolved == 0) {
         ++audit_int_empty;
         return;
