@@ -1,0 +1,28 @@
+file,source,sha256
+miplib3.tar.gz,https://miplib2010.zib.de/miplib3/miplib3.tar.gz,f07be4c2b3cad25b23b0c3085ec98412524989dbd24f4d385e5ffa1e3e4c118f
+miplib3/p0033.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/p0033),8ccff819023237c79ef32e238a5da9348725ce9a4425d48888baf3a0b3b42628
+miplib3/p0201.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/p0201),8352d7f121289185f443fdc67080fa9de01e5b9bf11b0bf41087fba4277c07a4
+miplib3/p0282.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/p0282),3bf907c6aa3cbf80de7c48ca8e71dc29f5d70f6e5fffb716502bfc5c513196a1
+miplib3/p0548.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/p0548),81fa3fb1e071cac0b72649c38196c18bca7ff6d7f2f6639776dcb0daf6bcab15
+miplib3/egout.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/egout),351ed046eb56e07662b3c2dba35800f5d2cee3fac18c1bd7fbc8dea4a0dcd8db
+miplib3/flugpl.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/flugpl),ed4b1fcb07d26b513027721d61344c2c4371cb506bf66098df328047c183b0c0
+miplib3/lseu.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/lseu),00416576ed4adac15b62b1982cb7be9d7dcb2d6505067dd8396183ff1eac3dab
+miplib3/mod008.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/mod008),5a08fe11b87bfe51f55e5537f5e8d0ad0e5fecbc57710a5b58c48a5f10a8e993
+miplib3/stein27.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/stein27),b8889994eda0853d71bad6ba9bf45755d4e59f33a13a3f43008e1ba681738c5b
+miplib3/stein45.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/stein45),0b119c8a2426cd9701a954127748bf8ae2bbe0fd669577ecb4715d8ffb81c85a
+miplib3/bell5.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/bell5),d4846d7ea889d482e32842832e599ca6d0dc04fd8ea3ea58f49a52b436859dd5
+miplib3/bell3a.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/bell3a),1ada0bcc162defc9d8f17769920d3531d6e9f8c69f466e3eb165939ae845fd43
+miplib3/misc03.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/misc03),caba4f42b1827e41cdd62c6548435cc786b9f9092f984f170cab8df939a84acb
+miplib3/misc07.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/misc07),1535ed1b59d2f91e17fe340fbebb6dd0b66bb6a837356e4ce9e5acb58be3be1d
+miplib3/enigma.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/enigma),bbc4a1a6e9ab30d2615b5e0391f0df1782d29b0a125eb38ef852e8dda6ebc323
+miplib3/gt2.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/gt2),7dfdce934f95ced966a14e9eaad34023bbe966dc295589a33ac0676d810707dd
+miplib3/khb05250.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/khb05250),951e36f03a1562d4adae3223db2026c3bba4ccd7cf38d59482298e9e7e5d0fc2
+miplib3/vpm1.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/vpm1),838f2b08516a97db20825488d6f10de998c3d4b9853336c75ec5f56d67366885
+miplib3/vpm2.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/vpm2),55ca0b6caff042c42c5269045177351db828f066a94876e5885f626d02d5ffbc
+miplib3/dcmulti.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/dcmulti),a9552af8f0fd228851352ba60b62a64639f8ffd4a01f217afc095eaac4c29a75
+miplib3/rgn.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/rgn),b5dcb0e7587a8c676af20c845c805657202828b344848759caa72d1aa70a50ef
+miplib3/pk1.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/pk1),f0a362be150a52baa650130b752e44ed0921d4c8a98af74c4a1f7a9bb3c65983
+miplib3/pp08a.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/pp08a),8f83650434dd18f7d459b2d188cf640aa67bfbab6b02fd052f9796cd311cf1ce
+miplib3/noswot.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/noswot),84a417e417b8b3f74f922dccf9eef6cc4b69c0010eb3a49e516d24225b65f8cc
+miplib3/fixnet6.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/fixnet6),e090a2103b8f4906095fd9931d8b608f41c35421f1ea267711e0297aeeb3af08
+miplib3/blend2.mps,https://miplib2010.zib.de/miplib3/miplib3.tar.gz (member miplib3/blend2),48c009606d5e949baa8e5e060c8b0cafd3eb96f9d615d98fff0d626d5b6e503f
