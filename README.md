@@ -56,16 +56,17 @@ Local machine: Intel Core 7 240H, 10 cores/16 threads, 15 GiB RAM, Ubuntu 24.04,
 
 | Path | Purpose |
 | --- | --- |
-| `src/` | Current modular C++ LP engine: MPS parser, sparse LU, simplex and CLI |
+| `src/` | Headline C++ engine: MPS parser, sparse LU, primal and dual simplex, branch-and-bound MILP, interior-point QP and CLI |
 | `cpp-engine/` | Separate bundled C++ reference engine, diagnostic tools, fixtures and internal report; its results apply to this engine alone |
-| `reproduction/` | One-command reproduction for that bundled reference engine, using canonical files in `cpp-engine/`; see its [instructions](reproduction/README_REPRO.md) |
-| `gpu/` | CUDA sparse matrix-vector kernel benchmark; LP solving is CPU-only |
-| `engine/`, `parsers/`, `benchmarks/` | Historical Python/SciPy prototype and checks; the current C++ engine is in `src/` |
+| `reproduction/` | One-command reproduction of the `src/` headline engine (build, pinned corpus, 93-case gate); see its [instructions](reproduction/README_REPRO.md) |
+| `gpu/` | CUDA sparse matrix-vector kernel benchmark and a PDHG LP solver prototype (near-optimal, reported on separate ledgers in `results/gpu_pdhg/`); the exact LP headline is CPU-only |
+| `benchmarks/` | Current benchmark and checking tooling for the C++ engine (`netlib_gate.py`, independent checker, MILP/QP/MPS-semantics suites; HiGHS is used only here) |
+| `engine/`, `parsers/` | Historical Python/SciPy prototype; the current C++ engine is in `src/` |
 | `milp/`, `qp/` | Historical small synthetic Python prototypes; the C++ MILP and QP results are the ledgers above |
 | `results/` | Older partial Python ledgers; current C++ results are summarized above |
 | `examples/` | Synthetic refinery LP and retained hypothetical objective; operational data and measured savings are unavailable |
 
-Reproduction uses the canonical source, tools, fixtures and references in `cpp-engine/`; it requires a clone of this whole repository. Fetch the corpus separately. Keep bundled-engine and historical results separate from the current `src/` headline.
+Reproduction builds `src/` and runs `benchmarks/netlib_gate.py`; it requires a clone of this whole repository and fetches the pinned corpus. Keep `cpp-engine/` and historical results separate from the current `src/` headline.
 
 ## Historical measurements
 

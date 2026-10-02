@@ -12,5 +12,7 @@ checked against something other than the default HiGHS answer:
 | PRIMALC8 | -18309.42979 | -18309.26684 | HiGHS with regularization 1e-12 returns -18309.4297884; taral's dual bound -18309.4297895. |
 | QFFFFF80 | 873147.46057 | 873149.27707 | taral is lower, feasible (violation 3e-11) and self-reported gap 1.3e-10. HiGHS with regularization 1e-12 returned 0.0 (unusable), so no second reference exists. Not independently certified. |
 
+**Summary: on DPKLO1, QBORE3D, GOULDQP2 and PRIMALC8 the taral answer is the accurate side (HiGHS's default reference is wrong or less accurate); QFFFFF80 stays uncertified.**
+
 Caveats: the dual bounds above are taral's own numbers (not recomputed by independent code); the rows stay FAIL under the stated rule.
 No solver change was needed for these five. Not run here: the 18 rows without a HiGHS reference and the 4 numerical failures.
