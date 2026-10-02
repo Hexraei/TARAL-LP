@@ -8,4 +8,5 @@ huge_bounds      LP    31000 31149 150
 negzero          LP    32000 32059 60
 rank_deficient   LP    33000 33149 150
 redundant_eq     LP    34000 34099 100
-# total LP 1260  MILP 0
+infeasible       LP    35000 35149 150
+# total LP 1410  MILP 0
