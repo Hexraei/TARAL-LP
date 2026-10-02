@@ -5,6 +5,7 @@
 // that bounds the multipliers.
 #include <algorithm>
 #include <cmath>
+#include <set>
 #include <utility>
 
 #include "taral.hpp"
@@ -51,6 +52,13 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
         if (acol[j].size() == 1) col_single.push_back(j);
     for (int i = 0; i < m; ++i)
         if (rows[i].size() == 1) row_single.push_back(i);
+    // Active nonempty columns and rows ordered by (count, index): the Markowitz search takes the
+    // first few, the same choice (ties to the lower index) as a full scan, without the O(m) pass.
+    std::set<std::pair<size_t, int>> cset, rset;
+    for (int j = 0; j < m; ++j)
+        if (!acol[j].empty()) cset.insert({acol[j].size(), j});
+    for (int i = 0; i < m; ++i)
+        if (!rows[i].empty()) rset.insert({rows[i].size(), i});
 
     auto col_max = [&](int q) {
         double mx = 0;
@@ -84,18 +92,8 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
         }
         if (p < 0) {  // Markowitz search among the sparsest few active columns and rows
             int bc[kCandidates], br[kCandidates], nc = 0, nr = 0;
-            auto keep = [](int* best, int& cnt, int id, size_t key, auto&& size_of) {
-                if (cnt < kCandidates) best[cnt++] = id;
-                else if (key < size_of(best[cnt - 1])) best[cnt - 1] = id;
-                else return;
-                for (int t = cnt - 1; t > 0 && size_of(best[t]) < size_of(best[t - 1]); --t) std::swap(best[t], best[t - 1]);
-            };
-            auto csize = [&](int j) { return acol[j].size(); };
-            auto rsize = [&](int i) { return rows[i].size(); };
-            for (int j = 0; j < m; ++j)
-                if (!col_done[j] && !acol[j].empty()) keep(bc, nc, j, acol[j].size(), csize);
-            for (int i = 0; i < m; ++i)
-                if (!row_done[i] && !rows[i].empty()) keep(br, nr, i, rows[i].size(), rsize);
+            for (auto it = cset.begin(); it != cset.end() && nc < kCandidates; ++it) bc[nc++] = it->second;
+            for (auto it = rset.begin(); it != rset.end() && nr < kCandidates; ++it) br[nr++] = it->second;
             for (int t = 0; t < nc; ++t) consider_col(bc[t]);
             for (int t = 0; t < nr; ++t)
                 for (const Entry& e : rows[br[t]]) consider(br[t], e.index, e.value, col_max(e.index));
@@ -106,6 +104,10 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
         if (p < 0) break;
 
         prow_.push_back(p), pcol_.push_back(q), piv_.push_back(pv);
+        // Only the pivot row/column and the rows of column q / columns of row p change counts.
+        std::vector<int> mrows, mcols;
+        for (const Entry& t : acol[q]) mrows.push_back(t.index), rset.erase({rows[t.index].size(), t.index});
+        for (const Entry& e : rows[p]) mcols.push_back(e.index), cset.erase({acol[e.index].size(), e.index});
         std::vector<Entry> urow;
         for (const Entry& e : rows[p])
             if (e.index != q) urow.push_back(e);
@@ -144,6 +146,10 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols) {
         acol[q].clear();
         rows[p].clear();
         row_done[p] = col_done[q] = 1;
+        for (int i : mrows)
+            if (!row_done[i] && !rows[i].empty()) rset.insert({rows[i].size(), i});
+        for (int j : mcols)
+            if (!col_done[j] && !acol[j].empty()) cset.insert({acol[j].size(), j});
     }
 
     if (int(prow_.size()) == m) return true;
