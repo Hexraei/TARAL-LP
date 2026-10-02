@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One command: build the C++ engine, fetch the pinned Netlib corpus, run the gate, print figures.
+# One command: build the C++ engine, fetch the pinned Netlib corpus, run the benchmark, print figures.
 # Usage: bash reproduce.sh [cases comma list]   (default: all 93 + truss, 60 s cap per case)
 # Env: CORPUS=<dir of .mps> to skip the clone; TL=60 time cap; OUT=out
 set -euo pipefail
@@ -32,7 +32,8 @@ MANIFEST="$ROOT/reproduction/MANIFEST_corpus_sha256.txt"
 echo "== corpus file hashes vs manifest"
 (cd "$CORPUS" && sha256sum -c --quiet "$MANIFEST" 2>&1 | tail -3)
 echo "manifest check done"
-echo "== gate (protocol ${TL}s)"
+echo "== benchmark (protocol ${TL}s; HiGHS references are computed from the original files)"
 CASES=()
 [ $# -ge 1 ] && CASES=(--cases "$1") || CASES=(--with-extra)
-python3 "$CANONICAL/tools/gate_cpp.py" --cmd "$OUT/taral" --corpus "$CORPUS" --time-limit "$TL" --protocol "${TL}s" --out "$OUT" "${CASES[@]}"
+python3 "$ROOT/benchmarks/netlib_gate.py" --engine "$OUT/taral" --source-commit "$(git -C "$ROOT" rev-parse --short HEAD)" \
+  --corpus "$CORPUS" --time-limit "$TL" --out "$OUT/ledger" "${CASES[@]}"
