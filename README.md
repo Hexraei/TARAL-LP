@@ -61,7 +61,7 @@ Ratios above 1 mean TARAL-LP took longer than HiGHS. The paired sets changed, so
 
 ### Local benchmarks - patched Python engine (September 30, 2026, historical)
 
-A linear-programming solver finds the best value of an objective while respecting linear constraints. TARAL-LP is a prototype of that solver. The newest local checks kept **42/42 selected baseline cases passing** and recovered **10 of the 35 cases that timed out in Kaggle the earlier 57-pass engine**. These are measured local results, not ten new Kaggle passes and not a full 93-case local result.
+A linear-programming solver finds the best value of an objective while respecting linear constraints. TARAL-LP is a prototype of that solver. The newest local checks kept **42/42 selected baseline cases passing** and recovered **10 of the 35 cases that timed out in the earlier 57-pass Kaggle run**. These are measured local results, not ten new Kaggle passes and not a full 93-case local result.
 
 Two changes were tested:
 
@@ -74,7 +74,7 @@ Intel Xeon @ 2.60 GHz, x86_64; two logical CPUs exposed by the OS (not a verifie
 
 The recovery checks used up to six concurrent workers. The times below are **wall times under concurrent load, including parsing and solving**, not isolated CPU benchmarks. The local per-case cap was 65 seconds; Kaggle's benchmark cap was 60 seconds. In particular, 25FV47 passed locally in 60.48 seconds, already outside the Kaggle budget.
 
-The 42 baseline regression cases passed against the saved HiGHS objective references. The ten recovered cases also matched their saved references within the test tolerance. The local ledger contains 77 checks: 42 baseline cases plus all 35 former timeouts. It does not retest the other 15 the earlier 57-pass engine passes or DEGEN2, so **52 local passes must not be reported as 52/93**.
+The 42 baseline regression cases passed against the saved HiGHS objective references. The ten recovered cases also matched their saved references within the test tolerance. The local ledger contains 77 checks: 42 baseline cases plus all 35 former timeouts. It does not retest the other 15 passes from the earlier 57-pass run or DEGEN2, so **52 local passes must not be reported as 52/93**.
 
 #### Ten former timeouts that passed locally
 
@@ -112,7 +112,7 @@ The crashed jobs are not claimed as numerical failures or recoveries: their caus
 
 #### Why local times are not Kaggle times
 
-A separate sequential, single-BLAS-thread check used the unchanged the earlier 57-pass engine engine and the same pinned MPS files for 16 passing cases. Kaggle/local solver-wall time had a **1.974x median**: Kaggle took about twice as long in this sample. The 10th-90th percentile range was 1.763-2.507x; the full range was 1.711-11.062x, with tiny AFIRO the overhead-heavy outlier.
+A separate sequential, single-BLAS-thread check used the unchanged earlier 57-pass engine and the same pinned MPS files for 16 passing cases. Kaggle/local solver-wall time had a **1.974x median**: Kaggle took about twice as long in this sample. The 10th-90th percentile range was 1.763-2.507x; the full range was 1.711-11.062x, with tiny AFIRO the overhead-heavy outlier.
 
 This is an environment comparison, not a hardware-only speed test. Runtime/library versions, startup and load can contribute. It does not mix the patched local engine with old Kaggle timings. Applying that factor to the concurrent-load recovery times is only a rough scenario, not an executed result: CZPROB, GANGES, SHIP08L and SHIP12L have room under 60 seconds; FIT1P is borderline; SCTAP2, STOCFOR2, SCTAP3, SIERRA and 25FV47 are at risk. Scaling parse time with a solver-time factor adds uncertainty. The saved September 30 run settled that historical count; the scenario was not a guaranteed forecast.
 
