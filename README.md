@@ -66,6 +66,8 @@ The 93-case denominator excludes PILOT.WE and PILOT4 under the fixed local 60-se
 
 All listed runs completed in a Kaggle CPU notebook using pinned engine source `442ca16`. "Measured" counts completed runs, not optimal solves. TARAL had a 30-second cap per case.
 
+Wave environment: Kaggle CPU notebook, no accelerator; Intel Xeon @ 2.20GHz, four logical CPUs (one socket, two cores, two threads per core), 30 GiB RAM cap; x86_64, Linux 6.18.48+, Ubuntu 22.04.5 LTS. Build: `g++ -O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic -o taral src/*.cpp`.
+
 | Benchmark selection | Completed measurements | Outcome | Ledger |
 | --- | --- | --- | --- |
 | MIPLIB | 12/12 measured | Six optimal objectives matched HiGHS; six reached the 30-second time limit | [`miplib_ledger.csv`](benchmarks/results/miplib_ledger.csv) |
