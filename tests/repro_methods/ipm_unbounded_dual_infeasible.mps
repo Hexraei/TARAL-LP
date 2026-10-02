@@ -1,0 +1,11 @@
+NAME          REPRO
+OBJSENSE
+    MAX
+ROWS
+ N  OBJ
+ G  R0
+COLUMNS
+    C0  OBJ  3.0  R0  2.0
+RHS
+    RHS  R0  1.0
+ENDATA

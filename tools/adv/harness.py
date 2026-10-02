@@ -306,6 +306,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--cats", default="")
     ap.add_argument("--kind", default="all", choices=["all", "lp", "milp", "big", "lp+big", "biglp", "lp+biglp", "all+big"])
+    ap.add_argument("--only", default="", help="comma-separated case ids (cat-seed) to run instead of whole categories")
     ap.add_argument("--method", default="simplex", choices=["simplex", "dual", "ipm"])
     ap.add_argument("--limit", type=int, default=0, help="cases per category (0 = full count)")
     ap.add_argument("--jobs", type=int, default=max(1, min(4, os.cpu_count() or 1)))
@@ -332,6 +333,11 @@ def main():
     for c in cats:
         cnt = gen.COUNT[c] if not a.limit else min(a.limit, gen.COUNT[c])
         jobs += [(os.path.abspath(a.engine), os.path.abspath(a.out), c, i, a.time_limit, a.method) for i in range(cnt)]
+    if a.only:
+        jobs = []
+        for cid in a.only.split(","):
+            cat, seed = cid.rsplit("-", 1)
+            jobs.append((os.path.abspath(a.engine), os.path.abspath(a.out), cat, int(seed) - gen.BASE[cat], a.time_limit, a.method))
     os.makedirs(a.out, exist_ok=True)
     t0 = time.time()
     recs = []

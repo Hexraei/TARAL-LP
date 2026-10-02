@@ -1,0 +1,57 @@
+{
+ "dual_coef_range_false_infeasible.mps": {
+  "category": "coef_range",
+  "source": "coef_range-38061 (shrunk, --method dual)",
+  "expected_status": "optimal",
+  "expected_objective": 0.0,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "status infeasible on a feasible model",
+  "report": "2x2 LP with entries 5e9 and 1.2e-3 (exactly rescaled model); the dual path reports infeasible, HiGHS (presolve off, presolve on, interior point) finds an optimal point that is exactly feasible. The default path solves the original case.",
+  "method": "dual"
+ },
+ "dual_huge_bounds_numfail.mps": {
+  "category": "huge_bounds",
+  "source": "huge_bounds-31036 (shrunk with 1e20 sentinel, --method dual)",
+  "expected_status": "optimal",
+  "expected_objective": 0.0,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "numerical_failure after 3 dual iterations, final point violates constraints",
+  "report": "1x2 LP with infinite column bounds written as the 1e20 sentinel. The dual path ends in numerical_failure; HiGHS finds the optimum. 4 of the 150 huge_bounds cases fail like this on --method dual and pass on the default path.",
+  "method": "dual"
+ },
+ "ipm_huge_bounds_numfail.mps": {
+  "category": "huge_bounds",
+  "source": "huge_bounds-31030 (shrunk, --method ipm)",
+  "expected_status": "optimal",
+  "expected_objective": 0.0,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "numerical_failure (no progress in 30 iterations) on a feasible bounded model",
+  "report": "2x4 LP with sentinel-style bounds; interior-point path ends in numerical_failure. 5 of the 150 huge_bounds cases do this on --method ipm.",
+  "method": "ipm"
+ },
+ "ipm_unbounded_dual_infeasible.mps": {
+  "category": "unbounded",
+  "source": "unbounded-36000 (shrunk, --method ipm)",
+  "expected_status": "unbounded",
+  "expected_objective": null,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "status dual_infeasible (message: recession direction) instead of unbounded",
+  "report": "max 3x s.t. 2x >= 1, x >= 0 (one row, one column) is unbounded. The interior-point path finds the recession direction but reports dual_infeasible, never unbounded. The harness scores that as no answer: 57 of 150 unbounded cases and 12 of 24 big_status cases (all the unbounded ones). This may be intended naming; it is reported because a caller asking for a status gets no 'unbounded'.",
+  "method": "ipm"
+ },
+ "simplex_big_sparse_timeout.mps": {
+  "category": "big_sparse",
+  "source": "big_sparse-59021 (unshrunk, default path)",
+  "expected_status": "optimal",
+  "expected_objective": -4239.049323080847,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "time_limit at the 30 s replay cap (the full run's 60 s cap: 59021 timed out under 4-way load; run alone it finishes in 59.6 s with 11840 iterations). The dual path solves it in about 2 s",
+  "report": "Sparse feasible bounded LP, 1500 rows (see tools/adv/cats/big_sparse.py). The default primal simplex path needs about 60 s on this case (59.6 s alone; 11840 iterations, about 5 ms per iteration; the sibling case big_sparse-59015 needs 68.6 s); --method dual and --method ipm solve it in seconds and HiGHS in about 5 s. A slow-solve finding, not a wrong answer: the replay cap is 30 s so the result does not depend on machine load. Not shrunk (the delta-debugging shrinker would need hundreds of engine calls at this size).",
+  "time_limit": 30
+ }
+}

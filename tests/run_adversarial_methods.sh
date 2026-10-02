@@ -58,5 +58,10 @@ python3 tools/adv/repro.py --engine "$ENGINE" --dir tests/repro
 r=$?; echo "   repro exit status $r"; [ $r -ne 0 ] && rc=1
 
 echo
+echo "== method-specific reproducers (tests/repro_methods, each replayed with its own --method)"
+python3 tools/adv/repro.py --engine "$ENGINE" --dir tests/repro_methods
+r=$?; echo "   repro_methods exit status $r"; [ $r -ne 0 ] && rc=1
+
+echo
 echo "suite wall time $(( $(date +%s) - T0 )) s; exit status $rc (0 = no NEW failures)"
 exit $rc
