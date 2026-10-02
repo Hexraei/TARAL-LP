@@ -3,4 +3,5 @@ degenerate       LP    26000 26199 200
 cycling          LP    27000 27099 100
 dup_coef         LP    28000 28149 150
 dup_empty_zero   LP    29000 29199 200
-# total LP 650  MILP 0
+free_fixed       LP    30000 30149 150
+# total LP 800  MILP 0
