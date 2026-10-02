@@ -13,4 +13,5 @@ unbounded        LP    36000 36149 150
 near_singular    LP    37000 37149 150
 coef_range       LP    38000 38199 200
 ranges           LP    39000 39199 200
-# total LP 2110  MILP 0
+objconst_sense   LP    40000 40119 120
+# total LP 2230  MILP 0
