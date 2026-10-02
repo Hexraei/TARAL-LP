@@ -12,7 +12,7 @@ Engine commit `1ba977a` (`src/`). Corpus: **93 Netlib cases**, pinned commit `56
 
 | Line | Result | Label |
 | --- | --- | --- |
-| **Headline - 60-second protocol** | **90 / 93 passed**, 0 wrong answers, no lost v23 baseline passes | local |
+| **Headline - 60-second protocol** | **90 / 93 passed**, 0 wrong answers, no lost October 1 Python baseline passes | local |
 | STRICT line (beside the headline) | 89 of the 90 passes also meet row/bound violation <= 1e-8 and objective relative error <= 1e-8 | local |
 | Extended-cap protocol (300 s per case), separate line | 92 / 93 passed, 0 wrong answers | local |
 
@@ -36,17 +36,17 @@ Engine commit `1ba977a` (`src/`). Corpus: **93 Netlib cases**, pinned commit `56
 
 **Not claimed:** no speed advantage over HiGHS; no MILP, QP or interior-point method in the C++ engine yet; no MIPLIB, Mittelmann or QPLIB results; no GPU LP solve. `gpu/csr_matvec.cu` is a measured sparse matrix-vector kernel benchmark (own CUDA kernel, no cuSPARSE), not a solver.
 
-**Kept out of the repository by design:** the gate harness, the HiGHS reference objectives, the corpus files and the per-run ledgers are maintained separately and are not checked in. The figures above come from those executed runs.
+**Reference packages:** `cpp-engine/` contains a separate C++ reference engine, diagnostic tools, fixtures and an internal report. `reproduction/` contains its reproduction script, tools and pinned corpus manifest. These packages are kept separate from `src/` and do not change the figures above. The corpus files themselves are not included.
 
-## Historical baseline - Python/SciPy prototype (v23)
+## Historical baseline - Python/SciPy prototype
 
 Everything in this section describes the **earlier Python prototype**, which uses SciPy's LU factorization for its linear algebra. It is kept for provenance and comparison only; it is **not** the compliant engine path. Its figures are Kaggle-executed unless marked local.
 
-### v23 summary (historical)
+### October 1, 2026 summary (historical)
 
-Last executed Python-prototype result: **Kaggle v23, October 1, 2026** (saved-run ID `354282101`).
+Last executed Python-prototype result: **Kaggle, October 1, 2026** (saved-run ID `354282101`).
 
-| Measurement | Sep 30 baseline (v19) | Latest (v23) |
+| Measurement | Sep 30 baseline | October 1 result |
 | --- | ---: | ---: |
 | Passing cases / attempted | 68 / 93 | 73 / 93 |
 | Timeouts | 16 | 13 |
@@ -55,13 +55,13 @@ Last executed Python-prototype result: **Kaggle v23, October 1, 2026** (saved-ru
 | Maximum passing primal residual | 9.31e-10 | 9.31e-10 |
 | Median TARAL-LP / HiGHS solver-wall ratio | 12.478x over 68 pairs | 5.828x over 73 pairs |
 
-**Five added passes, no lost v19 baseline passes:** BNL1, BNL2 and MAROS-R7 changed from timeout to pass; MODSZK1 and WOOD1P changed from solver failure to pass. MAROS-R7 is the added pass since v21's 72/93. The selected regression remains **42/42**; executed small synthetic checks remain **30/30 MILP and 30/30 QP** (QP maximum objective error **3.197e-13**). These are limited prototypes, not general MILP/QP coverage. Other executed selected gates: **EXTRA_NETLIB 7/7**, **CPU_LP 6/7**. The latter is not all-green; these separate gates do not change the 93-case denominator.
+**Five added passes, no lost September 30 baseline passes:** BNL1, BNL2 and MAROS-R7 changed from timeout to pass; MODSZK1 and WOOD1P changed from solver failure to pass. MAROS-R7 is the added pass since the earlier 72/93 result. The selected regression remains **42/42**; executed small synthetic checks remain **30/30 MILP and 30/30 QP** (QP maximum objective error **3.197e-13**). These are limited prototypes, not general MILP/QP coverage. Other executed selected gates: **EXTRA_NETLIB 7/7**, **CPU_LP 6/7**. The latter is not all-green; these separate gates do not change the 93-case denominator.
 
-Ratios above 1 mean TARAL-LP took longer than HiGHS. The paired sets changed, so the medians are **not a like-for-like speed comparison**. The figures above cite canonical v23. Four executed Kaggle runs of the same v23 engine code gave 73, 73, 73 and 74 passes out of 93. The 73 canonical v23 passes held in every run, with no losses against the v19 baseline. Cases near the 60-second cap, such as 80BAU3B, can change status with host speed, so identical per-case statuses are not guaranteed. Median TARAL-LP / HiGHS solver-wall ratios ranged from about 4.67x to 5.93x, varying by up to about 25% between runs. Headline figures remain canonical v23: 73/93 and 5.828x, not the best of the four runs. Both solvers had a 60-second parse + solve budget on Kaggle CPU. The Kaggle comparison uses the same parser for both solvers. A separate local original-MPS diagnostic run verified the same v23 engine on all 73 passing cases; it is not a Kaggle-executed or full-corpus verification gate and does not cover the 20 non-passing cases. No GPU LP solve is claimed.
+Ratios above 1 mean TARAL-LP took longer than HiGHS. The paired sets changed, so the medians are **not a like-for-like speed comparison**. The figures above are from the October 1 Python run. Four executed Kaggle runs of the same October 1 Python engine code gave 73, 73, 73 and 74 passes out of 93. The 73 October 1 Python passes held in every run, with no losses against the September 30 baseline. Cases near the 60-second cap, such as 80BAU3B, can change status with host speed, so identical per-case statuses are not guaranteed. Median TARAL-LP / HiGHS solver-wall ratios ranged from about 4.67x to 5.93x, varying by up to about 25% between runs. Headline figures remain the October 1 Python result: 73/93 and 5.828x, not the best of the four runs. Both solvers had a 60-second parse + solve budget on Kaggle CPU. The Kaggle comparison uses the same parser for both solvers. A separate local original-MPS diagnostic run verified the same October 1 Python engine on all 73 passing cases; it is not a Kaggle-executed or full-corpus verification gate and does not cover the 20 non-passing cases. No GPU LP solve is claimed.
 
 ### Local benchmarks - patched Python engine (September 30, 2026, historical)
 
-A linear-programming solver finds the best value of an objective while respecting linear constraints. TARAL-LP is a prototype of that solver. The newest local checks kept **42/42 selected baseline cases passing** and recovered **10 of the 35 cases that timed out in Kaggle v18**. These are measured local results, not ten new Kaggle passes and not a full 93-case local result.
+A linear-programming solver finds the best value of an objective while respecting linear constraints. TARAL-LP is a prototype of that solver. The newest local checks kept **42/42 selected baseline cases passing** and recovered **10 of the 35 cases that timed out in Kaggle the earlier 57-pass engine**. These are measured local results, not ten new Kaggle passes and not a full 93-case local result.
 
 Two changes were tested:
 
@@ -74,7 +74,7 @@ Intel Xeon @ 2.60 GHz, x86_64; two logical CPUs exposed by the OS (not a verifie
 
 The recovery checks used up to six concurrent workers. The times below are **wall times under concurrent load, including parsing and solving**, not isolated CPU benchmarks. The local per-case cap was 65 seconds; Kaggle's benchmark cap was 60 seconds. In particular, 25FV47 passed locally in 60.48 seconds, already outside the Kaggle budget.
 
-The 42 baseline regression cases passed against the saved HiGHS objective references. The ten recovered cases also matched their saved references within the test tolerance. The local ledger contains 77 checks: 42 baseline cases plus all 35 former timeouts. It does not retest the other 15 v18 passes or DEGEN2, so **52 local passes must not be reported as 52/93**.
+The 42 baseline regression cases passed against the saved HiGHS objective references. The ten recovered cases also matched their saved references within the test tolerance. The local ledger contains 77 checks: 42 baseline cases plus all 35 former timeouts. It does not retest the other 15 the earlier 57-pass engine passes or DEGEN2, so **52 local passes must not be reported as 52/93**.
 
 #### Ten former timeouts that passed locally
 
@@ -108,19 +108,19 @@ The residual measures how far the returned solution misses the primal constraint
 
 **Four crashed/unclassified jobs:** FIT2P, 80BAU3B, DFL001, FIT2D.
 
-The crashed jobs are not claimed as numerical failures or recoveries: their cause was not established by this ledger. **DEGEN2 remains a known issue:** v18 returned a primal-feasibility loss, and these two speed fixes do not establish a fix for it.
+The crashed jobs are not claimed as numerical failures or recoveries: their cause was not established by this ledger. **DEGEN2 remains a known issue:** the earlier 57-pass engine returned a primal-feasibility loss, and these two speed fixes do not establish a fix for it.
 
 #### Why local times are not Kaggle times
 
-A separate sequential, single-BLAS-thread check used the unchanged v18 engine and the same pinned MPS files for 16 passing cases. Kaggle/local solver-wall time had a **1.974x median**: Kaggle took about twice as long in this sample. The 10th-90th percentile range was 1.763-2.507x; the full range was 1.711-11.062x, with tiny AFIRO the overhead-heavy outlier.
+A separate sequential, single-BLAS-thread check used the unchanged the earlier 57-pass engine engine and the same pinned MPS files for 16 passing cases. Kaggle/local solver-wall time had a **1.974x median**: Kaggle took about twice as long in this sample. The 10th-90th percentile range was 1.763-2.507x; the full range was 1.711-11.062x, with tiny AFIRO the overhead-heavy outlier.
 
-This is an environment comparison, not a hardware-only speed test. Runtime/library versions, startup and load can contribute. It does not mix the patched local engine with old Kaggle timings. Applying that factor to the concurrent-load recovery times is only a rough scenario, not an executed result: CZPROB, GANGES, SHIP08L and SHIP12L have room under 60 seconds; FIT1P is borderline; SCTAP2, STOCFOR2, SCTAP3, SIERRA and 25FV47 are at risk. Scaling parse time with a solver-time factor adds uncertainty. The saved v19 run settled that historical count; the scenario was not a guaranteed forecast.
+This is an environment comparison, not a hardware-only speed test. Runtime/library versions, startup and load can contribute. It does not mix the patched local engine with old Kaggle timings. Applying that factor to the concurrent-load recovery times is only a rough scenario, not an executed result: CZPROB, GANGES, SHIP08L and SHIP12L have room under 60 seconds; FIT1P is borderline; SCTAP2, STOCFOR2, SCTAP3, SIERRA and 25FV47 are at risk. Scaling parse time with a solver-time factor adds uncertainty. The saved September 30 run settled that historical count; the scenario was not a guaranteed forecast.
 
 ### Executed Kaggle CPU benchmarks (Python prototype, historical)
 
 These results come from saved, executed CPU runs. The notebook is private, so no notebook URL is published here. HiGHS is a separate reference solver, not part of the TARAL-LP solve path. A ratio above 1 means TARAL-LP took longer than HiGHS.
 
-#### v16 - selected 42-case baseline
+#### Selected 42-case baseline
 
 - **42/42 selected Netlib cases passed.** This is a selected set, not the full feasible corpus.
 - Median TARAL-LP/HiGHS wall-time ratio: **90.6x** on the selected passing pairs.
@@ -128,24 +128,24 @@ These results come from saved, executed CPU runs. The notebook is private, so no
 - **30/30 small synthetic MILP tests and 30/30 small synthetic QP tests executed and passed.** The MILP prototype is limited branch-and-bound; the QP prototype handles positive-definite convex box-bounded problems. These are not MIPLIB or general QP coverage.
 - **12/42 local KKT checks** cover a subset of the selected LP set. KKT checks test optimality conditions; this local subset is not a 42-case certificate claim or an executed Kaggle certificate result.
 
-#### Full-corpus run - v23
+#### Full-corpus run - October 1, 2026
 
 - Attempted: **93 Netlib cases**, pinned corpus commit `56257eea85b433ce6aa67d26156b36385318fd6f`.
 - Result: **73 of 93 attempted cases passed**, **13 timeouts**, **5 `solver_failed`**, **2 `highs_failed`**.
 - Median TARAL-LP/HiGHS solver-wall ratio: **5.828x over 73 passing pairs only**. TARAL-LP is slower by this median factor. No like-for-like speed change is claimed against earlier medians with different pair sets.
 - Maximum passing primal residual: **9.31e-10 (LOTFI)**.
-- Saved-run ID: `354282101`. Figures in this section are from canonical v23; the four-run host-speed variation check is described above. Both solvers had **60 seconds per case for parse + solve**; paired ratios use solver-wall fields.
+- Saved-run ID: `354282101`. Figures in this section are from the October 1 Python result; the four-run host-speed variation check is described above. Both solvers had **60 seconds per case for parse + solve**; paired ratios use solver-wall fields.
 - The Kaggle run checks shared-parser formulation/objective match. A separate local original-MPS diagnostic run is described below; it does not widen the Kaggle gate.
 
-**Named v23 timeouts:** 80BAU3B, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT2D, FIT2P, GREENBEA, GREENBEB, PEROLD, PILOT, PILOT87, WOODW.
+**Named October 1 timeouts:** 80BAU3B, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT2D, FIT2P, GREENBEA, GREENBEB, PEROLD, PILOT, PILOT87, WOODW.
 
-**Named v23 `solver_failed` cases:** CYCLE, DEGEN2, MAROS, PILOT.JA, PILOTNOV.
+**Named October 1 `solver_failed` cases:** CYCLE, DEGEN2, MAROS, PILOT.JA, PILOTNOV.
 
-**Named v23 `highs_failed` cases:** PILOT.WE and PILOT4. PEROLD is classified as timeout, but its HiGHS attempt also failed. None of these counts as a pass. Three cases lack a usable HiGHS optimum in this run, leaving **90 of 93 comparable with HiGHS** until reference/model issues are resolved. Keep the headline denominator at 93 attempted, not 90 or 73 selected successes.
+**Named October 1 `highs_failed` cases:** PILOT.WE and PILOT4. PEROLD is classified as timeout, but its HiGHS attempt also failed. None of these counts as a pass. Three cases lack a usable HiGHS optimum in this run, leaving **90 of 93 comparable with HiGHS** until reference/model issues are resolved. Keep the headline denominator at 93 attempted, not 90 or 73 selected successes.
 
-#### Separate local original-MPS diagnostic - v23 passers
+#### Separate local original-MPS diagnostic - October 1 passers
 
-All **73 of 73 v23 passing cases** were independently checked locally using the same v23 engine code. `benchmarks/orig_check.py` uses its own MPS parser, maps the returned solution back to original variables, checks row activities and bounds, and compares the recomputed original objective with HiGHS reading the **original MPS file**. This was **not run on Kaggle**, is **not a full-verification gate**, and does **not cover the 20 non-passing cases**.
+All **73 of 73 October 1 Python passing cases** were independently checked locally using the same October 1 Python engine code. `benchmarks/orig_check.py` uses its own MPS parser, maps the returned solution back to original variables, checks row activities and bounds, and compares the recomputed original objective with HiGHS reading the **original MPS file**. This was **not run on Kaggle**, is **not a full-verification gate**, and does **not cover the 20 non-passing cases**.
 
 The per-case pass rule requires HiGHS optimal status, objective error no greater than `max(1e-6, 1e-7 * abs(HiGHS objective))`, relative original-row violation no greater than `1e-6`, and absolute bound violation no greater than `1e-6`. Relative row violation is normalized by `1 + abs(original row RHS)`. The checker applies a 60-second solver limit per case. Observed maxima across the 73 cases: **1.05e-9 relative original-row violation** and **9.3e-10 absolute bound violation**.
 
@@ -157,13 +157,13 @@ To run the checker from the repository root with an existing MPS corpus and `hig
 python benchmarks/orig_check.py --engine engine/revised_simplex.py --corpus /path/to/mps_files --out /tmp/orig_check_out.json afiro e226
 ```
 
-#### What changed from the v19 baseline
+#### What changed from the September 30 baseline
 
-All **68 v19 passing cases remained passing**. The five gains are BNL1, BNL2, MAROS-R7, MODSZK1 and WOOD1P. Relative to v21, MAROS-R7 is newly passing. The **42/42 regression**, **30/30 synthetic MILP** and **30/30 synthetic QP** checks remained green, with QP maximum objective error **3.197e-13**. Separate selected gates are **EXTRA_NETLIB 7/7** and **CPU_LP 6/7**; CPU_LP is not an all-pass result. These do not erase the 20 named non-passing full-corpus outcomes.
+All **68 September 30 passing cases remained passing**. The five gains are BNL1, BNL2, MAROS-R7, MODSZK1 and WOOD1P. Relative to the earlier 72/93 result, MAROS-R7 is newly passing. The **42/42 regression**, **30/30 synthetic MILP** and **30/30 synthetic QP** checks remained green, with QP maximum objective error **3.197e-13**. Separate selected gates are **EXTRA_NETLIB 7/7** and **CPU_LP 6/7**; CPU_LP is not an all-pass result. These do not erase the 20 named non-passing full-corpus outcomes.
 
-Historical v21: **72/93 passing, 14 timeout, 5 solver_failed, 2 highs_failed**, median **8.4156x over 72 passing pairs**, maximum passing residual **8.15e-10**. Historical v19: **68/93 passing, 16 timeout, 7 solver_failed, 2 highs_failed**, median **12.478x over 68 pairs**, maximum passing residual **9.31e-10**. Historical v18: **57/93 passing, 35 timeout, 1 solver_failed**, median **29.98x over 57 pairs**, maximum passing residual **9.31e-10**. Different passing sets do not make a controlled speedup series.
+Earlier 72-pass run: **72/93 passing, 14 timeout, 5 solver_failed, 2 highs_failed**, median **8.4156x over 72 passing pairs**, maximum passing residual **8.15e-10**. September 30 baseline: **68/93 passing, 16 timeout, 7 solver_failed, 2 highs_failed**, median **12.478x over 68 pairs**, maximum passing residual **9.31e-10**. Earlier 57-pass run: **57/93 passing, 35 timeout, 1 solver_failed**, median **29.98x over 57 pairs**, maximum passing residual **9.31e-10**. Different passing sets do not make a controlled speedup series.
 
-The full-corpus input source is [the pinned Netlib MPS collection](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files). The new local and Kaggle ledgers are separate from the older checked-in partial CSVs below. The checked-in engine is synced to the executed v23 solve path, and the parser retains the v19 bulk-construction path. The older checked-in result ledgers below are not the new full-run ledger.
+The full-corpus input source is [the pinned Netlib MPS collection](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files). The new local and Kaggle ledgers are separate from the older checked-in partial CSVs below. The checked-in engine is synced to the executed October 1 Python solve path, and the parser retains the September 30 bulk-construction path. The older checked-in result ledgers below are not the new full-run ledger.
 
 ## What is in this repository
 
@@ -172,7 +172,7 @@ The full-corpus input source is [the pinned Netlib MPS collection](https://githu
 
 Historical Python prototype (uses SciPy LU; not the compliant path):
 
-- `engine/revised_simplex.py` / `engine/solver_lu_relfeas.py`: matching copies of the executed v23 solve path (product-form basis updates, vectorized pricing, Harris ratio handling, conservative presolve and v19-rule fallback), using NumPy arrays and SciPy LU factorization for linear algebra. SciPy's optimization solvers are **not** called by the core.
+- `engine/revised_simplex.py` / `engine/solver_lu_relfeas.py`: matching copies of the executed October 1 Python solve path (product-form basis updates, vectorized pricing, Harris ratio handling, conservative presolve and earlier minimum-ratio-rule fallback), using NumPy arrays and SciPy LU factorization for linear algebra. SciPy's optimization solvers are **not** called by the core.
 - `engine/solver_dantzig_relative.py`: earlier revised-simplex variant retained for provenance, no longer imported by the refinery example and not the engine of record.
 - `parsers/mps_fixed.py`: fixed-field MPS parser for rows, RHS, ranges and bounds; it transforms finite lower and upper bounds into nonnegative standard-form variables and extra constraints.
 - `parsers/mps_free.py`: extension that splits free variables into positive and negative nonnegative columns. It imports `mps_fixed` from the same directory.

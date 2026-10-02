@@ -1,4 +1,4 @@
-# Clean-room reproduction (C++ engine M10)
+# TARAL-LP reproduction (C++ engine)
 bash reproduce.sh            # clones the pinned Netlib corpus, verifies file hashes, cold-builds, runs the 93-case gate + truss at 60 s
 CORPUS=/path/to/mps bash reproduce.sh afiro,e226    # offline / subset smoke test
 docker build -t taral . && docker run --rm taral     # Dockerfile provided, NOT yet built or run (no Docker in my workspace)
