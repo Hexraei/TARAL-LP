@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# One command: build the C++ engine, fetch the pinned Netlib corpus, run the benchmark, print figures.
+# One command: build the src/ C++ engine (the headline engine), fetch the pinned Netlib corpus, run the benchmark, print figures.
 # Usage: bash reproduce.sh [cases comma list]   (default: all 93 + truss, 60 s cap per case)
 # Env: CORPUS=<dir of .mps> to skip the clone; TL=60 time cap; OUT=out
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT/reproduction"
-CANONICAL="$ROOT/cpp-engine"
 TL=${TL:-60}; OUT=${OUT:-out}
 mkdir -p "$OUT"
 REPO=https://github.com/ozy4dm/lp-data-netlib.git
@@ -18,10 +17,11 @@ for name in ('numpy', 'scipy', 'highspy'):
     except PackageNotFoundError: print(name, 'not installed')
 VERSIONS
 echo "== cold build (reported separately from solver time)"
-s=$(date +%s.%N); g++ -O2 -std=c++17 -o "$OUT/taral" "$CANONICAL/engine/taral.cpp"; e=$(date +%s.%N)
+# Same flags as the committed ledgers: -march=native changes pivot paths, so do not change them.
+s=$(date +%s.%N); g++ -O3 -march=native -std=c++17 -o "$OUT/taral" "$ROOT"/src/*.cpp; e=$(date +%s.%N)
 echo "compile_seconds=$(python3 -c "print(round($e-$s,1))")"
-echo "engine_sha256=$(sha256sum "$CANONICAL/engine/taral.cpp" | cut -d' ' -f1)"
-echo "backend=CPU (single-thread C++ simplex; no GPU backend in this engine)"
+echo "engine_sources_sha256=$(cat "$ROOT"/src/*.cpp "$ROOT"/src/*.hpp | sha256sum | cut -d' ' -f1)"
+echo "backend=CPU (single-thread C++ simplex; default primal method; no GPU backend)"
 if [ -z "${CORPUS:-}" ]; then
   echo "== fetching pinned corpus ($PIN)"
   rm -rf "$OUT/netlib_corpus" && git clone -q "$REPO" "$OUT/netlib_corpus" && git -C "$OUT/netlib_corpus" checkout -q "$PIN"

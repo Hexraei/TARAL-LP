@@ -4,7 +4,7 @@ C++17 linear-programming solver with an MPS parser, sparse LU and bounded-variab
 
 ## Current status - October 2, 2026
 
-Experimental CPU solver. Not ready for production; Kaggle verification is pending. Local `src/` measurements use engine commit `c1f5694` and 93 Netlib cases from the [pinned corpus](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files).
+Experimental CPU solver. Not ready for production; Kaggle verification is pending. Local `src/` measurements use engine commit `a9e8218` (primal ledger) and `0bad060` (dual ledger; LP verdicts of the default method are unchanged since) and 93 Netlib cases from the [pinned corpus](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files).
 
 | Protocol | Result | Verification |
 | --- | --- | --- |
@@ -12,6 +12,8 @@ Experimental CPU solver. Not ready for production; Kaggle verification is pendin
 | Stricter numerical check | 89/90 passing cases | Local; row/bound violation and relative objective error <= 1e-8 |
 | 60 seconds, `--method dual` (separate line) | 91/93 passes, 0 wrong answers, STRICT 90/91 | Local; engine commit `0bad060`; DFL001 passes (about 14 s here); no case lost against the primal |
 | 300 seconds per case | 92/93 passes, 0 wrong answers | Local; separate extended-cap protocol |
+| MILP, 26 small MIPLIB instances | 19/26 solved at 300 s (14/26 at 30 s); 7 stop at the time limit, none wrong | 300 s run on a cloud container, 30 s run local; `results/milp_miplib/` |
+| Convex QP (interior point), 99 Maros-Meszaros instances | 71 pass, 28 fail: 5 wrong or narrowly missed objectives (one infeasible point, DPKLO1), 18 without a HiGHS reference, 4 numerical failures, 1 nonconvex | Cloud container, 60 s; `results/qp_maros_meszaros/`; a fix for the false-optimal cases is in progress |
 
 At 60 seconds, DFL001 times out. PILOT.WE and PILOT4 lack usable HiGHS reference results in that protocol and remain excluded from the pass count; its ceiling is 91/93. They pass under the separate 300-second protocol; DFL001 still does not finish. TRUSS passes as an extra case outside the 93-case denominator.
 
@@ -59,7 +61,7 @@ Local machine: Intel Core 7 240H, 10 cores/16 threads, 15 GiB RAM, Ubuntu 24.04,
 | `reproduction/` | One-command reproduction for that bundled reference engine, using canonical files in `cpp-engine/`; see its [instructions](reproduction/README_REPRO.md) |
 | `gpu/` | CUDA sparse matrix-vector kernel benchmark; LP solving is CPU-only |
 | `engine/`, `parsers/`, `benchmarks/` | Historical Python/SciPy prototype and checks; the current C++ engine is in `src/` |
-| `milp/`, `qp/` | Historical small synthetic Python prototypes; broader MILP/QP benchmarks remain untested |
+| `milp/`, `qp/` | Historical small synthetic Python prototypes; the C++ MILP and QP results are the ledgers above |
 | `results/` | Older partial Python ledgers; current C++ results are summarized above |
 | `examples/` | Synthetic refinery LP and retained hypothetical objective; operational data and measured savings are unavailable |
 
@@ -250,7 +252,7 @@ Unverified attempts in that older sweep included SCORPION (singular basis), FINN
 - Historical LP solves ran on CPU; QP support is limited to the box-bounded prototype below.
 - A separate small, pure-integer/binary MILP branch-and-bound prototype is included in `milp/`; its three fixed synthetic cases match HiGHS.
 - A seeded property test adds 30/30 randomized small synthetic cases matching brute force and SciPy/HiGHS.
-- MIPLIB and large-instance MILP reliability remain untested.
+- Large-instance MILP reliability remains untested; small-MIPLIB results are in `results/milp_miplib/`.
 - The separate QP prototype covers only positive-definite convex box-bounded problems; its three fixed synthetic cases and 30/30 seeded randomized SPD box-QP property tests match SciPy objectives.
 - General QP and public benchmark coverage remain untested.
 - Any future GPU matrix-operation experiments remain separate from LP solves.
