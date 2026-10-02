@@ -15,4 +15,16 @@ checked against something other than the default HiGHS answer:
 **Summary: on DPKLO1, QBORE3D, GOULDQP2 and PRIMALC8 the taral answer is the accurate side (HiGHS's default reference is wrong or less accurate); QFFFFF80 stays uncertified.**
 
 Caveats: the dual bounds above are taral's own numbers (not recomputed by independent code); the rows stay FAIL under the stated rule.
-No solver change was needed for these five. Not run here: the 18 rows without a HiGHS reference and the 4 numerical failures.
+No solver change was needed for these five. Not run here: the 4 numerical failures. The 18 rows without a HiGHS reference are covered in the next section.
+
+## The 18 rows without a HiGHS reference, rechecked with `qp_regularization_value=1e-12`
+
+`benchmarks/qp_recheck_unreferenced.py` (HiGHS 1.15.1, 300 s per instance, same files) writes `recheck_unreferenced.csv`.
+Outcome: **2 of 18 get a reference and both agree** with TARAL under the ledger rule (relative error <= 1e-6, violation <= 1e-6):
+QCAPRI (error 1.1e-12; the default-HiGHS reference had failed with a solve error) and QSCTAP3 (error 8.5e-10).
+**The other 16 stay unreferenced**: HiGHS again returns no optimal answer (not set, solve error, time limit, or, for QSTAIR,
+"unbounded" while TARAL reports a feasible optimum with violation 7.9e-9). For these 16 the TARAL answers rest on their own
+recheck only (independent row/bound violation and objective recomputation in the ledger; all relative violations <= 8e-9), not on
+agreement with a second solver. The ledger rows and verdicts are unchanged (the pass rule needs a reference).
+HiGHS's status on a given file is not stable across settings and runs (QCAPRI: solve error by default, optimal here), so these
+rows are re-checkable but should not be read as evidence about TARAL either way.

@@ -1,0 +1,19 @@
+instance,rows,cols,default_highs,highs_reg1e-12,taral_status,taral_objective,highs_reg_objective,rel_err,taral_max_violation,highs_wall_s,verdict
+KSIP,1001,20,Not Set,Not Set,optimal,0.5757979412744382,,,0.0,0.0,unreferenced
+LASER,1000,1002,Not Set,Not Set,optimal,2409601.348321212,,,0.0,0.0,unreferenced
+MOSARQP1,700,2500,Solve error,Solve error,optimal,-952.8754429137093,,,0.0,2.4,unreferenced
+MOSARQP2,600,900,Time limit reached,Time limit reached,optimal,-1597.4821166505355,,,0.0,300.0,unreferenced
+Q25FV47,820,1571,Time limit reached,Time limit reached,optimal,13744447.898387173,,,5.719903890170976e-10,300.0,unreferenced
+QCAPRI,271,353,Solve error,Optimal,optimal,66793293.266459666,66793293.266389035,1.057464014794735e-12,2.2436097424360923e-10,0.0,agree
+QE226,223,282,Not Set,Not Set,optimal,212.65343330737983,,,1.3242225289618521e-11,1.1,unreferenced
+QGROW15,300,645,Solve error,Solve error,optimal,-101693640.467504,,,1.020887418723465e-09,0.0,unreferenced
+QGROW22,440,946,Time limit reached,Solve error,optimal,-149628953.46695262,,,1.3813214974049615e-09,0.0,unreferenced
+QGROW7,140,301,Time limit reached,Not Set,optimal,-42798713.87064556,,,9.742788022449637e-10,0.0,unreferenced
+QPCSTAIR,356,467,Not Set,Time limit reached,optimal,6204387.477812482,,,3.3480625547588545e-10,300.0,unreferenced
+QPILOTNO,975,2172,Not Set,Not Set,optimal,4728586.900554332,,,3.0132508585018144e-09,0.1,unreferenced
+QSCSD8,397,2750,Time limit reached,Not Set,optimal,940.7635745992886,,,8.970602038971265e-14,0.3,unreferenced
+QSCTAP2,1090,1880,Not Set,Solve error,optimal,1735.0264989626323,,,5.218048215738236e-15,4.2,unreferenced
+QSCTAP3,1480,2480,Not Set,Optimal,optimal,1438.7546821419487,1438.7546809250719,8.457848093480318e-10,5.10702591327572e-15,0.6,agree
+QSHARE1B,117,225,Solve error,Not Set,optimal,720078.319017459,,,7.675604191646028e-11,0.4,unreferenced
+QSIERRA,1227,2036,Solve error,Time limit reached,optimal,23750458.182496995,,,2.5223908388622685e-13,300.0,unreferenced
+QSTAIR,356,467,Time limit reached,Unbounded,optimal,7985452.756392923,,,7.909076060741427e-09,0.0,unreferenced
