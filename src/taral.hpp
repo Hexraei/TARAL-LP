@@ -69,6 +69,11 @@ struct Result {
     std::vector<double> row_violation_abs, row_violation_magnitude_scaled, row_term_magnitude;
     double max_row_violation_magnitude_scaled = 0;
     double objective = 0;   // includes obj_const
+    // Nonoptimal LP proofs, checked against the input rows and effective column bounds.
+    std::vector<double> farkas_row_lower, farkas_row_upper, farkas_col_lower, farkas_col_upper;
+    std::vector<double> ray;  // recession direction; x is a verified feasible anchor
+    bool certificate_verified = false;
+    double certificate_residual = 0, certificate_margin = 0;
     long iterations = 0;
     std::string message;
     // LP optimality certificate in model sense: reduced_cost = cost - A' row_dual.
@@ -110,3 +115,8 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit);
 std::vector<char> basis_from_point(const Model& model, const std::vector<double>& x,
                                 const std::vector<double>& row_duals, double tol, int* interior);
 const char* status_name(Status s);
+
+// Recomputes proof validity from model coefficients, not solver basis/pricing state.
+// Invalid/missing/nonfinite proofs become NumericalFailure, never a proved status.
+bool verify_nonoptimal_certificate(const Model&, const std::vector<double>&,
+                                  const std::vector<double>&, Result&);

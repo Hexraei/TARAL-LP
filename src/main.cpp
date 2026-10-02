@@ -76,6 +76,24 @@ void write_json(const char* path, const char* status, const Result* r, double wa
         array("row_dual", r->row_dual);
         array("reduced_cost", r->reduced_cost);
     }
+    if (r && (r->status == Status::Infeasible || r->status == Status::Unbounded ||
+              !r->farkas_row_lower.empty() || !r->farkas_col_lower.empty() || !r->ray.empty())) {
+        std::fprintf(f, ", \"certificate_verified\": %s, \"certificate_residual\": %.17g, \"certificate_margin\": %.17g",
+                     r->certificate_verified ? "true" : "false", r->certificate_residual, r->certificate_margin);
+        auto array = [&](const char* name, const std::vector<double>& values) {
+            std::fprintf(f, ", \"%s\": [", name);
+            for (size_t k = 0; k < values.size(); ++k) {
+                if (k) std::fprintf(f, ", ");
+                if (std::isfinite(values[k])) std::fprintf(f, "%.17g", values[k]);
+                else std::fprintf(f, "null");
+            }
+            std::fprintf(f, "]");
+        };
+        array("farkas_row_lower", r->farkas_row_lower); array("farkas_row_upper", r->farkas_row_upper);
+        array("farkas_col_lower", r->farkas_col_lower); array("farkas_col_upper", r->farkas_col_upper);
+        if (!(r->status == Status::Optimal || !r->x.empty())) array("x", r->x);  // the certificate block above already wrote x
+        array("ray", r->ray);
+    }
     std::fprintf(f, ", \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n", r ? r->iterations : 0L, wall,
                  json_escape(msg).c_str());
     std::fclose(f);

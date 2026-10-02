@@ -536,12 +536,8 @@ Result solve_lp_dual(const Model& model, const std::vector<double>& col_lo, cons
     Dual dual(*mp, col_lo, col_up);
     Outcome out = dual.run(time_limit_s, warm_basis);
     Result r;
-    if (out == Outcome::Infeasible) {
-        r.status = Status::Infeasible;
-        r.iterations = dual.iterations;
-        r.message = "dual ray";
-        return r;
-    }
+    // The dual engine does not export its ray. Re-solve with primal phase 1 to
+    // obtain a checkable proof; exhausted budget returns time_limit, not infeasible.
     if (out == Outcome::TimeLimit) {
         r.status = Status::TimeLimit;
         r.iterations = dual.iterations;

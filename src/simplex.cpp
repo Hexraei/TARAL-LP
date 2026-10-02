@@ -225,6 +225,11 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
         if (lo_[j] > up_[j] + kPrimalTol) {
             res.status = Status::Infeasible;
             res.message = "inconsistent bounds";
+            res.farkas_row_lower.assign(m_, 0); res.farkas_row_upper.assign(m_, 0);
+            res.farkas_col_lower.assign(n_, 0); res.farkas_col_upper.assign(n_, 0);
+            if (j < n_) res.farkas_col_lower[j] = res.farkas_col_upper[j] = 0.5;
+            else res.farkas_row_lower[j-n_] = res.farkas_row_upper[j-n_] = 0.5;
+            verify_nonoptimal_certificate(md_, clo_, cup_, res);
             return res;
         }
     const auto start = SparseLU::Clock::now();
@@ -362,6 +367,26 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             }
             if (phase1) {
                 res.status = Status::Infeasible;
+                res.farkas_row_lower.resize(m_); res.farkas_row_upper.resize(m_);
+                res.farkas_col_lower.resize(n_); res.farkas_col_upper.resize(n_);
+                double norm = 0;
+                for (int i = 0; i < m_; ++i) {
+                    res.farkas_row_lower[i] = std::isfinite(md_.row_lo[i]) ? std::max(y[i], 0.0) : 0.0;
+                    res.farkas_row_upper[i] = std::isfinite(md_.row_up[i]) ? std::max(-y[i], 0.0) : 0.0;
+                    norm += res.farkas_row_lower[i] + res.farkas_row_upper[i];
+                }
+                for (int j = 0; j < n_; ++j) {
+                    double z = -dot_col(j, y);
+                    res.farkas_col_lower[j] = std::isfinite(clo_[j]) ? std::max(z, 0.0) : 0.0;
+                    res.farkas_col_upper[j] = std::isfinite(cup_[j]) ? std::max(-z, 0.0) : 0.0;
+                    norm += res.farkas_col_lower[j] + res.farkas_col_upper[j];
+                }
+                if (norm > 0) {
+                    for (auto* v : {&res.farkas_row_lower, &res.farkas_row_upper,
+                                    &res.farkas_col_lower, &res.farkas_col_upper})
+                        for (double& a : *v) a /= norm;
+                }
+                verify_nonoptimal_certificate(md_, clo_, cup_, res);
                 return res;
             }
             res.status = Status::Optimal;
@@ -410,6 +435,15 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
                 break;
             }
             res.status = Status::Unbounded;
+            res.x.assign(x_.begin(), x_.begin()+n_);
+            res.ray.assign(n_, 0.0);
+            if (q < n_) res.ray[q] = dir;
+            for (int p = 0; p < m_; ++p)
+                if (head_[p] < n_) res.ray[head_[p]] = -dir * alpha[p];
+            double norm = 0;
+            for (double v : res.ray) norm = std::max(norm, std::abs(v));
+            if (norm > 0) for (double& v : res.ray) v /= norm;
+            verify_nonoptimal_certificate(md_, clo_, cup_, res);
             return res;
         }
         ++res.iterations;
@@ -461,6 +495,7 @@ Result solve_lp(const Model& model, const std::vector<double>& col_lo, const std
                 const std::vector<char>* warm_basis, double time_limit_s) {
     if (!model.maximize) return Simplex(model, col_lo, col_up).run(time_limit_s, warm_basis);
     Model neg = model;  // maximise f  ==  minimise -f
+    neg.maximize = false;  // proof verifier sees the transformed minimization sense
     for (double& c : neg.cost) c = -c;
     neg.obj_const = -neg.obj_const;
     Result r = Simplex(neg, col_lo, col_up).run(time_limit_s, warm_basis);
