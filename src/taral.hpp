@@ -71,6 +71,10 @@ Result solve(const Model& model, double time_limit_s);
 // basis of an earlier solve of the same model (any bounds).
 Result solve_lp(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
                 const std::vector<char>* warm_basis, double time_limit_s);
+// Same contract, solved by the bounded dual simplex (src/dual.cpp) followed by a primal clean-up
+// from its basis that restores the true costs and certifies the result.
+Result solve_lp_dual(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
+                     const std::vector<char>* warm_basis, double time_limit_s);
 
 // Branch and bound over solve_lp. Objective values are in the model's own sense.
 struct MilpResult {
