@@ -11,4 +11,5 @@ redundant_eq     LP    34000 34099 100
 infeasible       LP    35000 35149 150
 unbounded        LP    36000 36149 150
 near_singular    LP    37000 37149 150
-# total LP 1710  MILP 0
+coef_range       LP    38000 38199 200
+# total LP 1910  MILP 0
