@@ -4,6 +4,8 @@ A C++17 optimization solver core for refinery planning and related sparse indust
 
 This is an experimental solver, not a production replacement for established industrial solvers. The strongest measured result is the CPU dual-simplex Netlib gate: 91/93 passes at 60 seconds per case, with no wrong answers found under that protocol. The default primal result is separate: 90/93.
 
+Project website: [taral-lp.vercel.app](https://taral-lp.vercel.app/) - interactive performance reports, per-case ledgers and measured limits. The full site is prepared for publication; the live URL currently shows the holding page.
+
 ## Problem statement coverage
 
 The checklist separates implemented features from measured coverage and unfinished industrial requirements. DONE applies only to the named scope, not to the whole solver.
@@ -22,7 +24,7 @@ The checklist separates implemented features from measured coverage and unfinish
 | Branch-and-cut, cutting planes, presolve, heuristics and node selection | IN PROGRESS: baseline MILP search exists | Full requirement coverage and separate measured evidence for each search technique |
 | Sparse matrices and efficient numerical linear algebra | DONE as an implementation: sparse columns and sparse LU in [`src/`](src/) | Further memory/scaling measurements and factorization tuning |
 | Multi-core parallelization | IN PROGRESS | Current headline engine runs single-threaded; parallel solve performance is not established |
-| GPU acceleration where it brings a measured benefit | IN PROGRESS: approximate CUDA PDHG measurements below | Equal-accuracy crossover evidence and stricter original-model feasibility |
+| GPU acceleration where it brings a measured benefit | IN PROGRESS: approximate CUDA PDHG and measured crossover below | No exact-answer crossover win; basis identification, dense-nucleus factorization and broader original-model checks remain |
 | Numerical stability and reliable convergence | IN PROGRESS: original-model checks, strict residual results and known unresolved cases below | Full robustness across ill-conditioned and difficult industrial models |
 | Thousands to millions of variables, sparse and highly constrained industrial models | IN PROGRESS | Selected benchmarks do not establish consistent industrial-scale performance |
 | Degenerate models, ill-conditioned matrices and weak MILP relaxations | IN PROGRESS: Netlib cases and [`benchmarks/milp_tests.py`](benchmarks/milp_tests.py) exercise these areas | Broader independently checked stress coverage and practical solve times |
@@ -60,7 +62,7 @@ An independent Kaggle run checked pinned `src/` at `442ca16` against live HiGHS 
 | Dual simplex, 60 seconds per case | 91/93 passes; 0 wrong answers; strict check 90/91 | [`results/cpp_0bad060_dual_60s/`](results/cpp_0bad060_dual_60s/) |
 | Separate extended primal protocol, 300 seconds per case | 92/93 passes; 0 wrong answers | [`results/cpp_a9e8218_ext300/`](results/cpp_a9e8218_ext300/) |
 
-The 93-case denominator excludes PILOT.WE and PILOT4 under the fixed local 60-second reference rule. Their separate Kaggle/extended results do not change that denominator. TRUSS passes as an extra case. DFL001 reaches the default-primal time limit; dual finishes in about 36 seconds on Kaggle. GREENBEA clears the fixed gate but misses the stricter check, with measured row violation 1.46e-8 on a cancellation-heavy row.
+The local ledgers contain 94 rows: 93 denominator rows plus TRUSS as an extra case. PILOT.WE and PILOT4 are marked `reference_excluded_60s`, but their `in_denominator` fields remain true and the summaries retain a denominator of 93. They count as nonpasses in the published 60-second totals; do not drop them and change the denominator. The separate extended protocol does not alter the 60-second headline. DFL001 reaches the default-primal time limit; dual finishes in about 36 seconds on Kaggle. GREENBEA clears the fixed gate but misses the stricter check, with measured row violation 1.46e-8 on a cancellation-heavy row.
 
 ### CPU benchmark wave - October 2, 2026
 
@@ -102,6 +104,34 @@ All twelve GPU runs were measured. None met the strict `1e-6` original-model row
 These selected cases show fast approximate answers, not GPU wins at equal accuracy. FIT2P and transport favor CPU dual simplex. See [`results/gpu_pdhg/`](results/gpu_pdhg/).
 
 A separate Kaggle T4 synthetic scaling table shows why acceleration is model-dependent. CPU dual is faster on every listed transport size through 1,000,000 variables (8.34 seconds at that size, versus about 48.15 seconds GPU solve time plus setup). For packing at 10,000 variables, CPU dual reaches its 90-second cap while GPU returns an approximate answer in 0.20-0.35 seconds of solve time. Larger listed packing cases show the same runtime pattern, but no packing row meets the table's strict `1e-6` gate, and objective error against HiGHS is unavailable from 100,000 variables onward. This is a speed observation at different achieved accuracy, not proof of faster correct solves. See [`gpu_scale_T4_table.csv`](benchmarks/results/gpu_scale_T4_table.csv).
+
+### Local GPU scaling and exact controls - October 2, 2026
+
+These newer local runs are separate from the Kaggle T4 measurements above. Hardware: RTX 5050 Laptop GPU (8 GB, compute capability 12.0), Intel Core 7 240H and CUDA 12.9. The round-2 synthetic tables use source `5e93146`, a 120-second limit, three repeats per PDHG configuration and a single run per exact-simplex configuration. PDHG times below include setup and transfer. Finished PDHG vectors were rechecked on the original MPS files; no recheck failure was recorded. That is not an exact-answer certificate.
+
+| Family and case | PDHG tolerance | GPU total | CPU PDHG, 10 threads | Exact dual, one thread | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| Transport, 1,000,000 columns / 2,000,000 nonzeros | 1e-4 | 15.5 s | 74.6 s | 2.88 s | [transport 1e-4](results/gpu_pdhg/synth_transport_tol1e-4.csv) |
+| Transport, 5,000,000 columns / 10,000,000 nonzeros | 1e-6 | Time limit, about 120 s | Time limit, about 121 s | 19.4 s | [transport 1e-6](results/gpu_pdhg/synth_transport_tol1e-6.csv) |
+| Packing, 100,000 columns | 1e-4 | 0.743 s | 0.593 s | Time limit, 120 s | [packing 1e-4](results/gpu_pdhg/synth_packing_tol1e-4.csv) |
+| Packing, 1,000,000 columns | 1e-4 | 8.99 s | 9.31 s | Time limit, 120 s | [packing 1e-4](results/gpu_pdhg/synth_packing_tol1e-4.csv) |
+| Packing, 1,000,000 columns | 1e-6 | 30.3 s | 52.1 s | Time limit, 120 s | [packing 1e-6](results/gpu_pdhg/synth_packing_tol1e-6.csv) |
+
+Exact dual simplex beats every PDHG configuration on transport at every tested size and both tolerances. GPU PDHG beats CPU PDHG on some larger transport models, but that comparison misses the faster exact method. The largest transport model does not converge on GPU at 1e-6 within 120 seconds.
+
+On packing, neither exact method finishes from 100,000 columns upward within the tested limit. PDHG is the only tested route returning a near-optimal answer there, not a certified exact answer. The 8.99 versus 9.31 second margin at one million columns and 1e-4 is small enough to sit within laptop run-to-run variation. Packing at one and two million columns has no usable reference objective, so objective accuracy is unknown there. See the [protocol and limits](results/gpu_pdhg/NOTES.md).
+
+The local GPU Netlib sweeps cover 94 files including TRUSS, not the CPU 93-case gate. At 1e-4, 92 report `near_optimal` and two reach the limit; at 1e-6, 86 report `near_optimal` and eight reach the limit. The tighter count changed near the cap between runs. At 1e-4, nine near-optimal rows have objective error above 1e-3 and the worst is about 4.8e-2 (FORPLAN). A scaled stopping tolerance is not a bound on objective error. Sources: [1e-4 sweep](results/gpu_pdhg/netlib_94files_tol1e-4.csv), [1e-6 sweep](results/gpu_pdhg/netlib_94files_tol1e-6.csv).
+
+### GPU-to-simplex crossover: it does not pay yet
+
+Crossover converts a PDHG point and row multipliers into a corner basis, then asks exact simplex to finish. Three alternating runs of each route on the same local laptop give DFL001 a median total of 20.4 seconds after handoff, versus 11.88 seconds for cold dual simplex. The warm route needs 29,869 simplex iterations against 21,256 cold. These times include the PDHG process, not just its 0.59-second solve.
+
+The point sits inside the optimal face rather than at a vertex. Only 3,507 of 6,071 basis slots are determined by variables off their bounds; the resulting basis has 2,585 dual infeasibilities and needs a 12,083-iteration dual phase 1. Tighter PDHG tolerances did not fix the basis. Packing with 100,000 columns has a nearly dense ~4,800 by ~4,800 factorization nucleus; neither the warm nor cold route returns an exact answer in 120 seconds.
+
+The factorization deadline now holds. The packing handoff that previously ran beyond 11.5 minutes returns `time_limit` at 60.07 seconds with a 60-second limit, instead of misreporting a singular basis or hanging. A warm basis gets a quarter of the limit to factor and falls back to the slack basis if it cannot. See [CROSSOVER.md, round 2](results/gpu_pdhg/CROSSOVER.md) for the measurements and diagnosis.
+
+The retained `5e93146` gates still report dual 91/93 (strict 90/91) and primal 90/93 (strict 89/90), with zero wrong answers under that protocol: [dual run](results/cpp_5e93146_dual_60s/summary.json), [primal run](results/cpp_5e93146_primal_60s/summary.json). Faster approximate points have not become faster exact answers. The next crossover work is basis identification and factorization that can handle the dense nucleus.
 
 ## Build and use
 
