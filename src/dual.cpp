@@ -23,6 +23,7 @@ constexpr double kPivotTol = 1e-9;    // smallest |alpha_rj| considered in the r
 constexpr double kPerturb = 5e-7;     // relative cost perturbation
 constexpr size_t kRefactorEvery = 60;
 constexpr long kMaxIterations = 50'000'000;
+constexpr long kStallIterations = 10000;  // without dual objective progress: hand over to the primal
 
 enum Where : char { kBasic, kLower, kUpper, kZero };
 
@@ -207,9 +208,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
     {
         compute_dual();
         std::mt19937_64 rng(2718281);
-        double cmax = 0;
-        for (int j = 0; j < n_; ++j) cmax = std::max(cmax, std::abs(c_[j]));
-        double base = kPerturb * std::min(1.0, std::max(cmax, 1e-3));  // never larger than the costs themselves
+        double base = kPerturb;  // also for zero costs, which are otherwise entirely dual degenerate
         for (int j = 0; j < N; ++j) {
             bool fl = std::isfinite(lo_[j]), fu = std::isfinite(up_[j]);
             if (lo_[j] == up_[j] || (!fl && !fu)) continue;
@@ -244,12 +243,17 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
     std::vector<int> flips;
     bool fresh = true;
     int shifts = 0;
+    double best_obj = -kInf;  // dual objective (c'x of the current basic solution) at refactorizations
+    long progress_at = 0;
     auto refresh = [&]() {
         if (!factor()) return false;
         compute_dual();
         repair_dual(true);
         compute_primal();
         fresh = true;
+        double obj = 0;
+        for (int j = 0; j < N; ++j) obj += c_[j] * x_[j];
+        if (best_obj == -kInf || obj > best_obj + 1e-9 * (1 + std::abs(best_obj))) best_obj = obj, progress_at = iterations;
         return true;
     };
 
@@ -258,8 +262,8 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             keep_basis();
             return Outcome::TimeLimit;
         }
-        if (iterations >= kMaxIterations) {
-            message = "dual iteration limit";
+        if (iterations >= kMaxIterations || iterations - progress_at > kStallIterations) {
+            message = iterations >= kMaxIterations ? "dual iteration limit" : "dual stalled";
             keep_basis();
             return Outcome::Fallback;
         }
@@ -278,6 +282,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             }
             if (phase1) {
                 phase1 = false;
+                best_obj = -kInf, progress_at = iterations;
                 lo_ = tlo_, up_ = tup_;
                 if (repair_dual(false) > 0) {
                     message = "dual infeasible after dual phase 1";
