@@ -98,12 +98,12 @@ def solve_and_check(path,E,q):
             t=time.perf_counter(); r=E.solve_lp(A,b,c,k); wall=time.perf_counter()-t
         xv=np.asarray(r['x'],float)+np.asarray(lower,float)
         xmap={}
-        for n,v in zip(names,xv): xmap[n]=xmap.get(n,0.)+v
+        for n,v in zip(names,xv):
+            # free-variable clones come back as '<original>|FR+' and '<original>|FR-'
+            if n.endswith('|FR+'): n=n[:-4]
+            elif n.endswith('|FR-'): n,v=n[:-4],-v
+            xmap[n]=xmap.get(n,0.)+v
         model=parse_mps(path)
-        # free-variable clones: solver names are first 7 chars + P/M suffix
-        for j in model['corder']:
-            if j not in xmap and (j[:7]+'P') in xmap:
-                xmap[j]=xmap.get(j[:7]+'P',0.)-xmap.get(j[:7]+'M',0.)
         res=check(model,xmap)
         res.update(solver_objective=float(r['objective']+offset),solver_residual=float(r['max_residual']),wall_s=wall)
         q.put(res)
