@@ -1,0 +1,583 @@
+### tests2/base: total=3630 verdicts={'PASS': 3523, 'NOANS': 56, 'REF_UNRESOLVED': 8, 'PASS_REF': 27, 'FAIL_OBJ': 16}
+  FAIL_OBJ (16):
+    near_singular-37003	optimal	engine 46.79808285048105 vs reference 46.7506289644656 (rel 0.00102); exact optimum 51.00000024337897 (engine off by 0.0824, reference off by 0.0833)
+    near_singular-37027	optimal	engine 95.90268156387545 vs reference 88.97184074891472 (rel 0.0779); exact optimum 97.99997135357869 (engine off by 0.0214, reference off by 0.0921)
+    near_singular-37045	optimal	engine 65.31517530490262 vs reference 65.05706531599685 (rel 0.00397); exact optimum 66.99999919427032 (engine off by 0.0251, reference off by 0.029)
+    near_singular-37056	optimal	engine 34.83997707436293 vs reference 32.230991231606794 (rel 0.0809); exact optimum 49.99999909401223 (engine off by 0.303, reference off by 0.355)
+    near_singular-37057	optimal	engine 56.002630060342064 vs reference 55.99741001417441 (rel 9.32e-05); exact optimum 59.99999741632594 (engine off by 0.0666, reference off by 0.0667)
+    near_singular-37062	optimal	engine 50.60538241769959 vs reference 43.9302061033062 (rel 0.152); exact optimum 54.00000178463698 (engine off by 0.0629, reference off by 0.186)
+    near_singular-37063	optimal	engine 47.4305725132009 vs reference 47.409960406717765 (rel 0.000435); exact optimum 56.000001295477645 (engine off by 0.153, reference off by 0.153)
+    near_singular-37074	optimal	engine 31.52952871314408 vs reference 30.901246908104866 (rel 0.0203); exact optimum 37.000000434705065 (engine off by 0.148, reference off by 0.165)
+    near_singular-37092	optimal	engine 24.63380810565488 vs reference 15.108108000236474 (rel 0.631); exact optimum 51.0 (engine off by 0.517, reference off by 0.704)
+    near_singular-37099	optimal	engine 62.42174491342429 vs reference 62.3831763675918 (rel 0.000618); exact optimum 65.000000681962 (engine off by 0.0397, reference off by 0.0403)
+    near_singular-37104	optimal	engine 17.88113641134032 vs reference 15.951796889312348 (rel 0.121); exact optimum 28.999999504273333 (engine off by 0.383, reference off by 0.45)
+    near_singular-37105	optimal	engine 63.874671551957846 vs reference 55.47627162845726 (rel 0.151); exact optimum 66.00002828519496 (engine off by 0.0322, reference off by 0.159)
+    near_singular-37111	optimal	engine 57.21630663059155 vs reference 57.14941558635095 (rel 0.00117); exact optimum 58.99999973356253 (engine off by 0.0302, reference off by 0.0314)
+    near_singular-37122	optimal	engine 25.85748539589595 vs reference 25.70446811843821 (rel 0.00595); exact optimum 46.99999291483206 (engine off by 0.45, reference off by 0.453)
+    near_singular-37129	optimal	engine 47.33613146094669 vs reference 47.33286158205954 (rel 6.91e-05); exact optimum 51.00000110773069 (engine off by 0.0718, reference off by 0.0719)
+    near_singular-37134	optimal	engine 48.931081135431256 vs reference 33.67552826352639 (rel 0.453); exact optimum 64.99999760003709 (engine off by 0.247, reference off by 0.482)
+  NOANS (56):
+    big_values-57025	numerical_failure	engine numerical_failure (root LP failed: final point violates constraints by 0.000000) vs reference optimal (presolve-off optimal)
+    big_values-57027	time_limit	engine time_limit (node LP numerical_failure: final point violates constraints by 0.000001) vs reference optimal (presolve-off optimal)
+    coef_range-38007	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38013	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38019	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38039	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38040	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38049	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38057	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38069	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38071	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38078	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38079	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38084	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38090	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38095	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38097	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38098	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38105	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38111	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38113	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38114	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38121	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38126	iteration_limit	engine iteration_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38127	numerical_failure	engine numerical_failure (phase 1 direction without a blocking variable) vs reference optimal (presolve-off optimal)
+    coef_range-38128	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38143	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38149	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38151	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38153	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38155	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38164	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38165	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38177	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38179	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38181	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38185	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38191	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38193	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38195	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38196	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38197	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    infeasible-35057	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    near_singular-37005	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37068	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    near_singular-37083	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37097	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37098	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    near_singular-37103	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37110	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37119	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37139	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    redundant_eq-34068	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34074	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34080	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34089	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+  REF_UNRESOLVED (8):
+    equality_int-55006	time_limit	reference status time_limit, engine time_limit
+    equality_int-55029	time_limit	reference status time_limit, engine time_limit
+    equality_int-55039	time_limit	reference status time_limit, engine time_limit
+    equality_int-55055	time_limit	reference status time_limit, engine time_limit
+    general_int-47018	time_limit	reference status time_limit, engine time_limit
+    general_int-47031	time_limit	reference status time_limit, engine time_limit
+    general_int-47057	time_limit	reference status time_limit, engine time_limit
+    int_free_neg-51021	time_limit	reference status time_limit, engine time_limit
+  QUICK rows: 330; changed vs FULL (verdict or engine status): 0
+  FULL-only rows not in QUICK: 3300
+### tests3/base: total=3630 verdicts={'PASS': 3523, 'NOANS': 56, 'REF_UNRESOLVED': 8, 'PASS_REF': 27, 'FAIL_OBJ': 16}
+  FAIL_OBJ (16):
+    near_singular-37003	optimal	engine 46.79808285048105 vs reference 46.7506289644656 (rel 0.00102); exact optimum 51.00000024337897 (engine off by 0.0824, reference off by 0.0833)
+    near_singular-37027	optimal	engine 95.90268156387545 vs reference 88.97184074891472 (rel 0.0779); exact optimum 97.99997135357869 (engine off by 0.0214, reference off by 0.0921)
+    near_singular-37045	optimal	engine 65.31517530490262 vs reference 65.05706531599685 (rel 0.00397); exact optimum 66.99999919427032 (engine off by 0.0251, reference off by 0.029)
+    near_singular-37056	optimal	engine 34.83997707436293 vs reference 32.230991231606794 (rel 0.0809); exact optimum 49.99999909401223 (engine off by 0.303, reference off by 0.355)
+    near_singular-37057	optimal	engine 56.002630060342064 vs reference 55.99741001417441 (rel 9.32e-05); exact optimum 59.99999741632594 (engine off by 0.0666, reference off by 0.0667)
+    near_singular-37062	optimal	engine 50.60538241769959 vs reference 43.9302061033062 (rel 0.152); exact optimum 54.00000178463698 (engine off by 0.0629, reference off by 0.186)
+    near_singular-37063	optimal	engine 47.4305725132009 vs reference 47.409960406717765 (rel 0.000435); exact optimum 56.000001295477645 (engine off by 0.153, reference off by 0.153)
+    near_singular-37074	optimal	engine 31.52952871314408 vs reference 30.901246908104866 (rel 0.0203); exact optimum 37.000000434705065 (engine off by 0.148, reference off by 0.165)
+    near_singular-37092	optimal	engine 24.63380810565488 vs reference 15.108108000236474 (rel 0.631); exact optimum 51.0 (engine off by 0.517, reference off by 0.704)
+    near_singular-37099	optimal	engine 62.42174491342429 vs reference 62.3831763675918 (rel 0.000618); exact optimum 65.000000681962 (engine off by 0.0397, reference off by 0.0403)
+    near_singular-37104	optimal	engine 17.88113641134032 vs reference 15.951796889312348 (rel 0.121); exact optimum 28.999999504273333 (engine off by 0.383, reference off by 0.45)
+    near_singular-37105	optimal	engine 63.874671551957846 vs reference 55.47627162845726 (rel 0.151); exact optimum 66.00002828519496 (engine off by 0.0322, reference off by 0.159)
+    near_singular-37111	optimal	engine 57.21630663059155 vs reference 57.14941558635095 (rel 0.00117); exact optimum 58.99999973356253 (engine off by 0.0302, reference off by 0.0314)
+    near_singular-37122	optimal	engine 25.85748539589595 vs reference 25.70446811843821 (rel 0.00595); exact optimum 46.99999291483206 (engine off by 0.45, reference off by 0.453)
+    near_singular-37129	optimal	engine 47.33613146094669 vs reference 47.33286158205954 (rel 6.91e-05); exact optimum 51.00000110773069 (engine off by 0.0718, reference off by 0.0719)
+    near_singular-37134	optimal	engine 48.931081135431256 vs reference 33.67552826352639 (rel 0.453); exact optimum 64.99999760003709 (engine off by 0.247, reference off by 0.482)
+  NOANS (56):
+    big_values-57025	numerical_failure	engine numerical_failure (root LP failed: final point violates constraints by 0.000000) vs reference optimal (presolve-off optimal)
+    big_values-57027	time_limit	engine time_limit (node LP numerical_failure: final point violates constraints by 0.000001) vs reference optimal (presolve-off optimal)
+    coef_range-38007	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38013	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38019	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38039	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38040	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38049	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38057	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38069	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38071	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38078	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38079	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38084	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38090	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38095	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38097	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38098	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38105	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38111	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38113	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38114	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38121	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38126	iteration_limit	engine iteration_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38127	numerical_failure	engine numerical_failure (phase 1 direction without a blocking variable) vs reference optimal (presolve-off optimal)
+    coef_range-38128	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38143	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38149	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38151	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38153	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38155	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38164	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38165	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38177	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38179	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38181	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38185	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38191	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38193	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38195	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38196	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38197	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    infeasible-35057	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    near_singular-37005	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37068	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    near_singular-37083	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37097	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37098	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    near_singular-37103	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37110	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37119	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37139	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    redundant_eq-34068	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34074	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34080	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34089	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+  REF_UNRESOLVED (8):
+    equality_int-55006	time_limit	reference status time_limit, engine time_limit
+    equality_int-55029	time_limit	reference status time_limit, engine time_limit
+    equality_int-55039	time_limit	reference status time_limit, engine time_limit
+    equality_int-55055	time_limit	reference status time_limit, engine time_limit
+    general_int-47018	time_limit	reference status time_limit, engine time_limit
+    general_int-47031	time_limit	reference status time_limit, engine time_limit
+    general_int-47057	time_limit	reference status time_limit, engine time_limit
+    int_free_neg-51021	time_limit	reference status time_limit, engine time_limit
+  QUICK rows: 330; changed vs FULL (verdict or engine status): 0
+  FULL-only rows not in QUICK: 3300
+### tests3/QP: total=1780 verdicts={'PASS': 1639, 'PASS_REF': 8, 'PARTIAL': 25, 'NOANS': 78, 'BORDER': 26, 'REF_UNRESOLVED': 3, 'FAIL_KKT': 1}
+  BORDER (26):
+    near_psd-77003	optimal	accepted a Q within noise of semidefinite (lam_min -2.8e-09); point certified
+    near_psd-77004	optimal	accepted a Q within noise of semidefinite (lam_min -1.48e-11); point certified
+    near_psd-77010	optimal	accepted a Q within noise of semidefinite (lam_min -1.03e-06); point certified
+    near_psd-77011	optimal	accepted a Q within noise of semidefinite (lam_min -3.8e-09); point certified
+    near_psd-77012	optimal	accepted a Q within noise of semidefinite (lam_min -9.82e-11); point certified
+    near_psd-77017	nonconvex	refused as nonconvex, lam_min -6.51e-05
+    near_psd-77018	optimal	accepted a Q within noise of semidefinite (lam_min -3.83e-07); point certified
+    near_psd-77020	optimal	accepted a Q within noise of semidefinite (lam_min -1.11e-10); point certified
+    near_psd-77026	optimal	accepted a Q within noise of semidefinite (lam_min -1.24e-06); point certified
+    near_psd-77027	optimal	accepted a Q within noise of semidefinite (lam_min -2.94e-09); point certified
+    near_psd-77028	optimal	accepted a Q within noise of semidefinite (lam_min -4.59e-11); point certified
+    near_psd-77034	optimal	accepted a Q within noise of semidefinite (lam_min -3.51e-07); point certified
+    near_psd-77035	optimal	accepted a Q within noise of semidefinite (lam_min -4.51e-09); point certified
+    near_psd-77036	optimal	accepted a Q within noise of semidefinite (lam_min -1.27e-10); point certified
+    near_psd-77041	nonconvex	refused as nonconvex, lam_min -5e-05
+    near_psd-77044	optimal	accepted a Q within noise of semidefinite (lam_min -9.61e-11); point certified
+    near_psd-77049	nonconvex	refused as nonconvex, lam_min -3.01e-05
+    near_psd-77051	optimal	accepted a Q within noise of semidefinite (lam_min -1.5e-08); point certified
+    near_psd-77052	optimal	accepted a Q within noise of semidefinite (lam_min -7.02e-11); point certified
+    near_psd-77058	optimal	accepted a Q within noise of semidefinite (lam_min -4.03e-07); point certified
+    near_psd-77060	optimal	accepted a Q within noise of semidefinite (lam_min -4.37e-11); point certified
+    near_psd-77065	nonconvex	refused as nonconvex, lam_min -5.26e-05
+    near_psd-77067	optimal	accepted a Q within noise of semidefinite (lam_min -1.1e-09); point certified
+    near_psd-77068	optimal	accepted a Q within noise of semidefinite (lam_min -7.71e-11); point certified
+    near_psd-77073	nonconvex	refused as nonconvex, lam_min -5.5e-05
+    near_psd-77075	optimal	accepted a Q within noise of semidefinite (lam_min -1.9e-09); point certified
+  FAIL_KKT (1):
+    bounds_huge-82051	optimal	certified duality gap 0.0638 (rel 0.00186); objective 33.2806249999 worse than target 33.34375 (rel 1.89e-03)
+  NOANS (78):
+    bounds_huge-82010	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    bounds_huge-82026	numerical_failure	numerical_failure: no progress in 30 iterations
+    bounds_huge-82028	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    bounds_huge-82033	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    bounds_huge-82040	numerical_failure	numerical_failure: no progress in 30 iterations
+    bounds_huge-82044	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    bounds_huge-82056	numerical_failure	numerical_failure: no progress in 30 iterations
+    bounds_huge-82068	numerical_failure	numerical_failure: no progress in 30 iterations
+    bounds_huge-82074	numerical_failure	numerical_failure: no progress in 30 iterations
+    bounds_huge-82075	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    ill_cond-87002	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87003	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87006	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    ill_cond-87007	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87010	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87011	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87014	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87015	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87018	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87019	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87023	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87026	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87030	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87031	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87034	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    ill_cond-87035	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    ill_cond-87038	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87039	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87043	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87046	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    ill_cond-87047	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87051	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87054	numerical_failure	numerical_failure: converged on the scaled problem but not on the original model
+    ill_cond-87055	numerical_failure	numerical_failure: no progress in 30 iterations
+    ill_cond-87059	numerical_failure	numerical_failure: no progress in 30 iterations
+    indef_convex_feasible-76000	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76001	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76002	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.03
+    indef_convex_feasible-76003	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76004	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76005	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.02
+    indef_convex_feasible-76006	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76007	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76008	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -2.99
+    indef_convex_feasible-76009	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76010	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76011	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76012	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -2.99
+    indef_convex_feasible-76013	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76014	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76015	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.02
+    indef_convex_feasible-76016	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76017	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76018	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76019	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -2.99
+    indef_convex_feasible-76020	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76021	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76022	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76023	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76024	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76025	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76026	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76027	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76028	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -2.99
+    indef_convex_feasible-76029	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76030	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.02
+    indef_convex_feasible-76031	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76032	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.02
+    indef_convex_feasible-76033	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76034	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76035	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76036	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    indef_convex_feasible-76037	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76038	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3.01
+    indef_convex_feasible-76039	nonconvex	refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min -3
+    infeasible-74057	numerical_failure	numerical_failure: nonoptimal original-model proof failed or unavailable
+    maximize-88059	numerical_failure	numerical_failure: no progress in 30 iterations
+    scale_rows-86044	numerical_failure	numerical_failure: no progress in 30 iterations
+  PARTIAL (25):
+    unbounded-73000	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73003	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73006	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73009	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73012	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73015	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73018	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73021	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73024	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73027	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73030	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73033	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73036	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73039	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73042	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73048	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73054	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73060	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73063	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73069	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73072	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73075	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73078	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73081	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+    unbounded-73084	dual_infeasible	dual_infeasible (recession ray verified, primal feasibility not established); truth unbounded
+  REF_UNRESOLVED (3):
+    near_psd-77031	optimal	reference other:Solve error; engine point feasible=True stationarity 0.00e+00
+    near_psd-77042	optimal	reference not_set; engine point feasible=True stationarity 0.00e+00
+    near_psd-77066	optimal	reference not_set; engine point feasible=True stationarity 0.00e+00
+  QUICK rows: 200; changed vs FULL (verdict or engine status): 0
+  FULL-only rows not in QUICK: 1580
+### tests2/methods/simplex: total=3754 verdicts={'PASS': 3645, 'NOANS': 57, 'REF_UNRESOLVED': 9, 'PASS_REF': 27, 'FAIL_OBJ': 16}
+  FAIL_OBJ (16):
+    near_singular-37003	optimal	engine 46.79808285048105 vs reference 46.7506289644656 (rel 0.00102); exact optimum 51.00000024337897 (engine off by 0.0824, reference off by 0.0833)
+    near_singular-37027	optimal	engine 95.90268156387545 vs reference 88.97184074891472 (rel 0.0779); exact optimum 97.99997135357869 (engine off by 0.0214, reference off by 0.0921)
+    near_singular-37045	optimal	engine 65.31517530490262 vs reference 65.05706531599685 (rel 0.00397); exact optimum 66.99999919427032 (engine off by 0.0251, reference off by 0.029)
+    near_singular-37056	optimal	engine 34.83997707436293 vs reference 32.230991231606794 (rel 0.0809); exact optimum 49.99999909401223 (engine off by 0.303, reference off by 0.355)
+    near_singular-37057	optimal	engine 56.002630060342064 vs reference 55.99741001417441 (rel 9.32e-05); exact optimum 59.99999741632594 (engine off by 0.0666, reference off by 0.0667)
+    near_singular-37062	optimal	engine 50.60538241769959 vs reference 43.9302061033062 (rel 0.152); exact optimum 54.00000178463698 (engine off by 0.0629, reference off by 0.186)
+    near_singular-37063	optimal	engine 47.4305725132009 vs reference 47.409960406717765 (rel 0.000435); exact optimum 56.000001295477645 (engine off by 0.153, reference off by 0.153)
+    near_singular-37074	optimal	engine 31.52952871314408 vs reference 30.901246908104866 (rel 0.0203); exact optimum 37.000000434705065 (engine off by 0.148, reference off by 0.165)
+    near_singular-37092	optimal	engine 24.63380810565488 vs reference 15.108108000236474 (rel 0.631); exact optimum 51.0 (engine off by 0.517, reference off by 0.704)
+    near_singular-37099	optimal	engine 62.42174491342429 vs reference 62.3831763675918 (rel 0.000618); exact optimum 65.000000681962 (engine off by 0.0397, reference off by 0.0403)
+    near_singular-37104	optimal	engine 17.88113641134032 vs reference 15.951796889312348 (rel 0.121); exact optimum 28.999999504273333 (engine off by 0.383, reference off by 0.45)
+    near_singular-37105	optimal	engine 63.874671551957846 vs reference 55.47627162845726 (rel 0.151); exact optimum 66.00002828519496 (engine off by 0.0322, reference off by 0.159)
+    near_singular-37111	optimal	engine 57.21630663059155 vs reference 57.14941558635095 (rel 0.00117); exact optimum 58.99999973356253 (engine off by 0.0302, reference off by 0.0314)
+    near_singular-37122	optimal	engine 25.85748539589595 vs reference 25.70446811843821 (rel 0.00595); exact optimum 46.99999291483206 (engine off by 0.45, reference off by 0.453)
+    near_singular-37129	optimal	engine 47.33613146094669 vs reference 47.33286158205954 (rel 6.91e-05); exact optimum 51.00000110773069 (engine off by 0.0718, reference off by 0.0719)
+    near_singular-37134	optimal	engine 48.931081135431256 vs reference 33.67552826352639 (rel 0.453); exact optimum 64.99999760003709 (engine off by 0.247, reference off by 0.482)
+  NOANS (57):
+    big_cover-64001	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    big_values-57025	numerical_failure	engine numerical_failure (root LP failed: final point violates constraints by 0.000000) vs reference optimal (presolve-off optimal)
+    big_values-57027	time_limit	engine time_limit (node LP numerical_failure: final point violates constraints by 0.000001) vs reference optimal (presolve-off optimal)
+    coef_range-38007	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38013	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38019	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38039	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38040	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38049	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38057	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38069	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38071	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38078	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38079	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38084	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38090	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38095	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38097	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38098	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38105	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38111	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38113	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38114	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38121	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38126	iteration_limit	engine iteration_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38127	numerical_failure	engine numerical_failure (phase 1 direction without a blocking variable) vs reference optimal (presolve-off optimal)
+    coef_range-38128	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38143	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38149	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38151	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38153	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38155	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38164	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38165	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38177	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38179	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38181	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38185	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38191	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    coef_range-38193	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38195	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38196	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    coef_range-38197	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    infeasible-35057	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    near_singular-37005	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37068	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    near_singular-37083	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37097	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37098	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    near_singular-37103	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37110	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37119	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference optimal (presolve-off optimal)
+    near_singular-37139	time_limit	engine time_limit () vs reference optimal (presolve-off optimal)
+    redundant_eq-34068	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34074	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34080	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34089	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable) vs reference infeasible (presolve-off infeasible)
+  REF_UNRESOLVED (9):
+    big_cover-64005	time_limit	reference status time_limit, engine time_limit
+    equality_int-55006	time_limit	reference status time_limit, engine time_limit
+    equality_int-55029	time_limit	reference status time_limit, engine time_limit
+    equality_int-55039	time_limit	reference status time_limit, engine time_limit
+    equality_int-55055	time_limit	reference status time_limit, engine time_limit
+    general_int-47018	time_limit	reference status time_limit, engine time_limit
+    general_int-47031	time_limit	reference status time_limit, engine time_limit
+    general_int-47057	time_limit	reference status time_limit, engine time_limit
+    int_free_neg-51021	time_limit	reference status time_limit, engine time_limit
+  QUICK rows: 390; changed vs FULL (verdict or engine status): 0
+  FULL-only rows not in QUICK: 3364
+### tests2/methods/dual: total=2952 verdicts={'PASS': 2874, 'NOANS': 34, 'PASS_REF': 29, 'FAIL_OBJ': 15}
+  FAIL_OBJ (15):
+    near_singular-37003	optimal	engine 46.776980711126846 vs reference 46.7506289644656 (rel 0.000564); exact optimum 51.00000024337897 (engine off by 0.0828, reference off by 0.0833)
+    near_singular-37027	optimal	engine 95.90268156387545 vs reference 88.97184074891472 (rel 0.0779); exact optimum 97.99997135357869 (engine off by 0.0214, reference off by 0.0921)
+    near_singular-37045	optimal	engine 65.3313013475023 vs reference 65.05706531599685 (rel 0.00422); exact optimum 66.99999919427032 (engine off by 0.0249, reference off by 0.029)
+    near_singular-37056	optimal	engine 32.2411973016773 vs reference 32.230991231606794 (rel 0.000317); exact optimum 49.99999909401223 (engine off by 0.355, reference off by 0.355)
+    near_singular-37062	optimal	engine 50.60538241769959 vs reference 43.9302061033062 (rel 0.152); exact optimum 54.00000178463698 (engine off by 0.0629, reference off by 0.186)
+    near_singular-37063	optimal	engine 47.43057251320089 vs reference 47.409960406717765 (rel 0.000435); exact optimum 56.000001295477645 (engine off by 0.153, reference off by 0.153)
+    near_singular-37074	optimal	engine 31.510672326611466 vs reference 30.901246908104866 (rel 0.0197); exact optimum 37.000000434705065 (engine off by 0.148, reference off by 0.165)
+    near_singular-37092	optimal	engine 24.625055091692364 vs reference 15.108108000236474 (rel 0.63); exact optimum 51.0 (engine off by 0.517, reference off by 0.704)
+    near_singular-37099	optimal	engine 62.42174491389976 vs reference 62.3831763675918 (rel 0.000618); exact optimum 65.000000681962 (engine off by 0.0397, reference off by 0.0403)
+    near_singular-37104	optimal	engine 17.88113641134032 vs reference 15.951796889312348 (rel 0.121); exact optimum 28.999999504273333 (engine off by 0.383, reference off by 0.45)
+    near_singular-37105	optimal	engine 63.948077413755456 vs reference 55.47627162845726 (rel 0.153); exact optimum 66.00002828519496 (engine off by 0.0311, reference off by 0.159)
+    near_singular-37110	optimal	engine 59.97633229839239 vs reference 30.715304979980438 (rel 0.953); exact optimum 61.00000022765435 (engine off by 0.0168, reference off by 0.496)
+    near_singular-37111	optimal	engine 57.18017695284595 vs reference 57.14941558635095 (rel 0.000538); exact optimum 58.99999973356253 (engine off by 0.0308, reference off by 0.0314)
+    near_singular-37129	optimal	engine 47.33613146094669 vs reference 47.33286158205954 (rel 6.91e-05); exact optimum 51.00000110773069 (engine off by 0.0718, reference off by 0.0719)
+    near_singular-37134	optimal	engine 48.931081135431256 vs reference 33.67552826352639 (rel 0.453); exact optimum 64.99999760003709 (engine off by 0.247, reference off by 0.482)
+  NOANS (34):
+    coef_range-38007	time_limit	engine time_limit (dual 57 + primal 39879913 iterations; dual factor 0.000203 s in 3 (first 0.00002) vs reference optimal (presolve-off optimal)
+    coef_range-38013	time_limit	engine time_limit (dual 35 + primal 17455711 iterations; dual factor 0.000099 s in 3 (first 0.00001) vs reference optimal (presolve-off optimal)
+    coef_range-38019	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 95 + primal 6022 ite) vs reference optimal (presolve-off optimal)
+    coef_range-38061	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 6 + primal 0 iterati) vs reference optimal (presolve-off optimal)
+    coef_range-38069	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 79 + primal 3 iterat) vs reference optimal (presolve-off optimal)
+    coef_range-38111	time_limit	engine time_limit (dual 42 + primal 16265260 iterations; dual factor 0.000144 s in 3 (first 0.00001) vs reference optimal (presolve-off optimal)
+    coef_range-38113	time_limit	engine time_limit (dual 57 + primal 9180737 iterations; dual factor 0.000234 s in 3 (first 0.000028) vs reference optimal (presolve-off optimal)
+    coef_range-38127	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 12 + primal 9008 ite) vs reference optimal (presolve-off optimal)
+    coef_range-38143	time_limit	engine time_limit (dual 10042 + primal 18143448 iterations (dual stalled); dual factor 0.031902 s i) vs reference optimal (presolve-off optimal)
+    coef_range-38149	time_limit	engine time_limit (dual 76 + primal 11232150 iterations; dual factor 0.000328 s in 4 (first 0.00002) vs reference optimal (presolve-off optimal)
+    coef_range-38164	time_limit	engine time_limit (dual 16 + primal 31966733 iterations; dual factor 0.000033 s in 3 (first 0.00001) vs reference optimal (presolve-off optimal)
+    coef_range-38165	time_limit	engine time_limit (dual 48 + primal 11463032 iterations (dual ray not confirmed); dual factor 0.000) vs reference optimal (presolve-off optimal)
+    coef_range-38191	time_limit	engine time_limit (dual 64 + primal 8951158 iterations; dual factor 0.000256 s in 3 (first 0.000029) vs reference optimal (presolve-off optimal)
+    infeasible-35057	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 19 + primal 27 itera) vs reference infeasible (presolve-off infeasible)
+    infeasible-35063	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 20 + primal 3 iterat) vs reference infeasible (presolve-off infeasible)
+    infeasible-35099	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 9 + primal 19 iterat) vs reference infeasible (presolve-off infeasible)
+    near_singular-37012	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 14 + primal 0 iterat) vs reference optimal (presolve-off optimal)
+    near_singular-37018	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 13 + primal 0 iterat) vs reference optimal (presolve-off optimal)
+    near_singular-37059	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 6 + primal 0 iterati) vs reference optimal (presolve-off optimal)
+    near_singular-37065	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 11 + primal 0 iterat) vs reference optimal (presolve-off optimal)
+    near_singular-37072	time_limit	engine time_limit (dual 11 + primal 23691505 iterations; dual factor 0.000042 s in 2 (first 0.00001) vs reference optimal (presolve-off optimal)
+    near_singular-37083	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 7 + primal 0 iterati) vs reference optimal (presolve-off optimal)
+    near_singular-37097	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 4 + primal 0 iterati) vs reference optimal (presolve-off optimal)
+    near_singular-37103	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 8 + primal 0 iterati) vs reference optimal (presolve-off optimal)
+    near_singular-37113	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 15 + primal 0 iterat) vs reference optimal (presolve-off optimal)
+    near_singular-37119	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 4 + primal 0 iterati) vs reference optimal (presolve-off optimal)
+    near_singular-37133	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 7 + primal 0 iterati) vs reference optimal (presolve-off optimal)
+    near_singular-37139	time_limit	engine time_limit (dual 4 + primal 38411078 iterations; dual factor 0.000020 s in 3 (first 0.000007) vs reference optimal (presolve-off optimal)
+    redundant_eq-34029	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 5 + primal 0 iterati) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34068	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 15 + primal 0 iterat) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34071	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 4 + primal 0 iterati) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34074	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 2 + primal 0 iterati) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34080	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 26 + primal 0 iterat) vs reference infeasible (presolve-off infeasible)
+    redundant_eq-34089	numerical_failure	engine numerical_failure (nonoptimal original-model proof failed or unavailable; dual 30 + primal 0 iterat) vs reference infeasible (presolve-off infeasible)
+  QUICK rows: 250; changed vs FULL (verdict or engine status): 0
+  FULL-only rows not in QUICK: 2702
+### tests2/methods/ipm: total=2952 verdicts={'PASS': 2829, 'NOANS': 122, 'FAIL_OBJ': 1}
+  FAIL_OBJ (1):
+    near_singular-37146	optimal	engine 6.925851299905113 vs reference 6.925830102183476 (rel 3.06e-06); exact optimum 29.999958805688994 (engine off by 0.769, reference off by 0.769)
+  NOANS (122):
+    big_status-63001	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63003	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63005	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63007	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63009	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63011	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63013	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63015	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63017	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63019	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63021	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    big_status-63023	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    huge_bounds-31030	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    huge_bounds-31042	numerical_failure	engine numerical_failure (converged on the scaled problem but not on the original model) vs reference optimal (presolve-off optimal)
+    huge_bounds-31090	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    huge_bounds-31118	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    huge_bounds-31130	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37002	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37003	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37008	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37009	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37014	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37015	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37020	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37021	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37027	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37032	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37033	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37038	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37039	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37044	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37045	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37050	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37051	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37052	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37056	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37057	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37062	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37063	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37068	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37069	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37074	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37075	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37080	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37081	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37086	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37087	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37092	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37093	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37098	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37099	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37104	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37105	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37110	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37111	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37116	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37117	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37122	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37123	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37128	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37129	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37134	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37135	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37140	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37141	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    near_singular-37147	numerical_failure	engine numerical_failure (no progress in 30 iterations) vs reference optimal (presolve-off optimal)
+    unbounded-36001	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36003	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36007	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36009	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36013	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36018	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36021	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36022	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36024	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36027	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36028	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36031	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36036	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36039	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36043	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36046	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36048	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36051	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36057	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36063	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36064	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36066	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36067	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36069	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36070	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36072	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36075	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36076	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36078	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36081	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36082	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36084	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36085	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36087	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36090	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36094	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36099	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36100	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36114	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36115	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36117	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36118	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36120	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36121	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36123	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36124	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36126	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36127	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36129	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36130	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36132	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36133	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36135	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36138	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36139	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+    unbounded-36145	dual_infeasible	engine dual_infeasible (recession direction) vs reference unbounded (presolve-off unbounded)
+  QUICK rows: 250; changed vs FULL (verdict or engine status): 0
+  FULL-only rows not in QUICK: 2702
