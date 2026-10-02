@@ -30,6 +30,21 @@ Scope:
 - No measured speed advantage over HiGHS.
 - GPU PDHG is a near-optimal prototype with its own ledgers in `results/gpu_pdhg`; Mittelmann and QPLIB are outside the tested coverage.
 
+## GPU PDHG - Kaggle T4 check
+
+Approximate LP solver, separate from the 91/93 exact-simplex headline. A clean-room Kaggle run used `gpu/pdhg.cu` from `442ca16`, targeting the T4 with `sm_75`, at tolerance `1e-6`: three GPU repeats per case, a live SciPy/HiGHS reference and an independent point check on the original model.
+
+| Case | GPU solve time | Same-run context |
+| --- | --- | --- |
+| DFL001 | 0.60-0.71 s | Primal simplex timed out at 90 s; dual simplex 31.8 s |
+| PILOT87 | 26.8-26.9 s | CPU PDHG reached 120 s unconverged; dual simplex 27.6-28.2 s |
+| FIT2P | 6.3-6.5 s | Dual simplex about 5.0 s |
+| Synthetic transport_316x316 (seed 1) | 3.7-3.8 s | Dual simplex about 0.5 s |
+
+GPU setup adds 0.35-0.77 s, reported separately from solve time. Relative objective errors against HiGHS were about `2e-11` (FIT2P), `4.7e-7` (DFL001), `7.9e-7` (transport) and `1.4e-6` (PILOT87). Original-model relative row violations ranged from `1.2e-5` to `3.4e-3`; **0/12 GPU runs passed the strict `1e-6` row/bound/objective gate**. Dual residuals and gaps were solver-self-reported.
+
+These selected cases show fast approximate answers, including large or degenerate LPs. They do not establish GPU-over-simplex speed wins at equal accuracy. FIT2P and transport favor dual simplex. Exact simplex remains the correctness engine.
+
 ## Build and run
 
 Build with a C++17 compiler. The engine has no external solver or linear-algebra dependency.
