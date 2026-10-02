@@ -88,13 +88,13 @@ def run_pdhg(path, device, threads, a):
                 os.unlink(f)
 
 
-def run_simplex(path, a):
+def run_simplex(path, a, method='simplex'):
     wait_load(a)
     with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as tf:
         out = tf.name
     try:
         t = time.perf_counter()
-        subprocess.run([SIMPLEX, path, '--time-limit', str(a.time_limit), '--json', out], stdout=subprocess.DEVNULL,
+        subprocess.run([SIMPLEX, path, '--time-limit', str(a.time_limit), '--json', out] + (['--method', 'dual'] if method == 'dual' else []), stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL, timeout=a.time_limit + 120)
         wall = time.perf_counter() - t
         with open(out) as f:
@@ -123,6 +123,7 @@ def main():
     ap.add_argument('--repeats', type=int, default=3)
     ap.add_argument('--time-limit', type=float, default=60)
     ap.add_argument('--simplex', action='store_true', help='also run the exact C++ simplex for context')
+    ap.add_argument('--simplex-methods', default='simplex', help='with --simplex: comma list of simplex, dual')
     ap.add_argument('--fp32', action='store_true')
     ap.add_argument('--repeat-all', action='store_true', help='repeat every non-crashed config, also time-limited ones')
     ap.add_argument('--max-load', type=float, default=0, help='wait (up to 20 min) for 1-min load below this')
@@ -166,16 +167,16 @@ def main():
             e = row['objective_rel_error_vs_highs']
             print(f"{case:12s} {cfg:6s} {row['status']:14s} it {row['iterations']} relerr "
                   f"{'n/a' if e is None else f'{e:.2e}'} total {row['total_s']} solve {row['solve_s']}", flush=True)
-        if a.simplex:
-            s = run_simplex(path, a)
+        for method in (a.simplex_methods.split(',') if a.simplex else []):
+            s = run_simplex(path, a, method)
             obj = s.get('objective')
             rows.append(dict(case=case, rows=rows[-1]['rows'], cols=rows[-1]['cols'], nnz=rows[-1]['nnz'],
-                             device='cpu-exact-simplex', threads=1, precision='fp64', tol='exact',
+                             device='cpu-exact-simplex' if method == 'simplex' else 'cpu-exact-dual', threads=1, precision='fp64', tol='exact',
                              status=s.get('status'), objective=obj, highs_objective=ref['objective'],
                              objective_rel_error_vs_highs=rel_err(obj, ref['objective']),
                              iterations=s.get('iterations'), total_s=s.get('wall_s'), repeats=1,
                              highs_s=ref['wall_s'], load_avg_1m=os.getloadavg()[0]))
-            print(f"{case:12s} simplex {s.get('status')} total {s.get('wall_s')}", flush=True)
+            print(f"{case:12s} {method} {s.get('status')} total {s.get('wall_s')}", flush=True)
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     with open(a.out + '.csv', 'w', newline='') as f:
         w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction='ignore')
