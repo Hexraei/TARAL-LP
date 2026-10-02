@@ -20,9 +20,9 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 SEEDS = [26119, 3, 7, 26120, 31, 47]
 CHECK = os.path.join(ROOT, "cpp-engine", "tools", "milp_check.py")
 FIELDS = ["family", "seed", "instance", "rows", "cols", "ints", "status", "objective", "best_bound", "nodes",
-          "lp_iterations", "wall_s", "prop_tightened", "prop_pruned", "rc_fixed", "rc_skipped", "ref_status",
+          "lp_iterations", "wall_s", "prop_tightened", "prop_crossed", "prop_crossed_lp_infeasible", "prop_pruned", "rc_fixed", "rc_skipped", "audit", "ref_status",
           "ref_objective", "verdict", "detail"]
-COUNTERS = ["prop_tightened", "prop_pruned", "rc_fixed", "rc_skipped"]  # absent in engines that predate them
+COUNTERS = ["prop_tightened", "prop_crossed", "prop_crossed_lp_infeasible", "prop_pruned", "rc_fixed", "rc_skipped"]  # absent in engines that predate them
 
 
 def load_check():
@@ -105,7 +105,7 @@ def run_random(a):
                              ints=sum(1 for x in g["ints"] if x), status=r["status"], objective=r.get("objective"),
                              best_bound=r.get("best_bound"), nodes=r.get("nodes"), lp_iterations=r.get("iterations"),
                              wall_s=round(r["wall_s"], 4), ref_status=hs, ref_objective=ho, verdict=verdict, detail=detail,
-                             **{c: r.get(c, "") for c in COUNTERS}))
+                             audit=json.dumps(r["audit"]) if "audit" in r else "", **{c: r.get(c, "") for c in COUNTERS}))
         json.dump(cache, open(cache_path, "w"))
     write_csv(a.out, rows)
     meta(a, cmds, {"seeds": a.seeds, "cases_per_seed": a.n, "reference": "scipy.optimize.milp (HiGHS) on generator data"})
@@ -145,6 +145,11 @@ def summarize(rows):
     solved = sum(1 for r in rows if r["status"] in ("optimal", "infeasible"))
     nodes = sum(int(r["nodes"] or 0) for r in rows)
     cnt = {c: sum(int(r.get(c) or 0) for r in rows) for c in COUNTERS}
+    if any(r.get("audit") for r in rows):  # [nodes, LP infeasible, LP feasible, LP other, int-empty, int-feasible, undecided]
+        tot = [0] * 7
+        for r in rows:
+            for k, v in enumerate(json.loads(r["audit"]) if r.get("audit") else []): tot[k] += v
+        cnt["audit[nodes,lp_infeasible,lp_feasible,lp_other,int_empty,int_feasible,undecided]"] = tot
     print("cases=%d solved(status optimal/infeasible)=%d total_nodes=%d verdicts=%s counters=%s" % (len(rows), solved, nodes, tally, cnt))
 
 

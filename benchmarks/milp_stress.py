@@ -4,7 +4,7 @@ equality rows built around a known integer point, negative lower bounds, general
 rows. Graded against HiGHS (scipy.optimize.milp on the generator data) and an independent check of the
 engine's point. Prints one line; exit 1 on any wrong answer.
 
-  python benchmarks/milp_stress.py --engine OUT/taral --seeds 1 2 3 --n 100
+  python benchmarks/milp_stress.py --engine OUT/taral --seeds 1 2 3 --n 100   (add --audit-prop to the engine command to cross-check propagation prunes)
 """
 import argparse, json, os, random, subprocess, sys, tempfile
 import numpy as np
@@ -64,14 +64,15 @@ def verify(g, solpath, tol=1e-6):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--engine", required=True); ap.add_argument("--seeds", type=int, nargs="+", required=True)
     ap.add_argument("--n", type=int, default=100); ap.add_argument("--time-limit", type=float, default=30)
-    a = ap.parse_args(); d = tempfile.mkdtemp(); bad = nodes = cases = unsolved = 0; st = {}
+    a = ap.parse_args(); d = tempfile.mkdtemp(); bad = nodes = cases = unsolved = pruned = 0; st = {}; audit = [0] * 7
     for seed in a.seeds:
         rng = random.Random(seed)
         for k in range(a.n):
             g = gen(rng, k); p = os.path.join(d, "s%d_%s.mps" % (seed, g["name"])); write_mps(p, **g)
             hs, ho = reference(g); js, sp = p + ".json", p + ".sol"
             subprocess.run([a.engine, p, "--time-limit", str(a.time_limit), "--json", js, "--sol", sp], capture_output=True)
-            r = json.load(open(js)); cases += 1; nodes += r.get("nodes") or 0
+            r = json.load(open(js)); cases += 1; nodes += r.get("nodes") or 0; pruned += r.get("prop_crossed") or 0
+            audit = [x + y for x, y in zip(audit, r.get("audit") or [0] * 7)]
             st[r["status"]] = st.get(r["status"], 0) + 1
             if r["status"] in ("time_limit", "node_limit"): unsolved += 1; continue
             ok = r["status"] == hs
@@ -79,7 +80,7 @@ def main():
                 o = verify(g, sp); ok = o is not None and abs(o - ho) <= 1e-6 * max(1, abs(ho)) and abs(o - r["objective"]) <= 1e-6 * max(1, abs(o))
             if not ok:
                 bad += 1; print("MISMATCH seed", seed, g["name"], "reference", hs, ho, "engine", r["status"], r.get("objective"))
-    print(f"STRESS cases={cases} wrong={bad} unsolved={unsolved} total_nodes={nodes} statuses={st}"); sys.exit(1 if bad else 0)
+    print(f"STRESS cases={cases} wrong={bad} unsolved={unsolved} total_nodes={nodes} prop_crossed={pruned} audit[nodes,lp_inf,lp_feas,lp_other,int_empty,int_feasible,undecided]={audit} statuses={st}"); sys.exit(1 if bad else 0)
 
 
 main()

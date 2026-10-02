@@ -47,6 +47,10 @@ void write_milp_json(const char* path, const MilpResult& r, double wall) {
     num_or_null(f, r.has_solution && r.status != "unbounded" ? r.gap : kInf);
     std::fprintf(f, ", \"nodes\": %ld, \"unresolved_nodes\": %ld, \"has_solution\": %s", r.nodes, r.unresolved_nodes,
                  r.has_solution ? "true" : "false");
+    std::fprintf(f, ", \"prop_tightened\": %ld, \"prop_crossed\": %ld, \"prop_crossed_lp_infeasible\": %ld, \"prop_pruned\": %ld",
+                 r.prop_tightened, r.prop_crossed, r.prop_crossed_lp_infeasible, r.prop_pruned);
+    std::fprintf(f, ", \"audit\": [%ld, %ld, %ld, %ld, %ld, %ld, %ld]", r.audit[0], r.audit[1], r.audit[2], r.audit[3],
+                 r.audit[4], r.audit[5], r.audit[6]);
     std::fprintf(f, ", \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n", r.lp_iterations, wall,
                  json_escape(r.message).c_str());
     std::fclose(f);
@@ -79,6 +83,7 @@ int main(int argc, char** argv) {
     const char *model = nullptr, *sol = nullptr, *json = nullptr;
     double limit = 60;
     long node_limit = std::numeric_limits<long>::max();
+    MilpOptions mopt;
     std::string method = "simplex";  // "ipm": interior point; "dual": dual simplex (LPs)
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--time-limit") && i + 1 < argc) limit = std::atof(argv[++i]);
@@ -86,6 +91,8 @@ int main(int argc, char** argv) {
         else if (!std::strcmp(argv[i], "--json") && i + 1 < argc) json = argv[++i];
         else if (!std::strcmp(argv[i], "--node-limit") && i + 1 < argc) node_limit = std::atol(argv[++i]);
         else if (!std::strcmp(argv[i], "--method") && i + 1 < argc) method = argv[++i];
+        else if (!std::strcmp(argv[i], "--audit-prop")) mopt.audit_prop = true;
+        else if (!std::strcmp(argv[i], "--no-prop-prune")) mopt.no_prop_prune = true;
         else model = argv[i];
     }
     if (!model) {
@@ -120,13 +127,13 @@ int main(int argc, char** argv) {
         return 0;
     }
     if (md.has_integers()) {
-        MilpResult r = solve_milp(md, limit - wall(), node_limit);
+        MilpResult r = solve_milp(md, limit - wall(), node_limit, mopt);
         double w = wall();
         if (json) write_milp_json(json, r, w);
         if (sol && r.has_solution) write_sol(sol, md, r.x);
-        std::printf("status %s objective %.12g best_bound %.12g gap %.3g nodes %ld iterations %ld wall %.3fs %s\n",
+        std::printf("status %s objective %.12g best_bound %.12g gap %.3g nodes %ld iterations %ld prop_crossed %ld wall %.3fs %s\n",
                     r.status.c_str(), r.has_solution ? r.objective : NAN, r.best_bound, r.gap, r.nodes, r.lp_iterations,
-                    w, r.message.c_str());
+                    r.prop_crossed, w, r.message.c_str());
         return 0;
     }
     Result r = method == "dual" ? solve_lp_dual(md, md.col_lo, md.col_up, nullptr, limit - wall())

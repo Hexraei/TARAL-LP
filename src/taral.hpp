@@ -1,5 +1,6 @@
 // TARAL-LP engine: shared types and module interfaces. C++17 standard library only.
 #pragma once
+#include <array>
 #include <limits>
 #include <stdexcept>
 #include <string>
@@ -85,7 +86,17 @@ struct MilpResult {
     double best_bound = 0;          // proven bound (-inf/+inf when none)
     double gap = kInf;              // |objective - best_bound| / max(1, |objective|)
     long nodes = 0, lp_iterations = 0, unresolved_nodes = 0;
+    long prop_tightened = 0;                   // propagation: integer bounds tightened
+    long prop_crossed = 0, prop_crossed_lp_infeasible = 0, prop_pruned = 0;  // nodes whose integer domain came out
+                                               // empty; of those the LP confirmed; pruned without the LP
+    // --audit-prop: nodes with an emptied domain, re-checked (see Search::audit_pruned in milp.cpp):
+    // {nodes, LP infeasible, LP feasible, LP other, integer-empty by plain B&B, integer-feasible (a bug), undecided}
+    std::array<long, 7> audit{};
     std::string message;
 };
-MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit);
+struct MilpOptions {
+    bool audit_prop = false;  // --audit-prop: re-check every node whose propagated integer domain came out empty
+    bool no_prop_prune = false;  // --no-prop-prune: do not prune such a node directly; the LP decides
+};
+MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, MilpOptions opt = {});
 const char* status_name(Status s);
