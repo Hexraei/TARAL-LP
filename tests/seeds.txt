@@ -1,0 +1,2 @@
+# category  kind  first_seed  last_seed  count   (case i has seed first_seed + i; fixed, deterministic)
+# total LP 0  MILP 0
