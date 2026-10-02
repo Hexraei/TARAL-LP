@@ -8,11 +8,11 @@ Experimental CPU solver. Not ready for production; Kaggle verification is pendin
 
 | Protocol | Result | Verification |
 | --- | --- | --- |
-| 60 seconds per case | **90/93 passes, 0 wrong answers** | Local; no lost October 1 Python baseline passes |
-| Stricter numerical check | **89/90 passing cases** | Local; row/bound violation and relative objective error <= 1e-8 |
-| 300 seconds per case | **92/93 passes, 0 wrong answers** | Local; separate extended-cap protocol |
+| 60 seconds per case | 90/93 passes, 0 wrong answers | Local; no lost October 1 Python baseline passes |
+| Stricter numerical check | 89/90 passing cases | Local; row/bound violation and relative objective error <= 1e-8 |
+| 300 seconds per case | 92/93 passes, 0 wrong answers | Local; separate extended-cap protocol |
 
-At 60 seconds, DFL001 times out. PILOT.WE and PILOT4 lack usable HiGHS reference results in that protocol and are never counted as passes; its ceiling is 91/93. They pass under the separate 300-second protocol; DFL001 still does not finish. TRUSS passes as an extra case outside the 93-case denominator.
+At 60 seconds, DFL001 times out. PILOT.WE and PILOT4 lack usable HiGHS reference results in that protocol and remain excluded from the pass count; its ceiling is 91/93. They pass under the separate 300-second protocol; DFL001 still does not finish. TRUSS passes as an extra case outside the 93-case denominator.
 
 A local check of 3,600 small LPs with known optimal/infeasible/unbounded status found 0 false verdicts.
 
@@ -46,22 +46,22 @@ The stricter check is reported separately; the fixed rule stays unchanged.
 
 The one 60-second pass outside the stricter line is GREENBEA: row `BRG...U3` has zero RHS and about 95 terms reaching 2.3e8 that cancel; measured violation is 1.46e-8. GREENBEA passes the fixed rule but fails the stricter check.
 
-Local machine: Intel Core 7 240H, 10 cores/16 threads, 15 GiB RAM, Ubuntu 24.04, Linux 6.17, g++ 13.3 with `-O3 -march=native -std=c++17`. Cases ran one at a time on a single-threaded engine. Local and Kaggle timings are not interchangeable; near-cap cases can change status on a slower host. Kaggle verification of this `src/` engine is pending.
+Local machine: Intel Core 7 240H, 10 cores/16 threads, 15 GiB RAM, Ubuntu 24.04, Linux 6.17, g++ 13.3 with `-O3 -march=native -std=c++17`. Cases ran one at a time on a single-threaded engine. Host speed affects near-cap outcomes. Use separate timing records for local and Kaggle runs. Kaggle verification of this `src/` engine is pending.
 
 ## Repository guide
 
 | Path | Purpose |
 | --- | --- |
 | `src/` | Current modular C++ LP engine: MPS parser, sparse LU, simplex and CLI |
-| `cpp-engine/` | Separate bundled C++ reference engine, diagnostic tools, fixtures and internal report; not interchangeable with the current `src/` figures |
+| `cpp-engine/` | Separate bundled C++ reference engine, diagnostic tools, fixtures and internal report; its results apply to this engine alone |
 | `reproduction/` | One-command reproduction for that bundled reference engine, using canonical files in `cpp-engine/`; see its [instructions](reproduction/README_REPRO.md) |
-| `gpu/` | Own CUDA sparse matrix-vector kernel benchmark, not an LP solver |
-| `engine/`, `parsers/`, `benchmarks/` | Historical Python/SciPy prototype and checks, not the current C++ solve path |
-| `milp/`, `qp/` | Historical small synthetic Python prototypes, not general MILP/QP benchmark coverage |
-| `results/` | Older partial Python ledgers, not the current C++ headline results |
-| `examples/` | Wholly synthetic refinery LP and retained result, not operational data or measured savings |
+| `gpu/` | CUDA sparse matrix-vector kernel benchmark; LP solving is CPU-only |
+| `engine/`, `parsers/`, `benchmarks/` | Historical Python/SciPy prototype and checks; the current C++ engine is in `src/` |
+| `milp/`, `qp/` | Historical small synthetic Python prototypes; broader MILP/QP benchmarks remain untested |
+| `results/` | Older partial Python ledgers; current C++ results are summarized above |
+| `examples/` | Synthetic refinery LP and retained hypothetical objective; operational data and measured savings are unavailable |
 
-Reproduction uses the canonical source, tools, fixtures and references in `cpp-engine/`; it requires a clone of this whole repository. The corpus itself is not checked in. Their internal reports and historical measurements do not change the current `src/` headline.
+Reproduction uses the canonical source, tools, fixtures and references in `cpp-engine/`; it requires a clone of this whole repository. Fetch the corpus separately. Keep bundled-engine and historical results separate from the current `src/` headline.
 
 ## Historical measurements
 
@@ -73,17 +73,17 @@ Reproduction uses the canonical source, tools, fixtures and references in `cpp-e
 The earlier Python prototype uses SciPy LU. These records document that prototype, outside the compliant C++ engine path. Measurements ran on Kaggle unless marked local.
 
 - Ratios above 1 mean TARAL-LP took longer than HiGHS.
-- The paired sets changed, so the medians are not a like-for-like speed comparison.
+- The medians use different passing pairs. A controlled speed comparison requires identical pairs.
 - The historical headline is the October 1 Python run.
 - Four executed Kaggle runs of the same October 1 Python engine code gave 73, 73, 73 and 74 passes out of 93.
 - The 73 October 1 Python passes held in every run, with no losses against the September 30 baseline.
-- Cases near the 60-second cap, such as 80BAU3B, can change status with host speed, so identical per-case statuses are not guaranteed.
+- Host speed can change outcomes near the 60-second cap, including 80BAU3B.
 - Median TARAL-LP / HiGHS solver-wall ratios ranged from about 4.67x to 5.93x, varying by up to about 25% between runs.
-- Headline figures remain the October 1 Python result: 73/93 and 5.828x, not the best of the four runs.
+- Headline selection: the October 1 Python result, 73/93 and 5.828x. The best of the four runs is excluded from that headline.
 - Both solvers had a 60-second parse + solve budget on Kaggle CPU.
 - The Kaggle comparison uses the same parser for both solvers.
-- A separate local original-MPS diagnostic run verified the same October 1 Python engine on all 73 passing cases; it is not a Kaggle-executed or full-corpus verification gate and does not cover the 20 non-passing cases.
-- No GPU LP solve is claimed.
+- Local original-MPS diagnostics checked all 73 passing cases of the same October 1 Python engine. This gate was limited to local passers; Kaggle and the 20 non-passing cases remained unchecked by it.
+- LP solving remained CPU-only.
 
 ### Local benchmarks - patched Python engine (September 30, 2026, historical)
 
@@ -103,7 +103,7 @@ The recovery checks used up to six concurrent workers. Timing scope: concurrent-
 - The 42 baseline regression cases passed against the saved HiGHS objective references.
 - The ten recovered cases also matched their saved references within the test tolerance.
 - The local ledger contains 77 checks: 42 baseline cases plus all 35 former timeouts.
-- It does not retest the other 15 passes from the earlier 57-pass run or DEGEN2, so 52 local passes must not be reported as 52/93.
+- Untested by this ledger: the other 15 passes from the earlier 57-pass run and DEGEN2. Report the 52 local passes within their selected set; 52/93 would overstate coverage.
 
 #### Ten former timeouts that passed locally
 
@@ -137,7 +137,7 @@ Fifteen 65-second caps: NESM, MAROS-R7, CYCLE, WOODW, PILOT.JA, D6CUBE, DEGEN3, 
 
 Four crashed/unclassified jobs: FIT2P, 80BAU3B, DFL001, FIT2D.
 
-Crash causes remain unknown; these jobs count as neither numerical failures nor recoveries. DEGEN2 remains a known issue: the earlier 57-pass engine returned a primal-feasibility loss, and these two speed fixes do not establish a fix for it.
+Crash causes remain unknown; both numerical-failure and recovery classifications remain unverified. DEGEN2 remains unresolved: the earlier 57-pass engine lost primal feasibility. The two speed fixes leave that issue unverified.
 
 #### Why local times are not Kaggle times
 
@@ -145,10 +145,10 @@ A separate sequential, single-BLAS-thread check used the unchanged earlier 57-pa
 
 - Environment comparison: hardware, runtime and load were not isolated.
 - Runtime/library versions, startup and load can contribute.
-- It does not mix the patched local engine with old Kaggle timings.
-- Applying that factor to the concurrent-load recovery times is only a rough scenario, not an executed result: CZPROB, GANGES, SHIP08L and SHIP12L have room under 60 seconds; FIT1P is borderline; SCTAP2, STOCFOR2, SCTAP3, SIERRA and 25FV47 are at risk.
+- The timing comparison uses the unchanged earlier engine on both hosts.
+- Hypothetical scaling of the concurrent-load recovery times, still awaiting an executed test: CZPROB, GANGES, SHIP08L and SHIP12L have room under 60 seconds; FIT1P is borderline; SCTAP2, STOCFOR2, SCTAP3, SIERRA and 25FV47 are at risk.
 - Scaling parse time with a solver-time factor adds uncertainty.
-- The saved September 30 run settled that historical count; the scenario was not a guaranteed forecast.
+- Use the saved September 30 run for the historical count. The scaling scenario carries forecast uncertainty.
 
 ### Executed Kaggle CPU benchmarks (Python prototype, historical)
 
@@ -160,16 +160,16 @@ Saved CPU runs; the notebook is private. HiGHS ran separately as the reference s
 - Median TARAL-LP/HiGHS wall-time ratio: 90.6x on the selected passing pairs.
 - Maximum reported primal residual: 4.66e-10 across those passes.
 - 30/30 small synthetic MILP tests and 30/30 small synthetic QP tests executed and passed. The MILP prototype is limited branch-and-bound; the QP prototype handles positive-definite convex box-bounded problems. Coverage excludes MIPLIB and general QP benchmarks.
-- 12/42 local KKT checks cover a subset of the selected LP set. KKT checks test optimality conditions; this local subset is not a 42-case certificate claim or an executed Kaggle certificate result.
+- KKT optimality conditions were checked locally for 12/42 selected LPs. Certification of all 42 cases and Kaggle certificate execution remain pending.
 
 #### Full-corpus run - October 1, 2026
 
 - Attempted: 93 Netlib cases, pinned corpus commit `56257eea85b433ce6aa67d26156b36385318fd6f`.
 - Result: 73 of 93 attempted cases passed, 13 timeouts, 5 `solver_failed`, 2 `highs_failed`.
-- Median TARAL-LP/HiGHS solver-wall ratio: 5.828x over 73 passing pairs only. TARAL-LP is slower by this median factor. No like-for-like speed change is claimed against earlier medians with different pair sets.
+- Median TARAL-LP/HiGHS solver-wall ratio: 5.828x over 73 passing pairs only. TARAL-LP is slower by this median factor. Earlier medians used different pair sets; a like-for-like speed comparison requires identical pairs.
 - Maximum passing primal residual: 9.31e-10 (LOTFI).
 - Saved-run ID: `354282101`. Figures in this section are from the October 1 Python result; the four-run host-speed variation check is described above. Both solvers had 60 seconds per case for parse + solve; paired ratios use solver-wall fields.
-- The Kaggle run checks shared-parser formulation/objective match. A separate local original-MPS diagnostic run is described below; it does not widen the Kaggle gate.
+- Kaggle verification covers shared-parser formulation/objective match. Original-MPS diagnostics have a separate local gate, described below.
 
 Named October 1 timeouts: 80BAU3B, D2Q06C, D6CUBE, DEGEN3, DFL001, FIT2D, FIT2P, GREENBEA, GREENBEB, PEROLD, PILOT, PILOT87, WOODW.
 
@@ -177,9 +177,9 @@ Named October 1 `solver_failed` cases: CYCLE, DEGEN2, MAROS, PILOT.JA, PILOTNOV.
 
 - Named October 1 `highs_failed` cases: PILOT.WE and PILOT4.
 - PEROLD is classified as timeout, but its HiGHS attempt also failed.
-- None of these counts as a pass.
+- Pass count contribution from these cases: zero.
 - Three cases lack a usable HiGHS optimum in this run, leaving 90 of 93 comparable with HiGHS until reference/model issues are resolved.
-- Keep the headline denominator at 93 attempted, not 90 or 73 selected successes.
+- Headline denominator: 93 attempted. The 90 comparable cases and 73 selected successes are subsets.
 
 #### Separate local original-MPS diagnostic - October 1 passers
 
@@ -220,7 +220,7 @@ python benchmarks/orig_check.py --engine engine/revised_simplex.py --corpus /pat
 - The full-corpus input source is [the pinned Netlib MPS collection](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files).
 - The new local and Kaggle ledgers are separate from the older checked-in partial CSVs below.
 - The checked-in engine is synced to the executed October 1 Python solve path, and the parser retains the September 30 bulk-construction path.
-- The older checked-in result ledgers below are not the new full-run ledger.
+- Older checked-in partial ledgers are listed below; the new full-run ledger is separate.
 
 
 ## Older checked-in measurements (historical Python prototype)
@@ -228,24 +228,24 @@ python benchmarks/orig_check.py --engine engine/revised_simplex.py --corpus /pat
 - The consolidated partial sweep ledger `results/consolidated_partial_sweep.csv` records 39 distinct passing LP instances and five failed rows.
 - A separate verified SCSD8 addendum (`results/scsd8_verified_addendum.jsonl`) raises that historical distinct verified count to 40.
 - Scope: older retained measurements, separate from the local and Kaggle totals above.
-- SHIP04S hit a run limit and is not counted.
+- SHIP04S hit a run limit and remains excluded from verified passes.
 - The retained results match HiGHS objectives and published Netlib reference objectives, with reported maximum primal residual 3.79e-10 across those passes.
-- The five failed rows are not the full inventory of attempts.
-- The ledger has no fresh independent rerun from the checked-in files.
-- The original MPS inputs, reference source links, environment capture and complete run script were not included in the handoff, so the numerical results cannot yet be fully reproduced from this repository alone.
+- The ledger includes five failed rows; the full attempt inventory is incomplete.
+- An independent rerun from the checked-in files remains pending.
+- Reproduction of these older results requires missing handoff artifacts: original MPS inputs, reference source links, environment capture and a complete run script.
 - End-to-end reproduction of this older sweep requires those artifacts.
 
 FIT1D is a separate result file with objective -9146.378092420928 versus HiGHS -9146.378092420926 and published reference -9146.3780924; it took 42.45 CPU seconds versus HiGHS 0.0223 seconds.
 
-In that older sweep, attempted cases not counted as verified included SCORPION (singular basis), FINNIS and SCRS8 (parsed HiGHS result mismatches published references), SCAGR25 and MODSZK1 (lost primal feasibility), and reported outside these attached ledgers: DEGEN2, TUFF, SCTAP2, WOOD1P. Use the newer ledgers for later outcomes.
+Unverified attempts in that older sweep included SCORPION (singular basis), FINNIS and SCRS8 (parsed HiGHS result mismatches published references), SCAGR25 and MODSZK1 (lost primal feasibility), and reported outside these attached ledgers: DEGEN2, TUFF, SCTAP2, WOOD1P. Use the newer ledgers for later outcomes.
 
-- The separate 14-case same-machine CSV benchmarked the earlier pre-LU engine, not the current LU engine.
+- The separate 14-case same-machine CSV applies only to the earlier pre-LU engine. Current LU performance needs its own measurements.
 - It reports HiGHS faster on all 14 tested cases; the median ratio of our CPU time to HiGHS CPU time across the 14 rows is about 52.7x.
 - This prototype was slower than HiGHS on the tested set.
-- Timings are process CPU measurements from the supplied CSV, not a universal speed claim.
-- HiGHS is a reference comparator, not part of our solver core.
+- Timing scope: process CPU measurements on the supplied CSV cases. Performance elsewhere remains untested.
+- HiGHS ran separately as the reference comparator.
 
-- There is no GPU LP solve or general QP solver in the historical prototype.
+- Historical LP solves ran on CPU; QP support is limited to the box-bounded prototype below.
 - A separate small, pure-integer/binary MILP branch-and-bound prototype is included in `milp/`; its three fixed synthetic cases match HiGHS.
 - A seeded property test adds 30/30 randomized small synthetic cases matching brute force and SciPy/HiGHS.
 - MIPLIB and large-instance MILP reliability remain untested.
@@ -262,7 +262,7 @@ In that older sweep, attempted cases not counted as verified included SCORPION (
 
 ## Illustrative example
 
-`examples/illustrative_refinery.py` is a synthetic six-variable LP. Its retained result matches HiGHS at about $1.19 million/day in assumed units; that is an assumed synthetic objective, not operational data, a measured margin or a savings estimate. It uses the historical Python engine. Run from the repository root after installing NumPy and SciPy:
+`examples/illustrative_refinery.py` is a synthetic six-variable LP. Its retained result matches HiGHS at about $1.19 million/day in assumed units. That hypothetical objective has no operational-data, measured-margin or savings validation. It uses the historical Python engine. Run from the repository root after installing NumPy and SciPy:
 
 ```bash
 python -m examples.illustrative_refinery
