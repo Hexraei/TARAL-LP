@@ -1,4 +1,5 @@
 # category  kind  first_seed  last_seed  count   (case i has seed first_seed + i; fixed, deterministic)
 degenerate       LP    26000 26199 200
 cycling          LP    27000 27099 100
-# total LP 300  MILP 0
+dup_coef         LP    28000 28149 150
+# total LP 450  MILP 0
