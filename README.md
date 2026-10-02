@@ -4,24 +4,28 @@ C++17 linear-programming solver with an MPS parser, sparse LU and bounded-variab
 
 ## Current status - October 2, 2026
 
-Experimental CPU solver. Not ready for production; Kaggle verification is pending. Local `src/` measurements use engine commit `a9e8218` (primal ledger) and `0bad060` (dual ledger; LP verdicts of the default method are unchanged since) and 93 Netlib cases from the [pinned corpus](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files).
+Experimental CPU solver, not ready for production. Netlib headline: 91/93 passes with `--method dual` at 60 seconds per case, 0 wrong answers.
+
+An independent clean-room Kaggle run verified `src/` at commit `442ca16`, with source embedded verbatim and live HiGHS references on the original MPS files. Every counted case matched the local ledger verdicts.
+
+Local measurements use engine commit `a9e8218` (primal ledger) and `0bad060` (dual ledger) and 93 Netlib cases from the [pinned corpus](https://github.com/ozy4dm/lp-data-netlib/tree/56257eea85b433ce6aa67d26156b36385318fd6f/mps_files).
 
 | Protocol | Result | Verification |
 | --- | --- | --- |
-| 60 seconds per case | 90/93 passes, 0 wrong answers | Local; no lost October 1 Python baseline passes |
-| Stricter numerical check | 89/90 passing cases | Local; row/bound violation and relative objective error <= 1e-8 |
-| 60 seconds, `--method dual` (separate line) | 91/93 passes, 0 wrong answers, STRICT 90/91 | Local; engine commit `0bad060`; DFL001 passes (about 14 s here); no case lost against the primal |
+| 60 seconds per case, default primal | 90/93 passes, 0 wrong answers | Local and independent Kaggle verification; no lost October 1 Python baseline passes |
+| Stricter primal numerical check | 89/90 passing cases | Local and Kaggle; row/bound violation and relative objective error <= 1e-8 |
+| 60 seconds, `--method dual` (headline) | 91/93 passes, 0 wrong answers, STRICT 90/91 | Local and independent Kaggle verification at `442ca16`; DFL001 passes in 35.9 s on Kaggle (about 14 s locally); no case lost against the primal |
 | 300 seconds per case | 92/93 passes, 0 wrong answers | Local; separate extended-cap protocol |
 | MILP, 26 small MIPLIB instances | 19/26 solved at 300 s (14/26 at 30 s); 7 stop at the time limit, none wrong | 300 s run on a cloud container, 30 s run local; `results/milp_miplib/` |
 | Convex QP (interior point), 99 Maros-Meszaros instances | 71 pass, 28 fail under the stated rule: 5 objective mismatches (checked: 4 are the HiGHS default reference being the less accurate side or misreading the file, the fifth is uncertified; see `results/qp_maros_meszaros/NOTES.md`), 18 without a HiGHS reference, 4 numerical failures, 1 nonconvex | Cloud container, 60 s; ledger rows unchanged |
 
-At 60 seconds, DFL001 times out. PILOT.WE and PILOT4 lack usable HiGHS reference results in that protocol and remain excluded from the pass count; its ceiling is 91/93. They pass under the separate 300-second protocol; DFL001 still does not finish. TRUSS passes as an extra case outside the 93-case denominator.
+At 60 seconds with the default primal method, DFL001 times out; dual solves it in about 36 seconds on Kaggle. PILOT.WE and PILOT4 lacked usable HiGHS references in the local 60-second protocol and remain excluded from the pass count; its ceiling is 91/93. They also pass with live HiGHS references on Kaggle, but remain excluded under the fixed 60-second rule. They pass under the separate local 300-second primal protocol; DFL001 still does not finish under that protocol. TRUSS passes as an extra case outside the 93-case denominator.
 
 A local check of 3,600 small LPs with known optimal/infeasible/unbounded status found 0 false verdicts.
 
 Scope:
 - LPs on CPU: primal simplex (default) and an opt-in dual simplex (`--method dual`). Branch-and-bound MILP, an interior-point QP path and `OBJSENSE` are implemented; see `results/milp_miplib`, `results/ipm_netlib`, `results/qp_maros_meszaros`.
-- Dual line ledger: `results/cpp_0bad060_dual_60s`. It is reported beside, never merged with, the primal headline.
+- Dual line ledger: `results/cpp_0bad060_dual_60s`. It is the 91/93 headline; the default-primal result remains a separate line.
 - Industrial-scale reliability remains untested.
 - No measured speed advantage over HiGHS.
 - GPU PDHG is a near-optimal prototype with its own ledgers in `results/gpu_pdhg`; Mittelmann and QPLIB are outside the tested coverage.
@@ -50,7 +54,7 @@ The stricter check is reported separately; the fixed rule stays unchanged.
 
 The one 60-second pass outside the stricter line is GREENBEA: row `BRG...U3` has zero RHS and about 95 terms reaching 2.3e8 that cancel; measured violation is 1.46e-8. GREENBEA passes the fixed rule but fails the stricter check.
 
-Local machine: Intel Core 7 240H, 10 cores/16 threads, 15 GiB RAM, Ubuntu 24.04, Linux 6.17, g++ 13.3 with `-O3 -march=native -std=c++17`. Cases ran one at a time on a single-threaded engine. Host speed affects near-cap outcomes. Use separate timing records for local and Kaggle runs. Kaggle verification of this `src/` engine is pending.
+Local machine: Intel Core 7 240H, 10 cores/16 threads, 15 GiB RAM, Ubuntu 24.04, Linux 6.17, g++ 13.3 with `-O3 -march=native -std=c++17`. Cases ran one at a time on a single-threaded engine. Host speed affects near-cap outcomes. Use separate timing records for local and Kaggle runs. Independent Kaggle verification at `442ca16` is complete; the measurements above identify which results were verified there.
 
 ## Repository guide
 
