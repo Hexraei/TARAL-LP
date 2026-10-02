@@ -91,3 +91,7 @@ general_int-47018	both_time_limit	-	REF_UNRESOLVED: reference status time_limit,
 general_int-47031	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
 general_int-47057	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
 int_free_neg-51021	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+equality_int-55006	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+equality_int-55029	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+equality_int-55039	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+equality_int-55055	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit

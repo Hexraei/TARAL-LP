@@ -28,4 +28,5 @@ int_free_neg     MILP  51000 51059 60
 markers_mixed    MILP  52000 52079 80
 int_bound_types  MILP  53000 53079 80
 objconst_max     MILP  54000 54049 50
-# total LP 2840  MILP 590
+equality_int     MILP  55000 55059 60
+# total LP 2840  MILP 650
