@@ -9,7 +9,7 @@ Files
 - `netlib.csv/json`: seven Netlib cases, tol 1e-4, median of 3 runs, GPU versus 1 and 10 CPU threads (+ exact simplex time).
 - `synth_transport.csv/json`, `synth_packing_part1.log`, `packing_2000000_gpu.json`: synthetic instances from `gpu/gen_lp.py`
   (fixed seed; transport and packing LPs; clearly synthetic, not industrial data).
-- `netlib_all93_tol1e-4.csv`, `netlib_all93_tol1e-6.csv`: correctness sweep over all Netlib cases at two tolerances
+- `netlib_94files_tol1e-4.csv`, `netlib_94files_tol1e-6.csv`: correctness sweep over all 94 corpus files (the 93 cases plus TRUSS, one row each) at two tolerances
   (objective error versus HiGHS per case). At 1e-4: 92 near-optimal, 2 time limits; at 1e-6: 88 and 6.
 
 Measured crossover (GPU total time including setup and transfer versus the best CPU configuration)
