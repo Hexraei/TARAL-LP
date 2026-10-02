@@ -41,14 +41,14 @@ Local machine: Intel Core 7 240H, 10 cores/16 threads, 15 GiB RAM, Ubuntu 24.04,
 | --- | --- |
 | `src/` | Current modular C++ LP engine: MPS parser, sparse LU, simplex and CLI |
 | `cpp-engine/` | Separate bundled C++ reference engine, diagnostic tools, fixtures and internal report; not interchangeable with the current `src/` figures |
-| `reproduction/` | Self-contained reproduction package for that bundled reference engine; see its [instructions](reproduction/README_REPRO.md) |
+| `reproduction/` | One-command reproduction for that bundled reference engine, using canonical files in `cpp-engine/`; see its [instructions](reproduction/README_REPRO.md) |
 | `gpu/` | Own CUDA sparse matrix-vector kernel benchmark, **not an LP solver** |
 | `engine/`, `parsers/`, `benchmarks/` | Historical Python/SciPy prototype and checks, not the current C++ solve path |
 | `milp/`, `qp/` | Historical small synthetic Python prototypes, not general MILP/QP benchmark coverage |
 | `results/` | Older partial Python ledgers, not the current C++ headline results |
 | `examples/` | Wholly synthetic refinery LP and retained result, not operational data or measured savings |
 
-The source and reproduction packages are kept separate. The corpus itself is not checked in. Their internal reports and historical measurements do not change the current `src/` headline.
+Reproduction uses the canonical source, tools, fixtures and references in `cpp-engine/`; it requires a clone of this whole repository. The corpus itself is not checked in. Their internal reports and historical measurements do not change the current `src/` headline.
 
 ## Historical measurements
 
