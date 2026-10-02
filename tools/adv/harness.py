@@ -10,7 +10,10 @@ Gates (all must hold for PASS):
   |obj_ours - obj_ref| <= 1e-6 * max(1, |obj_ref|)   (obj_ours recomputed exactly from the returned point)
   row and bound violation of the returned point <= 1e-6 * (1 + |violated bound|)  (absolute value also recorded)
   MILP: integrality violation <= 1e-6
-Usage: harness.py --engine ./taral --out DIR [--cats a,b] [--limit N] [--jobs J] [--time-limit 60] [--kind lp|milp|all]
+Usage: harness.py --engine ./taral --out DIR [--cats a,b] [--limit N] [--jobs J] [--time-limit 60]
+                  [--kind lp|milp|all|big|biglp|lp+big|lp+biglp|all+big] [--method simplex|dual|ipm]
+--method is passed to the engine as `--method M` (simplex = no flag, the default path). The engine only honours it for
+pure LPs (MILPs are routed to branch and bound whatever the flag says), so dual/ipm runs normally use --kind lp.
 """
 import argparse
 import json
@@ -29,11 +32,13 @@ TOL_VIOL = 1e-6
 DETERMINATE = ("optimal", "infeasible", "unbounded")
 
 
-def run_engine(engine, path, sol, js, tl):
+def run_engine(engine, path, sol, js, tl, method="simplex"):
     t0 = time.time()
+    cmd = [engine, path, "--time-limit", str(tl), "--sol", sol, "--json", js]
+    if method != "simplex":
+        cmd += ["--method", method]
     try:
-        p = subprocess.run([engine, path, "--time-limit", str(tl), "--sol", sol, "--json", js],
-                           capture_output=True, timeout=tl + 30)
+        p = subprocess.run(cmd, capture_output=True, timeout=tl + 30)
         rc = p.returncode
     except subprocess.TimeoutExpired:
         return dict(status="harness_timeout", objective=None, wall=time.time() - t0, rc=None, message="killed")
@@ -195,7 +200,7 @@ def judge(case, m, ours, sol_path, tl):
 
 
 def work(a):
-    engine, outdir, cat, i, tl = a
+    engine, outdir, cat, i, tl, method = a
     case = gen.gen(cat, i)
     d = os.path.join(outdir, "cases", cat)
     os.makedirs(d, exist_ok=True)
@@ -203,8 +208,8 @@ def work(a):
     with open(path, "w") as f:
         f.write(case.text)
     sol, js = path[:-4] + ".sol", path[:-4] + ".json"
-    ours = run_engine(engine, path, sol, js, tl)
-    rec = dict(id=case.id, cat=cat, seed=case.seed, mip=case.mip, expect=case.expect)
+    ours = run_engine(engine, path, sol, js, tl, method)
+    rec = dict(id=case.id, cat=cat, seed=case.seed, mip=case.mip, expect=case.expect, method=method)
     try:
         m = parse_mps(path)
     except OracleError as e:
@@ -225,14 +230,15 @@ def work(a):
 def worker_main():
     """Long-lived worker: reads 'cat index' lines on stdin, writes one JSON result line per case on stdout."""
     engine, outdir, tl = sys.argv[2], sys.argv[3], float(sys.argv[4])
+    method = sys.argv[5] if len(sys.argv) > 5 else "simplex"
     for line in sys.stdin:
         cat, i = line.split()
-        rec = work((engine, outdir, cat, int(i), tl))
+        rec = work((engine, outdir, cat, int(i), tl, method))
         sys.stdout.write(json.dumps(rec, sort_keys=True) + "\n")
         sys.stdout.flush()
 
 
-def supervise(jobs, nworkers, engine, outdir, tl, results):
+def supervise(jobs, nworkers, engine, outdir, tl, results, method="simplex"):
     """Own worker pool: a worker that dies or hangs (e.g. a crash inside the reference solver) is replaced and the
     case it held is recorded as HARNESS_ERR instead of hanging the whole run."""
     import queue
@@ -247,14 +253,14 @@ def supervise(jobs, nworkers, engine, outdir, tl, results):
     cap = 2 * tl + 120
 
     def spawn():
-        return subprocess.Popen([sys.executable, os.path.abspath(__file__), "--worker", engine, outdir, str(tl)],
+        return subprocess.Popen([sys.executable, os.path.abspath(__file__), "--worker", engine, outdir, str(tl), method],
                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
 
     def loop():
         w = spawn()
         while True:
             try:
-                _, _, cat, i, _ = q.get_nowait()
+                _, _, cat, i, _, _ = q.get_nowait()
             except queue.Empty:
                 break
             rec = None
@@ -269,7 +275,7 @@ def supervise(jobs, nworkers, engine, outdir, tl, results):
                 rec = None
             if rec is None:
                 seed = gen.BASE[cat] + i
-                rec = dict(id="%s-%d" % (cat, seed), cat=cat, seed=seed, mip=cat in gen.IS_MIP, verdict="HARNESS_ERR",
+                rec = dict(id="%s-%d" % (cat, seed), cat=cat, seed=seed, mip=cat in gen.IS_MIP, verdict="HARNESS_ERR", method=method,
                            detail="worker died or hung on this case (crash/hang in engine wrapper or reference solver)")
                 try:
                     w.kill()
@@ -299,7 +305,8 @@ def main():
     ap.add_argument("--engine", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--cats", default="")
-    ap.add_argument("--kind", default="all", choices=["all", "lp", "milp"])
+    ap.add_argument("--kind", default="all", choices=["all", "lp", "milp", "big", "lp+big", "biglp", "lp+biglp", "all+big"])
+    ap.add_argument("--method", default="simplex", choices=["simplex", "dual", "ipm"])
     ap.add_argument("--limit", type=int, default=0, help="cases per category (0 = full count)")
     ap.add_argument("--jobs", type=int, default=max(1, min(4, os.cpu_count() or 1)))
     ap.add_argument("--time-limit", type=float, default=60.0)
@@ -309,16 +316,26 @@ def main():
         cats = [c for c, _, _ in gen.LP_CATS]
     elif a.kind == "milp":
         cats = [c for c, _, _ in gen.MILP_CATS]
+    elif a.kind == "big":
+        cats = [c for c, _, _ in gen.BIG_CATS]
+    elif a.kind == "lp+big":
+        cats = [c for c, _, _ in gen.LP_CATS + gen.BIG_CATS]
+    elif a.kind == "biglp":
+        cats = [c for c, _, _ in gen.BIG_CATS if not gen.IS_MIP.get(c)]
+    elif a.kind == "lp+biglp":
+        cats = [c for c, _, _ in gen.LP_CATS + gen.BIG_CATS if not gen.IS_MIP.get(c)]
+    elif a.kind == "all+big":
+        cats = [c for c, _, _ in gen.ALL + gen.BIG_CATS]
     if a.cats:
         cats = [c for c in a.cats.split(",") if c]
     jobs = []
     for c in cats:
         cnt = gen.COUNT[c] if not a.limit else min(a.limit, gen.COUNT[c])
-        jobs += [(os.path.abspath(a.engine), os.path.abspath(a.out), c, i, a.time_limit) for i in range(cnt)]
+        jobs += [(os.path.abspath(a.engine), os.path.abspath(a.out), c, i, a.time_limit, a.method) for i in range(cnt)]
     os.makedirs(a.out, exist_ok=True)
     t0 = time.time()
     recs = []
-    supervise(jobs, a.jobs, os.path.abspath(a.engine), os.path.abspath(a.out), a.time_limit, recs)
+    supervise(jobs, a.jobs, os.path.abspath(a.engine), os.path.abspath(a.out), a.time_limit, recs, a.method)
     recs.sort(key=lambda r: (r["cat"], r["seed"]))
     with open(os.path.join(a.out, "results.jsonl"), "w") as f:
         for r in recs:

@@ -36,7 +36,7 @@ def main():
     a = ap.parse_args()
     recs = [json.loads(l) for l in open(a.results)]
     known = load_known(a.known)
-    cats = OrderedDict((c, Counter()) for c, _, _ in gen.ALL if any(r["cat"] == c for r in recs))
+    cats = OrderedDict((c, Counter()) for c, _, _ in gen.ALL + gen.BIG_CATS if any(r["cat"] == c for r in recs))
     new_fail = []
     for r in recs:
         v = r["verdict"]
