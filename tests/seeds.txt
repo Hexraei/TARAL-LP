@@ -29,4 +29,5 @@ markers_mixed    MILP  52000 52079 80
 int_bound_types  MILP  53000 53079 80
 objconst_max     MILP  54000 54049 50
 equality_int     MILP  55000 55059 60
-# total LP 2840  MILP 650
+unbounded_relax  MILP  56000 56039 40
+# total LP 2840  MILP 690
