@@ -1,0 +1,35 @@
+# category  kind  first_seed  last_seed  count   (case i has seed first_seed + i; fixed, deterministic)
+degenerate       LP    26000 26199 200
+cycling          LP    27000 27099 100
+dup_coef         LP    28000 28149 150
+dup_empty_zero   LP    29000 29199 200
+free_fixed       LP    30000 30149 150
+huge_bounds      LP    31000 31149 150
+negzero          LP    32000 32059 60
+rank_deficient   LP    33000 33149 150
+redundant_eq     LP    34000 34099 100
+infeasible       LP    35000 35149 150
+unbounded        LP    36000 36149 150
+near_singular    LP    37000 37149 150
+coef_range       LP    38000 38199 200
+ranges           LP    39000 39199 200
+objconst_sense   LP    40000 40119 120
+neg_lower        LP    41000 41099 100
+bound_types      LP    42000 42099 100
+fuzz_mixed       LP    43000 43249 250
+tolerance_edge   LP    44000 44099 100
+large_sparse     LP    45000 45059 60
+knapsack         MILP  46000 46079 80
+general_int      MILP  47000 47079 80
+setcover         MILP  48000 48059 60
+parity           MILP  49000 49039 40
+fixed_charge     MILP  50000 50059 60
+int_free_neg     MILP  51000 51059 60
+markers_mixed    MILP  52000 52079 80
+int_bound_types  MILP  53000 53079 80
+objconst_max     MILP  54000 54049 50
+equality_int     MILP  55000 55059 60
+unbounded_relax  MILP  56000 56039 40
+big_values       MILP  57000 57039 40
+indicator        MILP  58000 58059 60
+# total LP 2840  MILP 790

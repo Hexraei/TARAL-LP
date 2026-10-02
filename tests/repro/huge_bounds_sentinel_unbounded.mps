@@ -1,0 +1,9 @@
+NAME          REPRO
+ROWS
+ N  OBJ
+COLUMNS
+    C0  OBJ  5.0
+BOUNDS
+ LO BND  C0  -1e+30
+ UP BND  C0  1e+30
+ENDATA
