@@ -10,6 +10,7 @@ Experimental CPU solver. Not ready for production; Kaggle verification is pendin
 | --- | --- | --- |
 | 60 seconds per case | 90/93 passes, 0 wrong answers | Local; no lost October 1 Python baseline passes |
 | Stricter numerical check | 89/90 passing cases | Local; row/bound violation and relative objective error <= 1e-8 |
+| 60 seconds, `--method dual` (separate line) | 91/93 passes, 0 wrong answers, STRICT 90/91 | Local; engine commit `0bad060`; DFL001 passes (about 14 s here); no case lost against the primal |
 | 300 seconds per case | 92/93 passes, 0 wrong answers | Local; separate extended-cap protocol |
 
 At 60 seconds, DFL001 times out. PILOT.WE and PILOT4 lack usable HiGHS reference results in that protocol and remain excluded from the pass count; its ceiling is 91/93. They pass under the separate 300-second protocol; DFL001 still does not finish. TRUSS passes as an extra case outside the 93-case denominator.
@@ -17,10 +18,11 @@ At 60 seconds, DFL001 times out. PILOT.WE and PILOT4 lack usable HiGHS reference
 A local check of 3,600 small LPs with known optimal/infeasible/unbounded status found 0 false verdicts.
 
 Scope:
-- LPs on CPU. Integer markers use the LP relaxation; `OBJSENSE` is unsupported.
+- LPs on CPU: primal simplex (default) and an opt-in dual simplex (`--method dual`). Branch-and-bound MILP, an interior-point QP path and `OBJSENSE` are implemented; see `results/milp_miplib`, `results/ipm_netlib`, `results/qp_maros_meszaros`.
+- Dual line ledger: `results/cpp_0bad060_dual_60s`. It is reported beside, never merged with, the primal headline.
 - Industrial-scale reliability remains untested.
 - No measured speed advantage over HiGHS.
-- GPU LP solves, MIPLIB, Mittelmann and QPLIB are outside the tested coverage.
+- GPU PDHG is a near-optimal prototype with its own ledgers in `results/gpu_pdhg`; Mittelmann and QPLIB are outside the tested coverage.
 
 ## Build and run
 
