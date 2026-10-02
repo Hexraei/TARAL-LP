@@ -34,7 +34,7 @@ Scope:
 
 A fresh-seed test of `src/` at `442ca16` used 300 random small MILPs: seeds 26120, 31 and 47, 100 cases each. The hardened checker compared HiGHS and SciPy `milp` references and checked TARAL's returned points for bounds, integrality, rows and objective. This was a local run, without a Kaggle gate; it establishes neither MIPLIB coverage nor large-scale reliability.
 
-- 296/300 cases had clean agreement.
+- 296/300 cases cleared the checker without a mismatch flag. Four of those had separately recorded reference-objective discrepancies with TARAL's points verified feasible and integral; they are not identical-objective agreements.
 - Three flags were parser errors: BOUNDS referenced an all-zero column omitted from COLUMNS by the generator. After explicitly declaring those columns, TARAL matched HiGHS. The original inputs remain parser failures, not passes.
 - One flag was a reference-side presolve discrepancy: HiGHS reported infeasible, while TARAL's point satisfied all rows and SciPy `milp` with presolve disabled agreed with TARAL.
 - No wrong numerical answer was found in the investigated cases. The undeclared-column parser gap remains open.
