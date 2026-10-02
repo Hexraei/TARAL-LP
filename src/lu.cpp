@@ -69,6 +69,9 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock:
     for (int k = 0; k < m; ++k) {
         if (Clock::now() > deadline) {  // one clock read per pivot: a dense nucleus makes pivots slow
             timed_out = true;
+            pivots_done = k;
+            active_nnz = 0;
+            for (const std::vector<Cell>& r : rows) active_nnz += long(r.size());
             return false;
         }
         int p = -1, q = -1;

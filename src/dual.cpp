@@ -44,6 +44,11 @@ public:
     long iterations = 0;
     std::vector<char> basis;
     std::string message;
+    double factor_s = 0, first_factor_s = 0;  // seconds in LU factorization (all, and the initial one)
+    long factors = 0;
+    std::string start_diag;  // warm starts only: what the starting basis looked like
+    long phase1_iters = 0;
+    std::string timeout_info;
     std::string note;  // warm-start fallback, kept apart from the later status messages
 
 private:
@@ -106,12 +111,27 @@ private:
 };
 
 bool Dual::factor() {
+    const auto t0 = SparseLU::Clock::now();
+    struct Tally {
+        Dual& d;
+        SparseLU::Clock::time_point t0;
+        ~Tally() {
+            double s = std::chrono::duration<double>(SparseLU::Clock::now() - t0).count();
+            if (d.factors++ == 0) d.first_factor_s = s;
+            d.factor_s += s;
+        }
+    } tally{*this, t0};
     for (int attempt = 0; attempt < 5; ++attempt) {
         std::vector<std::vector<Entry>> cols(m_);
         for (int p = 0; p < m_; ++p) for_col(head_[p], [&](int i, double v) { cols[p].push_back({i, v}); });
         etas_.clear();
         if (lu_.factor(m_, cols, deadline_)) return true;
-        if (lu_.timed_out) return timed_out_ = true, false;
+        if (lu_.timed_out) {
+            timed_out_ = true;
+            timeout_info = "after " + std::to_string(lu_.pivots_done) + " of " + std::to_string(m_) + " pivots, " +
+                           std::to_string(lu_.active_nnz) + " entries left in the active submatrix";
+            return false;
+        }
         for (int p : lu_.bad_pos) where_[head_[p]] = kLower;  // placed properly after compute_dual
         for (size_t t = 0; t < lu_.bad_pos.size(); ++t) {
             int j = n_ + lu_.bad_rows[t];
@@ -216,7 +236,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
     }
     bool factored = factor();
     if (!factored && warmed && timed_out_) {
-        note = "warm basis not factored within " + std::to_string(time_limit_s / 4) + " s, slack basis used";
+        note = "warm basis not factored within " + std::to_string(time_limit_s / 4) + " s (" + timeout_info + "), slack basis used";
         std::fprintf(stderr, "dual: %s\n", note.c_str());
         slack_basis();
         deadline_ = start + limit;
@@ -243,7 +263,8 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
     }
     compute_dual();
     bool phase1 = false;
-    if (repair_dual(false) > 0) {  // dual phase 1 on the box-bounded auxiliary problem
+    const int dual_inf0 = repair_dual(false);
+    if (dual_inf0 > 0) {  // dual phase 1 on the box-bounded auxiliary problem
         phase1 = true;
         for (int j = 0; j < N; ++j) {
             bool fl = std::isfinite(tlo_[j]), fu = std::isfinite(tup_[j]);
@@ -254,6 +275,17 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             if (where_[j] != kBasic) place(j);
     }
     compute_primal();
+    if (warmed) {
+        int pinf = 0;
+        double psum = 0;
+        for (int p = 0; p < m_; ++p) {
+            int j = head_[p];
+            double v = std::max({0.0, lo_[j] - x_[j], x_[j] - up_[j]});
+            if (v > kPrimalTol) ++pinf, psum += v;
+        }
+        start_diag = "start: " + std::to_string(dual_inf0) + " dual infeasibilities" + (phase1 ? " (phase 1)" : "") + ", " +
+                     std::to_string(pinf) + " primal infeasible basics (sum " + std::to_string(psum) + ")";
+    }
 
     std::vector<double> weight(m_, 1.0);  // dual steepest-edge weights ||e_r' B^{-1}||^2 (by position)
     std::vector<double> alpha_row(N, 0.0), unit, rho, col(m_), alpha, tau, delta(m_);
@@ -306,6 +338,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             }
             if (phase1) {
                 phase1 = false;
+                phase1_iters = iterations;
                 best_obj = -kInf, progress_at = iterations;
                 lo_ = tlo_, up_ = tup_;
                 if (repair_dual(false) > 0) {
@@ -520,7 +553,10 @@ Result solve_lp_dual(const Model& model, const std::vector<double>& col_lo, cons
     r = solve_lp(*mp, col_lo, col_up, dual.basis.empty() ? warm_basis : &dual.basis, left);
     std::string what = "dual " + std::to_string(dual.iterations) + " + primal " + std::to_string(r.iterations) +
                        " iterations" + (dual.message.empty() ? "" : " (" + dual.message + ")") +
-                       (dual.note.empty() ? "" : "; " + dual.note);
+                       (dual.note.empty() ? "" : "; " + dual.note) +
+                       (dual.start_diag.empty() ? "" : "; " + dual.start_diag + ", phase 1 " + std::to_string(dual.phase1_iters) + " iterations") +
+                       "; dual factor " + std::to_string(dual.factor_s) + " s in " + std::to_string(dual.factors) +
+                       " (first " + std::to_string(dual.first_factor_s) + " s)";
     r.message = r.message.empty() ? what : r.message + "; " + what;
     r.iterations += dual.iterations;
     if (model.maximize) r.objective = -r.objective;

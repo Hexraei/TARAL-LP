@@ -50,6 +50,8 @@ public:
     void btran(std::vector<double>& rhs_pos, std::vector<double>& out_rows) const;  // B'y = rhs
     std::vector<int> bad_pos, bad_rows;
     bool timed_out = false;
+    int pivots_done = 0;       // set on timeout: pivots completed, and entries left in the active submatrix
+    long active_nnz = 0;
 
 private:
     int m_ = 0;
