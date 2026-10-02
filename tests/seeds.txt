@@ -19,4 +19,5 @@ bound_types      LP    42000 42099 100
 fuzz_mixed       LP    43000 43249 250
 tolerance_edge   LP    44000 44099 100
 large_sparse     LP    45000 45059 60
-# total LP 2840  MILP 0
+knapsack         MILP  46000 46079 80
+# total LP 2840  MILP 80
