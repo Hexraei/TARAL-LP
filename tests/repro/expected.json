@@ -108,5 +108,85 @@
   "known_failing": true,
   "observed_bad": "default simplex runs to the time limit (millions of iterations) on a 4x4 LP",
   "report": "A 4 x 4 square equality system with condition number about 1e10 and a unique feasible point (objective 14.999999242). HiGHS solves it; the engine's default simplex iterates until the time limit (over 2 million iterations in 3 seconds), i.e. it cycles or stalls on a model that needs four pivots."
+ },
+ "parser_dup_column_noncontiguous.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case dup_column_noncontiguous",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "all entries of a column must be contiguous in COLUMNS; a column name that reappears later is malformed",
+  "known_failing": true,
+  "observed_bad": "accepted and merged: optimal 1.5 (HiGHS treats the second block as a new column: optimal 0)",
+  "report": "Column x is listed, then y, then x again. The engine merges the two blocks (objective 1.5); HiGHS creates a second column with the same name (objective 0). The two readers build different models from the same file, which is the practical danger: the format requires contiguous column blocks, so the right answer is a parse error rather than a guess."
+ },
+ "parser_dup_row_name.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case dup_row_name",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "row names are unique keys in the format",
+  "known_failing": true,
+  "observed_bad": "accepted: optimal 3 (HiGHS also accepts)",
+  "report": "ROWS declares r1 twice. The engine accepts the file without a message and solves it; HiGHS also accepts it. Row names key every later section (COLUMNS, RHS, RANGES), so which of the two rows an entry belongs to is undefined; a conforming reader must reject the file. Judgement call on strictness, but silent acceptance can attach coefficients to the wrong row."
+ },
+ "parser_dup_section_columns.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case dup_section_columns",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "each section occurs once",
+  "known_failing": true,
+  "observed_bad": "accepted: optimal 3 (HiGHS also accepts)",
+  "report": "The COLUMNS section appears twice. The engine continues reading the second block as more columns and solves; HiGHS also accepts. Sections occur once in the format, so this is malformed input accepted silently (low severity, judgement call)."
+ },
+ "parser_missing_endata.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case missing_endata",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "ENDATA terminates an MPS file; a file without it is malformed (judgement: some readers accept EOF)",
+  "known_failing": true,
+  "observed_bad": "accepted: optimal 3 (HiGHS rejects)",
+  "report": "A valid small model with the ENDATA line removed. The engine reads it as complete and solves it (optimal 3); HiGHS reports a read error. The format requires ENDATA, so the engine is more lenient than the format and than HiGHS. Low severity, but it means a truncated file (for example an interrupted download) is solved as if it were complete, silently dropping any rows or columns that were cut off."
+ },
+ "parser_num_hex_value.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case num_hex_value",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "MPS numbers are decimal; strtod's hexadecimal syntax is not part of the format",
+  "known_failing": true,
+  "observed_bad": "accepted as 16: optimal 6 (HiGHS also accepts)",
+  "report": "A coefficient written as 0x10. strtod parses C hexadecimal floating-point syntax, so the engine reads it as 16 and solves the model (HiGHS does the same). Decimal is the only number syntax in the format; a stray 0x token should be an error. Low severity, judgement call."
+ },
+ "parser_num_inf_value.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case num_inf_value",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "an infinite coefficient cannot define an LP",
+  "known_failing": true,
+  "observed_bad": "status optimal with objective nan (invalid JSON)",
+  "report": "A coefficient written as 'inf'. Same defect as parser_num_nan_value: non-finite coefficient accepted, optimal with NaN objective reported, JSON output invalid. HiGHS accepts the file and reports optimal 6 (treating the value as a large number), so readers differ; the engine's answer is the one that is wrong under every reading."
+ },
+ "parser_num_nan_value.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case num_nan_value",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "a coefficient that is not a finite number cannot define an LP; rejecting is the only safe answer",
+  "known_failing": true,
+  "observed_bad": "status optimal with objective nan; JSON file contains a bare nan (invalid JSON)",
+  "report": "A coefficient written as 'nan'. strtod accepts it, the matrix carries a NaN, and the engine prints 'status optimal objective nan' and writes a result JSON with an unquoted nan, which is not valid JSON, so any consumer that parses the --json output fails on it. Reporting optimal with a NaN objective is wrong whatever the input convention; the reader should reject non-finite coefficients (the same happens for inf and for 1e400, which overflows to inf)."
+ },
+ "parser_num_overflow_1e400.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case num_overflow_1e400",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "a value that overflows double cannot define an LP",
+  "known_failing": true,
+  "observed_bad": "status optimal with objective nan (invalid JSON)",
+  "report": "A coefficient written as 1e400, which overflows to infinity in double precision. Same defect as parser_num_inf_value: accepted, optimal with NaN objective, invalid JSON in the --json output."
  }
 }

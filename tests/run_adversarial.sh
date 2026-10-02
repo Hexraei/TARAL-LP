@@ -35,6 +35,11 @@ echo "== results by category"
 python3 tools/adv/report.py --results "$OUT/results.jsonl" --known tests/known_failures.tsv --md "$OUT/table.md" || rc=1
 
 echo
+echo "== MPS parser strictness (engine vs HiGHS reader)"
+python3 tools/adv/parser_table.py --engine "$ENGINE" --out "$OUT" || rc=1
+echo "   full table: $OUT/parser_table.md"
+
+echo
 echo "== reproducers (tests/repro)"
 python3 tools/adv/repro.py --engine "$ENGINE" --dir tests/repro || rc=1
 
