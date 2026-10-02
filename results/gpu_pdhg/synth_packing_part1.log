@@ -1,0 +1,13 @@
+packing_10000 gpu    near_optimal   it 640 relerr 1.14e-06 total 0.183619 solve 0.020837
+packing_10000 cpu1   near_optimal   it 640 relerr 1.14e-06 total 0.108267 solve 0.076849
+packing_10000 cpu10  near_optimal   it 640 relerr 1.14e-06 total 0.049449 solve 0.016896
+packing_10000 simplex time_limit total 120.078115
+packing_100000 gpu    near_optimal   it 640 relerr 1.01e-06 total 0.652482 solve 0.178811
+packing_100000 cpu1   near_optimal   it 640 relerr 1.01e-06 total 1.241059 solve 0.892581
+packing_100000 cpu10  near_optimal   it 640 relerr 1.01e-06 total 0.560643 solve 0.222138
+packing_100000 simplex time_limit total 120.000865
+packing_1000000 gpu    near_optimal   it 640 relerr n/a total 7.351829 solve 2.239892
+packing_1000000 cpu1   near_optimal   it 640 relerr n/a total 19.821367 solve 14.920462
+packing_1000000 cpu10  near_optimal   it 640 relerr n/a total 9.352885 solve 4.445412
+packing_1000000 simplex time_limit total 120.01978
+Terminated
