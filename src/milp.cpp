@@ -10,6 +10,9 @@
 // check that guards the prune is a plain branch and bound over the node (--audit-prop,
 // Search::audit_pruned). MilpOptions::no_prop_prune hands those nodes to the LP instead. Any other
 // LP outcome keeps the node as unresolved; its inherited bound stays in the reported best bound.
+// With an incumbent, reduced-cost fixing tightens the bounds of nonbasic integer columns whose
+// reduced cost proves that moving them further cannot beat the incumbent. Like propagation, these
+// tightenings belong to the node's subtree only; a box they empty holds no improving point.
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -29,6 +32,8 @@ constexpr int kNodePasses = 10;
 constexpr double kPropEps = 1e-6;  // integer bounds round outward by this much (plus a scale term)
 constexpr double kPropMax = 1e9;   // a derived bound beyond this is numerical noise: ignored
 constexpr double kPropPivot = 1e-9;  // coefficients below this are not used to derive bounds
+constexpr double kRcMin = 1e-7;      // never fix on a reduced cost with a smaller magnitude
+constexpr double kRcDualTol = 1e-7;  // dual infeasibility (scaled by 1 + max|cost|) that voids a basis for fixing
 
 double tol_at(double z) { return kGapTol * std::max(1.0, std::abs(z)); }
 
@@ -71,6 +76,7 @@ struct Node {
     double dist = 0;  // distance the branched variable was moved (fraction)
     int bj = -1;      // the branched variable
     int depth = 0;    // number of branchings from the root
+    std::vector<int> seeds;  // columns whose bounds changed since the parent was propagated
 };
 
 struct Worse {  // priority_queue keeps the smallest bound on top; deeper first on ties
@@ -104,13 +110,16 @@ public:
     long prop_crossed = 0;     // nodes whose propagated integer domain came out empty
     long prop_crossed_lp_infeasible = 0;  // ... of which the LP then confirmed infeasible
     long prop_pruned = 0;      // ... pruned without the LP (all of them unless --no-prop-prune)
+    long rc_fixed = 0, rc_skipped = 0;  // reduced-cost tightenings; nodes whose basis was not trusted
     bool use_prop = true;      // false: plain branch and bound (the audit's oracle)
+    bool use_rc = true;
     bool prop_prune = true;    // prune an emptied domain directly; false: the LP decides (--no-prop-prune)
     bool audit_prop = false;   // re-check every node whose propagated domain came out empty (debug/test)
     // Audit of those nodes: the LP on the box the node had before propagating, and for the ones the
     // LP finds feasible a plain branch and bound over that box.
     long audit_nodes = 0, audit_lp_infeasible = 0, audit_lp_feasible = 0, audit_lp_other = 0;
-    long audit_int_empty = 0, audit_int_feasible = 0, audit_int_undecided = 0;
+    long audit_int_empty = 0, audit_int_feasible = 0, audit_int_undecided = 0, audit_cutoff = 0;
+    long audit_rc_checked = 0, audit_rc_bad = 0;  // reduced-cost fixings re-checked / found to cut off a better point
     std::string note;
 
 private:
@@ -124,7 +133,9 @@ private:
     std::vector<int> work_, next_, changed_;
     double elapsed() const { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0_).count(); }
 
-    bool propagate(std::vector<double>& lo, std::vector<double>& up, int seed, int max_passes);
+    bool propagate(std::vector<double>& lo, std::vector<double>& up, const std::vector<int>* seeds, int max_passes);
+    void fix_by_reduced_cost(const Result& r, std::vector<double>& lo, std::vector<double>& up, std::vector<int>& fixed);
+    void audit_fixing(std::vector<double> lo, std::vector<double> up, int j, double cut_lo, double cut_up);
     void audit_pruned(const std::vector<double>& lo, const std::vector<double>& up);
 
     // Offer an LP point: integer columns rounded first, then as is. Returns true if accepted.
@@ -146,12 +157,12 @@ private:
 // and largest value of a'x over the current bounds) every integer column gets the bound the row's
 // sides force on it, rounded outward by a small tolerance so no feasible point is ever cut off.
 // Only integer bounds change; continuous columns enter the activities but are never tightened.
-// seed < 0 starts from every row (root), otherwise from the rows of that column. The columns whose
+// seeds == nullptr starts from every row (root), otherwise from the rows of those columns. The columns whose
 // bounds changed are left in changed_. Returns false only when an integer column's domain is empty,
 // ceil(lb - eps) > floor(ub + eps) with eps >= 1e-6 (the eps also grows with the row's magnitude, so a
 // borderline case is never pruned). Crossed bounds of a continuous column cannot occur here: they are
 // never tightened, and a row with no integer column is left to the LP.
-bool Search::propagate(std::vector<double>& lo, std::vector<double>& up, int seed, int max_passes) {
+bool Search::propagate(std::vector<double>& lo, std::vector<double>& up, const std::vector<int>* seeds, int max_passes) {
     changed_.clear();
     work_.clear(), next_.clear();
     auto push = [&](std::vector<int>& to, int i) {
@@ -162,10 +173,11 @@ bool Search::propagate(std::vector<double>& lo, std::vector<double>& up, int see
         for (int i : next_) queued_[i] = 0;
         for (int j : changed_) mark_[j] = 0;
     };
-    if (seed < 0) {
+    if (!seeds) {
         for (int i = 0; i < int(rows_.size()); ++i) push(work_, i);
     } else {
-        for (const Entry& e : md_.cols[seed]) push(work_, e.index);
+        for (int j : *seeds)
+            for (const Entry& e : md_.cols[j]) push(work_, e.index);
     }
     for (int pass = 0; pass < max_passes && !work_.empty(); ++pass) {
         for (int i : work_) {
@@ -233,7 +245,9 @@ bool Search::propagate(std::vector<double>& lo, std::vector<double>& up, int see
 // means the emptiness came from integer rounding, which an LP cannot see, so it is not a
 // disagreement. (2) For those, a plain branch and bound (no propagation) over the same box with a
 // zero objective: an integer-feasible point there would make the prune wrong (audit_int_feasible,
-// must stay 0).
+// must stay 0) unless an incumbent exists and the box was cut by reduced-cost fixing, in which case
+// the prune only has to leave no point better than the incumbent: a second plain search with the
+// true objective and the incumbent as cutoff must come back empty (audit_cutoff counts those).
 void Search::audit_pruned(const std::vector<double>& lo, const std::vector<double>& up) {
     ++audit_nodes;
     Result r = solve_lp(md_, lo, up, nullptr, 60);
@@ -249,15 +263,123 @@ void Search::audit_pruned(const std::vector<double>& lo, const std::vector<doubl
     Model feas = md_;
     std::fill(feas.cost.begin(), feas.cost.end(), 0.0);
     Search sub(feas, lo, up, 60, 2'000'000);
-    sub.use_prop = false;
+    sub.use_prop = false, sub.use_rc = false;
     End e = sub.run();
-    if (sub.has_inc) {
-        ++audit_int_feasible;
-        std::fprintf(stderr, "AUDIT FAILURE: a node pruned by propagation holds an integer-feasible point\n");
-    } else if (e == End::Complete && sub.unresolved == 0) {
+    if (!sub.has_inc && e == End::Complete && sub.unresolved == 0) {
         ++audit_int_empty;
+        return;
+    }
+    if (!sub.has_inc || !has_inc) {
+        if (sub.has_inc) {
+            ++audit_int_feasible;
+            std::fprintf(stderr, "AUDIT FAILURE: a node pruned by propagation holds an integer-feasible point\n");
+        } else {
+            ++audit_int_undecided;
+        }
+        return;
+    }
+    Search imp(md_, lo, up, 60, 2'000'000);  // integer points exist: none may beat the incumbent
+    imp.use_prop = false, imp.use_rc = false;
+    imp.has_inc = true, imp.z = z;
+    End ie = imp.run();
+    if (!imp.inc.empty()) {
+        ++audit_int_feasible;
+        std::fprintf(stderr, "AUDIT FAILURE: a node pruned by propagation holds a point better than the incumbent\n");
+    } else if (ie == End::Complete && imp.unresolved == 0) {
+        ++audit_cutoff;
     } else {
         ++audit_int_undecided;
+    }
+}
+
+// Audit of one reduced-cost fixing: the part of the node's box it removes (column j restricted to
+// [cut_lo, cut_up]) is searched by a plain branch and bound with the true objective and the incumbent
+// as cutoff. A point better than the incumbent there means the fixing was wrong.
+void Search::audit_fixing(std::vector<double> lo, std::vector<double> up, int j, double cut_lo, double cut_up) {
+    ++audit_rc_checked;
+    lo[j] = cut_lo, up[j] = cut_up;
+    Search imp(md_, lo, up, 60, 2'000'000);
+    imp.use_prop = false, imp.use_rc = false;
+    imp.has_inc = true, imp.z = z;
+    imp.run();
+    if (!imp.inc.empty()) {
+        ++audit_rc_bad;
+        std::fprintf(stderr, "AUDIT FAILURE: a reduced-cost fixing cuts off a point better than the incumbent\n");
+    }
+}
+
+// Reduced-cost fixing. At the optimal basis of a node LP with value zlp, every feasible point x of the
+// node has c'x = zlp + sum over nonbasic j of d_j (x_j - xhat_j), each term >= 0 when the basis is dual
+// feasible. A solution better than the incumbent z therefore moves a nonbasic integer column j at
+// its lower (upper) bound by at most floor((z - zlp) / |d_j|); the bound on the far side is tightened
+// to that. The duals come from a fresh factorization of the basis (y = B^-T c_B, d = c - A'y; the
+// logical of row i is the column -e_i). The slack in the gap and the 1e-7 floor on |d_j| keep
+// numerical noise from cutting off a point that could still win; if any nonbasic reduced cost has the
+// wrong sign by more than a tolerance the basis is not trusted and nothing is fixed. The columns
+// tightened are appended to `fixed`.
+void Search::fix_by_reduced_cost(const Result& r, std::vector<double>& lo, std::vector<double>& up,
+                                 std::vector<int>& fixed) {
+    const int n = int(md_.cols.size()), m = int(md_.row_lo.size());
+    const std::vector<char>& bs = r.basis;
+    if (int(bs.size()) != n + m) return;
+    std::vector<int> head;
+    for (int j = 0; j < n + m; ++j)
+        if (bs[j] == 0) head.push_back(j);
+    if (int(head.size()) != m) return;
+    std::vector<std::vector<Entry>> bcols(m);
+    std::vector<double> cb(m), y;
+    for (int p = 0; p < m; ++p) {
+        int j = head[p];
+        if (j < n) {
+            bcols[p] = md_.cols[j], cb[p] = md_.cost[j];
+        } else {
+            bcols[p].push_back({j - n, -1.0}), cb[p] = 0;
+        }
+    }
+    SparseLU lu;
+    if (!lu.factor(m, bcols)) {
+        ++rc_skipped;
+        return;
+    }
+    lu.btran(cb, y);
+    double cmax = 0;
+    for (double c : md_.cost) cmax = std::max(cmax, std::abs(c));
+    const double dtol = kRcDualTol * (1 + cmax);
+    std::vector<double> d(n, 0.0);
+    for (int j = 0; j < n + m; ++j) {
+        if (bs[j] == 0) continue;
+        double dj;
+        if (j < n) {
+            dj = md_.cost[j];
+            for (const Entry& e : md_.cols[j]) dj -= e.value * y[e.index];
+            d[j] = dj;
+        } else {
+            dj = y[j - n];
+        }
+        double l = j < n ? lo[j] : md_.row_lo[j - n], u = j < n ? up[j] : md_.row_up[j - n];
+        if (l == u) continue;  // pinned: the sign of its reduced cost does not matter
+        bool bad = bs[j] == 1 ? dj < -dtol : bs[j] == 2 ? dj > dtol : std::abs(dj) > dtol;
+        if (bad) {
+            ++rc_skipped;
+            return;
+        }
+    }
+    const double gap = z - r.objective + tol_at(z);
+    for (int j = 0; j < n; ++j) {
+        if (!md_.is_int[j] || bs[j] == 0 || bs[j] == 3 || lo[j] == up[j] || std::abs(d[j]) < kRcMin) continue;
+        double steps = std::floor(gap / std::abs(d[j]) + kPropEps);
+        if (steps > kPropMax) continue;
+        if (bs[j] == 1 && d[j] > 0 && lo[j] + steps < up[j]) {
+            if (audit_prop) audit_fixing(lo, up, j, lo[j] + steps + 1, up[j]);
+            up[j] = lo[j] + steps;
+            fixed.push_back(j);
+            ++rc_fixed;
+        } else if (bs[j] == 2 && d[j] < 0 && up[j] - steps > lo[j]) {
+            if (audit_prop) audit_fixing(lo, up, j, lo[j], up[j] - steps - 1);
+            lo[j] = up[j] - steps;
+            fixed.push_back(j);
+            ++rc_fixed;
+        }
     }
 }
 
@@ -266,7 +388,7 @@ End Search::run() {
     std::vector<double> held;  // bounds of nodes that could not be resolved
     double pruned = kInf;      // smallest bound among nodes pruned by bound
     int n = int(md_.cols.size());
-    Node cur{-kInf, {}, nullptr, 0, 0, -1, 0};
+    Node cur{-kInf, {}, nullptr, 0, 0, -1, 0, {}};
     // Pseudocosts: objective gain per unit of fractionality, per variable and direction.
     std::vector<double> pc_sum[2] = {std::vector<double>(n, 0.0), std::vector<double>(n, 0.0)};
     std::vector<int> pc_cnt[2] = {std::vector<int>(n, 0), std::vector<int>(n, 0)};
@@ -304,7 +426,7 @@ End Search::run() {
         // it, siblings do not see them).
         bool crossed = false;
         if (use_prop) {
-            if (propagate(lo, up, is_root ? -1 : cur.bj, is_root ? kRootPasses : kNodePasses)) {
+            if (propagate(lo, up, is_root ? nullptr : &cur.seeds, is_root ? kRootPasses : kNodePasses)) {
                 for (int j : changed_) cur.changes.push_back({j, lo[j], up[j]});
                 prop_tightened += long(changed_.size());
             } else {
@@ -378,10 +500,16 @@ End Search::run() {
             note = "integral node point rejected by the feasibility check";
             continue;
         }
+        std::vector<int> seeds{bj};  // the children propagate from the branching and from any fixing
+        if (has_inc && use_rc) {
+            size_t at = seeds.size();
+            fix_by_reduced_cost(r, lo, up, seeds);
+            for (size_t t = at; t < seeds.size(); ++t) cur.changes.push_back({seeds[t], lo[seeds[t]], up[seeds[t]]});
+        }
         auto basis = std::make_shared<const std::vector<char>>(std::move(r.basis));
         double v = r.x[bj], fl = std::floor(v);
-        Node down{b, cur.changes, basis, -1, v - fl, bj, cur.depth + 1},
-            upn{b, std::move(cur.changes), basis, 1, fl + 1 - v, bj, cur.depth + 1};
+        Node down{b, cur.changes, basis, -1, v - fl, bj, cur.depth + 1, seeds},
+            upn{b, std::move(cur.changes), basis, 1, fl + 1 - v, bj, cur.depth + 1, seeds};
         down.changes.push_back({bj, lo[bj], fl});
         upn.changes.push_back({bj, fl + 1, up[bj]});
         bool dive_up = v - fl >= 0.5;
@@ -427,8 +555,10 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     res.nodes = s.nodes, res.lp_iterations = s.iters, res.unresolved_nodes = s.unresolved;
     res.prop_tightened = s.prop_tightened, res.prop_crossed = s.prop_crossed, res.prop_pruned = s.prop_pruned;
     res.prop_crossed_lp_infeasible = s.prop_crossed_lp_infeasible;
+    res.rc_fixed = s.rc_fixed, res.rc_skipped = s.rc_skipped;
     res.audit = {s.audit_nodes, s.audit_lp_infeasible, s.audit_lp_feasible, s.audit_lp_other,
-                 s.audit_int_empty, s.audit_int_feasible, s.audit_int_undecided};
+                 s.audit_int_empty, s.audit_int_feasible, s.audit_int_undecided, s.audit_cutoff,
+                 s.audit_rc_checked, s.audit_rc_bad};
     res.message = s.note;
     if (end == End::RootUnbounded) {
         // For rational data an unbounded relaxation plus one integer-feasible point means the MILP
@@ -437,11 +567,12 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
         Model feas = md;
         std::fill(feas.cost.begin(), feas.cost.end(), 0.0);
         Search f(feas, lo, up, time_limit_s - elapsed(), node_limit - s.nodes);
-        f.prop_prune = s.prop_prune;
+        f.prop_prune = s.prop_prune, f.use_rc = false;  // the feasibility search has no objective to cut on
         End fe = f.run();
         res.nodes += f.nodes, res.lp_iterations += f.iters;
         res.prop_tightened += f.prop_tightened, res.prop_crossed += f.prop_crossed, res.prop_pruned += f.prop_pruned;
         res.prop_crossed_lp_infeasible += f.prop_crossed_lp_infeasible;
+        res.rc_fixed += f.rc_fixed, res.rc_skipped += f.rc_skipped;
         if (f.has_inc && violation(model, f.inc) <= kFeasTol) {
             res.status = "unbounded";
             res.has_solution = true;

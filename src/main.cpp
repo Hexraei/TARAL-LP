@@ -49,8 +49,10 @@ void write_milp_json(const char* path, const MilpResult& r, double wall) {
                  r.has_solution ? "true" : "false");
     std::fprintf(f, ", \"prop_tightened\": %ld, \"prop_crossed\": %ld, \"prop_crossed_lp_infeasible\": %ld, \"prop_pruned\": %ld",
                  r.prop_tightened, r.prop_crossed, r.prop_crossed_lp_infeasible, r.prop_pruned);
-    std::fprintf(f, ", \"audit\": [%ld, %ld, %ld, %ld, %ld, %ld, %ld]", r.audit[0], r.audit[1], r.audit[2], r.audit[3],
-                 r.audit[4], r.audit[5], r.audit[6]);
+    std::fprintf(f, ", \"rc_fixed\": %ld, \"rc_skipped\": %ld", r.rc_fixed, r.rc_skipped);
+    std::fprintf(f, ", \"audit\": [");
+    for (size_t k = 0; k < r.audit.size(); ++k) std::fprintf(f, "%s%ld", k ? ", " : "", r.audit[k]);
+    std::fprintf(f, "]");
     std::fprintf(f, ", \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n", r.lp_iterations, wall,
                  json_escape(r.message).c_str());
     std::fclose(f);

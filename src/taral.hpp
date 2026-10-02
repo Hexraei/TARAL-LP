@@ -90,8 +90,10 @@ struct MilpResult {
     long prop_crossed = 0, prop_crossed_lp_infeasible = 0, prop_pruned = 0;  // nodes whose integer domain came out
                                                // empty; of those the LP confirmed; pruned without the LP
     // --audit-prop: nodes with an emptied domain, re-checked (see Search::audit_pruned in milp.cpp):
-    // {nodes, LP infeasible, LP feasible, LP other, integer-empty by plain B&B, integer-feasible (a bug), undecided}
-    std::array<long, 7> audit{};
+    // {nodes, LP infeasible, LP feasible, LP other, integer-empty by plain B&B, integer-feasible (a bug),
+    //  undecided, justified by the incumbent cutoff only, reduced-cost fixings checked, fixings found wrong}
+    std::array<long, 10> audit{};
+    long rc_fixed = 0, rc_skipped = 0;  // reduced-cost fixing: bounds tightened, bases not trusted
     std::string message;
 };
 struct MilpOptions {

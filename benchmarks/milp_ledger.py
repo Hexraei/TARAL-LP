@@ -145,11 +145,11 @@ def summarize(rows):
     solved = sum(1 for r in rows if r["status"] in ("optimal", "infeasible"))
     nodes = sum(int(r["nodes"] or 0) for r in rows)
     cnt = {c: sum(int(r.get(c) or 0) for r in rows) for c in COUNTERS}
-    if any(r.get("audit") for r in rows):  # [nodes, LP infeasible, LP feasible, LP other, int-empty, int-feasible, undecided]
-        tot = [0] * 7
+    if any(r.get("audit") for r in rows):  # [nodes, LP infeasible, LP feasible, LP other, int-empty, int-feasible, undecided, cutoff-only]
+        tot = [0] * 10
         for r in rows:
             for k, v in enumerate(json.loads(r["audit"]) if r.get("audit") else []): tot[k] += v
-        cnt["audit[nodes,lp_infeasible,lp_feasible,lp_other,int_empty,int_feasible,undecided]"] = tot
+        cnt["audit[nodes,lp_infeasible,lp_feasible,lp_other,int_empty,int_feasible,undecided,cutoff_only,rc_checked,rc_bad]"] = tot
     print("cases=%d solved(status optimal/infeasible)=%d total_nodes=%d verdicts=%s counters=%s" % (len(rows), solved, nodes, tally, cnt))
 
 
