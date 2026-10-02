@@ -128,16 +128,19 @@ def dual_certificate(case, x):
         res[mode] = (t, lp, A, w)
     stat_rel, lp, A, w = res["rel"]
     gap = math.nan
+    cap = None
     if lp is not None and k:
-        h = highspy.Highs(); h.setOptionValue("output_flag", False); h.setOptionValue("threads", 1)
         lp.col_cost_ = np.array(cost_gap + [0.0])
-        lp.col_upper_ = np.concatenate([np.full(k, highspy.kHighsInf), [max(2 * stat_rel, 1e-12)]])
-        h.passModel(lp); h.run()
-        if h.modelStatusToString(h.getModelStatus()) == "Optimal":
-            gap = max(0.0, float(h.getInfo().objective_function_value))
+        for cap in (max(2 * stat_rel, 1e-12), 1e-9, 1e-7):  # residual allowance; loosened only if the LP is numerically infeasible
+            lp.col_upper_ = np.concatenate([np.full(k, highspy.kHighsInf), [cap]])
+            h = highspy.Highs(); h.setOptionValue("output_flag", False); h.setOptionValue("threads", 1)
+            h.passModel(lp); h.run()
+            if h.modelStatusToString(h.getModelStatus()) == "Optimal":
+                gap = max(0.0, float(h.getInfo().objective_function_value))
+                break
     elif lp is not None:
         gap = 0.0
-    return dict(stat_rel=stat_rel, stat_abs=res["abs"][0], gap=gap, g_inf=float(np.max(np.abs(g))) if n else 0.0)
+    return dict(stat_rel=stat_rel, stat_abs=res["abs"][0], gap=gap, gap_cap=cap, g_inf=float(np.max(np.abs(g))) if n else 0.0)
 
 
 def kkt_certificate(case, x, tau=TAU):

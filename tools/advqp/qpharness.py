@@ -271,11 +271,13 @@ def work(engine, outdir, cat, i, tl):
 
 def worker_main():
     engine, outdir, tl = sys.argv[2], sys.argv[3], float(sys.argv[4])
+    proto = os.fdopen(os.dup(1), "w")  # HiGHS prints diagnostics on fd 1 (also from forked children): keep the
+    os.dup2(2, 1)                      # JSON protocol on a private copy and send everything else to stderr
     for line in sys.stdin:
         cat, i = line.split()
         rec = work(engine, outdir, cat, int(i), tl)
-        sys.stdout.write(json.dumps(rec, sort_keys=True, default=lambda o: None if o != o else float(o)) + "\n")
-        sys.stdout.flush()
+        proto.write(json.dumps(rec, sort_keys=True, default=lambda o: None if o != o else float(o)) + "\n")
+        proto.flush()
 
 
 def supervise(jobs, nworkers, engine, outdir, tl, results):
@@ -290,7 +292,7 @@ def supervise(jobs, nworkers, engine, outdir, tl, results):
 
     def spawn():
         return subprocess.Popen([sys.executable, os.path.abspath(__file__), "--worker", engine, outdir, str(tl)],
-                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, bufsize=1)
+                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, bufsize=1)
 
     def loop():
         w = spawn()
