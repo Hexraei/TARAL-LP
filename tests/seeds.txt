@@ -16,4 +16,5 @@ ranges           LP    39000 39199 200
 objconst_sense   LP    40000 40119 120
 neg_lower        LP    41000 41099 100
 bound_types      LP    42000 42099 100
-# total LP 2430  MILP 0
+fuzz_mixed       LP    43000 43249 250
+# total LP 2680  MILP 0
