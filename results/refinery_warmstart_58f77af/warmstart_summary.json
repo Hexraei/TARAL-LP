@@ -1,0 +1,10 @@
+{
+ "rows": 39,
+ "validated_both": 39,
+ "warm_used": 39,
+ "wrong": 0,
+ "median_iter_ratio_warm_over_cold": 0.3022847100175747,
+ "warm_worse": 0,
+ "method": "default",
+ "note": "synthetic data; iteration ratios only from rows where the warm start was used and both solves validated"
+}
