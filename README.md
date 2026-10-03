@@ -2,7 +2,9 @@
 
 A C++17 optimization solver core for refinery planning and related sparse industrial models. The current engine implements CPU LP, MILP and convex QP paths without linking an existing solver library. HiGHS is used for benchmark reference answers, not inside the solve path.
 
-This is an experimental solver, not a production replacement for established industrial solvers. The strongest measured result is the CPU dual-simplex Netlib gate: 91/93 passes at 60 seconds per case, with no wrong answers found under that protocol. The default primal result is separate: 90/93.
+This is an experimental solver, not a production replacement for established industrial solvers. The post-merge CPU Netlib gate measured 93/93 passes in both primal and dual modes, with no wrong answers and 92/93 meeting the stricter check ([ledgers](results/netlib_postmerge_58f77af/)).
+
+Protocol: 60s per engine solve, pilots counted against HiGHS references capped at 300s; default `reproduction/reproduce.sh` excludes `pilot.we`/`pilot4` from passes as `reference_excluded_60s` (ceiling 91/93).
 
 Project website: [taral-lp.vercel.app](https://taral-lp.vercel.app/) - interactive performance reports, per-case ledgers and measured limits. The full site is prepared for publication; the live URL currently shows the holding page.
 
@@ -14,7 +16,7 @@ The checklist separates implemented features from measured coverage and unfinish
 | --- | --- | --- |
 | A sovereign solver core built from mathematical foundations, not an existing solver library | DONE for the current C++ engine: standard-library-only solve path in [`src/`](src/) | Broader industrial validation and performance work |
 | A core with a basic API or CLI, rather than a modeling environment or GUI | DONE: C++ interfaces in [`src/taral.hpp`](src/taral.hpp), MPS input and CLI below | Stable versioned API and broader integration testing |
-| LP as an initial focus | DONE for measured Netlib coverage: 91/93 dual and 90/93 primal under the stated gate | Unresolved cases and larger industrial models |
+| LP as an initial focus | DONE for measured Netlib coverage: 93/93 in both modes under the pilots-counted gate ([protocol above](#taral-lp)) | Unresolved cases and larger industrial models |
 | MILP as an initial focus | IN PROGRESS: branch-and-bound implemented; selected MIPLIB measurements below | Faster search and broader difficult-MILP coverage |
 | QP as an initial focus | IN PROGRESS: convex-QP interior-point path and [Maros-Meszaros ledger](results/qp_maros_meszaros/ledger.csv) | Reference gaps, numerical failures and uncertified cases; nonconvex QP is rejected |
 | Modular extension to MIQP, NLP and MINLP | IN PROGRESS: solver modules are separate in [`src/`](src/) | These problem classes are not implemented or measured |
@@ -53,7 +55,9 @@ The target is a solver core that fits refinery models, not a GUI wrapped around 
 
 ### Netlib LP
 
-An independent Kaggle run checked pinned `src/` at `442ca16` against live HiGHS references on the original MPS files. Local ledgers retain the primal and dual protocols separately.
+The post-merge Kaggle gate on `58f77af` measured 93/93 in both modes, strict 92/93, with only GREENBEA nonstrict ([raw ledgers and logs](results/netlib_postmerge_58f77af/)); the counting protocol is stated above. Its `src/` is byte-identical to `6c621e0`.
+
+The historical table below is unchanged: an independent Kaggle run checked pinned `src/` at `442ca16` against live HiGHS references on the original MPS files. Local ledgers retain the primal and dual protocols separately.
 
 | Protocol | Outcome | Evidence |
 | --- | --- | --- |

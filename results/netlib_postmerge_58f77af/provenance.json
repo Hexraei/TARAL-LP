@@ -1,0 +1,18 @@
+{
+  "source_snapshot": "58f77af",
+  "current_main_src_equivalent": "6c621e0e303fa85091e1ac040086f3272cfb4a28",
+  "origin_notebook": "hexraei/notebook59c24ff068",
+  "origin_version": 1,
+  "reported_build": "g++ -O2",
+  "engine_cap_seconds": 60,
+  "reference_cap_seconds_reported": 300,
+  "reference_cap_provenance": "notebook run report; attached case logs show engine cap only",
+  "counting": "pilots counted: 93/93 passes, 92/93 strict in each mode; exclusion summary: 91/93 passes, 90/91 strict",
+  "sha256": {
+    "primal_ledger.csv": "0d284bfc1f3b939b2948dda87151e14395c08c17aaecc1a8f6a9bc0a63a4eaa7",
+    "dual_ledger.csv": "77f5967184730cdb9b87252ba894564fa3a529a2c60f104923007aa19ed429e8",
+    "primal.log": "1af485d6881712cf800436ccf5eb25f401d309e341ba10e314c05955bd10a3a7",
+    "dual.log": "dfbd98d44216fa48da5b6ea3a0e0c8eddef695ac3b68af0e8a73c22895bf7c85",
+    "summary.txt": "0a652cb9aa947a2cf44e9cd6dcd2ce85bb8b23400851c6fe9e15ee74d066edf2"
+  }
+}
