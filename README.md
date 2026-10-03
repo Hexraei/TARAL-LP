@@ -22,7 +22,7 @@ Checked means **measured in the linked scope**, not complete industrial coverage
 - [ ] **R9 - Independent solver core:** prototype [standard-library-only C++ engine](src/), [build definition](CMakeLists.txt); reference solvers are test-only.
 - [x] **R10 - Large models:** measured [GPU LPs up to 1,092,610 decision variables](results/gpu_pdhg/t4_industrial_20261003/ledger.csv), approximately; not consistent exact industrial-scale solves.
 - [x] **R11 - Difficult numerical models:** measured [seeded adversarial LP/MILP](results/adversarial_4517277/tests2_base_full.csv); failures and unresolved cases retained.
-- [ ] **R12 - Basic interface:** prototype [command-line interface](src/main.cpp) and [C++ programming interface](src/taral.hpp); no GUI required for use.
+- [x] **R12 - Basic interface:** [documented command-line and C++ interfaces](docs/interface.md), measured 31/31 command-line checks and one LP API example; stable versioning and broader integration coverage remain.
 - [x] **R13 - Standard benchmarks:** measured [Netlib](results/netlib_postmerge_58f77af/) and [selected MIPLIB](benchmarks/results/miplib_ledger.csv); broader benchmark coverage planned.
 - [x] **R14 - Established-solver comparison:** measured [HiGHS objective and feasibility checks](results/netlib_postmerge_58f77af/); no general speed claim.
 - [x] **R15 - Challenging large models:** measured [historical large-model stress](results/adversarial_4517277/tests2_methods_dual_full.csv); weak-relaxation industrial coverage remains incomplete.

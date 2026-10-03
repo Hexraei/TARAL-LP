@@ -1,0 +1,17 @@
+usage: taral MODEL.mps [--time-limit S] [--node-limit N] [--method simplex|dual|ipm]
+             [--sol OUT.sol] [--json OUT.json] [--warm-sol F [--warm-dual F] [--cross-tol T]]
+             [--no-fallback] [--audit-prop] [--no-prop-prune]
+
+options:
+  --time-limit S    wall-clock limit in seconds; finite and > 0 (default 60)
+  --node-limit N    branch-and-bound node limit; integer >= 0 (default unlimited)
+  --method M        simplex (default), dual (dual simplex, LPs), or ipm (interior point)
+  --warm-sol FILE   crossover: start from the basis of an approximate primal point (name value per line)
+  --warm-dual FILE  optional row multipliers for --warm-sol (name value per line)
+  --cross-tol T     crossover: distance from a bound that counts as interior (default 1e-3)
+  --no-fallback     LP simplex: do not hand a stalled primal run to the dual simplex
+  --audit-prop      MILP: re-check propagation prunes (diagnostic)
+  --no-prop-prune   MILP: disable propagation pruning
+  --sol FILE        write the solution (name value per line) when optimal
+  --json FILE       write a JSON result summary
+  -h, --help        show this help and exit

@@ -1,0 +1,20 @@
+{
+  "source_commit": "7648676232345660c656b31171c9d189382c8f89",
+  "src_clean": true,
+  "cli_cases": 31,
+  "cli_passes": 31,
+  "api_cases": 1,
+  "api_result": "optimal 192000",
+  "api_scope": "LP file read and solve only; not all API functions or stable ABI",
+  "engine_binary_sha256": "c01d367931e94eb4a98ebb69f7e2976884dd053bf98a3641c15f0849fb97b8ea",
+  "api_binary_sha256": "9d27c84ebeb882aa4132b0810d1febe69160604e47e67621c9f69c5aa0c06d4f",
+  "compiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "cli_build_flags": "-O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic",
+  "api_build_flags": "-O3 -std=c++17 -Wall -Wextra -Wpedantic -Isrc",
+  "artifact_sha256": {
+    "help.txt": "2a2ab93dcd38f498f0cbbc15a62b8af0b7199335b946e3fa408c6439dd02abfd",
+    "api_test.log": "03e0e5445ea55da80087d6eb8ee3a3524a0f326753cd3371976e7952aa598bb1",
+    "cli_test.log": "cf74f2462af5cf52adfef1b63126b4ccba6e0f254c334b459a7efe2b4cf5e4e0",
+    "api_build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
