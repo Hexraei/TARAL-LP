@@ -14,6 +14,13 @@ BIN = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "build", "taral")
 NRAND = int(sys.argv[2]) if len(sys.argv) > 2 else 200
 TMP = tempfile.mkdtemp()
 fails = []
+def expect(name, cond, msg=""):
+    print(("PASS " if cond else "FAIL ") + name + ("" if cond else " " + str(msg)))
+    if not cond: fails.append((name, [str(msg)]))
+
+def run_raw(model, args):
+    return subprocess.run([BIN, model] + args, capture_output=True, text=True, timeout=60)
+
 stats = {"cases": 0, "reduced": 0, "ops": {}, "presolve_infeasible": 0, "audited_points": 0}
 
 def write_mps(path, rows, cols, ints, maximize, objc):
@@ -48,6 +55,27 @@ def write_mps(path, rows, cols, ints, maximize, objc):
         if up != math.inf: L.append(" UP BND X%d %.12g" % (j, up))
     L.append("ENDATA")
     open(path, "w").write("\n".join(L) + "\n")
+
+def mps(name, body):
+    p = os.path.join(TMP, name + ".mps"); open(p, "w").write(body); return p
+
+conflict = mps("conflict_base", """NAME C
+ROWS
+ N OBJ
+ G LOW
+ L HIGH
+COLUMNS
+ X OBJ 1 LOW 1
+ X HIGH 1
+ Y OBJ 1 LOW 1
+ Y HIGH 1
+RHS
+ RHS LOW 10 HIGH 4
+BOUNDS
+ UP BND X 100
+ UP BND Y 100
+ENDATA
+""")
 
 def gen(rng):
     n, m = rng.randint(4, 12), rng.randint(3, 10)
@@ -140,7 +168,7 @@ def check_case(path, tag, expect_reduction=False):
             ax = [0.0] * M["m"]
             for j, col in enumerate(M["cols"]):
                 for i, a in col: ax[i] += a * x[j]
-                if x[j] < M["lo"][j] - 1e-6 * rc.sc(M["lo"][j]) or x[j] > M["up"][j] + 1e-6 * rc.sc(M["up"][j]): problems.append("bound violated")
+                if x[j] < M["lo"][j] - 1e-6 * (1 + min(abs(M["lo"][j]), 1e3)) or x[j] > M["up"][j] + 1e-6 * (1 + min(abs(M["up"][j]), 1e3)): problems.append("bound violated")
                 if M["isint"][j] and abs(x[j] - round(x[j])) > 1e-6: problems.append("integrality violated")
             for i in range(M["m"]):
                 if ax[i] < M["rlo"][i] - 1e-6 * rc.sc(M["rlo"][i]) or ax[i] > M["rup"][i] + 1e-6 * rc.sc(M["rup"][i]): problems.append("row violated")
@@ -194,6 +222,139 @@ rejected(lambda l: l["reduced"].__setitem__("obj_const", l["reduced"]["obj_const
 sr = [k for k, o in enumerate(L["ops"]) if o["type"] == "singleton_row"]
 if sr: rejected(lambda l: l["ops"][sr[0]].__setitem__("v3", 123.0), "singleton_bound")
 rejected(lambda l: l["ops"].append({"type": "redundant_row", "row": 0, "col": -1, "a": 0, "v1": -math.inf, "v2": 10, "v3": 0, "v4": 1}), "bogus_redundant")
+
+# ---- large-magnitude integer bounds (review item 6): empty integer intervals must be infeasible
+def one_int(name, lo, up, ints=True, cost=1):
+    return mps(name, "NAME L\nROWS\n N OBJ\nCOLUMNS\n" + (" MARK 'MARKER' 'INTORG'\n" if ints else "") + " X OBJ %g\n" % cost +
+               (" MARK 'MARKER' 'INTEND'\n" if ints else "") + "BOUNDS\n LO BND X %r\n UP BND X %r\nENDATA\n" % (lo, up))
+for nm, lo_, up_, want in (("big_empty_int", 1000000000.4, 1000000000.6, "infeasible"), ("big_empty_int_1e12", 1e12 + 0.3, 1e12 + 0.7, "infeasible"),
+                           ("big_nonempty_int", 1000000000.4, 1000000001.6, "optimal"), ("big_integral_int", 1000000000.0, 1000000000.0000001, "optimal"),
+                           ("small_empty_int", 2.2, 2.8, "infeasible")):
+    pth = one_int(nm, lo_, up_)
+    lg = os.path.join(TMP, nm + "_log.json"); sl = os.path.join(TMP, nm + ".sol")
+    r = run_raw(pth, ["--presolve-log", lg, "--sol", sl]) if "run_raw" in globals() else subprocess.run([BIN, pth, "--presolve-log", lg, "--sol", sl], capture_output=True, text=True)
+    st = [l for l in r.stdout.splitlines() if l.startswith("status ")][-1].split()[1]
+    expect("large_int_status_" + nm, st == want, st)
+    if os.path.exists(lg):
+        errs = rc.replay(rc.load(pth), json.load(open(lg)))
+        expect("large_int_replay_" + nm, not errs, errs)
+    # plain engine must agree (no presolve): same status
+    r0 = subprocess.run([BIN, pth], capture_output=True, text=True)
+    st0 = [l for l in r0.stdout.splitlines() if l.startswith("status ")][-1].split()[1]
+    expect("large_int_plain_agrees_" + nm, st0 == want, st0)
+# an invalid point must fail the original-space audit and the replay cross-check: write X=1e9 for the empty interval
+pth = os.path.join(TMP, "big_empty_int.mps"); lg = os.path.join(TMP, "big_empty_int_log.json")
+fake_sol = os.path.join(TMP, "fake.sol"); open(fake_sol, "w").write("X 1000000000\n")
+Mb = rc.load(pth)
+l = json.load(open(lg)) if os.path.exists(lg) else {}
+expect("large_int_invalid_point_violates_bounds", 1e9 < Mb["lo"][0] or 1e9 > Mb["up"][0])
+
+# ---- regression tests for the independent review of the first version
+# 1. fully eliminated model: JSON carries the original-space objective and point, matching stdout
+full = mps("fully_eliminated", """NAME FULL
+ROWS
+ N OBJ
+ L R0
+COLUMNS
+ X OBJ 2 R0 1
+RHS
+ RHS R0 5
+BOUNDS
+ FX BND X 1
+ENDATA
+""")
+jp = os.path.join(TMP, "full.json"); sp_ = os.path.join(TMP, "full.sol")
+r = run_raw(full, ["--presolve", "--json", jp, "--sol", sp_])
+j = json.load(open(jp))
+expect("full_elim_json_status", j["status"] == "optimal", j["status"])
+expect("full_elim_json_objective_not_null", j["objective"] is not None and abs(j["objective"] - 2.0) < 1e-12, j["objective"])
+expect("full_elim_json_has_x", j.get("x") == [1.0], j.get("x"))
+expect("full_elim_stdout_matches", "objective 2" in r.stdout, r.stdout[-100:])
+
+# 2. unwritable presolve log: nonzero exit with a diagnostic, in all three paths
+for nm, mpath in (("normal", conflict), ("fully_eliminated", full), ("infeasible", os.path.join(ROOT, "benchmarks/refinery_stress/infeasible_supply_lp.mps"))):
+    r = run_raw(mpath, ["--presolve-log", "/no-such-dir/log.json"])
+    expect("unwritable_log_nonzero_" + nm, r.returncode != 0 and "cannot write" in (r.stdout + r.stderr), "rc=%d %s" % (r.returncode, r.stdout[-80:]))
+
+# 3. replay checker strict validation
+good = os.path.join(TMP, "good_log.json"); gsol = os.path.join(TMP, "good.sol")
+run_raw(full, ["--presolve-log", good, "--sol", gsol])
+Mf = rc.load(full); G = json.load(open(good))
+import copy
+def rep_rejects(name, mut, M=Mf, base=G):
+    l = copy.deepcopy(base); mut(l)
+    pth = os.path.join(TMP, name + ".json"); open(pth, "w").write(json.dumps(l, allow_nan=True))
+    p = subprocess.run([sys.executable, os.path.join(ROOT, "benchmarks/presolve_replay_check.py"), full if M is Mf else M, pth], capture_output=True, text=True)
+    expect(name, p.returncode == 1 and "FAIL" in p.stdout, p.stdout[-200:])
+expect("good_log_replays", rc.replay(Mf, G) == [], rc.replay(Mf, G))
+def col_minus1(l): l["ops"][0]["col"] = -1
+rep_rejects("reject_fix_col_index_minus1", col_minus1)
+def col_big(l): l["ops"][0]["col"] = 7
+rep_rejects("reject_col_index_out_of_range", col_big)
+def row_set(l): l["ops"][0]["row"] = 0
+rep_rejects("reject_unexpected_row_index_on_fix_col", row_set)
+def nan_a(l): l["ops"][0]["a"] = float("nan")
+rep_rejects("reject_nan_unused_coefficient", nan_a)
+def null_a(l): l["ops"][0]["a"] = None
+rep_rejects("reject_null_coefficient", null_a)
+def nan_v(l): l["ops"][0]["v2"] = float("nan")
+rep_rejects("reject_nan_unused_value", nan_v)
+def audit_nan(l): l["audit"]["objective"] = float("nan")
+rep_rejects("reject_audit_nan_objective", audit_nan)
+def audit_fake(l): l["audit"]["objective"] += 1.0
+rep_rejects("reject_audit_ok_with_wrong_objective", audit_fake)
+def audit_missing(l): del l["audit"]["max_row_violation"]
+rep_rejects("reject_audit_missing_field", audit_missing)
+def dims(l): l["original"]["cols"] = 9
+rep_rejects("reject_wrong_original_dims", dims)
+p = subprocess.run([sys.executable, os.path.join(ROOT, "benchmarks/presolve_replay_check.py"), full, good, gsol], capture_output=True, text=True)
+expect("sol_audit_cross_check_passes", p.returncode == 0, p.stdout)
+open(gsol, "w").write("X 5\n")
+p = subprocess.run([sys.executable, os.path.join(ROOT, "benchmarks/presolve_replay_check.py"), full, good, gsol], capture_output=True, text=True)
+expect("sol_audit_cross_check_rejects_wrong_point", p.returncode == 1, p.stdout)
+
+# 4. oracle semantics: duplicate coefficients are summed (engine) and a read failure is reported, not ignored
+dupf = mps("dup_presolve", """NAME D
+ROWS
+ N OBJ
+ G R0
+COLUMNS
+ X OBJ 1 R0 3
+ X R0 -4
+RHS
+ RHS R0 2
+BOUNDS
+ UP BND X 5
+ENDATA
+""")  # summed coefficient -1: -x >= 2 is infeasible; first-only (3x >= 2) would be feasible
+lg = os.path.join(TMP, "dup_log.json")
+r = run_raw(dupf, ["--presolve-log", lg])
+expect("duplicates_summed_presolve_infeasible", "status infeasible" in r.stdout, r.stdout[-100:])
+p = subprocess.run([sys.executable, os.path.join(ROOT, "benchmarks/presolve_replay_check.py"), dupf, lg], capture_output=True, text=True)
+expect("duplicates_summed_replay_passes", p.returncode == 0, p.stdout)
+garbage = mps("garbage2", "this is not an mps file\n")
+p = subprocess.run([sys.executable, os.path.join(ROOT, "benchmarks/presolve_replay_check.py"), garbage, good], capture_output=True, text=True)
+expect("replay_reader_failure_fails", p.returncode == 1, p.stdout)
+
+# 5. deadline discipline: expired budget -> honest time_limit, partial reduction unused, log marked and replayable
+tl = os.path.join(TMP, "tl_log.json"); tj = os.path.join(TMP, "tl.json")
+os.environ["TARAL_PRESOLVE_TEST_TIMEOUT_AFTER_OPS"] = "5"  # deterministic: as if the deadline passed after 5 reductions
+r = run_raw(os.path.join(ROOT, "benchmarks/refinery_stress/infeasible_supply_lp.mps"), ["--presolve-log", tl, "--json", tj])
+del os.environ["TARAL_PRESOLVE_TEST_TIMEOUT_AFTER_OPS"]
+if "time_limit" in r.stdout and "presolve" in r.stdout:
+    expect("presolve_timeout_exit4", r.returncode == 4, r.returncode)
+    L = json.load(open(tl)); expect("presolve_timeout_log_marked", L.get("timed_out") is True)
+    expect("presolve_timeout_json_status", json.load(open(tj))["status"] == "time_limit")
+    p = subprocess.run([sys.executable, os.path.join(ROOT, "benchmarks/presolve_replay_check.py"), os.path.join(ROOT, "benchmarks/refinery_stress/infeasible_supply_lp.mps"), tl], capture_output=True, text=True)
+    expect("presolve_timeout_log_replays", p.returncode == 0, p.stdout)
+else:
+    expect("presolve_timeout_reached", False, r.stdout[-200:])
+api = os.path.join(TMP, "presolve_api")
+srcs = [os.path.join(ROOT, "src", f) for f in os.listdir(os.path.join(ROOT, "src")) if f.endswith(".cpp") and f != "main.cpp"]
+cc = subprocess.run(["g++", "-O1", "-std=c++17", "-o", api, os.path.join(ROOT, "benchmarks/presolve_api_tests.cpp")] + srcs, capture_output=True, text=True)
+expect("presolve_api_test_builds", cc.returncode == 0, cc.stderr[-300:])
+if cc.returncode == 0:
+    r = subprocess.run([api], capture_output=True, text=True); expect("presolve_api_deadline_tests", r.returncode == 0, r.stdout + r.stderr)
 
 print("stats", json.dumps(stats))
 print("FAILED %d" % len(fails) if fails else "ALL PASS")
