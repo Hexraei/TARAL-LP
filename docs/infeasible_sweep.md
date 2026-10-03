@@ -71,13 +71,24 @@ Generated LPs (`--generated 60 --seed 7`, neutral seeds): 60 of 60 explained `ir
 the explained set was no larger than the planted k in 60 of 60 and equal to k in 58 (an upper bound, not a minimality
 statement). Smaller HiGHS IIS than the engine's set: 0 of 60; larger: 0 of 60 (row counts).
 
-## Checker change in this branch
+## Checker change in this branch (shared BOUNDS canonicalization)
 
-The independent checker's oracle model was wrong for `greenbea`: the file defines several named BOUNDS sets; the engine
-uses only the first set and lets the last entry per side win, HiGHS keeps the first entry and warned. The checker now
-normalizes the BOUNDS section the way the engine reads it (tested on small cases). Before the change the checker
-could not read greenbea; after it, the row proof is accepted. Only LO/UP/FX/MI/PL/FR are normalized; BV/LI/UI/SC bounds
-are passed through unchanged.
+Coverage gap, not an engine bug: highspy keeps the first entry when a BOUNDS entry repeats, uses only the first bound set
+only by accident of file layout, and gives a negative UP bound a lower bound of 0 (reporting the model infeasible),
+while the engine uses only the first named bound set, lets later entries overwrite earlier ones, and gives a negative UP
+an implicit lower bound of -infinity when the lower bound is still 0. The checker therefore could not read `greenbea`
+(several bound sets) and would have false-rejected valid negative-UP models. The engine's answers on these were not
+established wrong anywhere.
+
+`normalize_mps` now (a) uses only the first bound set, (b) drops an entry only when a later entry on the same column
+sets every side (lower/upper) it sets, never rewriting entries, (c) inserts the equivalent `MI` entry before a
+negative `UP` when the lower bound is still 0 at that point and no later entry sets the lower bound (dropping an
+explicit `LO 0` it overrides), and (d) raises on kept overlaps it cannot express. An earlier version of this branch
+(b4a67e1) emitted `LO BND X 0` before a negative `UP` and was wrong; it is replaced here.
+Tested by comparing the engine's status with HiGHS' status on the normalized file for: first-set-only,
+last-wins in a set, `UP -1` alone, `LO 0` then `UP -1`, `UP -1` then `LO -5`, `LO -3` then `UP -1`, `FX` then `UP`,
+`MI` then `UP`, `UP 7` then `UP -2`, `UP -1` then `LO 3`. Not covered by tests and not claimed: BV/LI/UI/SC bounds
+(passed through), bound sets that mix FX 0 with a later negative UP (raises), integer-variable interplay.
 
 ## Not run / not claimed
 
