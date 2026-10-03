@@ -1,0 +1,24 @@
+{
+  "artifact_sha256": {
+    "HOST.txt": "0049d6a9755509cd2e451e86d47cfd5be91fb4916174938363f1138dcbcbdfea",
+    "SUMMARY.md": "49bfb2682980eaa76b5349577b332894bcaff0a0a02920ab46776b6d82c52d1a",
+    "inputs_manifest.csv": "218ce4366a084406125ef18c536334fe2697f4c1dd1999598b3086d64ecb76af",
+    "ledger.csv": "21d478d62ae8e1e3933d17ba1d8665daf00be90a7f9f6691bbdbb2527ef4a225"
+  },
+  "source_commit": "58f77afbb8e85e51ad2cb9971be9e12d8e2bd96b",
+  "engine_cap_seconds": 300,
+  "reference_cap_seconds": 600,
+  "publication_state": "Raw evidence archived. Engine-attributable improvement wording withheld pending same-host pre-merge isolation comparison.",
+  "checked_counts": {
+    "dual": {
+      "optimal": 21,
+      "time_limit": 12
+    },
+    "primal": {
+      "optimal": 19,
+      "time_limit": 14
+    }
+  },
+  "default_optimal_using_dual_switch": 7,
+  "worst_objective_relative_error": 7.935720242099985e-15
+}

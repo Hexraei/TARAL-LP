@@ -1,0 +1,13 @@
+# Host / toolchain record (measurement run 2026-10-03, UTC)
+cpu_model: Intel(R) Xeon(R) Processor @ 2.80GHz
+cpu_cores_visible: 4 (virtual machine; shared host, steal not controlled)
+ram: MemTotal:       16480972 kB
+kernel: Linux 6.18.44-fc-v64 #1 SMP PREEMPT_DYNAMIC @0
+os: Ubuntu 24.04.4 LTS
+compiler: g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+build: g++ -O2 -std=c++17 src/*.cpp -o taral ; also compiled with -Wall -Wextra -Wpedantic: zero diagnostics (logs/build.log)
+engine_git_sha: 58f77afbb8e85e51ad2cb9971be9e12d8e2bd96b  (detached checkout of origin/main; git status --porcelain src = clean)
+taral binary: 1dbca768296db12d2cdf52ad504d405eee570a355c88f7e239489688748f265c  bin/taral
+highs: highspy 1.15.1, all options default (solver=choose, presolve=choose, threads=0/auto), time_limit=600; python 3.11.15; scipy 1.17.1
+checker: benchmarks/orig_check.py from the same tree (unmodified), rel row viol = viol/(1+|rhs|), tol 1e-6 rows and bounds
+emps expander: netlib lp/data/emps.c (sha256 fee41f544f6873a5e12bc598947828dc9964ef0676162e4df55e915760e2be22), gcc 13.3.0
