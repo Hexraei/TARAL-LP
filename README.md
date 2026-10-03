@@ -8,7 +8,7 @@ TARAL-LP is a from-scratch C++17 solver core for sparse industrial optimization:
 
 Checked means **measured in the linked scope**, not complete industrial coverage. Unchecked work is a prototype, planned or not started.
 
-<details>
+<details open>
 <summary>17 requirements, each mapped to evidence or implementation</summary>
 
 - [x] **R1 - LP, MILP and QP:** measured [Netlib](results/netlib_postmerge_58f77af/), [selected MIPLIB](benchmarks/results/miplib_ledger.csv) and [QP tests](results/adversarial_4517277/tests3_qp_full.csv); limits remain.
