@@ -18,8 +18,11 @@ REL = 1e-9
 INF = math.inf
 
 def sc(b): return 1 + (abs(b) if math.isfinite(b) else 0)
-def int_up(l): return float(math.ceil(l))  # strict inward rounding, no snap
-def int_dn(u): return float(math.floor(u))
+def int_up(l, e=0.0): return float(math.ceil(l - e))  # strict inward rounding of input bounds (e = 0)
+def int_dn(u, e=0.0): return float(math.floor(u + e))
+KEPS = 2.220446049250313e-16  # DBL_EPSILON: derived bounds are rounded OUTWARD by a running absolute error bound only
+def derr(rerr_i, a, l, u):  # mirrors the engine: row-bound error / |a| plus the division rounding (none for |a| = 1)
+    return rerr_i / abs(a) + (0.0 if abs(a) == 1.0 else KEPS * max(abs(l) if math.isfinite(l) else 0.0, abs(u) if math.isfinite(u) else 0.0))
 def close(a, b): 
     if not (math.isfinite(a) and math.isfinite(b)): return a == b
     return abs(a - b) <= 1e-12 * (1 + abs(a) + abs(b))  # tight: engine and replay do the same double arithmetic; a +1 at 1e9 must fail
@@ -98,6 +101,7 @@ def replay_ops(M, log):
     for j, col in enumerate(M["cols"]):
         for i, v in col: rows[i].append((j, v))
     rrem, crem = [False] * m, [False] * n
+    rerr, cerr = [0.0] * m, [0.0] * n
     errs = []
     def act_cols(i): return [(j, v) for j, v in rows[i] if not crem[j]]
     for k, op in enumerate(log["ops"]):
@@ -116,8 +120,10 @@ def replay_ops(M, log):
             crem[j] = True
             for r, a in M["cols"][j]:
                 if rrem[r]: continue
-                if math.isfinite(rlo[r]): rlo[r] -= a * v[0]
-                if math.isfinite(rup[r]): rup[r] -= a * v[0]
+                av, mag = a * v[0], 0.0
+                if math.isfinite(rlo[r]): rlo[r] -= av; mag = max(mag, abs(rlo[r]))
+                if math.isfinite(rup[r]): rup[r] -= av; mag = max(mag, abs(rup[r]))
+                rerr[r] += KEPS * (abs(av) + mag) + abs(a) * cerr[j]
             objc += M["cost"][j] * v[0]
         elif t == "empty_row":
             if rrem[i] or act_cols(i): errs.append(tag + ": row not empty/active"); continue
@@ -130,14 +136,16 @@ def replay_ops(M, log):
             if not (close(v[0], rlo[i]) and close(v[1], rup[i])): errs.append(tag + ": row bounds mismatch")
             a = ac[0][1]
             l, u = (rlo[i] / a, rup[i] / a) if a > 0 else (rup[i] / a, rlo[i] / a)
+            de = derr(rerr[i], a, l, u)
             if M["isint"][j]:
-                if math.isfinite(l): l = int_up(l)
-                if math.isfinite(u): u = int_dn(u)
+                if math.isfinite(l): l = int_up(l, de)
+                if math.isfinite(u): u = int_dn(u, de)
+                de = 0.0
             nl, nu = max(lo[j], l), min(up[j], u)
             if (nl > nu) if M["isint"][j] else (nl > nu + REL * sc(nu)): errs.append(tag + ": conflict logged as reduction")
             if nl > nu: nu = nl
             if not (close(v[2], nl) and close(v[3], nu)): errs.append(tag + ": derived bounds mismatch")
-            lo[j], up[j] = nl, nu; rrem[i] = True
+            lo[j], up[j] = nl, nu; rrem[i] = True; cerr[j] = max(cerr[j], de)
         elif t == "redundant_row":
             if rrem[i]: errs.append(tag + ": row already removed"); continue
             mn = sum((a * lo[c] if a > 0 else a * up[c]) for c, a in act_cols(i))
@@ -171,8 +179,9 @@ def replay_ops(M, log):
                     a = ac[0][1]; l, u = (rlo[i] / a, rup[i] / a) if a > 0 else (rup[i] / a, rlo[i] / a)
                     c = ac[0][0]
                     if M["isint"][c]:
-                        if math.isfinite(l): l = int_up(l)
-                        if math.isfinite(u): u = int_dn(u)
+                        de = derr(rerr[i], a, l, u)
+                        if math.isfinite(l): l = int_up(l, de)
+                        if math.isfinite(u): u = int_dn(u, de)
                         found = found or max(lo[c], l) > min(up[c], u)
                     else:
                         found = found or max(lo[c], l) > min(up[c], u) + REL * sc(min(up[c], u))
