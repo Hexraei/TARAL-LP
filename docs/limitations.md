@@ -11,7 +11,7 @@ TARAL-LP is an experimental C++17 solver, not a production replacement for estab
 
 ## Implemented scope
 
-- LP: CPU primal and dual simplex, an interior-point path, and crossover from an approximate point. The default LP path checks optimality conditions on the original model, then switches from primal to dual simplex if needed. The first method receives 20 percent of the available time, so host speed can change the route taken.
+- LP: CPU primal and dual simplex, an interior-point path, and crossover from an approximate point. The default LP path checks optimality conditions on the original model, then switches from primal to dual simplex if needed. The first method receives 20 percent of the available time, so host speed can change the route taken. `--work-limit N` replaces that wall-clock share with a share of an iteration budget (see `docs/deterministic_solve.md`); the default path is unchanged.
 - MILP: branch and bound with integer-bound propagation and reduced-cost fixing. Limits and unresolved nodes remain unresolved outcomes, not successful solves.
 - QP: continuous convex quadratic objectives with linear or bound constraints through the interior-point path. Returned results require independent checks; implementation does not establish full-library coverage.
 - GPU: CUDA PDHG for continuous LPs. It reports `near_optimal`, not an exact vertex or exact-answer certificate. Integer or quadratic models are rejected as `unsupported_model` with exit code 2.
