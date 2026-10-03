@@ -1,0 +1,18 @@
+# status/iterations of bounds_huge-82056, -82057, -82068 with --method ipm, by source tree and toolchain (this host, gcc 13.3 / clang 18)
+# trees: main = 93653d7 src (== main 4517277 src); patch2 = db82de0; head_before_fix = af9df1b; fix = this commit
+=== g++ -O3 -march=native
+  main:                    82056=numerical_failure/50  82057=numerical_failure/27  82068=numerical_failure/63
+  patch2:                  82056=numerical_failure/50  82057=numerical_failure/27  82068=numerical_failure/63
+  head_before_fix:         82056=numerical_failure/50  82057=numerical_failure/27  82068=numerical_failure/63
+  fix:                     82056=optimal/92            82057=optimal/17            82068=optimal/25
+=== g++ -O3   (no FMA)
+  main:                    82056=optimal/92            82057=optimal/17            82068=optimal/25
+  patch2:                  82056=optimal/92            82057=optimal/17            82068=optimal/25
+  head_before_fix:         82056=optimal/92            82057=optimal/17            82068=optimal/25
+  fix:                     82056=optimal/92            82057=optimal/17            82068=optimal/25
+=== clang++-18 -O3 -march=native
+  main:                    82056=numerical_failure/77  82057=optimal/26            82068=numerical_failure/57
+  patch2:                  82056=numerical_failure/77  82057=optimal/26            82068=numerical_failure/57
+  head_before_fix:         82056=numerical_failure/77  82057=optimal/26            82068=numerical_failure/57
+  fix:                     82056=optimal/92            82057=optimal/17            82068=optimal/25
+# objectives with the fix (every toolchain): -26.658203125, -9.08984375, -130.656249985

@@ -1,0 +1,4 @@
+# model	status	objective (model sense)	iterations with --method ipm
+bounds_huge-82056.mps	optimal	-26.658203125	92
+bounds_huge-82057.mps	optimal	-9.08984375	17
+bounds_huge-82068.mps	optimal	-130.656249985	25

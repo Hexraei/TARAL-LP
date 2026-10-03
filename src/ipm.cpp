@@ -13,6 +13,17 @@
 // direction as recession directions (A d = 0, Q d = 0, c'd < 0, d inside the bound cone). A status is
 // only reported when such a certificate passes the tolerances below.
 // "Optimal" requires the original-model measures (recomputed from x and y alone) below tol.
+// The interior-point iterates must not depend on how the compiler fuses a*b+c. A fused multiply-add changes the last
+// bits of every Newton step, and with an FMA build (-march=native) the path of ill-scaled models (bounds_huge-82056,
+// -82057 and -82068 are three) flips between optimal and numerical_failure under unrelated source edits, because
+// inlining decisions inside this file decide which products get fused (any edit to ipm.cpp moves the fused-op count of
+// run_ipm). Contraction is therefore pinned off for this file: the same source gives the same iterates on every
+// compiler and flag set. tools/diag_qp_ipm/fp_shape_check.py shows the shape drift; tests/ipm_numerics replays it.
+#if defined(__clang__)
+#pragma clang fp contract(off)
+#elif defined(__GNUC__)
+#pragma GCC optimize("fp-contract=off")
+#endif
 #include "ipm.hpp"
 
 #include <algorithm>
