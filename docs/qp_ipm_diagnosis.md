@@ -266,3 +266,19 @@ The invariance script only checks those three numerics models, despite its
 FULL comment; no full-suite compiler invariance claim is made. Independent
 null-space HiGHS replay of the five equality-convex cases agrees with the
 recorded final objectives within 9.93e-10 absolute.
+
+### Separate five-label harness correction
+
+`tools/advqp/qpequality.py` limits the correction to `indefinite-75012/75027/75034/75060/75076`.
+Each use recomputes the equality null space, checks consistency, and verifies
+PSD reduced curvature (tolerance 1e-13 times the original Hessian scale).
+The reference solves the reduced model; the engine's returned point still faces
+the original-model exact feasibility, objective, stationarity and gap checks.
+No recorded raw verdict is edited. The 75034 reduced eigenvalue is about
+-1.28e-15, treated as roundoff, not proof of exact PSD.
+
+An integration-host replay of the 80 indefinite cases now yields 80 PASS, with
+only the five classification changes. Its ledger is `equality_labels_replay_80.jsonl`.
+`tests/ipm_gate/check_equality_labels.py` also checks all five returned points and
+rejects injected negative reduced curvature and an unrelated case identity.
+This is not a new 1780-case benchmark; the raw final 1780 ledger remains unchanged.

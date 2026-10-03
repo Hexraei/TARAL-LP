@@ -34,6 +34,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import qpcase
 import qpcheck
+import qpequality
 
 TOL_VIOL = 1e-6
 TOL_OBJ = 1e-6
@@ -98,7 +99,10 @@ def judge(case, ours, x, tl):
     ost = ours.get("status")
     conv, lam = convexity(case)
     rec["convexity"], rec["lam_min"] = conv, lam
-    feas_convex = case.cat == "indef_convex_feasible"  # indefinite Q, convex on the feasible set
+    equality_model = qpequality.reduced_case(case)
+    feas_convex = case.cat == "indef_convex_feasible" or equality_model is not None
+    if equality_model is not None:
+        rec.update(equality_convex=True, equality_lam_min=equality_model[1], equality_dimension=equality_model[2])
     if ost == "parse_error":
         rec.update(verdict="PARSE_ERR", detail=rec["msg"])
         return rec
@@ -130,9 +134,10 @@ def judge(case, ours, x, tl):
         return rec
 
     # ---- reference
-    ref = qpcheck.reference(case, presolve=True, tl=tl)
+    reference_case = equality_model[0] if equality_model is not None else case
+    ref = qpcheck.reference(reference_case, presolve=True, tl=tl)
     if ref["status"] not in ("optimal", "infeasible", "unbounded"):
-        ref2 = qpcheck.reference(case, presolve=False, tl=tl)
+        ref2 = qpcheck.reference(reference_case, presolve=False, tl=tl)
         rec["ref_note"] = "presolve-on %s -> presolve-off %s" % (ref["status"], ref2["status"])
         if ref2["status"] in ("optimal", "infeasible", "unbounded"):
             ref = ref2
@@ -153,7 +158,7 @@ def judge(case, ours, x, tl):
     sgn = -1.0 if case.maximize else 1.0
 
     if ost == "nonconvex":
-        if conv == "border":
+        if conv == "border" and equality_model is None:
             rec.update(verdict="BORDER", detail="refused as nonconvex, lam_min %.3g" % lam)
         elif feas_convex:
             rec.update(verdict="NOANS", detail="refused: Q indefinite although convex on {Ax=b} (engine requires PSD Q); lam_min %.3g" % lam)
@@ -209,7 +214,7 @@ def judge(case, ours, x, tl):
             first = next(p for p in probs if p[0] in ("FAIL_STATUS", "FAIL_FEAS", "FAIL_OBJ", "FAIL_KKT"))
             rec.update(verdict=first[0], detail="; ".join(p[1] for p in probs), all_fail=order)
             return rec
-        if conv == "border":
+        if conv == "border" and equality_model is None:
             rec.update(verdict="BORDER", detail="accepted a Q within noise of semidefinite (lam_min %.3g); point certified" % lam)
             return rec
         rec.update(verdict="PASS_REF" if better else "PASS", detail=rec.get("pass_ref_why", ""))
@@ -220,7 +225,7 @@ def judge(case, ours, x, tl):
         ph = qpcheck.farkas_phase1(case)
         rec["phase1"] = ph
         if truth == "infeasible":
-            if conv == "border":
+            if conv == "border" and equality_model is None:
                 rec.update(verdict="BORDER", detail="")
             else:
                 rec.update(verdict="PASS", detail="independent phase-1 LP violation %.3g" % ph)
