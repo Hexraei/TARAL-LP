@@ -26,6 +26,21 @@ not special-cased: the objective is not used either way.
 - Certificates are floating-point, verified at the engine's existing margin (`docs/certificates`
   semantics, 1e-8); they are not exact-rational proofs.
 
+## Behaviour notes (after independent review)
+
+- The time limit covers every phase. The elastic solve is skipped (`relaxation.status` =
+  `not_run_time_limit`) when no budget is left after the deletion phase; no minimum one-second grace.
+  The row proof status is then reported without a relaxation report. Timed-out removal tests leave
+  rows unproven (`reduced_unproven`).
+- An unwritable output path exits 5 with a message on stderr and stdout; no success is claimed.
+- `relaxation.certificate_quality` is exported (the gated solver's own KKT label); it is not an exact proof.
+- Duplicate coefficients in an MPS COLUMNS section are summed by the engine. HiGHS keeps the first one, so the
+  checker normalizes the model (sums duplicates, free format only) before using HiGHS as the oracle.
+- The checker never trusts `certificate_verified`: it re-checks multiplier dimensions, finiteness, signs,
+  stationarity (<= 1e-9 scaled by the L1 norm) and a contradiction margin > 1e-8 on the original model,
+  rejects NaN/non-finite JSON, wrong-length or non-finite witnesses and bad indices, requires oracle
+  status infeasible (not merely non-optimal) and fails if the oracle read or solve fails.
+
 ## Measured (this branch)
 
 Measured by `benchmarks/infeasibility_explanation_tests.py` and the independent checker
@@ -50,8 +65,10 @@ Measured by `benchmarks/infeasibility_explanation_tests.py` and the independent 
 
 ## Not run / not claimed
 
-- No MIPLIB or Netlib infeasible-set sweep; the historical 26-time-limit MIPLIB ledger is not a
+- No dedicated infeasible corpus sweep (MIPLIB/Netlib); only 150 generated random LPs (seeds 7000-7149); the historical 26-time-limit MIPLIB ledger is not a
   baseline for this feature.
 - Irreducibility is not shown for integer models (LP relaxation only).
 - No exact-arithmetic or rational certificate; no minimum-cardinality or minimum-row-count search.
 - No timing comparison against HiGHS IIS.
+- Budget behaviour is tested with a simulated clock after the deletion phase, not with a real overrun.
+- Fixed-format MPS with spaces in names is not supported by the checker's duplicate normalizer.
