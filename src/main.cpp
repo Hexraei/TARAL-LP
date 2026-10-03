@@ -258,7 +258,8 @@ int exit_code(const std::string& status) {
 const char* kUsage =
     "usage: taral MODEL.mps [--time-limit S] [--node-limit N] [--method simplex|dual|ipm]\n"
     "             [--sol OUT.sol] [--json OUT.json] [--warm-sol F [--warm-dual F] [--cross-tol T]]\n"
-    "             [--no-fallback] [--audit-prop] [--no-prop-prune] [--explain-infeasible OUT.json]\n";
+    "             [--no-fallback] [--audit-prop] [--no-prop-prune] [--explain-infeasible OUT.json]\n"
+    "             [--presolve] [--presolve-log OUT.json]\n";
 
 void print_help() {
     std::printf("%s"
@@ -271,6 +272,8 @@ void print_help() {
                 "  --warm-dual FILE  optional row multipliers for --warm-sol (name value per line)\n"
                 "  --cross-tol T     crossover: distance from a bound that counts as interior (default 1e-3)\n"
                 "  --no-fallback     LP simplex: do not hand a stalled primal run to the dual simplex\n"
+                "  --presolve        verified presolve (linear LP/MILP): replayable log, original-space audit of the result\n"
+                "  --presolve-log F  write the presolve log and audit to F (implies --presolve)\n"
                 "  --audit-prop      MILP: re-check propagation prunes (diagnostic)\n"
                 "  --no-prop-prune   MILP: disable propagation pruning\n"
                 "  --explain-infeasible FILE  write a verified LP-relaxation infeasibility explanation (irreducible rows + minimum relaxation) and exit\n"
@@ -317,6 +320,8 @@ int main(int argc, char** argv) {
     bool fallback = true;            // primal simplex that stalls hands the rest of the time to the dual (--no-fallback: off)
     bool only_files = false;
     const char* explain_path = nullptr;  // --explain-infeasible FILE
+    bool do_presolve = false;
+    const char* presolve_log = nullptr;
     for (int i = 1; i < argc; ++i) {
         const char* a = argv[i];
         if (!only_files && !std::strcmp(a, "--")) { only_files = true; continue; }
@@ -351,6 +356,11 @@ int main(int argc, char** argv) {
                 if (!value(warm_dual)) return usage_error("--warm-dual requires a value");
             } else if (!std::strcmp(a, "--explain-infeasible")) {
                 if (!value(explain_path)) return usage_error("--explain-infeasible requires a value");
+            } else if (!std::strcmp(a, "--presolve")) {
+                do_presolve = true;
+            } else if (!std::strcmp(a, "--presolve-log")) {
+                if (!value(presolve_log)) return usage_error("--presolve-log requires a value");
+                do_presolve = true;
             } else if (!std::strcmp(a, "--no-fallback")) {
                 fallback = false;
             } else if (!std::strcmp(a, "--audit-prop")) {
@@ -400,6 +410,45 @@ int main(int argc, char** argv) {
         if (ex.status == "no_verified_proof") return 5;
         return ex.status == "reduced_unproven" && ex.wall_s >= limit - 1e-3 ? 4 : 0;
     }
+    Model orig_md;  // --presolve: solve a reduced model, report and audit in original space
+    PresolveResult pre;
+    if (do_presolve) {
+        if (!md.qobj.empty() || method == "ipm")
+            return usage_error("--presolve supports linear models with --method simplex or dual only");
+        orig_md = md;
+        pre = presolve_model(orig_md);
+        if (pre.infeasible) {
+            if (presolve_log) write_presolve_log(presolve_log, orig_md, pre, nullptr);
+            if (json) write_json(json, "infeasible", nullptr, wall(), "presolve: " + pre.infeasible_reason);
+            std::printf("status infeasible (presolve: %s) wall %.3fs\n", pre.infeasible_reason.c_str(), wall());
+            return exit_code("infeasible");
+        }
+        std::printf("presolve: %zu -> %zu rows, %zu -> %zu cols, %zu reductions, %d passes\n", orig_md.row_lo.size(),
+                    pre.kept_rows.size(), orig_md.cols.size(), pre.kept_cols.size(), pre.log.size(), pre.passes);
+        if (presolve_log) write_presolve_log(presolve_log, orig_md, pre, nullptr);  // rewritten with the audit when a point is reported
+        md = pre.reduced;
+        if (md.cols.empty()) {  // everything fixed: the answer is the substitution itself
+            std::vector<double> x = presolve_expand(orig_md, pre, {});
+            PresolveAudit au = presolve_audit(orig_md, x, md.obj_const);
+            if (presolve_log) write_presolve_log(presolve_log, orig_md, pre, &au);
+            const char* st = au.ok ? "optimal" : "numerical_failure";
+            if (json) write_json(json, st, nullptr, wall(), "presolve solved the model");
+            if (sol && au.ok) write_sol(sol, orig_md, x);
+            std::printf("status %s objective %.12g (presolve) wall %.3fs\n", st, au.objective, wall());
+            return exit_code(st);
+        }
+    }
+    auto presolve_report = [&](std::vector<double>& x, double obj, bool& ok) {  // expand + audit; x becomes original-space
+        PresolveAudit au;
+        if (do_presolve) {
+            x = presolve_expand(orig_md, pre, x);
+            au = presolve_audit(orig_md, x, obj);
+            ok = au.ok;
+            if (presolve_log) write_presolve_log(presolve_log, orig_md, pre, &au);
+            std::printf("presolve audit %s: row %.3g bound %.3g int %.3g objective diff %.3g\n", au.ok ? "ok" : "FAILED",
+                        au.max_row_violation, au.max_bound_violation, au.max_int_violation, au.objective_diff);
+        }
+    };
     if ((!md.qobj.empty() || method == "ipm") && !md.has_integers()) {  // convex QP, or LP by interior point
         IpmOptions opt;
         opt.time_limit = limit - wall();
@@ -423,9 +472,14 @@ int main(int argc, char** argv) {
         MilpResult r = solve_milp(md, limit - wall(), node_limit, mopt);
         if (r.status == "optimal" && !std::isfinite(r.objective))
             r.status = "numerical_failure", r.has_solution = false, r.message = "non-finite objective";
+        if (r.has_solution && do_presolve) {
+            bool ok = true;
+            presolve_report(r.x, r.objective, ok);
+            if (!ok) r.status = "numerical_failure", r.has_solution = false, r.message = "presolve audit failed";
+        }
         double w = wall();
         if (json) write_milp_json(json, r, w);
-        if (sol && r.has_solution) write_sol(sol, md, r.x);
+        if (sol && r.has_solution) write_sol(sol, do_presolve ? orig_md : md, r.x);
         std::printf("status %s objective %.12g best_bound %.12g gap %.3g nodes %ld iterations %ld prop_crossed %ld wall %.3fs %s\n",
                     r.status.c_str(), r.has_solution ? r.objective : NAN, r.best_bound, r.gap, r.nodes, r.lp_iterations,
                     r.prop_crossed, w, r.message.c_str());
@@ -456,9 +510,14 @@ int main(int argc, char** argv) {
     Result r = solve_lp_gated(md, md.col_lo, md.col_up, wp, limit - wall(), method == "dual", fallback);
     if (r.status == Status::Optimal && !std::isfinite(r.objective))
         r.status = Status::NumericalFailure, r.message = "non-finite objective";
+    if (r.status == Status::Optimal && do_presolve) {
+        bool ok = true;
+        presolve_report(r.x, r.objective, ok);
+        if (!ok) r.status = Status::NumericalFailure, r.message = "presolve audit failed";
+    }
     double w = wall();
     if (json) write_json(json, status_name(r.status), &r, w, r.message);
-    if (sol && r.status == Status::Optimal) write_sol(sol, md, r.x);
+    if (sol && r.status == Status::Optimal) write_sol(sol, do_presolve ? orig_md : md, r.x);
     std::printf("status %s objective %.12g iterations %ld wall %.3fs %s\n", status_name(r.status), r.objective,
                 r.iterations, w, r.message.c_str());
     return exit_code(status_name(r.status));
