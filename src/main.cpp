@@ -434,6 +434,7 @@ int main(int argc, char** argv) {
         if (ex.status == "no_verified_proof") return 5;
         return ex.status == "reduced_unproven" && ex.wall_s >= limit - 1e-3 ? 4 : 0;
     }
+    if (work_limit && !md.qobj.empty()) return usage_error("--work-limit supports linear LPs only");
     if ((!md.qobj.empty() || method == "ipm") && !md.has_integers()) {  // convex QP, or LP by interior point
         IpmOptions opt;
         opt.time_limit = limit - wall();
@@ -449,6 +450,12 @@ int main(int argc, char** argv) {
     }
     if (!md.qobj.empty()) {  // quadratic objective with integer variables: never a silent relaxation
         std::string why = "mixed-integer quadratic models are not supported";
+        if (json) write_json(json, "unsupported", nullptr, wall(), why);
+        std::printf("status unsupported: %s\n", why.c_str());
+        return exit_code("unsupported");
+    }
+    if (work_limit && md.has_integers()) {  // B&B node LPs share one counter; no determinism claim for MILP
+        std::string why = "--work-limit supports continuous LPs only (use --node-limit for MILP)";
         if (json) write_json(json, "unsupported", nullptr, wall(), why);
         std::printf("status unsupported: %s\n", why.c_str());
         return exit_code("unsupported");
@@ -494,8 +501,8 @@ int main(int argc, char** argv) {
         char hx[32];
         std::snprintf(hx, sizeof hx, "%016llx", (unsigned long long)result_hash(status_name(r.status), r));
         g_json_extra = std::string(", \"work_limit\": ") + std::to_string(work_limit) + ", \"work_used\": " +
-                       std::to_string(work_budget().used) + ", \"result_hash\": \"" + hx + "\"";
-        std::printf("work_used %ld of %ld result_hash %s\n", work_budget().used, work_limit, hx);
+                       std::to_string(std::min(work_budget().used, work_limit)) + ", \"result_hash\": \"" + hx + "\"";
+        std::printf("work_used %ld of %ld result_hash %s\n", std::min(work_budget().used, work_limit), work_limit, hx);
     }
     double w = wall();
     if (json) write_json(json, status_name(r.status), &r, w, r.message);
