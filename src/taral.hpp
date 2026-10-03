@@ -1,5 +1,6 @@
 // TARAL-LP engine: shared types and module interfaces. C++17 standard library only.
 #pragma once
+#include <array>
 #include <chrono>
 #include <limits>
 #include <stdexcept>
@@ -108,12 +109,24 @@ struct MilpResult {
     double best_bound = 0;          // proven bound (-inf/+inf when none)
     double gap = kInf;              // |objective - best_bound| / max(1, |objective|)
     long nodes = 0, lp_iterations = 0, unresolved_nodes = 0;
+    long prop_tightened = 0;                   // propagation: integer bounds tightened
+    long prop_crossed = 0, prop_crossed_lp_infeasible = 0, prop_pruned = 0;  // nodes whose integer domain came out
+                                               // empty; of those the LP confirmed; pruned without the LP
+    // --audit-prop: nodes with an emptied domain, re-checked (see Search::audit_pruned in milp.cpp):
+    // {nodes, LP infeasible, LP feasible, LP other, integer-empty by plain B&B, integer-feasible (a bug),
+    //  undecided, justified by the incumbent cutoff only, reduced-cost fixings checked, fixings found wrong}
+    std::array<long, 10> audit{};
+    long rc_fixed = 0, rc_skipped = 0;  // reduced-cost fixing: bounds tightened, bases not trusted
     std::string message;
 };
-MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit);
 // Warm-start basis from an approximate primal point (src/crossover.cpp); *interior = variables farther than tol from a bound.
 std::vector<char> basis_from_point(const Model& model, const std::vector<double>& x,
                                 const std::vector<double>& row_duals, double tol, int* interior);
+struct MilpOptions {
+    bool audit_prop = false;  // --audit-prop: re-check every node whose propagated integer domain came out empty
+    bool no_prop_prune = false;  // --no-prop-prune: do not prune such a node directly; the LP decides
+};
+MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, MilpOptions opt = {});
 const char* status_name(Status s);
 
 // Recomputes proof validity from model coefficients, not solver basis/pricing state.
