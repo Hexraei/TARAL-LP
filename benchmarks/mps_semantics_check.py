@@ -169,6 +169,52 @@ RHS
  rhs r 1.0D1
 ENDATA
 """, "optimal", 7.5, "D exponents; 2x >= 10 so x=5, cost 1.5*5"),
+    "zero_column_bounded_free_format": ("""NAME ZEROCOL1
+ROWS
+ N obj
+ G r
+COLUMNS
+ x obj 1 r 1
+RHS
+ rhs r 2
+BOUNDS
+ UP bnd x 10
+ UP bnd z 5
+ENDATA
+""", "parse_error", None, "BOUNDS names a column COLUMNS never declared: rejected (typo guard kept by decision; HiGHS accepts it); z appears only in BOUNDS"),
+    "zero_column_fixed_bound_makes_it_binding": ("""NAME ZEROCOL2
+ROWS
+ N obj
+ G r
+COLUMNS
+ x obj 1 r 1
+RHS
+ rhs r 2
+BOUNDS
+ LO bnd z 3
+ UP bnd z 1
+ENDATA
+""", "parse_error", None, "BOUNDS names a column COLUMNS never declared: rejected (typo guard kept by decision; HiGHS accepts it); empty column z with lo 3 > up 1"),
+    "zero_column_free_and_integer_bounds": ("""NAME ZEROCOL3
+ROWS
+ N obj
+ G r
+COLUMNS
+ x obj 1 r 1
+RHS
+ rhs r 1
+BOUNDS
+ FR bnd w
+ BV bnd b
+ FX bnd f 4
+ENDATA
+""", "parse_error", None, "BOUNDS names a column COLUMNS never declared: rejected (typo guard kept by decision; HiGHS accepts it); w free, b binary, f fixed, all bound-only"),
+    "zero_column_fixed_names_with_spaces": ("\n".join([
+        "NAME ZEROCOL4", "ROWS", fixed("N", "obj"), fixed("G", "r1"), "COLUMNS",
+        fixed("", "x y", "obj", "1", "r1", "1"),
+        "RHS", fixed("", "rhs", "r1", "2"),
+        "BOUNDS", fixed("UP", "bnd", "z w", "7"), "ENDATA", ""]),
+        "parse_error", None, "BOUNDS names a column COLUMNS never declared: rejected (typo guard kept by decision; HiGHS accepts it); fixed-column file, bound-only name with a space"),
     "integer_marker_solved_as_mip": ("""NAME INTS
 ROWS
  N obj
