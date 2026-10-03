@@ -93,3 +93,17 @@ explicit upper bound because readers differ on the default.
 - Replay comparisons of logged values use a tight tolerance (1e-12 relative, same double arithmetic as the
   engine) and fixed values must equal the bound exactly and be integral for integer columns, so a +1 shift at 1e9
   is rejected. Limit: a shift below about 1e-12 x magnitude is not detected.
+
+## Float-derived integer bounds (singleton rows)
+
+A singleton row bound is computed in floating point (row bound minus fixed-column terms, then divided by the
+coefficient), so for an INTEGER column its ceil/floor is not exact. Example: 2X=.394, X+.5Y=.697, Y integer in
+[1,10] is feasible (X=.197, Y=1), but float substitution gives .697-.19700000000000006 and a strict floor gave Y<=0,
+a false "infeasible". The engine now carries a running absolute error bound per row (one DBL_EPSILON-scaled term per
+multiply/subtract, plus the fixed column's own error, plus the division rounding unless |a| = 1) and rounds the
+DERIVED integer bound outward by that bound only: ceil(l - e), floor(u + e). Outward rounding only relaxes, so
+infeasible claims stay sound; the final answer is still audited in original space. Direct input bounds
+(`round_int_bounds`, and singleton rows with |a| = 1 and no substitution) have e = 0 and stay strictly ceil/floor, so
+the [4e-7,8e-7] cases remain infeasible. The replay checker recomputes the same error bounds with the same
+formulas and rejects the old false-infeasible logs (kept as fixtures). Limits: the error bound is a first-order
+model of rounding, not interval arithmetic with directed rounding; an integer bound is treated as exact once rounded.
