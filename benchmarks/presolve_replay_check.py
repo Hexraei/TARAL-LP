@@ -12,6 +12,7 @@ Usage: presolve_replay_check.py MODEL.mps LOG.json   (exit 0 pass, 1 fail)
 import json, math, sys
 import numpy as np, highspy
 sys.path.insert(0, __import__("os").path.dirname(__import__("os").path.abspath(__file__)))
+from fractions import Fraction as Fr
 import infeasibility_explanation_check as ic  # shared MPS duplicate-sum normalization (free format only)
 
 REL = 1e-9
@@ -27,6 +28,73 @@ def close(a, b):
     if not (math.isfinite(a) and math.isfinite(b)): return a == b
     return abs(a - b) <= 1e-12 * (1 + abs(a) + abs(b))  # tight: engine and replay do the same double arithmetic; a +1 at 1e9 must fail
 def num(v): return {"inf": INF, "-inf": -INF}.get(v, v) if isinstance(v, str) else (math.nan if v is None else v)
+
+
+# ---- independent exact-rational enclosure used ONLY to accept an "infeasible" claim. It does not mirror the engine's
+# floating error model: every float in the model/log is read as an exact rational and every derived bound is carried as
+# an exact enclosure [lo, hi] of the true value, so an accepted claim is an exact-arithmetic proof from the original data
+# (rows/bounds as parsed), up to the oracle's own MPS parse.
+def fx(v): return v if (isinstance(v, float) and not math.isfinite(v)) else Fr(v)
+def fsub(a, b): return a if (isinstance(a, float) and not math.isfinite(a)) else a - b
+def fmul(a, b):  # a Fraction coefficient, b possibly infinite
+    if isinstance(b, float) and not math.isfinite(b): return (INF if (b > 0) == (a > 0) else -INF)
+    return a * b
+def fdiv(b, a):
+    if isinstance(b, float) and not math.isfinite(b): return (INF if (b > 0) == (a > 0) else -INF)
+    return b / a
+def fceil(v): return v if isinstance(v, float) else Fr(math.ceil(v))
+def ffloor(v): return v if isinstance(v, float) else Fr(math.floor(v))
+def widen(v):
+    # An input bound that is not an integer was decimal text rounded to a double: the true value lies within one ulp.
+    # Enclose it (relative 2^-52) so a claim cannot rest on decimal-to-binary representation error. Integral values
+    # below 2^53 are exact. Coefficient representation error is NOT modelled (limitation, stated in the docs).
+    if isinstance(v, float) and not math.isfinite(v): return (v, v)
+    f = Fr(v)
+    if f.denominator == 1 and abs(f) < 2 ** 53: return (f, f)
+    e = abs(f) * Fr(1, 2 ** 52)
+    return (f - e, f + e)
+class Enc:
+    def __init__(s, M):
+        n, m = M["n"], M["m"]
+        s.L = [widen(M["lo"][j]) for j in range(n)]; s.U = [widen(M["up"][j]) for j in range(n)]
+        s.Rl = [widen(M["rlo"][i]) for i in range(m)]; s.Ru = [widen(M["rup"][i]) for i in range(m)]
+    def int_round(s, j):
+        s.L[j] = tuple(fceil(v) for v in s.L[j]); s.U[j] = tuple(ffloor(v) for v in s.U[j])
+    def fix(s, M, j, rrem):
+        xl, xh = s.L[j][0], s.U[j][1]
+        for r, a in M["cols"][j]:
+            if rrem[r]: continue
+            a = Fr(a); pl, ph = (fmul(a, xl), fmul(a, xh)) if a > 0 else (fmul(a, xh), fmul(a, xl))
+            s.Rl[r] = (fsub(s.Rl[r][0], ph), fsub(s.Rl[r][1], pl)); s.Ru[r] = (fsub(s.Ru[r][0], ph), fsub(s.Ru[r][1], pl))
+    def single_bounds(s, i, j, a, isint):
+        a = Fr(a)
+        if a > 0: l = (fdiv(s.Rl[i][0], a), fdiv(s.Rl[i][1], a)); u = (fdiv(s.Ru[i][0], a), fdiv(s.Ru[i][1], a))
+        else: l = (fdiv(s.Ru[i][1], a), fdiv(s.Ru[i][0], a)); u = (fdiv(s.Rl[i][1], a), fdiv(s.Rl[i][0], a))
+        if isint: l = tuple(fceil(v) for v in l); u = tuple(ffloor(v) for v in u)
+        return l, u
+    def single(s, i, j, a, isint):
+        l, u = s.single_bounds(i, j, a, isint)
+        s.L[j] = (max(s.L[j][0], l[0]), max(s.L[j][1], l[1])); s.U[j] = (min(s.U[j][0], u[0]), min(s.U[j][1], u[1]))
+    def proves_infeasible(s, M, rrem, crem):
+        for c in range(M["n"]):
+            if crem[c]: continue
+            lo_, up_ = s.L[c][0], s.U[c][1]
+            if M["isint"][c]: lo_, up_ = fceil(lo_), ffloor(up_)
+            if lo_ > up_: return True
+        for i in range(M["m"]):
+            if rrem[i]: continue
+            ac = [(j, v) for j, v in s.rows[i] if not crem[j]]
+            if not ac:
+                if s.Rl[i][0] > 0 or s.Ru[i][1] < 0: return True
+                continue
+            mn = sum((fmul(Fr(a), s.L[c][0]) if a > 0 else fmul(Fr(a), s.U[c][1])) for c, a in ac)
+            mx = sum((fmul(Fr(a), s.U[c][1]) if a > 0 else fmul(Fr(a), s.L[c][0])) for c, a in ac)
+            if (not isinstance(mn, float) and mn > s.Ru[i][1]) or (not isinstance(mx, float) and mx < s.Rl[i][0]): return True
+            if len(ac) == 1:
+                c, a = ac[0]; l, u = s.single_bounds(i, c, a, M["isint"][c])
+                nl, nu = max(s.L[c][0], l[0]), min(s.U[c][1], u[1])
+                if nl > nu: return True
+        return False
 
 def load(path):
     path = ic.normalize_mps(path)  # engine semantics: duplicate coefficients are summed (HiGHS keeps the first)
@@ -102,6 +170,7 @@ def replay_ops(M, log):
         for i, v in col: rows[i].append((j, v))
     rrem, crem = [False] * m, [False] * n
     rerr, cerr = [0.0] * m, [0.0] * n
+    enc = Enc(M); enc.rows = rows
     errs = []
     def act_cols(i): return [(j, v) for j, v in rows[i] if not crem[j]]
     for k, op in enumerate(log["ops"]):
@@ -114,10 +183,10 @@ def replay_ops(M, log):
             nl = int_up(lo[j]) if math.isfinite(lo[j]) else lo[j]
             nu = int_dn(up[j]) if math.isfinite(up[j]) else up[j]
             if not (close(v[2], nl) and close(v[3], nu)): errs.append(tag + ": new bounds mismatch")
-            lo[j], up[j] = nl, nu
+            lo[j], up[j] = nl, nu; enc.int_round(j)
         elif t == "fix_col":
             if crem[j] or not (lo[j] == up[j] and math.isfinite(lo[j])) or v[0] != lo[j] or (M["isint"][j] and v[0] != math.floor(v[0])): errs.append(tag + ": not fixed at logged value (exact, integral for integer columns)"); continue
-            crem[j] = True
+            enc.fix(M, j, rrem); crem[j] = True
             for r, a in M["cols"][j]:
                 if rrem[r]: continue
                 av, mag = a * v[0], 0.0
@@ -145,7 +214,7 @@ def replay_ops(M, log):
             if (nl > nu) if M["isint"][j] else (nl > nu + REL * sc(nu)): errs.append(tag + ": conflict logged as reduction")
             if nl > nu: nu = nl
             if not (close(v[2], nl) and close(v[3], nu)): errs.append(tag + ": derived bounds mismatch")
-            lo[j], up[j] = nl, nu; rrem[i] = True; cerr[j] = max(cerr[j], de)
+            lo[j], up[j] = nl, nu; rrem[i] = True; cerr[j] = max(cerr[j], de); enc.single(i, j, a, M["isint"][j])
         elif t == "redundant_row":
             if rrem[i]: errs.append(tag + ": row already removed"); continue
             mn = sum((a * lo[c] if a > 0 else a * up[c]) for c, a in act_cols(i))
@@ -166,26 +235,8 @@ def replay_ops(M, log):
     if log.get("timed_out"):
         return errs  # incomplete presolve: operations validated, no reduced model is claimed
     if log["infeasible"]:
-        found = any((lo[c] > up[c]) if M["isint"][c] else (lo[c] > up[c] + REL * sc(up[c])) for c in range(n) if not crem[c])
-        for i in range(m):
-            if rrem[i] or found: continue
-            ac = act_cols(i)
-            if not ac:
-                found = rlo[i] > REL * sc(rlo[i]) or rup[i] < -REL * sc(rup[i])
-            else:
-                mn = sum((a * lo[c] if a > 0 else a * up[c]) for c, a in ac); mx = sum((a * up[c] if a > 0 else a * lo[c]) for c, a in ac)
-                found = (math.isfinite(mn) and mn > rup[i] + REL * sc(rup[i])) or (math.isfinite(mx) and mx < rlo[i] - REL * sc(rlo[i]))
-                if len(ac) == 1:  # singleton conflict against bounds
-                    a = ac[0][1]; l, u = (rlo[i] / a, rup[i] / a) if a > 0 else (rup[i] / a, rlo[i] / a)
-                    c = ac[0][0]
-                    if M["isint"][c]:
-                        de = derr(rerr[i], a, l, u)
-                        if math.isfinite(l): l = int_up(l, de)
-                        if math.isfinite(u): u = int_dn(u, de)
-                        found = found or max(lo[c], l) > min(up[c], u)
-                    else:
-                        found = found or max(lo[c], l) > min(up[c], u) + REL * sc(min(up[c], u))
-        if not found: errs.append("log claims infeasible but the replayed state shows no violated condition")
+        found = enc.proves_infeasible(M, rrem, crem)  # exact-rational enclosure proof, independent of the engine error model
+        if not found: errs.append("log claims infeasible but the exact-rational enclosure of the replayed state does not prove it")
         return errs
     kr = [i for i in range(m) if not rrem[i]]; kc = [c for c in range(n) if not crem[c]]
     if kr != log["kept_rows"] or kc != log["kept_cols"]: errs.append("kept rows/cols differ from the log")
