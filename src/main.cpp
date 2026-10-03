@@ -3,6 +3,8 @@
 #include <cmath>
 #include <limits>
 #include <cstdio>
+#include <cerrno>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <unordered_map>
@@ -170,6 +172,54 @@ int exit_code(const std::string& status) {
     if (status == "time_limit" || status == "iteration_limit" || status == "node_limit") return 4;
     return 5;
 }
+const char* kUsage =
+    "usage: taral MODEL.mps [--time-limit S] [--node-limit N] [--method simplex|dual|ipm]\n"
+    "             [--sol OUT.sol] [--json OUT.json] [--warm-sol F [--warm-dual F] [--cross-tol T]]\n"
+    "             [--no-fallback] [--audit-prop] [--no-prop-prune]\n";
+
+void print_help() {
+    std::printf("%s"
+                "\n"
+                "options:\n"
+                "  --time-limit S    wall-clock limit in seconds; finite and > 0 (default 60)\n"
+                "  --node-limit N    branch-and-bound node limit; integer >= 0 (default unlimited)\n"
+                "  --method M        simplex (default), dual (dual simplex, LPs), or ipm (interior point)\n"
+                "  --warm-sol FILE   crossover: start from the basis of an approximate primal point (name value per line)\n"
+                "  --warm-dual FILE  optional row multipliers for --warm-sol (name value per line)\n"
+                "  --cross-tol T     crossover: distance from a bound that counts as interior (default 1e-3)\n"
+                "  --no-fallback     LP simplex: do not hand a stalled primal run to the dual simplex\n"
+                "  --audit-prop      MILP: re-check propagation prunes (diagnostic)\n"
+                "  --no-prop-prune   MILP: disable propagation pruning\n"
+                "  --sol FILE        write the solution (name value per line) when optimal\n"
+                "  --json FILE       write a JSON result summary\n"
+                "  -h, --help        show this help and exit\n",
+                kUsage);
+}
+
+int usage_error(const std::string& msg) {
+    std::fprintf(stderr, "taral: %s\n%sTry 'taral --help'.\n", msg.c_str(), kUsage);
+    return 2;
+}
+
+bool parse_double(const char* s, double& out) {
+    if (!*s) return false;
+    char* end = nullptr;
+    errno = 0;
+    double v = std::strtod(s, &end);
+    if (*end || errno == ERANGE || !std::isfinite(v)) return false;
+    out = v;
+    return true;
+}
+
+bool parse_long(const char* s, long& out) {
+    if (!*s) return false;
+    char* end = nullptr;
+    errno = 0;
+    long v = std::strtol(s, &end, 10);
+    if (*end || errno == ERANGE) return false;
+    out = v;
+    return true;
+}
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -181,19 +231,56 @@ int main(int argc, char** argv) {
     MilpOptions mopt;
     std::string method = "simplex";  // "ipm": interior point; "dual": dual simplex (LPs)
     bool fallback = true;            // primal simplex that stalls hands the rest of the time to the dual (--no-fallback: off)
+    bool only_files = false;
     for (int i = 1; i < argc; ++i) {
-        if (!std::strcmp(argv[i], "--time-limit") && i + 1 < argc) limit = std::atof(argv[++i]);
-        else if (!std::strcmp(argv[i], "--sol") && i + 1 < argc) sol = argv[++i];
-        else if (!std::strcmp(argv[i], "--json") && i + 1 < argc) json = argv[++i];
-        else if (!std::strcmp(argv[i], "--node-limit") && i + 1 < argc) node_limit = std::atol(argv[++i]);
-        else if (!std::strcmp(argv[i], "--method") && i + 1 < argc) method = argv[++i];
-        else if (!std::strcmp(argv[i], "--no-fallback")) fallback = false;
-        else if (!std::strcmp(argv[i], "--warm-sol") && i + 1 < argc) warm_sol = argv[++i];
-        else if (!std::strcmp(argv[i], "--warm-dual") && i + 1 < argc) warm_dual = argv[++i];
-        else if (!std::strcmp(argv[i], "--cross-tol") && i + 1 < argc) cross_tol = std::atof(argv[++i]);
-        else if (!std::strcmp(argv[i], "--audit-prop")) mopt.audit_prop = true;
-        else if (!std::strcmp(argv[i], "--no-prop-prune")) mopt.no_prop_prune = true;
-        else model = argv[i];
+        const char* a = argv[i];
+        if (!only_files && !std::strcmp(a, "--")) { only_files = true; continue; }
+        if (!only_files && (!std::strcmp(a, "--help") || !std::strcmp(a, "-h"))) { print_help(); return 0; }
+        if (!only_files && a[0] == '-' && a[1]) {
+            auto value = [&](const char*& v) {
+                if (i + 1 >= argc) return false;
+                v = argv[++i];
+                return true;
+            };
+            const char* v = nullptr;
+            if (!std::strcmp(a, "--time-limit")) {
+                if (!value(v)) return usage_error("--time-limit requires a value");
+                if (!parse_double(v, limit) || !(limit > 0))
+                    return usage_error(std::string("--time-limit must be a finite number > 0, got '") + v + "'");
+            } else if (!std::strcmp(a, "--node-limit")) {
+                if (!value(v)) return usage_error("--node-limit requires a value");
+                if (!parse_long(v, node_limit) || node_limit < 0)
+                    return usage_error(std::string("--node-limit must be an integer >= 0, got '") + v + "'");
+            } else if (!std::strcmp(a, "--sol")) {
+                if (!value(sol)) return usage_error("--sol requires a value");
+            } else if (!std::strcmp(a, "--json")) {
+                if (!value(json)) return usage_error("--json requires a value");
+            } else if (!std::strcmp(a, "--method")) {
+                if (!value(v)) return usage_error("--method requires a value");
+                method = v;
+                if (method != "simplex" && method != "dual" && method != "ipm")
+                    return usage_error("unknown --method '" + method + "' (expected simplex, dual or ipm)");
+            } else if (!std::strcmp(a, "--warm-sol")) {
+                if (!value(warm_sol)) return usage_error("--warm-sol requires a value");
+            } else if (!std::strcmp(a, "--warm-dual")) {
+                if (!value(warm_dual)) return usage_error("--warm-dual requires a value");
+            } else if (!std::strcmp(a, "--no-fallback")) {
+                fallback = false;
+            } else if (!std::strcmp(a, "--audit-prop")) {
+                mopt.audit_prop = true;
+            } else if (!std::strcmp(a, "--no-prop-prune")) {
+                mopt.no_prop_prune = true;
+            } else if (!std::strcmp(a, "--cross-tol")) {
+                if (!value(v)) return usage_error("--cross-tol requires a value");
+                if (!parse_double(v, cross_tol) || !(cross_tol > 0))
+                    return usage_error(std::string("--cross-tol must be a finite number > 0, got '") + v + "'");
+            } else {
+                return usage_error(std::string("unknown option '") + a + "'");
+            }
+        } else {
+            if (model) return usage_error(std::string("unexpected extra argument '") + a + "'");
+            model = a;
+        }
     }
     if (!model) {
         std::fprintf(stderr, "usage: taral MODEL.mps [--time-limit S] [--node-limit N] [--sol OUT.sol] [--json OUT.json]\n");
