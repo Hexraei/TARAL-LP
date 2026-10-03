@@ -403,6 +403,43 @@ for nm, rhs, want in (("exact_row_empty", 1.0000004, "infeasible"), ("exact_row_
     pth = mps(nm, "NAME E\nROWS\n N OBJ\n G R0\nCOLUMNS\n MARK 'MARKER' 'INTORG'\n X OBJ 1 R0 1\n MARK 'MARKER' 'INTEND'\nRHS\n RHS R0 %r\nBOUNDS\n UP BND X 1.0000008\nENDATA\n" % rhs)
     expect("derived_exact_row_" + nm, status_of(run_raw(pth, ["--presolve"])) == want, status_of(run_raw(pth, ["--presolve"])))
 
+# 8. review 11: activity-range / empty-row / singleton conflicts must respect tracked uncertainty
+for nm in ("30", "320", "cancel-negative"):
+    fx = os.path.join(ROOT, "tests/fixtures/presolve_chain_%s.mps" % nm); lg = os.path.join(TMP, "chain_%s_log.json" % nm)
+    r = run_raw(fx, ["--presolve-log", lg]); r0 = subprocess.run([BIN, fx], capture_output=True, text=True)
+    expect("chain_not_false_infeasible_" + nm, status_of(r) == "optimal" and status_of(r0) == "optimal", (status_of(r), status_of(r0)))
+    if os.path.exists(lg): expect("chain_replay_" + nm, not rc.replay(rc.load(fx), json.load(open(lg))), rc.replay(rc.load(fx), json.load(open(lg))))
+    old = os.path.join(ROOT, "tests/fixtures/presolve_chain_%s_false_infeasible_log.json" % nm)
+    if os.path.exists(old): expect("chain_replay_rejects_old_false_claim_" + nm, bool(rc.replay(rc.load(fx), json.load(open(old)))))
+# seeded chained-equality sweep (generator and seed 84571 from the reviewer's package, 500 models). Wrong answer = presolve says
+# infeasible while the HiGHS oracle says optimal. Presolve-infeasible vs plain-optimal where HiGHS also says infeasible is reported, not counted.
+def chain_model(r, path):
+    n = r.randint(2, 12); x = [r.choice([.197, .394, 1.5, -.197, 1e-10, 1e10]) for _ in range(n - 1)] + [r.choice([0, 1, -1, 1000])]
+    a = [r.choice([1, -1, .5, -.5, 2, -2, 3, -3, 1e-8, 1e8]) for _ in range(n - 1)]; b = [r.choice([1, -1, .5, -.5, 2, -2, 3, -3, 1e-8, 1e8]) for _ in range(n - 1)]
+    L = ["NAME CHAIN", "ROWS", " N OBJ"] + [" E R%d" % i for i in range(n - 1)] + ["COLUMNS"]
+    for j in range(n):
+        if j == n - 1: L += [" M 'MARKER' 'INTORG'"]
+        L += [" X%d OBJ 0" % j]
+        if j < n - 1: L += [" X%d R%d %.17g" % (j, j, a[j])]
+        if j: L += [" X%d R%d %.17g" % (j, j - 1, b[j - 1])]
+    L += [" M 'MARKER' 'INTEND'", "RHS"] + [" RHS R%d %.17g" % (i, a[i] * x[i] + b[i] * x[i + 1]) for i in range(n - 1)] + ["BOUNDS", " FX BO X0 %.17g" % x[0]]
+    for j in range(1, n - 1): L += [" FR BO X%d" % j]
+    L += [" LO BO X%d %.17g" % (n - 1, x[-1] - 1), " UP BO X%d %.17g" % (n - 1, x[-1] + 1), "ENDATA"]
+    open(path, "w").write("\n".join(L) + "\n")
+rg = random.Random(84571); wrong = []; pres_inf = 0; info_inf = 0; replay_bad = []
+for k in range(500):
+    pth = os.path.join(TMP, "chain%d.mps" % k); chain_model(rg, pth); lg = os.path.join(TMP, "chain%d_log.json" % k)
+    r = run_raw(pth, ["--presolve", "--presolve-log", lg, "--json", os.path.join(TMP, "chain_res.json")])
+    if status_of(r) != "infeasible": continue
+    pres_inf += 1
+    h = highspy.Highs(); h.setOptionValue("output_flag", False); h.readModel(pth); h.run()
+    if h.getModelStatus() == highspy.HighsModelStatus.kOptimal: wrong.append(k)
+    else: info_inf += 1
+    if os.path.exists(lg) and rc.replay(rc.load(pth), json.load(open(lg))): replay_bad.append(k)
+print("INFO chain500 presolve_infeasible=%d (highs also not optimal: %d)" % (pres_inf, info_inf))
+expect("chain500_no_infeasible_where_highs_optimal", not wrong, wrong[:10])
+expect("chain500_infeasible_logs_replay", not replay_bad, replay_bad[:10])
+
 api = os.path.join(TMP, "presolve_api")
 srcs = [os.path.join(ROOT, "src", f) for f in os.listdir(os.path.join(ROOT, "src")) if f.endswith(".cpp") and f != "main.cpp"]
 cc = subprocess.run(["g++", "-O1", "-std=c++17", "-o", api, os.path.join(ROOT, "benchmarks/presolve_api_tests.cpp")] + srcs, capture_output=True, text=True)
