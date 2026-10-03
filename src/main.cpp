@@ -41,6 +41,8 @@ std::string json_escape(const std::string& s) {
 
 void num_or_null(std::FILE* f, double v);
 
+std::string g_json_extra;  // optional ", \"key\": value" fragments appended to the LP JSON (--work-limit)
+
 void write_json(const char* path, const char* status, const Result* r, double wall, const std::string& msg) {
     std::FILE* f = std::fopen(path, "w");
     if (!f) return;
@@ -96,8 +98,8 @@ void write_json(const char* path, const char* status, const Result* r, double wa
         if (!(r->status == Status::Optimal || !r->x.empty())) array("x", r->x);  // the certificate block above already wrote x
         array("ray", r->ray);
     }
-    std::fprintf(f, ", \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n", r ? r->iterations : 0L, wall,
-                 json_escape(msg).c_str());
+    std::fprintf(f, ", \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"%s}\n", r ? r->iterations : 0L, wall,
+                 json_escape(msg).c_str(), g_json_extra.c_str());
     std::fclose(f);
 }
 
@@ -239,6 +241,23 @@ bool write_explanation_json(const char* path, const Model& md, const Infeasibili
     return ok;
 }
 
+// FNV-1a 64 over a canonical text of (status, iterations, objective, x) with %.17g. Excludes wall time and the
+// message (which carries timings). Bit-exact: equal only when the arithmetic result is identical.
+unsigned long long result_hash(const char* status, const Result& r) {
+    unsigned long long h = 14695981039346656037ULL;
+    auto feed = [&](const std::string& t) {
+        for (unsigned char c : t) h = (h ^ c) * 1099511628211ULL;
+        h = (h ^ 0xff) * 1099511628211ULL;
+    };
+    char b[48];
+    feed(status);
+    feed(std::to_string(r.iterations));
+    std::snprintf(b, sizeof b, "%.17g", r.status == Status::Optimal ? r.objective : 0.0);
+    feed(b);
+    for (double v : r.x) { std::snprintf(b, sizeof b, "%.17g", v); feed(b); }
+    return h;
+}
+
 void write_sol(const char* path, const Model& md, const std::vector<double>& x) {
     if (std::FILE* f = std::fopen(path, "w")) {
         for (size_t j = 0; j < md.col_names.size(); ++j) std::fprintf(f, "%s %.17g\n", md.col_names[j].c_str(), x[j]);
@@ -258,7 +277,8 @@ int exit_code(const std::string& status) {
 const char* kUsage =
     "usage: taral MODEL.mps [--time-limit S] [--node-limit N] [--method simplex|dual|ipm]\n"
     "             [--sol OUT.sol] [--json OUT.json] [--warm-sol F [--warm-dual F] [--cross-tol T]]\n"
-    "             [--no-fallback] [--audit-prop] [--no-prop-prune] [--explain-infeasible OUT.json]\n";
+    "             [--no-fallback] [--audit-prop] [--no-prop-prune] [--explain-infeasible OUT.json]\n"
+    "             [--work-limit N]\n";
 
 void print_help() {
     std::printf("%s"
@@ -271,6 +291,7 @@ void print_help() {
                 "  --warm-dual FILE  optional row multipliers for --warm-sol (name value per line)\n"
                 "  --cross-tol T     crossover: distance from a bound that counts as interior (default 1e-3)\n"
                 "  --no-fallback     LP simplex: do not hand a stalled primal run to the dual simplex\n"
+                "  --work-limit N    LP (simplex/dual): deterministic iteration budget; routing never uses the wall clock (an explicit --time-limit that fires still stops the run, non-deterministically)\n"
                 "  --audit-prop      MILP: re-check propagation prunes (diagnostic)\n"
                 "  --no-prop-prune   MILP: disable propagation pruning\n"
                 "  --explain-infeasible FILE  write a verified LP-relaxation infeasibility explanation (irreducible rows + minimum relaxation) and exit\n"
@@ -317,6 +338,8 @@ int main(int argc, char** argv) {
     bool fallback = true;            // primal simplex that stalls hands the rest of the time to the dual (--no-fallback: off)
     bool only_files = false;
     const char* explain_path = nullptr;  // --explain-infeasible FILE
+    long work_limit = 0;       // --work-limit N: deterministic iteration budget (LP simplex/dual)
+    bool time_limit_given = false;
     for (int i = 1; i < argc; ++i) {
         const char* a = argv[i];
         if (!only_files && !std::strcmp(a, "--")) { only_files = true; continue; }
@@ -330,8 +353,13 @@ int main(int argc, char** argv) {
             const char* v = nullptr;
             if (!std::strcmp(a, "--time-limit")) {
                 if (!value(v)) return usage_error("--time-limit requires a value");
+                time_limit_given = true;
                 if (!parse_double(v, limit) || !(limit > 0))
                     return usage_error(std::string("--time-limit must be a finite number > 0, got '") + v + "'");
+            } else if (!std::strcmp(a, "--work-limit")) {
+                if (!value(v)) return usage_error("--work-limit requires a value");
+                if (!parse_long(v, work_limit) || work_limit < 1)
+                    return usage_error(std::string("--work-limit must be an integer >= 1, got '") + v + "'");
             } else if (!std::strcmp(a, "--node-limit")) {
                 if (!value(v)) return usage_error("--node-limit requires a value");
                 if (!parse_long(v, node_limit) || node_limit < 0)
@@ -373,6 +401,12 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "usage: taral MODEL.mps [--time-limit S] [--node-limit N] [--sol OUT.sol] [--json OUT.json]\n");
         return 2;
     }
+    if (work_limit) {
+        if (method == "ipm") return usage_error("--work-limit supports --method simplex or dual only");
+        if (explain_path) return usage_error("--work-limit does not apply to --explain-infeasible");
+        work_budget().cap = work_limit;
+        if (!time_limit_given) limit = 1e9;  // the work limit, not the wall clock, ends the solve
+    }
     auto t0 = std::chrono::steady_clock::now();
     auto wall = [&] { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(); };
     Model md;
@@ -400,6 +434,7 @@ int main(int argc, char** argv) {
         if (ex.status == "no_verified_proof") return 5;
         return ex.status == "reduced_unproven" && ex.wall_s >= limit - 1e-3 ? 4 : 0;
     }
+    if (work_limit && !md.qobj.empty()) return usage_error("--work-limit supports linear LPs only");
     if ((!md.qobj.empty() || method == "ipm") && !md.has_integers()) {  // convex QP, or LP by interior point
         IpmOptions opt;
         opt.time_limit = limit - wall();
@@ -415,6 +450,12 @@ int main(int argc, char** argv) {
     }
     if (!md.qobj.empty()) {  // quadratic objective with integer variables: never a silent relaxation
         std::string why = "mixed-integer quadratic models are not supported";
+        if (json) write_json(json, "unsupported", nullptr, wall(), why);
+        std::printf("status unsupported: %s\n", why.c_str());
+        return exit_code("unsupported");
+    }
+    if (work_limit && md.has_integers()) {  // B&B node LPs share one counter; no determinism claim for MILP
+        std::string why = "--work-limit supports continuous LPs only (use --node-limit for MILP)";
         if (json) write_json(json, "unsupported", nullptr, wall(), why);
         std::printf("status unsupported: %s\n", why.c_str());
         return exit_code("unsupported");
@@ -456,6 +497,13 @@ int main(int argc, char** argv) {
     Result r = solve_lp_gated(md, md.col_lo, md.col_up, wp, limit - wall(), method == "dual", fallback);
     if (r.status == Status::Optimal && !std::isfinite(r.objective))
         r.status = Status::NumericalFailure, r.message = "non-finite objective";
+    if (work_limit) {  // deterministic report: hash covers status, iterations, objective and x bits only
+        char hx[32];
+        std::snprintf(hx, sizeof hx, "%016llx", (unsigned long long)result_hash(status_name(r.status), r));
+        g_json_extra = std::string(", \"work_limit\": ") + std::to_string(work_limit) + ", \"wall_limit_active\": " + (time_limit_given ? "true" : "false") + ", \"work_used\": " +
+                       std::to_string(std::min(work_budget().used, work_limit)) + ", \"result_hash\": \"" + hx + "\"";
+        std::printf("work_used %ld of %ld result_hash %s\n", std::min(work_budget().used, work_limit), work_limit, hx);
+    }
     double w = wall();
     if (json) write_json(json, status_name(r.status), &r, w, r.message);
     if (sol && r.status == Status::Optimal) write_sol(sol, md, r.x);

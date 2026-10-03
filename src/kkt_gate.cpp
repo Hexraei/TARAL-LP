@@ -94,8 +94,30 @@ namespace {
 // which solves DFL001 where the primal stalls) gets everything that is left.
 constexpr double kPrimalShare = 0.2;
 
+// Work-based routing: the primal simplex may use kPrimalShare of the cumulative work budget.
+// `limit` is the remaining wall-clock budget. Without --time-limit the caller passes 1e9 (effectively none), so the
+// work cap alone decides the outcome; with an explicit --time-limit the wall clock is enforced by the engines and a
+// time_limit status means the outcome depended on the clock (documented in docs/deterministic_solve.md).
+Result run_one_work(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
+                    const std::vector<char>* warm, double limit, bool use_dual, bool fallback) {
+    WorkBudget& w = work_budget();
+    const auto t0 = std::chrono::steady_clock::now();
+    if (use_dual) return solve_lp_dual(md, lo, up, warm, limit);
+    const long total_cap = w.cap;
+    if (fallback) w.cap = w.used + std::max(1L, long(kPrimalShare * double(total_cap - w.used)));  // cap 0 means off, so at least 1
+    Result r = solve_lp(md, lo, up, warm, limit);
+    w.cap = total_cap;
+    if (!fallback || r.status != Status::IterationLimit || r.message != "work limit" || w.used >= total_cap) return r;
+    const double spent = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    Result d = solve_lp_dual(md, lo, up, warm, limit - spent);
+    d.iterations += r.iterations;
+    d.message = "route=primal-work-budget-then-dual primal_iters=" + std::to_string(r.iterations) + "; dual simplex fallback: " + d.message;
+    return d;
+}
+
 Result run_one(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
                const std::vector<char>* warm, double limit, bool use_dual, bool fallback) {
+    if (work_budget().cap) return run_one_work(md, lo, up, warm, limit, use_dual, fallback);
     if (use_dual) return solve_lp_dual(md, lo, up, warm, limit);
     const auto t0 = std::chrono::steady_clock::now();
     Result r = solve_lp(md, lo, up, warm, fallback ? kPrimalShare * limit : limit);
@@ -109,6 +131,11 @@ Result run_one(const Model& md, const std::vector<double>& lo, const std::vector
     return d;
 }
 }  // namespace
+
+WorkBudget& work_budget() {
+    static WorkBudget w;
+    return w;
+}
 
 Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
                       const std::vector<char>* warm, double time_limit_s, bool use_dual, bool primal_fallback) {
@@ -124,7 +151,7 @@ Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std:
     } else {
         why = "first solve: " + r.message;
     }
-    if (left() < 0.5) {
+    if ((!work_budget().cap || time_limit_s < 1e8) && left() < 0.5) {  // an unlimited wall budget (work mode) never stops here
         r.status = Status::NumericalFailure;
         r.message = why + "; no time left for the equilibrated retry";
         return r;
@@ -157,7 +184,9 @@ Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std:
     if (s.status != Status::Optimal) {
         // a retry that proves infeasible/unbounded is not trusted over the first answer: report the failure
         Result f;
-        f.status = (s.status == Status::TimeLimit) ? Status::TimeLimit : Status::NumericalFailure;
+        // a retry stopped by a limit keeps that limit status (work cap or clock); anything else is a failure
+        f.status = (s.status == Status::TimeLimit) ? Status::TimeLimit
+                   : (s.status == Status::IterationLimit && work_budget().cap) ? Status::IterationLimit : Status::NumericalFailure;
         f.iterations = r.iterations + s.iterations;
         f.message = why + "; equilibrated retry ended " + status_name(s.status) + (s.message.empty() ? "" : " (" + s.message + ")");
         return f;

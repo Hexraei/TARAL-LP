@@ -180,3 +180,14 @@ struct InfeasibilityExplanation {
 // The budget covers every phase (root test, deletion filter, elastic solve). The last argument is a test hook
 // that adds simulated elapsed time after the deletion phase; production callers leave it at 0.
 InfeasibilityExplanation explain_infeasibility(const Model& model, double time_limit_s, double test_elapsed_after_deletion_s = 0);
+
+// ---- Deterministic work limit (src/kkt_gate.cpp, docs/deterministic_solve.md) -------------------------------
+// Opt-in via --work-limit N (LP, simplex/dual routes). The budget counts simplex iterations of the primal and
+// dual engines cumulatively (including the dual's primal clean-up and the equilibrated retry). When a cap is
+// set, the primal-to-dual route switch happens when the primal has used kPrimalShare of the work, not of the
+// wall clock, and the wall clock is never consulted for routing. Stopping at the cap returns iteration_limit.
+struct WorkBudget {
+    long cap = 0;   // 0: off. Otherwise the cumulative iteration count at which engines stop.
+    long used = 0;  // cumulative iterations consumed since the last reset
+};
+WorkBudget& work_budget();
