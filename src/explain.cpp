@@ -96,9 +96,10 @@ Outcome test_rows(const Model& m, const std::vector<char>& keep, double budget_s
 }
 }  // namespace
 
-InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit_s) {
+InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit_s, double test_elapsed_after_deletion_s) {
     const auto t0 = Clock::now();
-    auto left = [&] { return time_limit_s - std::chrono::duration<double>(Clock::now() - t0).count(); };
+    double sim = 0;  // test hook: pretend this much time passed once the deletion phase is over
+    auto left = [&] { return time_limit_s - sim - std::chrono::duration<double>(Clock::now() - t0).count(); };
     InfeasibilityExplanation e;
     const size_t nrows = m.row_names.size(), ncols = m.cols.size();
     long solves = 0;
@@ -154,6 +155,7 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
             unproven[r] = 1;
         }
     }
+    sim = test_elapsed_after_deletion_s;
     // Final certificate must verify on the FULL model with the original column bounds.
     Result check = cert;
     check.status = Status::Infeasible;
@@ -185,6 +187,9 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
     if (!e.inconsistent_bound_columns.empty()) {
         e.relaxation_status = "not_applicable_column_bounds_inconsistent";
     } else {
+      if (left() <= 0) {  // the budget covers every phase: never start the elastic solve after the deadline
+        e.relaxation_status = "not_run_time_limit";
+      } else {
         Model r = m;
         r.maximize = false;
         r.obj_const = 0;
@@ -214,7 +219,7 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
         }
         r.is_int.assign(r.cols.size(), 0);
         ++solves;
-        Result rr = solve_lp_gated(r, r.col_lo, r.col_up, nullptr, std::max(left(), 1.0), false, true);
+        Result rr = solve_lp_gated(r, r.col_lo, r.col_up, nullptr, left(), false, true);
         if (rr.status == Status::Optimal && rr.x.size() == r.cols.size()) {
             e.relaxation_status = "optimal";
             e.relaxation_objective = rr.objective;
@@ -244,6 +249,7 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
         } else {
             e.relaxation_status = std::string("not_solved_") + status_name(rr.status);
         }
+      }
     }
     if (!e.unproven_rows.empty() || out_of_time)
         finish("reduced_unproven", "the subsystem is infeasible (verified) but " + std::to_string(e.unproven_rows.size()) +

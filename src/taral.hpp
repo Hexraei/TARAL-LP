@@ -177,4 +177,6 @@ struct InfeasibilityExplanation {
     long lp_solves = 0;
     double wall_s = 0;
 };
-InfeasibilityExplanation explain_infeasibility(const Model& model, double time_limit_s);
+// The budget covers every phase (root test, deletion filter, elastic solve). The last argument is a test hook
+// that adds simulated elapsed time after the deletion phase; production callers leave it at 0.
+InfeasibilityExplanation explain_infeasibility(const Model& model, double time_limit_s, double test_elapsed_after_deletion_s = 0);
