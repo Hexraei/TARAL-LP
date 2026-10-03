@@ -1,5 +1,12 @@
 # LP certificate quality and solve acceptance
 
+## Reading the technical terms
+
+LP means linear programming; MILP means mixed-integer linear programming; QP means quadratic programming. IPM is an interior-point method. PDHG is primal-dual hybrid gradient, the approximate GPU method. KKT (Karush-Kuhn-Tucker) checks test feasibility and optimality conditions. A "gate" is the stated validation rule, not an exact-arithmetic proof. "Strict" means the separately stated tighter tolerance; a non-strict pass meets the ordinary rule but not that tighter check. A ledger is a per-case result table. Source hashes, file paths and command flags are retained only so engineers can reproduce a measurement. Historical measurements are not current-source claims.
+
+JSON is the machine-readable result format. Warm starts reuse a previous solution or simplex basis; cold starts do not. fp64 is double-precision floating point; FMA is fused multiply-add.
+
+
 Strict original-model KKT quality is reported separately from solve acceptance.
 `certificate_quality` is `pass`, `fail`, or `unknown`, using the unchanged 1e-8
 primal/dual/gap/complementarity metric. It is not an acceptance veto. Unknown is
@@ -43,9 +50,9 @@ violation while still failing strict RHS-normalized quality. Both are honest.
 Canonical acceptance (the fixed rule in the README) is compared against two
 earlier states. The two comparisons differ and must not be merged into one claim.
 
-- Versus `90430a4` (the documented baseline): canonical acceptance is unchanged.
+- Versus the evaluated source snapshot `90430a4` (the documented baseline): canonical acceptance is unchanged.
   GREENBEA was already a pass there, with the strict check failing.
-- Versus `eac35f2` (an earlier version of this branch that vetoed a solve whose
+- Versus the evaluated source snapshot `eac35f2` (an earlier evaluated implementation that vetoed a solve whose
   strict quality was `fail`): acceptance CHANGED. The stricter quality veto was
   removed on purpose. GREENBEA is now accepted as `optimal` with the same
   objective (-72555248.1298), `certificate_quality` = `fail` and `primal_res`
@@ -54,7 +61,7 @@ earlier states. The two comparisons differ and must not be merged into one claim
   (89/90 primal, 90/91 dual) are unchanged, so the strict check still fails
   GREENBEA and this is a non-strict pass, not a strict one.
 
-Evidence for the `eac35f2` figures is the independent reviewer's report; that
+Evidence for the evaluated source snapshot `eac35f2` figures is the independent reviewer's report; that
 commit is not in this checkout, so those counts were not re-measured here.
 Re-measured here at the current code with the pinned GREENBEA file (sha256
 `3d978068...fdf`): primal `optimal`, objective -72555248.12984599, 9037 iterations,

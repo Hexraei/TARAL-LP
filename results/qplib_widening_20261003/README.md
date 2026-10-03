@@ -1,5 +1,12 @@
 # QPLIB widening measurement
 
+## Reading the technical terms
+
+LP means linear programming; MILP means mixed-integer linear programming; QP means quadratic programming. IPM is an interior-point method. PDHG is primal-dual hybrid gradient, the approximate GPU method. KKT (Karush-Kuhn-Tucker) checks test feasibility and optimality conditions. A "gate" is the stated validation rule, not an exact-arithmetic proof. "Strict" means the separately stated tighter tolerance; a non-strict pass meets the ordinary rule but not that tighter check. A ledger is a per-case result table. Source hashes, file paths and command flags are retained only so engineers can reproduce a measurement. Historical measurements are not current-source claims.
+
+JSON is the machine-readable result format. Warm starts reuse a previous solution or simplex basis; cold starts do not. fp64 is double-precision floating point; FMA is fused multiply-add.
+
+
 19 continuous convex-QP candidates. Engine requested cap 120s; HiGHS requested cap 300s. Input download and expanded-MPS SHA-256 values are recorded per row. Reported snapshot `58f77af` is independently bound by its source-file fingerprint. Build: g++13.3.0, `g++ -O2 -std=c++17 src/*.cpp -o taral`; reference HiGHS1.15.1; Kaggle Xeon2.20GHz,4 logical cores,31GB RAM. Caps are soft: engine ordinary timeout up to 140.68s and reference up to 363.74s. Objective gate is 1e-6*(1+|ref|); relative row/bound/integrality checks each 1e-6.
 
 - Five returned objectives matched optimal HiGHS references under the reported comparison tolerance.

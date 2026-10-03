@@ -1,17 +1,20 @@
-# QP and IPM engine gap diagnosis
+# Quadratic-programming and interior-point numerical diagnosis
 
-Branch `cloud/qp-ipm-diagnosis`, started from `origin/cloud/adversarial-tests3` (main `4517277` plus the adversarial harness and the QP suite).
-Diagnosis first, then two prototypes on this branch. Nothing here weakens a tolerance, and no `known_failures` file was touched.
+## Reading the technical terms
+
+LP means linear programming; MILP means mixed-integer linear programming; QP means quadratic programming. IPM is an interior-point method. PDHG is primal-dual hybrid gradient, the approximate GPU method. KKT (Karush-Kuhn-Tucker) checks test feasibility and optimality conditions. A "gate" is the stated validation rule, not an exact-arithmetic proof. "Strict" means the separately stated tighter tolerance; a non-strict pass meets the ordinary rule but not that tighter check. A ledger is a per-case result table. Source hashes, file paths and command flags are retained only so engineers can reproduce a measurement. Historical measurements are not current-source claims.
+
+Raw result labels: PASS is accepted; PASS_REF or pass* is accepted with an independently checked reference discrepancy; NOANS/noans means no verified answer; PARTIAL means a weaker conclusion than the expected result; BORDER means curvature is within rounding uncertainty; FAIL_STATUS/FAIL_OBJ/FAIL_FEAS/FAIL_KKT mean a status/objective/feasibility/optimality-check failure; REF_UNRESOLVED means no usable reference answer. JSON is the machine-readable result format. Warm starts reuse a previous solution or simplex basis; cold starts do not. fp64 is double-precision floating point; FMA is fused multiply-add.
+
+
+Historical diagnosis based on the evaluated source snapshot `4517277`, with the LP and QP stress-test tools. Two implementation proposals were then tested. This report retains their original measured results; the integration and second-host sections below state the later outcome. No tolerance or recorded known-failure list was weakened.
 
 Setup: engine built from `src/` with `g++ -O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic` on a 4-core cloud container;
 reference HiGHS 1.15.1 (`highspy`); caps 60 s per case (LP) and 30 s (QP); seeds are the suites' own (`26000+N`-style seeds appear
 only in the new `tools/diag_qp_ipm/` script). Raw per-case files are in `results/qp_ipm_diagnosis/`.
 
-Two facts about the starting point that differ from the hand-off note:
+Reproduction context: LP method replays used `tools/adv/harness.py` and `tests/repro_methods/`; QP replays used `tools/advqp/qpharness.py`. The tools were read-only during the diagnosis.
 
-* `--method` and the IPM ledgers are **not** on `cloud/adversarial-tests3`. They live on the sibling branch `cloud/adversarial-tests2`
-  (`tools/adv/harness.py --only ... --method ipm`, `tests/repro_methods/`). Every IPM replay below used a read-only checkout of that branch's
-  tools against the engine built from this branch. The QP replays use this branch's `tools/advqp/qpharness.py`.
 * The committed ledger counts 68 `dual_infeasible` rows on ipm (56 unbounded + 12 big_status); a fresh run of the same suite on this host gives
   **69**. 13 unbounded cases flip between `unbounded` and `dual_infeasible` between the ledger's build and mine (7 one way, 6 the other, the other 2939
   rows are identical). That flip is itself evidence for gap 2 (a knife-edge status test, below). The QP ledger flips 5 cases the same way
@@ -20,7 +23,7 @@ Two facts about the starting point that differ from the hand-off note:
 
 ---
 
-## Gap 1: `indef_convex_feasible`, 40 no-answer cases
+## Gap 1: `indef_convex_feasible`, 40 cases with no verified answer
 
 **Cases:** `indef_convex_feasible-76000` .. `-76039` (all 40). Replay:
 `python3 tools/advqp/qpharness.py --engine out/taral --out DIR --cats indef_convex_feasible --jobs 2` (all 40 return `nonconvex`);
@@ -109,27 +112,27 @@ Gap 2 (status path):
 
 | # | candidate | risk | state |
 | --- | --- | --- | --- |
-| D0 | harness: score a verified-ray `dual_infeasible` as `partial` (the QP harness already does) | none for the engine; changes scoring only | not done |
-| D1 | promote to `Unbounded` only when the original-model point passes AND the ray passes on the original model (cone per row/column type, `Qd = 0`, `c'd < 0`) | low: status only, optimal path untouched | **prototyped, commit "IPM: promote DualInfeasible ... "** |
-| D2 | when the returned point is infeasible, find a feasible point with a zero-objective solve of the same constraints, require the same checks | low to medium: one extra solve (about 3x on the affected cases, no other case) | **prototyped inside D1** |
-| D3 | also export the ray / anchor in the JSON for external verification | low, interface change | not done |
+| weaker-result scoring | harness: score a verified-ray `dual_infeasible` as `partial` (the QP harness already does) | none for the engine; changes scoring only | not done |
+| point-and-ray verification | promote to `Unbounded` only when the original-model point passes AND the ray passes on the original model (cone per row/column type, `Qd = 0`, `c'd < 0`) | low: status only, optimal path untouched | **prototyped, commit "IPM: promote DualInfeasible ... "** |
+| feasibility recovery | when the returned point is infeasible, find a feasible point with a zero-objective solve of the same constraints, require the same checks | low to medium: one extra solve (about 3x on the affected cases, no other case) | **prototyped inside point-and-ray verification** |
+| proof export | also export the ray / anchor in the JSON for external verification | low, interface change | not done |
 
 Gap 1:
 
 | # | candidate | risk | state |
 | --- | --- | --- | --- |
-| C0 | keep refusing and relabel the generator expectation in the harness | none for the engine | not done |
-| C1 | equality convexification: if `Q + rho A_E'A_E` passes the inertia test (tolerance tied to the original `max|Q|`) the model is convex on `{A_E x = b_E}`; solve the penalised model, which has identical solutions and multipliers there. Only runs when the old test already refused | medium: changes 45 verdicts in the QP suite (below) | **prototyped, separate commit** |
-| C2 | full reduced-Hessian check including active inequalities | high, needs a null-space factorisation | not done |
-| C3 | inertia-correcting regularisation (local solve of a nonconvex QP) | rejected: gives local optima while the engine reports global certificates | not done |
+| expectation correction | keep refusing and relabel the generator expectation in the harness | none for the engine | not done |
+| equality convexification | equality convexification: if `Q + rho A_E'A_E` passes the inertia test (tolerance tied to the original `max|Q|`) the model is convex on `{A_E x = b_E}`; solve the penalised model, which has identical solutions and multipliers there. Only runs when the old test already refused | medium: changes 45 verdicts in the QP suite (below) | **prototyped, separate commit** |
+| reduced-Hessian check | full reduced-Hessian check including active inequalities | high, needs a null-space factorisation | not done |
+| local nonconvex solve | inertia-correcting regularisation (local solve of a nonconvex QP) | rejected: gives local optima while the engine reports global certificates | not done |
 
-Gap 3 (not prototyped; one run each only on the failing ids): N1 adaptive `kDelta` (lower it when `dres` and the gap have converged but `pres` is stuck;
-evidence above), medium risk because it touches the optimal path; N2 make the stall/convergence test use the original-model measure or cap the bound
-term in `bnorm`, medium; N3 start-point clamp for huge finite boxes, medium; N4 a basis-solve polish for square near-singular systems, high effort.
+Gap 3 (not prototyped; one run each only on the failing ids): adaptive regularization adaptive `kDelta` (lower it when `dres` and the gap have converged but `pres` is stuck;
+evidence above), medium risk because it touches the optimal path; original-model stopping test make the stall/convergence test use the original-model measure or cap the bound
+term in `bnorm`, medium; initial-point adjustment start-point clamp for huge finite boxes, medium; linear-system polishing a basis-solve polish for square near-singular systems, high effort.
 
 ---
 
-## Prototype 1 (D1 + D2): status gate, `src/ipm.cpp`
+## Implementation proposal 1: verified unboundedness, `src/ipm.cpp`
 
 Rules implemented (all checks on the original unscaled model; any failure keeps `DualInfeasible`):
 
@@ -142,7 +145,7 @@ Rules implemented (all checks on the original unscaled model; any failure keeps 
 
 Tolerance note: with slack `1e-9` instead of `opt.tol` the gate demotes 4 cases that were `unbounded` before (`unbounded-36004, 36037, 36061, 36102`) and leaves 5 more on
 `dual_infeasible`; their ray violations are 1e-10 .. 6e-9 after un-scaling, i.e. iterate noise. The slack is `opt.tol`, the same as the point check;
-it is one constant (`rtol` in `ray_ok`) if the program agent wants it tighter.
+it is one constant (`rtol` in `ray_ok`) if a tighter tolerance is selected after validation.
 
 Before/after, same host, same build flags (`out/` runs; per-case CSVs in `results/qp_ipm_diagnosis/`):
 
@@ -150,8 +153,8 @@ Before/after, same host, same build flags (`out/` runs; per-case CSVs in `result
 | --- | --- | --- | --- |
 | ipm LP+big LP (2952, tests2 harness) | PASS 2828, NOANS 123, FAIL_OBJ 1 | PASS 2897, NOANS 54, FAIL_OBJ 1 | 69, all `dual_infeasible` -> `unbounded`; 0 rows with optimal/infeasible status moved; 0 previously-`unbounded` rows moved |
 | QP (1780) | 1636 pass, 25 partial | 1661 pass, 0 partial | 25, all `partial` -> `pass`; 0 optimal/infeasible rows moved |
-| QP QUICK (200) | 182 pass, 3 partial | 185 pass, 0 partial | the 3 partials |
-| base suite QUICK (330, simplex) | | | 0 rows differ |
+| QP reduced-size test (200) | 182 pass, 3 partial | 185 pass, 0 partial | the 3 partials |
+| base suite reduced-size test (330, simplex) | | | 0 rows differ |
 | Netlib 93, primal and dual, engine run | 92 optimal + dfl001 time_limit / 93 optimal | same | status, objective and iterations identical on all 93 in both modes, except the wall-clock-limited dfl001 iteration count (41464 vs 41231, `time_limit` in both) (compared at full precision; the committed `netlib93_*.txt` files show the objective to 10 significant digits) |
 | 5 Farkas cases (`infeasible-35057`, `redundant_eq-34068/34074/34080/34089`) | numerical_failure | numerical_failure | untouched |
 
@@ -160,7 +163,7 @@ Same-status rows are bit-identical in objective and violations (2883 of 2883 on 
 Cost: engine time on the 69 cases 10.5 s -> 32.9 s (the zero-objective solves), 206 s -> 219 s over the whole suite. On the near-singular borderline cases of
 the safety test below the gate also turns a questionable `unbounded` (strictly convex model, curvature 5e-9) into `dual_infeasible`.
 
-## Prototype 2 (C1): equality convexification, `src/ipm.cpp` (separate commit, gate it separately)
+## Implementation proposal 2: equality convexification, `src/ipm.cpp` (separate commit, gate it separately)
 
 On `{A_E x = b_E}` the objective equals `(c - rho A_E'b_E)'x + 0.5 x'(Q + rho A_E'A_E)x - rho/2 |b_E|^2`; gradient and multipliers of the equality rows are unchanged at feasible points.
 `rho` climbs a decade ladder from `max|Q| / max_i |a_i|^2` (9 rungs), the inertia tolerance stays tied to the original `max|Q|` (otherwise the large `rho` would widen it), and the first passing rung is multiplied by 4.
@@ -170,55 +173,55 @@ QP full run on the tree with both prototypes: 1636 -> 1696 pass; `indef_convex_f
 **Five `indefinite` cases move from PASS to FAIL_STATUS in the harness**: `indefinite-75012, 75027, 75034, 75060, 75076`. The generator labels that category by `lam_min(Q)` only and ignores the
 equality rows; for these five `Z'QZ` is positive definite (1 of them, 75034, is PSD with `lam_min` -1e-15), so the model is convex on its feasible set and the engine's answer is correct: objectives agree with
 HiGHS on the null-space-reduced convex problem to 1e-9 (`tools/diag_qp_ipm/nullspace_reference.py`, differences 1e-15 .. 1e-9). These are label errors in the suite, not wrong answers, but they count as regressions under the harness as it stands,
-so C1 needs either the harness relabel (C0) or a decision to accept them.
+so equality convexification needs either the harness relabel (expectation correction) or a decision to accept them.
 Safety test (`tools/diag_qp_ipm/nonconvex_nullspace_negative_test.py`, 300 random models, seed 26007): all 114 models whose `Z'QZ` has `lam_min/|Q|` below -1e-6 are still refused as `nonconvex`;
 all 74 with `lam_min` positive (1e-3, 1) are solved, except 1 `numerical_failure`; the 112 borderline models (delta -1e-6, -1e-8, +1e-8) end as `nonconvex` (38, all at -1e-6), `numerical_failure` (70) or, with the gate,
-`dual_infeasible` (4); before C1 they were all `nonconvex`. Without the gate, 4 of them were reported `unbounded`, one of them a strictly convex model. QP `qp_repro`: `qp_dual_infeasible_on_unbounded.mps` and `qp_refuses_indefinite_q_convex_on_feasible_set.mps` FIXED, the other four unchanged.
+`dual_infeasible` (4); before equality convexification they were all `nonconvex`. Without the gate, 4 of them were reported `unbounded`, one of them a strictly convex model. QP `qp_repro`: `qp_dual_infeasible_on_unbounded.mps` and `qp_refuses_indefinite_q_convex_on_feasible_set.mps` FIXED, the other four unchanged.
 
-## Regression found by the program agent's gate: FP contraction (separate fix commit)
+## Regression found by the independent validation: FP contraction (separate fix commit)
 
-**Report.** On the program agent's build, `bounds_huge-82056`, `-82057` and `-82068` (`--method ipm`, also in the QP suite) go from `optimal` (main: 92 iterations, objective -26.658203125
-for 82056) to `numerical_failure` ("no progress in 30 iterations", stop at iteration 50) on the tree with the status gate (`db82de0`); the convexification (`af9df1b`) was cleared by them.
+**Report.** On the independent review build, `bounds_huge-82056`, `-82057` and `-82068` (`--method ipm`, also in the QP suite) go from `optimal` (baseline: 92 iterations, objective -26.658203125
+for 82056) to `numerical_failure` ("no progress in 30 iterations", stop at iteration 50) on the tree with the status gate (the evaluated source snapshot `db82de0`); the convexification (the evaluated source snapshot `af9df1b`) was cleared by them.
 Models: `tests/ipm_numerics/bounds_huge-*.mps`.
 
-**What I can and cannot reproduce.** On this host (gcc 13.3 and clang 18) main and `db82de0` give identical iterates on all three models under every configuration I tried (gcc `-O3`/`-O2`, with and
+**What I can and cannot reproduce.** On this host (gcc 13.3 and clang 18) the baseline source and the evaluated source snapshot `db82de0` give identical iterates on all three models under every configuration I tried (gcc `-O3`/`-O2`, with and
 without `-march=native`, inline-limit parameters, clang), so the patch-induced flip itself does not appear here. What does reproduce is the cause it points at: the three models are sensitive to
-how the compiler fuses `a*b+c`. Every FMA-contracted build of main *already* fails them here (gcc `-O3 -march=native`: 50, 27, 63 iterations, the same stop at iteration 50 the program agent reports for the gated tree),
-and every uncontracted build solves them: optimal at 92, 17 and 25 iterations, objective -26.658203125 for 82056, exactly main's figures in the report
-(`results/qp_ipm_diagnosis/fp_contraction_three_models.txt`). So the program agent's main behaves like an uncontracted build on these models and the gated tree like a contracted one.
+how the compiler fuses `a*b+c`. Every FMA-contracted build of the baseline source *already* fails them here (gcc `-O3 -march=native`: 50, 27, 63 iterations, the same stop at iteration 50 the independent reviewer reports for the gated tree),
+and every uncontracted build solves them: optimal at 92, 17 and 25 iterations, objective -26.658203125 for 82056, exactly the baseline figures in the report
+(`results/qp_ipm_diagnosis/fp_contraction_three_models.txt`). So the evaluated baseline build behaves like an uncontracted build on these models and the gated tree like a contracted one.
 
 **Mechanism (shown on this host).** `run_ipm` is a separate function whose floating-point code is decided by GCC's inlining of its lambdas, and which products get fused follows from that. The shape of
 `run_ipm` (`tools/diag_qp_ipm/fp_shape_check.py`, FP opcode sequence per function from `objdump`) moves with *any* edit to `ipm.cpp`, at gcc `-O3 -march=native`:
 
 | tree | `run_ipm` FP ops | fused (FMA) ops |
 | --- | --- | --- |
-| main | 195 | 51 |
-| gate alone (`db82de0`): about 40 FP ops (the divisions of the recession test's normalisation among them) leave the loop body and an outlined function with FP ops appears | 151 | 43 |
-| convexification alone (`af9df1b` without the gate; nothing near the loop changed) | 201 | 53 |
+| baseline build | 195 | 51 |
+| gate alone (the evaluated source snapshot `db82de0`): about 40 FP ops (the divisions of the recession test's normalisation among them) leave the loop body and an outlined function with FP ops appears | 151 | 43 |
+| convexification alone (the evaluated source snapshot `af9df1b` without the gate; nothing near the loop changed) | 201 | 53 |
 | both, before this fix | 173 | 47 |
 
 Even moving the ray store out of the loop (only `out.dz = dz;` in the exit branch) does not keep the shape in the full tree: the shape of the loop depends on the rest of the translation unit.
 So the gate did not alter the algorithm (the new code runs only after a recession direction ends the run, and these three models do not end that way); it altered which products the compiler fuses, and
-these models sit on a contraction knife-edge. That also explains why the convexification can pass the program agent's gate on one build and would not on another: it moves the shape too (51 -> 53).
+these models sit on a contraction knife-edge. That also explains why the convexification can pass the independent validation on one build and would not on another: it moves the shape too (51 -> 53).
 
 **Fix.** `#pragma clang fp contract(off)` / `#pragma GCC optimize("fp-contract=off")` at the top of `src/ipm.cpp` (11 lines with the comment, no other change). No edit to `run_ipm`, to the gate or to its rules:
-verified point and verified ray on the original model, status path only, nothing else. With the pragma the iterates are a function of the source alone: the three models give identical status, objective and iteration count
-(optimal, 92 / 17 / 25) with gcc `-O3 -march=native`, `-O2 -march=native`, `-O3`, and clang `-O3 -march=native` (`tests/ipm_numerics/build_invariance.sh`), and main-with-the-pragma and the fixed tree are the same on every row
+verified point and verified ray on the original model, status path only, nothing else. With contraction disabled, the tested configurations agree on these three models: the three models give identical status, objective and iteration count
+(optimal, 92 / 17 / 25) with gcc `-O3 -march=native`, `-O2 -march=native`, `-O3`, and clang `-O3 -march=native` (`tests/ipm_numerics/build_invariance.sh`), and the baseline with contraction disabled and the fixed tree are the same on every row
 of the ipm and QP suites except the intended ones (below). The matrix by tree and toolchain is in `fp_contraction_three_models.txt`; `tests/ipm_numerics/check.sh ENGINE` replays the three models.
 
-**Before / after, same host, `-O3 -march=native`** (pinned main = main source plus the pragma, built identically):
+**Before / after, same host, `-O3 -march=native`** (baseline with floating-point contraction disabled = the baseline source plus the pragma, built identically):
 
-| suite | pinned main | fixed tree | rows that differ |
+| suite | baseline with floating-point contraction disabled | fixed tree | rows that differ |
 | --- | --- | --- | --- |
 | 3 models | optimal 92 / 17 / 25 | optimal 92 / 17 / 25 | 0 (the unpinned head fails all three) |
 | ipm LP+big LP (2952) | PASS 2826, NOANS 125, FAIL_OBJ 1 | PASS 2897, NOANS 54, FAIL_OBJ 1 | 71, all `dual_infeasible` -> `unbounded`; 0 others; no `unbounded` row moved; the 69 original ids all `unbounded` |
 | QP (1780) | 1636 pass, 25 partial | 1696 pass, 0 partial | 70: 25 `partial` -> `pass`, 40 `indef_convex_feasible` `nonconvex` -> `optimal`, 5 `indefinite` `nonconvex` -> `optimal` (harness relabel issue above); 0 others |
 | Netlib 93, primal and dual, engine run | same as before | status, objective, iterations identical on all 93 in both modes, except the wall-clock-limited dfl001 iteration count (41464 vs 41181, `time_limit` in both) |
 
-**Cost, stated plainly.** Pinning changes the numerics of every contracted build relative to an unpinned FMA build of main on this host: QP 6 rows (`bounds_huge-82056`, `-82057`, `-82068` `numerical_failure` -> `optimal`;
+**Cost, stated plainly.** Pinning changes the numerics of every contracted build relative to an unpinned FMA build of the baseline source on this host: QP 6 rows (`bounds_huge-82056`, `-82057`, `-82068` `numerical_failure` -> `optimal`;
 `bounds_huge-82002`, `-82052`, `ill_cond-87054` `optimal` -> `numerical_failure`), ipm 14 rows (`dual_infeasible` <-> `unbounded`, the knife-edge of gap 2; the gate resolves all of them)
 (`pinning_effect_*.csv`). These are the same knife-edge models the committed ledger already flips between hosts (5 QP rows against the committed ledger on an unpinned build here, 7 on the pinned build), not new failure modes.
-If the program agent's main is contracted on `82002`, `82052` or `87054` and passes them, the pinned tree will not; I could not check that build. The alternative, keeping FMA and accepting that any edit to `ipm.cpp` can move these models,
+If the evaluated baseline build is contracted on `82002`, `82052` or `87054` and passes them, the pinned tree will not; I could not check that build. The alternative, keeping FMA and accepting that any edit to `ipm.cpp` can move these models,
 is the status quo that produced this report.
 
 ## Reproduce
@@ -229,7 +232,7 @@ python3 tools/advqp/qpharness.py --engine out/taral --out out/qp --jobs 4 --time
 tests/ipm_gate/check.sh $PWD/out/taral                                                          # status gate models
 python3 tools/diag_qp_ipm/indef_convex_highs.py --engine out/taral                              # gap 1 table
 python3 tools/diag_qp_ipm/feasible_check.py DIR_WITH_MPS                                        # gap 2 feasibility
-python3 tools/diag_qp_ipm/nonconvex_nullspace_negative_test.py out/taral                        # C1 safety test
+python3 tools/diag_qp_ipm/nonconvex_nullspace_negative_test.py out/taral                        # equality convexification safety test
 tests/ipm_numerics/check.sh $PWD/out/taral                                                      # the three FP-sensitive models
 tests/ipm_numerics/build_invariance.sh                                                          # same result on every toolchain
 # IPM-method LP suite: tools from branch cloud/adversarial-tests2
@@ -238,8 +241,7 @@ python3 tools/adv/harness.py --engine out/taral --out out/ipm --kind lp+biglp --
 
 ## Integrated-main gate (October 3, 2026)
 
-The program gate replayed S5 plus `524637f`, `db82de0`, `af9df1b`, and
-`c6a7fccc`. Raw before/after ledgers are preserved, without relabeling, in
+The independent validation replayed the baseline solver plus the diagnosis, point-and-ray verification, equality-convexification and floating-point contraction changes (source identifiers `524637f`, `db82de0`, `af9df1b`, `c6a7fccc`). Raw before/after ledgers are preserved, without relabeling, in
 `results/qp_postmerge_gate_20261003/`; host, flags, caps and abbreviated binary
 hashes are in `PROVENANCE.txt`. Both Netlib modes have 93 rows, with zero
 per-case verdict, passed, strict or engine-status changes. This is the program
@@ -286,8 +288,8 @@ This is not a new 1780-case benchmark; the raw final 1780 ledger remains unchang
 ### Post-merge Kaggle confirmation
 
 The [second-host evidence](../results/qp_postmerge_gate_20261003/kaggle_second_host/)
-replays source `a240203` after integration: Netlib 93/93 both modes with pilots
-counted, strict 92/93 (`greenbea` only nonstrict). Independent comparison against
-the `58f77af` CSVs finds zero per-case verdict, pass, strict, engine-status or
+replays evaluated source snapshot `a240203` after integration: Netlib 93/93 both modes with PILOT.WE and PILOT4
+included, strict 92/93 (`greenbea` only outside the tighter tolerance). Independent comparison against
+the result tables for the evaluated source snapshot `58f77af` finds zero per-case verdict, pass, strict, engine-status or
 printed-objective changes. This confirms the Netlib gate on that Kaggle host;
 it is not a post-merge 1780-case QP run or a universal cross-host claim.

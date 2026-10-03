@@ -1,11 +1,18 @@
 # MIPLIB widening: 40 measured cases
 
+## Reading the technical terms
+
+LP means linear programming; MILP means mixed-integer linear programming; QP means quadratic programming. IPM is an interior-point method. PDHG is primal-dual hybrid gradient, the approximate GPU method. KKT (Karush-Kuhn-Tucker) checks test feasibility and optimality conditions. A "gate" is the stated validation rule, not an exact-arithmetic proof. "Strict" means the separately stated tighter tolerance; a non-strict pass meets the ordinary rule but not that tighter check. A ledger is a per-case result table. Source hashes, file paths and command flags are retained only so engineers can reproduce a measurement. Historical measurements are not current-source claims.
+
+JSON is the machine-readable result format. Warm starts reuse a previous solution or simplex basis; cold starts do not. fp64 is double-precision floating point; FMA is fused multiply-add.
+
+
 The raw `ledger.csv` records six objective matches, seven infeasibility matches,
 26 engine time limits and one no-JSON run (`neos-1425699`). Zero rows are labeled
 wrong under this protocol. That is not a claim of 40 successful solves or proof
-that the no-JSON anomaly is harmless.
+that the run without a machine-readable result is harmless.
 
-Source `58f77af`, not the later Q integration, was reported for this Kaggle run.
+Evaluated source snapshot `58f77af`, not the later Q integration, was reported for this Kaggle run.
 The reported notebook is `hexraei/notebook89d59928c7`, version 1. Environment,
 build/source provenance and CSV hash are in `provenance.json`; per-instance
 download and MPS hashes are in the CSV. The MPS bytes and per-case logs were

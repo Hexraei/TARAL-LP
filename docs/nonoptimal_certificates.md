@@ -1,6 +1,13 @@
 # Nonoptimal LP certificates
 
-Independent lane on main, not stacked on the optimal-KKT certificate branch.
+## Reading the technical terms
+
+LP means linear programming; MILP means mixed-integer linear programming; QP means quadratic programming. IPM is an interior-point method. PDHG is primal-dual hybrid gradient, the approximate GPU method. KKT (Karush-Kuhn-Tucker) checks test feasibility and optimality conditions. A "gate" is the stated validation rule, not an exact-arithmetic proof. "Strict" means the separately stated tighter tolerance; a non-strict pass meets the ordinary rule but not that tighter check. A ledger is a per-case result table. Source hashes, file paths and command flags are retained only so engineers can reproduce a measurement. Historical measurements are not current-source claims.
+
+JSON is the machine-readable result format. Warm starts reuse a previous solution or simplex basis; cold starts do not. fp64 is double-precision floating point; FMA is fused multiply-add.
+
+
+This document describes infeasibility and unboundedness evidence separately from optimality-condition checks.
 
 For continuous linear models the simplex engine exports original-coordinate proofs in JSON:
 

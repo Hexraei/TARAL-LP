@@ -1,6 +1,13 @@
 # Detailed measurements and retained context
 
-This is the long-form README retained during the October 3 layout revision. Historical tables and implementation notes refer to their stated snapshots, not an updated claim that every branch note still describes current main. [Current landing page](../README.md) · [Current limitations](limitations.md)
+## Reading the technical terms
+
+LP means linear programming; MILP means mixed-integer linear programming; QP means quadratic programming. IPM is an interior-point method. PDHG is primal-dual hybrid gradient, the approximate GPU method. KKT (Karush-Kuhn-Tucker) checks test feasibility and optimality conditions. A "gate" is the stated validation rule, not an exact-arithmetic proof. "Strict" means the separately stated tighter tolerance; a non-strict pass meets the ordinary rule but not that tighter check. A ledger is a per-case result table. Source hashes, file paths and command flags are retained only so engineers can reproduce a measurement. Historical measurements are not current-source claims.
+
+JSON is the machine-readable result format. Warm starts reuse a previous solution or simplex basis; cold starts do not. fp64 is double-precision floating point; FMA is fused multiply-add.
+
+
+This is the long-form README retained during the October 3 layout revision. Historical tables and implementation notes refer to their stated snapshots, not an updated claim that every historical implementation note describes the current solver. [Current landing page](../README.md) · [Current limitations](limitations.md)
 
 # TARAL-LP
 
@@ -8,7 +15,7 @@ A C++17 optimization solver core for refinery planning and related sparse indust
 
 This is an experimental solver, not a production replacement for established industrial solvers. The post-merge CPU Netlib gate measured 93/93 passes in both primal and dual modes, with no wrong answers and 92/93 meeting the stricter check ([ledgers](../results/netlib_postmerge_58f77af/)).
 
-Protocol: 60s per engine solve, pilots counted against HiGHS references capped at 300s; default `reproduction/reproduce.sh` excludes `pilot.we`/`pilot4` from passes as `reference_excluded_60s` (ceiling 91/93).
+Protocol: 60s per engine solve, PILOT.WE and PILOT4 included against HiGHS references capped at 300s; default `reproduction/reproduce.sh` excludes `pilot.we`/`pilot4` from passes as `reference_excluded_60s` (ceiling 91/93).
 
 Project website: [taral-lp.vercel.app](https://taral-lp.vercel.app/) - interactive performance reports, per-case ledgers and measured limits. The full site is prepared for publication; the live URL currently shows the holding page.
 
@@ -20,7 +27,7 @@ The checklist separates implemented features from measured coverage and unfinish
 | --- | --- | --- |
 | A sovereign solver core built from mathematical foundations, not an existing solver library | DONE for the current C++ engine: standard-library-only solve path in [`src/`](../src/) | Broader industrial validation and performance work |
 | A core with a basic API or CLI, rather than a modeling environment or GUI | DONE: C++ interfaces in [`src/taral.hpp`](../src/taral.hpp), MPS input and CLI below | Stable versioned API and broader integration testing |
-| LP as an initial focus | DONE for measured Netlib coverage: 93/93 in both modes under the pilots-counted gate ([protocol above](#taral-lp)) | Unresolved cases and larger industrial models |
+| LP as an initial focus | DONE for measured Netlib coverage: 93/93 in both modes under the validation including both PILOT.WE and PILOT4 ([protocol above](#taral-lp)) | Unresolved cases and larger industrial models |
 | MILP as an initial focus | IN PROGRESS: branch-and-bound implemented; selected MIPLIB measurements below | Faster search and broader difficult-MILP coverage |
 | QP as an initial focus | IN PROGRESS: convex-QP interior-point path and [Maros-Meszaros ledger](../results/qp_maros_meszaros/ledger.csv) | Reference gaps, numerical failures and uncertified cases; nonconvex QP is rejected |
 | Modular extension to MIQP, NLP and MINLP | IN PROGRESS: solver modules are separate in [`src/`](../src/) | These problem classes are not implemented or measured |
@@ -47,11 +54,11 @@ The checklist separates implemented features from measured coverage and unfinish
 
 The goal is that a returned LP answer comes with evidence a separate checker can verify: KKT evidence for an optimum, a Farkas proof for infeasibility, or a feasible anchor and improving ray for unboundedness. A checker should not need to trust the solver's own success flag.
 
-Current main uses independent original-model benchmark checks. The `taral-ai/simplex-certificates` and `taral-ai/infeasible-unbounded-certificates` branches contain certificate development; they are unmerged. Certificate export is development work, not a promise that every solve on main already ships a proof. Limits and numerical failures remain unresolved outcomes. MILP global proofs and nonconvex-QP certificates are outside this claim.
+The current solver uses independent original-model benchmark checks. Historical development snapshots contain optimality and infeasibility/unboundedness certificate work; those snapshot notes do not establish the current integration state. Certificate export is development work, not a promise that every solve already exports a verified proof. Limits and numerical failures remain unresolved outcomes. MILP global proofs and nonconvex-QP certificates are outside this claim.
 
 ### What we are building toward: a solver built for refinery problems
 
-The model structure supports sparse balances, row ranges, bounds and mixed-integer decisions. Current checked-in refinery examples are synthetic, not field data. The unmerged `taral-ai/refinery-stress` branch has twelve refinery-shaped synthetic fixtures checked against HiGHS; those tests do not establish industrial readiness and are not yet part of main.
+The model structure supports sparse balances, row ranges, bounds and mixed-integer decisions. Current checked-in refinery examples are synthetic, not field data. A historical development snapshot has twelve refinery-shaped synthetic fixtures checked against HiGHS; those tests do not establish industrial readiness and are not established here as part of the evaluated solver.
 
 The target is a solver core that fits refinery models, not a GUI wrapped around another solver. Measured refinery savings, live plant integration and production scheduling remain unverified.
 
@@ -59,7 +66,7 @@ The target is a solver core that fits refinery models, not a GUI wrapped around 
 
 ### Netlib LP
 
-The post-merge Kaggle gate on `58f77af` measured 93/93 in both modes, strict 92/93, with only GREENBEA nonstrict ([raw ledgers and logs](../results/netlib_postmerge_58f77af/)); the counting protocol is stated above. Its `src/` is byte-identical to `6c621e0`.
+The post-merge Kaggle gate on the evaluated source snapshot `58f77af` measured 93/93 in both modes, strict 92/93, with only GREENBEA outside the tighter tolerance ([raw ledgers and logs](../results/netlib_postmerge_58f77af/)); the counting protocol is stated above. Its `src/` is byte-identical to the evaluated source snapshot `6c621e0`.
 
 The historical table below is unchanged: an independent Kaggle run checked pinned `src/` at `442ca16` against live HiGHS references on the original MPS files. Local ledgers retain the primal and dual protocols separately.
 
@@ -72,11 +79,11 @@ The historical table below is unchanged: an independent Kaggle run checked pinne
 
 The local ledgers contain 94 rows: 93 denominator rows plus TRUSS as an extra case. PILOT.WE and PILOT4 are marked `reference_excluded_60s`, but their `in_denominator` fields remain true and the summaries retain a denominator of 93. They count as nonpasses in the published 60-second totals; do not drop them and change the denominator. The separate extended protocol does not alter the 60-second headline. DFL001 reaches the default-primal time limit; dual finishes in about 36 seconds on Kaggle. GREENBEA clears the fixed gate but misses the stricter check, with measured row violation 1.46e-8 on a cancellation-heavy row.
 
-### CPU benchmark wave - October 2, 2026
+### CPU benchmark selection - October 2, 2026
 
 All listed runs completed in a Kaggle CPU notebook using pinned engine source `442ca16`. "Measured" counts completed runs, not optimal solves. TARAL had a 30-second cap per case.
 
-Wave environment: Kaggle CPU notebook, no accelerator; Intel Xeon @ 2.20GHz, four logical CPUs (one socket, two cores, two threads per core), 30 GiB RAM cap; x86_64, Linux 6.18.48+, Ubuntu 22.04.5 LTS. Build: `g++ -O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic -o taral src/*.cpp`.
+Measurement environment: Kaggle CPU notebook, no accelerator; Intel Xeon @ 2.20GHz, four logical CPUs (one socket, two cores, two threads per core), 30 GiB RAM cap; x86_64, Linux 6.18.48+, Ubuntu 22.04.5 LTS. Build: `g++ -O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic -o taral src/*.cpp`.
 
 | Benchmark selection | Completed measurements | Outcome | Ledger |
 | --- | --- | --- | --- |
@@ -98,7 +105,7 @@ A local check of 3,600 small LPs with known optimal/infeasible/unbounded status 
 
 ## Approximate GPU LP results
 
-CUDA PDHG is separate from the exact-simplex headline. The Kaggle T4 check used `gpu/pdhg.cu` from `442ca16`, `sm_75`, tolerance `1e-6`, three repeats per case, live SciPy/HiGHS references and original-model point checks.
+CUDA PDHG is separate from the exact-simplex headline. The Kaggle T4 check used `gpu/pdhg.cu` from the evaluated source snapshot `442ca16`, `sm_75`, tolerance `1e-6`, three repeats per case, live SciPy/HiGHS references and original-model point checks.
 
 | Case | GPU solve time | Same-run CPU context |
 | --- | --- | --- |
@@ -133,13 +140,13 @@ The local GPU Netlib sweeps cover 94 files including TRUSS, not the CPU 93-case 
 
 ### GPU-to-simplex crossover: it does not pay yet
 
-Crossover converts a PDHG point and row multipliers into a corner basis, then asks exact simplex to finish. Three alternating runs of each route on the same local laptop give DFL001 a median total of 20.4 seconds after handoff, versus 11.88 seconds for cold dual simplex. The warm route needs 29,869 simplex iterations against 21,256 cold. These times include the PDHG process, not just its 0.59-second solve.
+Crossover converts a PDHG point and row multipliers into a corner basis, then asks exact simplex to finish. Three alternating runs of each route on the same local laptop give DFL001 a median total of 20.4 seconds after handoff, versus 11.88 seconds for dual simplex without a previous solution. The previous-basis method needs 29,869 simplex iterations against 21,256 cold. These times include the PDHG process, not just its 0.59-second solve.
 
-The point sits inside the optimal face rather than at a vertex. Only 3,507 of 6,071 basis slots are determined by variables off their bounds; the resulting basis has 2,585 dual infeasibilities and needs a 12,083-iteration dual phase 1. Tighter PDHG tolerances did not fix the basis. Packing with 100,000 columns has a nearly dense ~4,800 by ~4,800 factorization nucleus; neither the warm nor cold route returns an exact answer in 120 seconds.
+The point sits inside the optimal face rather than at a vertex. Only 3,507 of 6,071 basis slots are determined by variables off their bounds; the resulting basis has 2,585 dual infeasibilities and needs a 12,083-iteration dual phase 1. Tighter PDHG tolerances did not fix the basis. Packing with 100,000 columns has a nearly dense ~4,800 by ~4,800 factorization nucleus; neither the warm nor fresh-start method returns an exact answer in 120 seconds.
 
 The factorization deadline now holds. The packing handoff that previously ran beyond 11.5 minutes returns `time_limit` at 60.07 seconds with a 60-second limit, instead of misreporting a singular basis or hanging. A warm basis gets a quarter of the limit to factor and falls back to the slack basis if it cannot. See [CROSSOVER.md, round 2](../results/gpu_pdhg/CROSSOVER.md) for the measurements and diagnosis.
 
-The retained `5e93146` gates still report dual 91/93 (strict 90/91) and primal 90/93 (strict 89/90), with zero wrong answers under that protocol: [dual run](../results/cpp_5e93146_dual_60s/summary.json), [primal run](../results/cpp_5e93146_primal_60s/summary.json). Faster approximate points have not become faster exact answers. The next crossover work is basis identification and factorization that can handle the dense nucleus.
+Validation of the retained evaluated source snapshot `5e93146` gates still report dual 91/93 (strict 90/91) and primal 90/93 (strict 89/90), with zero wrong answers under that protocol: [dual run](../results/cpp_5e93146_dual_60s/summary.json), [primal run](../results/cpp_5e93146_primal_60s/summary.json). Faster approximate points have not become faster exact answers. The next crossover work is basis identification and factorization that can handle the dense nucleus.
 
 ## Build and use
 
@@ -178,14 +185,14 @@ Proprietary. Only official competition judges and organizers may read this submi
 
 ## Synthetic refinery warm starts
 
-[39 what-if LP rows](../results/refinery_warmstart_58f77af/warmstart_table.csv), using source `58f77af`, record oracle validation of both cold and warm solves at 1e-6, with zero recorded wrong answers. Median warm/cold iteration ratio is 0.302, recomputed from the CSV. This is synthetic-data iteration evidence only: warm route use is inferred from stderr, and millisecond wall times do not support a stable speedup claim. [Protocol, summary and provenance](../results/refinery_warmstart_58f77af/).
+[39 what-if LP rows](../results/refinery_warmstart_58f77af/warmstart_table.csv), using the evaluated source snapshot `58f77af`, record independent reference validation of both solves without and with a previous basis at 1e-6, with zero recorded wrong answers. Median warm/cold iteration ratio is 0.302, recomputed from the CSV. This is synthetic-data iteration evidence only: reuse of the previous basis is inferred from diagnostic output, and millisecond wall times do not support a stable speedup claim. [Protocol, summary and provenance](../results/refinery_warmstart_58f77af/).
 
 ## MIPLIB widening, October 3, 2026
 
 [40-case CSV and provenance](../results/miplib_widening_20261003/): six objective
 matches, seven infeasibility matches, 26 engine time limits and one no-JSON
-anomaly, with zero rows labeled wrong under the protocol. Source `58f77af`;
+anomaly, with zero rows labeled wrong under the protocol. Evaluated source snapshot `58f77af`;
 requested soft caps were engine 120 seconds and HiGHS 300 seconds. The current
 implementation times out on the 26 cases. HiGHS also hit its separate cap on
-11 of those. The `neos-1425699` no-JSON cause is unconfirmed. Do not add this
+11 of those. The `neos-1425699` cause of the missing machine-readable result is unconfirmed. Do not add this
 selection to older MIPLIB counts without checking overlap.

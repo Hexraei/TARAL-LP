@@ -1,5 +1,12 @@
 # Adversarial suite across solver paths (default simplex, dual simplex, interior point) and big models
 
+## Reading the technical terms
+
+LP means linear programming; MILP means mixed-integer linear programming; QP means quadratic programming. IPM is an interior-point method. PDHG is primal-dual hybrid gradient, the approximate GPU method. KKT (Karush-Kuhn-Tucker) checks test feasibility and optimality conditions. A "gate" is the stated validation rule, not an exact-arithmetic proof. "Strict" means the separately stated tighter tolerance; a non-strict pass meets the ordinary rule but not that tighter check. A ledger is a per-case result table. Source hashes, file paths and command flags are retained only so engineers can reproduce a measurement. Historical measurements are not current-source claims.
+
+Raw result labels: PASS is accepted; PASS_REF or pass* is accepted with an independently checked reference discrepancy; NOANS/noans means no verified answer; PARTIAL means a weaker conclusion than the expected result; BORDER means curvature is within rounding uncertainty; FAIL_STATUS/FAIL_OBJ/FAIL_FEAS/FAIL_KKT mean a status/objective/feasibility/optimality-check failure; REF_UNRESOLVED means no usable reference answer. JSON is the machine-readable result format. Warm starts reuse a previous solution or simplex basis; cold starts do not. fp64 is double-precision floating point; FMA is fused multiply-add.
+
+
 Everything here is tools and tests; `src/` was not touched. Engine: `src/` at `7d0af4d`, built with `g++ -O3 -march=native -std=c++17`.
 Reference: HiGHS 1.15.1 via `highspy` (as in `docs/adversarial.md`). Shared 4-core cloud container, 4 cases at a time, 60 s cap per
 engine run and per reference solve; timings are indicative only (one case below changes verdict with the load).
@@ -19,7 +26,7 @@ every MILP to branch and bound whatever the flag says, so the 802 MILP cases are
 assumed: 130 MILP cases (10 per base MILP category) were re-run with `--method dual` and with `--method ipm`; 129 of 130 have the same
 verdict and status as the default path in both runs, the 130th (`equality_int-55002`) is `optimal` on all three but scored `PASS` once
 and `PASS_REF` twice because HiGHS' presolve answer differs between runs. (Branch and bound itself re-solves nodes with the dual simplex,
-`0bad060`, independent of the flag.)
+the evaluated source snapshot `0bad060`, independent of the flag.)
 
 Scoring is unchanged: same status, objective within 1e-6 relative, exact rational feasibility check of the returned point, HiGHS
 re-solved with presolve off on any disagreement. The interior-point status `dual_infeasible` is **not** `unbounded` and is scored as no
@@ -134,7 +141,7 @@ default path these pass. Reproducer for the `coef_range` one: `dual_coef_range_f
 pass on the default path. Reproducer `dual_huge_bounds_numfail.mps` (1 row, 2 columns, bounds written as the 1e20 sentinel).
 
 **F5. dual: stall on `near_singular-37072`**: `time_limit` after 11 dual iterations and about 20 million primal iterations (hand-over from a stalled dual to
-primal simplex, `f40f048`); passes on the default path. Seed only (see F6).
+primal simplex, the evaluated source snapshot `f40f048`); passes on the default path. Seed only (see F6).
 
 **F6. Reproducer limits for the near_singular findings.** The shrunk models of `37012` (dual false infeasible), `37072` (dual stall) and `37002` (ipm
 numerical failure) are 7x6, 9x8 and 4x3. `tools/adv/mkrepro.py` refused them: HiGHS' interior point disagrees with HiGHS' simplex on them, and
