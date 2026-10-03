@@ -70,12 +70,12 @@ This builds the CPU engine, verifies the pinned corpus and runs the default 60s 
 
 | Member | GitHub |
 | --- | --- |
-| Navin | [Hexraei](https://github.com/Hexraei) |
-| Sutharshan | [muffedd](https://github.com/muffedd) |
-| Sailakshmi | [Saibts](https://github.com/Saibts) |
-| Madhesh | [Professor-Mady](https://github.com/Professor-Mady) |
-| Manaswini | [ksm-13](https://github.com/ksm-13) |
-| Abinaya | [abinaya2006](https://github.com/abinaya2006) |
+| <img src="https://github.com/Hexraei.png?size=80" width="40" height="40" alt="Navin's GitHub avatar"> Navin | [Hexraei](https://github.com/Hexraei) |
+| <img src="https://github.com/muffedd.png?size=80" width="40" height="40" alt="Sutharshan's GitHub avatar"> Sutharshan | [muffedd](https://github.com/muffedd) |
+| <img src="https://github.com/abinaya2006.png?size=80" width="40" height="40" alt="Abinaya's GitHub avatar"> Abinaya | [abinaya2006](https://github.com/abinaya2006) |
+| <img src="https://github.com/ksm-13.png?size=80" width="40" height="40" alt="Manaswini's GitHub avatar"> Manaswini | [ksm-13](https://github.com/ksm-13) |
+| <img src="https://github.com/Professor-Mady.png?size=80" width="40" height="40" alt="Madhesh's GitHub avatar"> Madhesh | [Professor-Mady](https://github.com/Professor-Mady) |
+| <img src="https://github.com/Saibts.png?size=80" width="40" height="40" alt="Sailakshmi's GitHub avatar"> Sailakshmi | [Saibts](https://github.com/Saibts) |
 
 ## Scope and access
 
