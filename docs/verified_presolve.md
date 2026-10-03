@@ -102,8 +102,26 @@ coefficient), so for an INTEGER column its ceil/floor is not exact. Example: 2X=
 a false "infeasible". The engine now carries a running absolute error bound per row (one DBL_EPSILON-scaled term per
 multiply/subtract, plus the fixed column's own error, plus the division rounding unless |a| = 1) and rounds the
 DERIVED integer bound outward by that bound only: ceil(l - e), floor(u + e). Outward rounding only relaxes, so
-infeasible claims stay sound; the final answer is still audited in original space. Direct input bounds
+this reduces false-infeasible rounding but is NOT an unconditional soundness guarantee (first-order, non-directed error model scaled by a safety factor 4); the final answer is still audited in original space. Direct input bounds
 (`round_int_bounds`, and singleton rows with |a| = 1 and no substitution) have e = 0 and stay strictly ceil/floor, so
 the [4e-7,8e-7] cases remain infeasible. The replay checker recomputes the same error bounds with the same
 formulas and rejects the old false-infeasible logs (kept as fixtures). Limits: the error bound is a first-order
 model of rounding, not interval arithmetic with directed rounding; an integer bound is treated as exact once rounded.
+
+### Conflict claims inside the tracked uncertainty (review of c226e90)
+
+Empty-row, singleton-row and activity-range conflicts are claimed only when the violation exceeds the 1e-9 relative
+tolerance PLUS 4x the tracked uncertainty (row error, the fixed/derived columns' errors, and summation rounding for the
+activity range). A violation inside that margin is declined: no `infeasible` claim, the row is kept, and the solver
+decides. Redundant-row removal needs the same margin. Reviewer finding: a 500-model chained-equality sweep (seed 84571)
+previously had two cases (indices 30, 320) where presolve said infeasible and both HiGHS and the plain engine said
+optimal with zero floating row residuals; the minimized `cancel-negative` case is also a regression. These are
+ill-conditioned numerical cases, not exact-rational proofs. The other 42 sweep discrepancies are HiGHS-infeasible and are
+not wrong-answer evidence.
+
+Independent validation: the replay checker accepts an `infeasible` log only if an exact-rational enclosure proves it.
+Every float is read as an exact rational, derived bounds are exact enclosures (fixed columns are carried as the full
+range of their enclosure), non-integer INPUT bounds are widened by 2^-52 relative (decimal-to-binary representation
+error), and integer bounds round outward in exact arithmetic. Not modelled: representation error in matrix coefficients,
+and the parse of the MPS itself. This replaces the mirrored-formula check for infeasible logs; non-infeasible logs still
+use the mirrored floating replay plus the original-space audit of the reported point.
