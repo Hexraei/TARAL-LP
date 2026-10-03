@@ -1,0 +1,192 @@
+{
+ "big_values_numfail.mps": {
+  "category": "big_values",
+  "source": "big_values-57025 (shrunk)",
+  "expected_status": "optimal",
+  "expected_objective": -8782000000.0,
+  "expected_basis": "exhaustive enumeration over the integer columns in exact rational arithmetic gives -4391/5 x 1e7 = -8.782e9; HiGHS at default options agrees",
+  "known_failing": true,
+  "observed_bad": "numerical_failure after 14 nodes although its incumbent (-8.782e9) is already the exact optimum",
+  "report": "A 5-integer, 1-continuous MIP with coefficients and costs of order 1e7 (objective about -8.8e9). Exhaustive enumeration in exact rational arithmetic gives the optimum -8.782e9 (C = 6,5,24,1,16 and C5 = 10.4) and HiGHS at default options returns the same. The engine finds exactly that incumbent but ends with numerical_failure ('node LP numerical_failure: final point violates constraints by 0.000000') and a best bound of -8.851e9, so it cannot prove optimality; the same happens with --method dual and --method ipm because the node LP path is shared. Side finding about the reference: HiGHS 1.15.1 with mip_feasibility_tolerance set to 1e-9 returns -8.256e9 (and -8.678e9 with some other options), both worse than the true optimum, which is why the harness leaves HiGHS tolerances at their defaults. Engine side not root-caused."
+ },
+ "coef_range_false_infeasible.mps": {
+  "category": "coef_range",
+  "source": "coef_range-38039 (shrunk)",
+  "expected_status": "optimal",
+  "expected_objective": -70.0,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "default simplex returns infeasible after 2 iterations",
+  "report": "One column and two rows with coefficients 20 and 4e9, RHS -1e-3 and -3.2e5, and upper bound 7e-5. The rows give x >= 5e-5 and x <= 8e-5, the bound gives x <= 7e-5, so the feasible set is [5e-5, 7e-5] and the optimum of min -1e6 x is x = 7e-5, objective -70. HiGHS (simplex and interior point, presolve on and off) returns -70, and so do the engine's --method dual (-70) and --method ipm (-69.9999999916), but the default primal simplex declares the model infeasible after 2 iterations. Not root-caused: the variable lives at the 1e-5 scale while its row coefficient is 4e9, which points at an absolute feasibility tolerance applied to an unscaled model."
+ },
+ "coef_range_false_unbounded.mps": {
+  "category": "coef_range",
+  "source": "coef_range-38040 (shrunk)",
+  "expected_status": "optimal",
+  "expected_objective": 0.0,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "default simplex returns unbounded after 1 iteration",
+  "report": "One row 0.1 C0 + 2e8 C1 >= 2e5 with C0, C1 >= 0 and objective min 1e4 C1. The cost is non-negative and C1 = 0, C0 = 2e6 is feasible, so the optimum is 0 and the LP is bounded. The default primal simplex returns 'unbounded' after one iteration; --method dual returns optimal 0 and so does HiGHS. A wrong unbounded claim is worse than a failure to finish because it is a definite (false) statement about the model. Not root-caused: the row coefficients differ by nine orders of magnitude."
+ },
+ "coef_range_numfail.mps": {
+  "category": "coef_range",
+  "source": "coef_range-38127 (shrunk)",
+  "expected_status": "optimal",
+  "expected_objective": 0.0,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "default simplex returns numerical_failure: phase 1 direction without a blocking variable",
+  "report": "A 5 x 5 LP with equality rows and coefficients 5e-5..5e9 that has optimal objective 0. The default primal simplex stops with numerical_failure ('phase 1 direction without a blocking variable') after 5 iterations; --method dual and --method ipm return optimal 0, as does HiGHS. Not root-caused."
+ },
+ "coef_range_stall.mps": {
+  "category": "coef_range",
+  "source": "coef_range-38013 (shrunk)",
+  "expected_status": "optimal",
+  "expected_objective": -32.0,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": true,
+  "observed_bad": "default simplex runs to the time limit (tens of millions of iterations in a few seconds) on a 3-row, 4-column LP",
+  "report": "A 3 x 4 LP whose coefficients span 1e-4..3e4 (an exactly rescaled version of a well-behaved model). The default primal simplex spends the whole time limit (about 8e6 iterations per second, i.e. it is cycling or stalling, not slowly converging) while HiGHS and the engine's own --method dual (4 iterations, objective -32) and --method ipm solve it instantly. This is the dominant failure mode in the coef_range category (see docs/adversarial.md for counts). Not root-caused."
+ },
+ "huge_bounds_sentinel_1e20_unbounded.mps": {
+  "category": "huge_bounds",
+  "source": "hand-written",
+  "expected_status": "unbounded",
+  "expected_objective": null,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": false,
+  "observed_bad": "optimal, objective -1e+20",
+  "report": "No rows, one column with cost +1 and lower bound -1e20 (upper bound default +infinity). With the convention that |bound| >= 1e20 is infinity the LP is unbounded below; the engine's simplex and dual paths use -1e20 as a finite bound and answer optimal -1e20. Same root behaviour as huge_bounds_sentinel_unbounded, at the 1e20 spelling used by CPLEX/Gurobi/HiGHS."
+ },
+ "huge_bounds_sentinel_numfail.mps": {
+  "category": "huge_bounds",
+  "source": "huge_bounds-31019 (shrunk, sentinel 1e20)",
+  "expected_status": "optimal",
+  "expected_objective": -4.0,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": false,
+  "observed_bad": "numerical_failure: final point violates constraints by 0.8889",
+  "report": "A 4 x 4 LP in which three columns are bounded by +-1e20 and two rows carry RANGES 1e20 (so one side of each is infinite by the 1e20 convention). HiGHS and the engine's --method dual / --method ipm return optimal -4. The default simplex treats the 1e20 values as finite data, runs 5 iterations and stops with numerical_failure ('final point violates constraints by 0.8889'): the huge finite bounds enter the arithmetic of the ratio test and destroy the basic solution. Same convention gap as the other huge_bounds reproducers; with 1e30 in place of 1e20 the failure is identical."
+ },
+ "huge_bounds_sentinel_unbounded.mps": {
+  "category": "huge_bounds",
+  "source": "huge_bounds-31000 (shrunk)",
+  "expected_status": "unbounded",
+  "expected_objective": null,
+  "expected_basis": "HiGHS 1.15.1: simplex/presolve-off, simplex/presolve-on, ipm/presolve-off agree",
+  "known_failing": false,
+  "observed_bad": "optimal, objective -5e+30",
+  "report": "No rows, one column with cost 5 and bounds [-1e30, 1e30]. By the common convention (CPLEX, Gurobi, HiGHS all treat |bound| >= 1e20 as infinity) the column is free, so the LP is unbounded below. The engine's simplex and dual paths treat 1e30 as a finite bound and report 'optimal' with objective -5e+30, a point nobody can use; only --method ipm reports unbounded. The MPS format itself does not define the sentinel, so this is a convention gap rather than a format violation, but returning 'optimal' with a 1e30 objective is a wrong answer under every common reading."
+ },
+ "near_singular_false_infeasible.mps": {
+  "category": "near_singular",
+  "source": "near_singular-37097",
+  "expected_status": "optimal",
+  "expected_objective": 9.999999989977592,
+  "expected_basis": "4x4 equality system with condition number ~1e11 and a unique solution that is nonnegative in exact rational arithmetic (generator proves it); objective c'x computed exactly",
+  "known_failing": true,
+  "observed_bad": "default simplex and --method dual return infeasible; --method ipm returns optimal 9.99999998998",
+  "report": "A 4 x 4 square equality system B x = b, x >= 0, with B of condition number about 1e11 (prescribed singular values) written with full 17-digit coefficients. In exact rational arithmetic the solution is unique and nonnegative, so the LP is feasible with objective 9.999999989977592. HiGHS (default tolerances) returns optimal 9.99999998251 (a point within its 1e-9 feasibility tolerance), the engine's --method ipm returns 9.99999998998, but the default simplex and the dual method declare the model infeasible. At this conditioning the feasibility verdict is tolerance-dependent; the reproducer records that the engine answers 'infeasible' for a model that is exactly feasible and that other solvers accept."
+ },
+ "near_singular_objective.mps": {
+  "category": "near_singular",
+  "source": "near_singular-37140",
+  "expected_status": "optimal",
+  "expected_objective": 38.0,
+  "expected_basis": "4x4 square system, condition number ~1e11, unique nonnegative solution in exact rational arithmetic; objective c'x = 38 exactly",
+  "known_failing": true,
+  "observed_bad": "optimal, objective 36.2183747274 instead of 38.0",
+  "report": "A 4 x 4 square equality system with condition number about 1e11, so the feasible set is a single point and the optimal objective is exactly 38. The engine returns optimal 36.2183747274 (relative error 0.047) and HiGHS returns 36.2172385 (also off by 0.047): both stop inside the cloud of points that satisfy the equalities to their 1e-9 feasibility tolerance. The engine's answer is infeasible by about 1e-9 relative to the data but is nowhere near the exact optimum, and it differs from HiGHS by 3e-5, above the 1e-6 differential gate. This reproducer documents an inherent limit of tolerance-based LP solvers at this conditioning, not a unique defect of the engine."
+ },
+ "near_singular_stall.mps": {
+  "category": "near_singular",
+  "source": "near_singular-37068",
+  "expected_status": "optimal",
+  "expected_objective": 14.999999242005337,
+  "expected_basis": "4x4 square system, condition number ~1e10, unique nonnegative solution in exact rational arithmetic; objective computed exactly",
+  "known_failing": true,
+  "observed_bad": "default simplex runs to the time limit (millions of iterations) on a 4x4 LP",
+  "report": "A 4 x 4 square equality system with condition number about 1e10 and a unique feasible point (objective 14.999999242). HiGHS solves it; the engine's default simplex iterates until the time limit (over 2 million iterations in 3 seconds), i.e. it cycles or stalls on a model that needs four pivots."
+ },
+ "parser_dup_column_noncontiguous.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case dup_column_noncontiguous",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "all entries of a column must be contiguous in COLUMNS; a column name that reappears later is malformed",
+  "known_failing": false,
+  "observed_bad": "accepted and merged: optimal 1.5 (HiGHS treats the second block as a new column: optimal 0)",
+  "report": "Column x is listed, then y, then x again. The engine merges the two blocks (objective 1.5); HiGHS creates a second column with the same name (objective 0). The two readers build different models from the same file, which is the practical danger: the format requires contiguous column blocks, so the right answer is a parse error rather than a guess."
+ },
+ "parser_dup_row_name.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case dup_row_name",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "row names are unique keys in the format",
+  "known_failing": false,
+  "observed_bad": "accepted: optimal 3 (HiGHS also accepts)",
+  "report": "ROWS declares r1 twice. The engine accepts the file without a message and solves it; HiGHS also accepts it. Row names key every later section (COLUMNS, RHS, RANGES), so which of the two rows an entry belongs to is undefined; a conforming reader must reject the file. Judgement call on strictness, but silent acceptance can attach coefficients to the wrong row."
+ },
+ "parser_dup_section_columns.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case dup_section_columns",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "each section occurs once",
+  "known_failing": false,
+  "observed_bad": "accepted: optimal 3 (HiGHS also accepts)",
+  "report": "The COLUMNS section appears twice. The engine continues reading the second block as more columns and solves; HiGHS also accepts. Sections occur once in the format, so this is malformed input accepted silently (low severity, judgement call)."
+ },
+ "parser_missing_endata.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case missing_endata",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "ENDATA terminates an MPS file; a file without it is malformed (judgement: some readers accept EOF)",
+  "known_failing": false,
+  "observed_bad": "accepted: optimal 3 (HiGHS rejects)",
+  "report": "A valid small model with the ENDATA line removed. The engine reads it as complete and solves it (optimal 3); HiGHS reports a read error. The format requires ENDATA, so the engine is more lenient than the format and than HiGHS. Low severity, but it means a truncated file (for example an interrupted download) is solved as if it were complete, silently dropping any rows or columns that were cut off."
+ },
+ "parser_num_hex_value.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case num_hex_value",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "MPS numbers are decimal; strtod's hexadecimal syntax is not part of the format",
+  "known_failing": false,
+  "observed_bad": "accepted as 16: optimal 6 (HiGHS also accepts)",
+  "report": "A coefficient written as 0x10. strtod parses C hexadecimal floating-point syntax, so the engine reads it as 16 and solves the model (HiGHS does the same). Decimal is the only number syntax in the format; a stray 0x token should be an error. Low severity, judgement call."
+ },
+ "parser_num_inf_value.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case num_inf_value",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "an infinite coefficient cannot define an LP",
+  "known_failing": false,
+  "observed_bad": "status optimal with objective nan (invalid JSON)",
+  "report": "A coefficient written as 'inf'. Same defect as parser_num_nan_value: non-finite coefficient accepted, optimal with NaN objective reported, JSON output invalid. HiGHS accepts the file and reports optimal 6 (treating the value as a large number), so readers differ; the engine's answer is the one that is wrong under every reading."
+ },
+ "parser_num_nan_value.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case num_nan_value",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "a coefficient that is not a finite number cannot define an LP; rejecting is the only safe answer",
+  "known_failing": false,
+  "observed_bad": "status optimal with objective nan; JSON file contains a bare nan (invalid JSON)",
+  "report": "A coefficient written as 'nan'. strtod accepts it, the matrix carries a NaN, and the engine prints 'status optimal objective nan' and writes a result JSON with an unquoted nan, which is not valid JSON, so any consumer that parses the --json output fails on it. Reporting optimal with a NaN objective is wrong whatever the input convention; the reader should reject non-finite coefficients (the same happens for inf and for 1e400, which overflows to inf)."
+ },
+ "parser_num_overflow_1e400.mps": {
+  "category": "parser",
+  "source": "tools/adv/parser_table.py case num_overflow_1e400",
+  "expected_status": "parse_error",
+  "expected_objective": null,
+  "expected_basis": "a value that overflows double cannot define an LP",
+  "known_failing": false,
+  "observed_bad": "status optimal with objective nan (invalid JSON)",
+  "report": "A coefficient written as 1e400, which overflows to infinity in double precision. Same defect as parser_num_inf_value: accepted, optimal with NaN objective, invalid JSON in the --json output."
+ }
+}
