@@ -317,7 +317,7 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             res.status = Status::IterationLimit;
             return res;
         }
-        if (work_budget().cap && ++work_budget().used > work_budget().cap) {  // --work-limit: deterministic stop
+        if (work_budget().cap && work_budget().used >= work_budget().cap) {  // --work-limit: deterministic stop (denied entries are not counted)
             res.status = Status::IterationLimit;
             res.message = "work limit";
             return res;
@@ -452,6 +452,7 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             return res;
         }
         ++res.iterations;
+        ++work_budget().used;  // work_used counts performed iterations
         if (range <= theta) {  // entering variable reaches its opposite bound first
             for (int p = 0; p < m_; ++p) x_[head_[p]] -= dir * range * alpha[p];
             bool to_upper = where_[q] == kLower;

@@ -318,7 +318,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             keep_basis();
             return Outcome::TimeLimit;
         }
-        if (work_budget().cap && ++work_budget().used > work_budget().cap) {  // --work-limit: deterministic stop
+        if (work_budget().cap && work_budget().used >= work_budget().cap) {  // --work-limit: deterministic stop (denied entries are not counted)
             message = "work limit";
             keep_basis();
             return Outcome::Fallback;
@@ -459,6 +459,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             }
         }
         ++iterations;
+        ++work_budget().used;  // work_used counts performed iterations
 
         // Bound flips: x_B -= B^{-1} sum a_j dx_j.
         if (!flips.empty()) {
