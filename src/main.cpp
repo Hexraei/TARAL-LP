@@ -41,6 +41,26 @@ std::string json_escape(const std::string& s) {
 
 void num_or_null(std::FILE* f, double v);
 
+// --presolve reports the ORIGINAL-space primal point only. Dual postsolve is out of scope, so dual/KKT fields of the
+// reduced model are written as null, never as placeholders next to an original-space x, and reduced-model
+// infeasible/unbounded certificates are not mapped back (no original-space proof is claimed).
+static bool g_primal_only = false;
+static void presolve_sanitize(Result& r, const Model& orig) {
+    g_primal_only = true;
+    if (r.status == Status::Infeasible || r.status == Status::Unbounded) {
+        r.certificate_quality = "presolve_reduced_model_only";
+        r.certificate_verified = false;
+        r.farkas_row_lower.clear(); r.farkas_row_upper.clear(); r.farkas_col_lower.clear(); r.farkas_col_upper.clear();
+        r.ray.clear(); r.x.clear();
+        r.message = "reduced-model result after presolve; the certificate is not mapped back and is not an original-space proof. " + r.message;
+        return;
+    }
+    r.certificate_quality = "presolve_primal_only";
+    r.row_activity.assign(orig.row_lo.size(), 0.0);
+    for (size_t j = 0; j < orig.cols.size() && j < r.x.size(); ++j)
+        for (const Entry& e : orig.cols[j]) r.row_activity[e.index] += e.value * r.x[j];
+}
+
 void write_json(const char* path, const char* status, const Result* r, double wall, const std::string& msg) {
     std::FILE* f = std::fopen(path, "w");
     if (!f) return;
@@ -62,6 +82,15 @@ void write_json(const char* path, const char* status, const Result* r, double wa
             }
             std::fprintf(f, "]");
         };
+        if (g_primal_only) {
+            std::fprintf(f, ", \"original_space_primal_only\": true");
+            for (const char* nm : {"dual_objective", "primal_res", "dual_res", "gap", "complementarity", "max_row_viol", "max_bound_viol",
+                                   "max_row_violation_magnitude_scaled", "row_violation_abs", "row_violation_magnitude_scaled",
+                                   "row_term_magnitude", "row_dual", "reduced_cost"})
+                std::fprintf(f, ", \"%s\": null", nm);
+            array("x", r->x);
+            array("row_activity", r->row_activity);
+        } else {
         scalar("dual_objective", r->dual_objective);
         scalar("primal_res", r->primal_res);
         scalar("dual_res", r->dual_res);
@@ -77,6 +106,7 @@ void write_json(const char* path, const char* status, const Result* r, double wa
         array("row_activity", r->row_activity);
         array("row_dual", r->row_dual);
         array("reduced_cost", r->reduced_cost);
+        }
     }
     if (r && (r->status == Status::Infeasible || r->status == Status::Unbounded ||
               !r->farkas_row_lower.empty() || !r->farkas_col_lower.empty() || !r->ray.empty())) {
@@ -453,6 +483,7 @@ int main(int argc, char** argv) {
             full.objective = au.objective;
             full.certificate_quality = "presolve_substitution";
             full.message = "presolve solved the model";
+            presolve_sanitize(full, orig_md);
             if (json) write_json(json, st, &full, wall(), "presolve solved the model");
             if (sol && au.ok) write_sol(sol, orig_md, x);
             std::printf("status %s objective %.12g (presolve) wall %.3fs\n", st, au.objective, wall());
@@ -540,6 +571,7 @@ int main(int argc, char** argv) {
         if (!ok) r.status = Status::NumericalFailure, r.message = "presolve audit or log write failed";
     }
     double w = wall();
+    if (do_presolve) presolve_sanitize(r, orig_md);
     if (json) write_json(json, status_name(r.status), &r, w, r.message);
     if (sol && r.status == Status::Optimal) write_sol(sol, do_presolve ? orig_md : md, r.x);
     std::printf("status %s objective %.12g iterations %ld wall %.3fs %s\n", status_name(r.status), r.objective,
