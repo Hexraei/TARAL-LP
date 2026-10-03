@@ -12,6 +12,7 @@ add_executable(taral
     src/milp.cpp
     src/mps.cpp
     src/nonoptimal_certificate.cpp
+    src/presolve.cpp
     src/simplex.cpp
 )
 target_compile_features(taral PRIVATE cxx_std_17)

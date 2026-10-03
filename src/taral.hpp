@@ -191,3 +191,39 @@ struct WorkBudget {
     long used = 0;  // cumulative iterations consumed since the last reset
 };
 WorkBudget& work_budget();
+// ---- Verified presolve (src/presolve.cpp) -------------------------------------------------------------
+// Opt-in (--presolve). Linear models only (no quadratic objective). Every reduction is recorded in a log
+// that an independent replayer (benchmarks/presolve_replay_check.py) re-derives from the ORIGINAL model, and
+// every returned point is audited in original space (rows, bounds, integrality, objective) before it is
+// reported. Reductions: integer bound rounding, fixed-column substitution, empty/singleton rows,
+// activity-redundant rows, empty-column fixing. Floating point throughout, tolerances stated in
+// docs/verified_presolve.md.
+struct PresolveOp {
+    std::string type;       // round_int_bounds, fix_col, empty_row, singleton_row, redundant_row, fix_empty_col
+    int row = -1, col = -1;
+    double a = 0, v1 = 0, v2 = 0, v3 = 0, v4 = 0;  // type-specific data, see presolve.cpp
+};
+struct PresolveResult {
+    bool infeasible = false;
+    std::string infeasible_reason;
+    Model reduced;
+    std::vector<int> kept_rows, kept_cols;   // original indices of the reduced model's rows/columns
+    std::vector<double> fixed_value;         // per original column; valid where the column was removed
+    std::vector<char> removed_col;
+    std::vector<PresolveOp> log;
+    int passes = 0;
+    bool timed_out = false;  // deadline hit: the partial reduction is NOT used; the log is kept for inspection
+};
+// The deadline is checked at the start of every pass and every 256 rows/columns. test_timeout_after_ops >= 0 is a
+// test hook that behaves as if the deadline passed once that many reductions are logged.
+PresolveResult presolve_model(const Model& orig,
+                              std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max(),
+                              long test_timeout_after_ops = -1);
+std::vector<double> presolve_expand(const Model& orig, const PresolveResult& p, const std::vector<double>& x_reduced);
+struct PresolveAudit {
+    bool ok = false;
+    double max_row_violation = 0, max_bound_violation = 0, max_int_violation = 0;  // relative: viol/(1+|bound|)
+    double objective = 0, reported_objective = 0, objective_diff = 0;
+};
+PresolveAudit presolve_audit(const Model& orig, const std::vector<double>& x, double reported_objective);
+bool write_presolve_log(const char* path, const Model& orig, const PresolveResult& p, const PresolveAudit* audit);
