@@ -52,7 +52,7 @@ Protocol: Netlib engine time limit 60s/case, PILOT.WE and PILOT4 included with H
 
 The tighter CPU check requires row and bound violations and relative objective error at or below 1e-8. The ordinary pass rule is documented in [full measurements](docs/measured-results.md#verification-and-reproduction).
 
-GPU results are approximate, double precision, one run on a shared T4. Solver tolerance is not a bound on objective error or violation of the original constraintss; rail objective references are unavailable. [Full measurements and historical tables](docs/measured-results.md).
+GPU results are approximate, double precision, one run on a shared T4. Solver tolerance is not a bound on objective error or violation of the original constraints; rail objective references are unavailable. [Full measurements and historical tables](docs/measured-results.md).
 
 ## Reproduce in three commands
 
