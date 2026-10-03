@@ -22,7 +22,8 @@
     "CSVs derived from notebook per-case log lines, not results.jsonl",
     "MIPLIB40/QPLIB19 coverage CSVs contain verdict only; no objectives or timings manufactured",
     "Not comparable to older 20261003 ledger wall times from another host",
-    "CPU source identity and host are producer-reported in HOST.txt; only delivered artifact hashes independently verified here"
+    "CPU source identity and host are producer-reported in HOST.txt; only delivered artifact hashes independently verified here",
+    "Full-field MIPLIB40/QPLIB19 copies added later from producer; verdicts checked row-for-row identical to retained verdict-only copies"
   ],
   "artifact_sha256": {
     "fj_noise_rows.csv": "9e3dfe058c41c007e1c4649fa1e2907e87711cf711895174a4495ef12fe799bc",
@@ -30,13 +31,18 @@
     "coverage_qplib_90774b9.csv": "26845c5ceb8f84813bd5b5454fb5ba026db0007f55212ecfdee051e1c69c5698",
     "coverage_kennington_mittelmann_90774b9.csv": "065c621c1f654d3437d343f0b03ae75bcefa42417be06f9fcd653220d94af7ac",
     "miplib_26_timeouts.csv": "e0c124a066a9b456e8e9ff528e7e17775cdeb5e1f4e411d2790ffaf2a1a208ae",
-    "coverage_miplib_90774b9.csv": "49a4232db017888b47433705364c41b0871d681938bbedcd7e6feb5b5bb9c148"
+    "coverage_miplib_90774b9.csv": "49a4232db017888b47433705364c41b0871d681938bbedcd7e6feb5b5bb9c148",
+    "coverage_miplib_full_90774b9.csv": "793f4bc419fd743bf400d7ddbd45c6d830a4393a68708e2826989f2947208412",
+    "coverage_qplib_full_90774b9.csv": "0fedabc7249c18a12d73ab7b61b560935caac49577c2d14076c293f86f0ba68a"
   },
   "row_counts": {
     "fj_noise_rows.csv": 24,
     "coverage_qplib_90774b9.csv": 19,
     "coverage_kennington_mittelmann_90774b9.csv": 33,
     "miplib_26_timeouts.csv": 26,
-    "coverage_miplib_90774b9.csv": 40
-  }
+    "coverage_miplib_90774b9.csv": 40,
+    "coverage_miplib_full_90774b9.csv": 40,
+    "coverage_qplib_full_90774b9.csv": 19
+  },
+  "full_field_scope": "Full copies include engine status, objective, wall, best bound, nodes, violations, reference results and input hashes; verdict time_limit can correspond to engine node_limit (for example ej), so use engine_status for the precise stop reason."
 }
