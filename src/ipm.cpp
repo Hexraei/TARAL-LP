@@ -61,7 +61,7 @@ double norm_inf(const Vec& v) {
 // detection or mass elimination. Rows/columns with more than 10 sqrt(n) neighbours are ordered last.
 // adj must be symmetric without self loops. Returns order[k] = original index of the k-th pivot.
 // ponytail: no supervariables; add them if ordering time shows up on large problems.
-std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj) {
+std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj, Clock::time_point deadline = Clock::time_point::max()) {
     std::vector<std::vector<int>> E(n), L(n);
     std::vector<char> st(n, 0);  // 0 variable, 1 element, 2 absorbed element, 3 dense
     const size_t dense = std::max<size_t>(16, static_cast<size_t>(10 * std::sqrt(static_cast<double>(n))));
@@ -93,6 +93,7 @@ std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj) {
     std::vector<int> mark(n, 0), wflag(n, 0), w(n, 0), Lp;
     int stamp = 0, wstamp = 0, mindeg = 0;
     while (nleft > 0) {
+        if ((order.size() & 255) == 0 && Clock::now() > deadline) return {};  // empty: deadline passed
         while (head[mindeg] < 0) ++mindeg;
         const int p = head[mindeg];
         del(p);
@@ -162,13 +163,15 @@ std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj) {
 // sign * dyn_delta (quasi-definite systems are strongly factorisable in any symmetric order).
 class Ldl {
 public:
-    void analyze(int n, const std::vector<int>& ei, const std::vector<int>& ej, const std::vector<int>& esrc,
-                 const std::vector<signed char>& sign) {
+    // Returns false when the deadline passes during ordering or symbolic counting.
+    bool analyze(int n, const std::vector<int>& ei, const std::vector<int>& ej, const std::vector<int>& esrc,
+                 const std::vector<signed char>& sign, Clock::time_point deadline = Clock::time_point::max()) {
         n_ = n;
         std::vector<std::vector<int>> adj(n);
         for (size_t e = 0; e < ei.size(); ++e)
             if (ei[e] != ej[e]) adj[ei[e]].push_back(ej[e]), adj[ej[e]].push_back(ei[e]);
-        perm_ = amd_order(n, std::move(adj));
+        perm_ = amd_order(n, std::move(adj), deadline);
+        if (n > 0 && perm_.empty()) return false;
         std::vector<int> iperm(n);
         for (int k = 0; k < n; ++k) iperm[perm_[k]] = k;
         Kp_.assign(n + 1, 0);
@@ -189,6 +192,7 @@ public:
         flag_.assign(n, -1);
         lnz_.assign(n, 0);
         for (int k = 0; k < n; ++k) {
+            if ((k & 1023) == 0 && Clock::now() > deadline) return false;
             flag_[k] = k;
             for (int p = Kp_[k]; p < Kp_[k + 1]; ++p)
                 for (int i = Ki_[p]; flag_[i] != k; i = parent_[i]) {
@@ -203,6 +207,7 @@ public:
         pattern_.assign(n, 0);
         D_.assign(n, 0);
         x_.assign(n, 0);
+        return true;
     }
 
     long long nnz_l() const { return n_ ? Lp_[n_] : 0; }
@@ -339,7 +344,10 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
         for (int p = P.Ap[j]; p < P.Ap[j + 1]; ++p) ei.push_back(N + P.Ai[p]), ej.push_back(j), es.push_back(N + nqo + p);
     for (int i = 0; i < M; ++i) ei.push_back(N + i), ej.push_back(N + i), es.push_back(N + nqo + nza + i), sign[N + i] = 1;
     Ldl ldl;
-    ldl.analyze(N + M, ei, ej, es, sign);
+    if (!ldl.analyze(N + M, ei, ej, es, sign, deadline)) {
+        out.status = IpmStatus::TimeLimit;
+        return out;
+    }
     out.fnnz = ldl.nnz_l();
     if (!ldl.fits()) {
         out.msg = "augmented-system factor too large (" + std::to_string(ldl.nnz_l()) + " nonzeros)";
