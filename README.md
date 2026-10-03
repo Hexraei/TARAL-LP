@@ -68,14 +68,14 @@ This builds the CPU engine, verifies the pinned corpus and runs the default 60s 
 
 **Team IRIZ_**
 
-| Member | GitHub |
-| --- | --- |
-| <img src="https://github.com/Hexraei.png?size=80" width="40" height="40" alt="Navin's GitHub avatar"> Navin | [Hexraei](https://github.com/Hexraei) |
-| <img src="https://github.com/muffedd.png?size=80" width="40" height="40" alt="Sutharshan's GitHub avatar"> Sutharshan | [muffedd](https://github.com/muffedd) |
-| <img src="https://github.com/abinaya2006.png?size=80" width="40" height="40" alt="Abinaya's GitHub avatar"> Abinaya | [abinaya2006](https://github.com/abinaya2006) |
-| <img src="https://github.com/ksm-13.png?size=80" width="40" height="40" alt="Manaswini's GitHub avatar"> Manaswini | [ksm-13](https://github.com/ksm-13) |
-| <img src="https://github.com/Professor-Mady.png?size=80" width="40" height="40" alt="Madhesh's GitHub avatar"> Madhesh | [Professor-Mady](https://github.com/Professor-Mady) |
-| <img src="https://github.com/Saibts.png?size=80" width="40" height="40" alt="Sailakshmi's GitHub avatar"> Sailakshmi | [Saibts](https://github.com/Saibts) |
+<p>
+<a href="https://github.com/Hexraei" title="Navin"><img src="docs/assets/team/Hexraei.png" width="56" height="56" alt="Navin" title="Navin" style="border-radius:50%;"></a>
+<a href="https://github.com/muffedd" title="Sutharshan"><img src="docs/assets/team/muffedd.png" width="56" height="56" alt="Sutharshan" title="Sutharshan" style="border-radius:50%;"></a>
+<a href="https://github.com/abinaya2006" title="Abinaya"><img src="docs/assets/team/abinaya2006.png" width="56" height="56" alt="Abinaya" title="Abinaya" style="border-radius:50%;"></a>
+<a href="https://github.com/ksm-13" title="Manaswini"><img src="docs/assets/team/ksm-13.png" width="56" height="56" alt="Manaswini" title="Manaswini" style="border-radius:50%;"></a>
+<a href="https://github.com/Professor-Mady" title="Madhesh"><img src="docs/assets/team/Professor-Mady.png" width="56" height="56" alt="Madhesh" title="Madhesh" style="border-radius:50%;"></a>
+<a href="https://github.com/Saibts" title="Sailakshmi"><img src="docs/assets/team/Saibts.png" width="56" height="56" alt="Sailakshmi" title="Sailakshmi" style="border-radius:50%;"></a>
+</p>
 
 ## Scope and access
 
