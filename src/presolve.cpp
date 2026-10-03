@@ -19,8 +19,14 @@ constexpr double kRel = 1e-9;
 double sc(double b) { return 1 + (std::isfinite(b) ? std::abs(b) : 0); }
 // Strict inward integer rounding, no outward snap: ceil(lb), floor(ub). An interval that contains no integer
 // ([4e-7,8e-7], [1.0000004,1.0000008]) is infeasible exactly; nothing is approximated.
-double int_up(double l) { return std::ceil(l); }
-double int_dn(double u) { return std::floor(u); }
+double int_up(double l, double e = 0) { return std::ceil(l - e); }
+double int_dn(double u, double e = 0) { return std::floor(u + e); }
+// Derived (float-computed) integer bounds: a row bound after fixed-column substitution and a division carries
+// rounding error. `e` is a running absolute error bound (kEps = DBL_EPSILON, one rounding per operation, the
+// substituted column's own error propagated), and the derived integer bound is rounded OUTWARD by e only:
+// ceil(l - e), floor(u + e). It never snaps input bounds (e = 0 there, so the direct case stays strict), and with
+// exact data (|a| = 1, no substitution) e = 0 as well. Outward rounding only relaxes, so an infeasible claim stays sound.
+constexpr double kEps = 2.220446049250313e-16;
 // Audit scale for column bounds: relative up to 1e3, absolute (1e-6 * 1e3) beyond, so large bounds stay strict.
 double scb(double b) { return 1 + (std::isfinite(b) ? std::min(std::abs(b), 1e3) : 0); }
 }  // namespace
@@ -43,6 +49,7 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
         for (const Entry& e : orig.cols[j])
             if (e.value != 0) rows[e.index].push_back({j, e.value});
     std::vector<char> rrem(m, 0), crem(n, 0);
+    std::vector<double> rerr(m, 0.0), cerr(n, 0.0);  // absolute error bounds of derived row bounds / continuous column bounds
     P.fixed_value.assign(n, 0.0);
     auto fail = [&](const std::string& why) { P.infeasible = true; P.infeasible_reason = why; };
 
@@ -71,10 +78,13 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
             double v = lo[j];
             P.log.push_back({"fix_col", -1, j, 0, v, 0, 0, 0});
             crem[j] = 1, P.fixed_value[j] = v, changed = true;
+            const double verr = cerr[j];
             for (const Entry& e : orig.cols[j]) {
                 if (rrem[e.index]) continue;
-                if (std::isfinite(rlo[e.index])) rlo[e.index] -= e.value * v;
-                if (std::isfinite(rup[e.index])) rup[e.index] -= e.value * v;
+                double av = e.value * v, mag = 0;
+                if (std::isfinite(rlo[e.index])) rlo[e.index] -= av, mag = std::max(mag, std::abs(rlo[e.index]));
+                if (std::isfinite(rup[e.index])) rup[e.index] -= av, mag = std::max(mag, std::abs(rup[e.index]));
+                rerr[e.index] += kEps * (std::abs(av) + mag) + std::abs(e.value) * verr;
             }
             objc += orig.cost[j] * v;
         }
@@ -94,15 +104,19 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
             if (cnt == 1) {
                 double l = rlo[i] / lastv, u = rup[i] / lastv;
                 if (lastv < 0) std::swap(l, u);
+                double de = rerr[i] / std::abs(lastv) +
+                            (std::abs(lastv) == 1.0 ? 0.0 : kEps * std::max(std::isfinite(l) ? std::abs(l) : 0.0, std::isfinite(u) ? std::abs(u) : 0.0));
                 if (!orig.is_int.empty() && orig.is_int[last]) {
-                    if (std::isfinite(l)) l = int_up(l);
-                    if (std::isfinite(u)) u = int_dn(u);
+                    if (std::isfinite(l)) l = int_up(l, de);
+                    if (std::isfinite(u)) u = int_dn(u, de);
+                    de = 0;  // an integer bound is a relaxed integer; fixing there carries no further error
                 }
                 double nl = std::max(lo[last], l), nu = std::min(up[last], u);
                 const bool lint = !orig.is_int.empty() && orig.is_int[last];  // integer interval: exact comparison
                 if (lint ? nl > nu : nl > nu + kRel * sc(nu)) { fail("singleton row " + std::to_string(i) + " conflicts with bounds of column " + std::to_string(last)); break; }
                 if (nl > nu) nu = nl;  // equal within tolerance
                 lo[last] = nl, up[last] = nu;
+                cerr[last] = std::max(cerr[last], de);
                 P.log.push_back({"singleton_row", i, last, lastv, rlo[i], rup[i], nl, nu});
                 rrem[i] = 1, changed = true;
                 continue;
