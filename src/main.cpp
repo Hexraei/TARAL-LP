@@ -180,12 +180,14 @@ int main(int argc, char** argv) {
     double cross_tol = 1e-3;
     MilpOptions mopt;
     std::string method = "simplex";  // "ipm": interior point; "dual": dual simplex (LPs)
+    bool fallback = true;            // primal simplex that stalls hands the rest of the time to the dual (--no-fallback: off)
     for (int i = 1; i < argc; ++i) {
         if (!std::strcmp(argv[i], "--time-limit") && i + 1 < argc) limit = std::atof(argv[++i]);
         else if (!std::strcmp(argv[i], "--sol") && i + 1 < argc) sol = argv[++i];
         else if (!std::strcmp(argv[i], "--json") && i + 1 < argc) json = argv[++i];
         else if (!std::strcmp(argv[i], "--node-limit") && i + 1 < argc) node_limit = std::atol(argv[++i]);
         else if (!std::strcmp(argv[i], "--method") && i + 1 < argc) method = argv[++i];
+        else if (!std::strcmp(argv[i], "--no-fallback")) fallback = false;
         else if (!std::strcmp(argv[i], "--warm-sol") && i + 1 < argc) warm_sol = argv[++i];
         else if (!std::strcmp(argv[i], "--warm-dual") && i + 1 < argc) warm_dual = argv[++i];
         else if (!std::strcmp(argv[i], "--cross-tol") && i + 1 < argc) cross_tol = std::atof(argv[++i]);
@@ -260,8 +262,7 @@ int main(int argc, char** argv) {
                      md.row_names.size(), wall());
     }
     const std::vector<char>* wp = warm.empty() ? nullptr : &warm;
-    Result r = method == "dual" ? solve_lp_dual(md, md.col_lo, md.col_up, wp, limit - wall())
-                                  : solve_lp(md, md.col_lo, md.col_up, wp, limit - wall());
+    Result r = solve_lp_gated(md, md.col_lo, md.col_up, wp, limit - wall(), method == "dual", fallback);
     if (r.status == Status::Optimal && !std::isfinite(r.objective))
         r.status = Status::NumericalFailure, r.message = "non-finite objective";
     double w = wall();

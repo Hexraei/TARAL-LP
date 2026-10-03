@@ -133,3 +133,16 @@ const char* status_name(Status s);
 // Invalid/missing/nonfinite proofs become NumericalFailure, never a proved status.
 bool verify_nonoptimal_certificate(const Model&, const std::vector<double>&,
                                   const std::vector<double>&, Result&);
+const char* status_name(Status s);
+
+// KKT-gated LP solve (src/kkt_gate.cpp): Optimal only when an independent check on the original model agrees,
+// with one power-of-two Ruiz-equilibrated retry before numerical_failure. use_dual selects solve_lp_dual.
+struct KktReport {
+    bool ok = false;
+    double primal = 0, dual = 0;  // worst primal violation, worst dual violation relative to its column cost scale
+    std::string msg;
+};
+KktReport kkt_check(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
+                    const Result& r);
+Result solve_lp_gated(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
+                      const std::vector<char>* warm_basis, double time_limit_s, bool use_dual, bool primal_fallback = true);
