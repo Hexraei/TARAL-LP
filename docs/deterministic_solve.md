@@ -22,9 +22,22 @@ route can differ.
 
 ## `result_hash`
 
-FNV-1a 64-bit over canonical text of: status, iteration count, objective (`%.17g`) and every `x` value
+FNV-1a 64-bit (offset basis 14695981039346656037, prime 1099511628211; a first version had a mistyped basis and was fixed after review; known vectors are tested) over canonical text of: status, iteration count, objective (`%.17g`) and every `x` value
 (`%.17g`). It excludes wall time and the message (the message carries timings). It is a bit-exact fingerprint,
 not a tolerance comparison and not cryptographic.
+
+## Limits and accounting
+
+- `work_used` equals the number of performed simplex iterations. A check that denies the next iteration at the
+  cap does not count. A KKT equilibrated retry stopped by the cap keeps the `iteration_limit` status
+  (executed fixture `tests/fixtures/scaled_retry_c87.mps`; the previous code returned `numerical_failure`).
+- `--time-limit` together with `--work-limit` is enforced as a wall clock in the solve path (also inside the
+  retry). If it fires the status is `time_limit`, the result depends on machine speed and is NOT deterministic;
+  JSON reports `wall_limit_active`. Determinism is claimed only for runs ending by optimal/iteration_limit
+  without a wall limit that fires. Using work limit alone gives the deterministic stop.
+- Runtime evidence: reviewer's pilot case with `--time-limit 0.05` now returns `time_limit` in about 0.05 s
+  (measured by me, 0.054 s; before: about 8 s, reviewer-reported). Other items are covered by the test file
+  (runtime) and code reading (static).
 
 ## What "deterministic" means here (environment and serialization limits)
 
@@ -48,7 +61,7 @@ identical keys on 6 refinery LP fixtures; identical under 4 busy threads on 3 fi
 N=1e5 and N=1e7 once the solve completes; flag off reproduces the baseline binary's status, iterations and
 objective on the 6 fixtures and writes no work fields; usage and scope errors exit 2 or report `unsupported`.
 
-Cross-build comparison (one host, Intel Xeon 2.6 GHz, g++ 11.4, `--work-limit 100000`, 6 fixtures):
+Cross-build comparison (measured BEFORE the hash-basis fix, so the hash values were from the mistyped basis; the text hashed is unchanged, so the equality pattern is expected to hold but was not re-measured; one host, Intel Xeon 2.6 GHz, g++ 11.4, `--work-limit 100000`, 6 fixtures):
 `-O3 -march=native` versus `-O2` versus `-O3 -march=x86-64` versus `-O3 -march=native -ffast-math`. `-O2` and `-O3 -march=x86-64` agree with each other on all 6; `-O3 -march=native` differs from both on all 6;
 the `-ffast-math` build equals the `-march=native` build on `base_lp_t6` only and differs from it on the other 5. So the
 hash is NOT stable across these build settings, which is why the claim above is limited to one binary.
