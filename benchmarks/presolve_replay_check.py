@@ -18,12 +18,11 @@ REL = 1e-9
 INF = math.inf
 
 def sc(b): return 1 + (abs(b) if math.isfinite(b) else 0)
-SNAP = 1e-6
-def int_up(l): r = round(l); return float(r) if abs(l - r) <= SNAP else float(math.ceil(l))
-def int_dn(u): r = round(u); return float(r) if abs(u - r) <= SNAP else float(math.floor(u))
+def int_up(l): return float(math.ceil(l))  # strict inward rounding, no snap
+def int_dn(u): return float(math.floor(u))
 def close(a, b): 
     if not (math.isfinite(a) and math.isfinite(b)): return a == b
-    return abs(a - b) <= 1e-9 * (1 + abs(a) + abs(b))
+    return abs(a - b) <= 1e-12 * (1 + abs(a) + abs(b))  # tight: engine and replay do the same double arithmetic; a +1 at 1e9 must fail
 def num(v): return {"inf": INF, "-inf": -INF}.get(v, v) if isinstance(v, str) else (math.nan if v is None else v)
 
 def load(path):
@@ -113,7 +112,7 @@ def replay_ops(M, log):
             if not (close(v[2], nl) and close(v[3], nu)): errs.append(tag + ": new bounds mismatch")
             lo[j], up[j] = nl, nu
         elif t == "fix_col":
-            if crem[j] or not (lo[j] == up[j] and math.isfinite(lo[j])) or not close(v[0], lo[j]): errs.append(tag + ": not fixed at logged value"); continue
+            if crem[j] or not (lo[j] == up[j] and math.isfinite(lo[j])) or v[0] != lo[j] or (M["isint"][j] and v[0] != math.floor(v[0])): errs.append(tag + ": not fixed at logged value (exact, integral for integer columns)"); continue
             crem[j] = True
             for r, a in M["cols"][j]:
                 if rrem[r]: continue
