@@ -1,0 +1,6 @@
+Host: local laptop sandbox, 2 cores, 2 GB RAM, Linux, g++ 11. Run Oct 3 2026 IST, jobs 2 (final) / jobs 1 (baseline), --time-limit 30.
+Build flags: g++ -O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic -o <bin> src/*.cpp (warning-free).
+Baseline: fresh rebuild of S5 tree (main src/ at 58f77af; src delta to 6c621e0 is empty), binary sha256 5433215af61a1d8f.
+Final: S5 + Q commits 524637f, db82de0, af9df1b, c6a7fccc; binary sha256 3f56ff084e27c318.
+Harness: taral-adversarial-tests3 tools/advqp/qpharness.py, 1780 cases. 93-gate: render-pkg/gate/gate_pub.py cases93.txt, 60 s, primal and dual; ledgers baseline=t5 final=qf, 0 per-case diffs.
+Diffs baseline->final: 40 nonconvex->optimal, 25 dual_infeasible->unbounded, 5 indefinite-75012/27/34/60/76 PASS->FAIL_STATUS (engine optimal; matches HiGHS rel diff 5e-16,4e-15,5e-11,1e-16,5e-10), bounds_huge-82056/57/68 NOANS->PASS, bounds_huge-82002/82052 + ill_cond-87054 PASS->NOANS (FMA pin cost).

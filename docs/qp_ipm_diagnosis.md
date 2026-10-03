@@ -235,3 +235,34 @@ tests/ipm_numerics/build_invariance.sh                                          
 # IPM-method LP suite: tools from branch cloud/adversarial-tests2
 python3 tools/adv/harness.py --engine out/taral --out out/ipm --kind lp+biglp --method ipm --jobs 4 --time-limit 60
 ```
+
+## Integrated-main gate (October 3, 2026)
+
+The program gate replayed S5 plus `524637f`, `db82de0`, `af9df1b`, and
+`c6a7fccc`. Raw before/after ledgers are preserved, without relabeling, in
+`results/qp_postmerge_gate_20261003/`; host, flags, caps and abbreviated binary
+hashes are in `PROVENANCE.txt`. Both Netlib modes have 93 rows, with zero
+per-case verdict, passed, strict or engine-status changes. This is the program
+host's comparison, not a fresh Kaggle result.
+
+The original 1780-case harness counts move from PASS 1636, NOANS 81, PARTIAL 25
+to PASS 1696, NOANS 41, PARTIAL 0. The final raw ledger also contains five
+FAIL_STATUS (the equality-feasible convex cases discussed above). Other counts
+are unchanged: BORDER 26, PASS_REF 8, REF_UNRESOLVED 3, FAIL_KKT 1. These raw
+counts precede the separate harness correction.
+
+The FMA pin has a measured cost on this build: `bounds_huge-82002`,
+`bounds_huge-82052`, and `ill_cond-87054` move from optimal/PASS to
+numerical_failure/NOANS. `bounds_huge-82056/82057/82068` move the other way.
+Do not describe this as a no-regression QP patch, or the pin as a universal
+numerical improvement. The status gate strengthens unbounded claims by requiring
+a feasible point as well as a ray; equality convexification admits models convex
+on their equality-feasible set. Neither fixes every numerical failure.
+
+Integration-host checks: warning-free GCC O3-native build; IPM gate 6/6,
+IPM numerics 3/3, CLI 31/31. Three numerics status/objective/iteration outputs
+agree under GCC O3-native, O2-native and O3. Clang was unavailable and skipped.
+The invariance script only checks those three numerics models, despite its
+FULL comment; no full-suite compiler invariance claim is made. Independent
+null-space HiGHS replay of the five equality-convex cases agrees with the
+recorded final objectives within 9.93e-10 absolute.
