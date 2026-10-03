@@ -1,0 +1,78 @@
+{
+  "source_commit": "34ea8b4b8700bb659b96c3be5ea2c746f0b9124b",
+  "source_dirty": "",
+  "src_file_sha256": {
+    "src/crossover.cpp": "778b12bfd2e7023ab0620d5c61a687654c6e2195b3ca3c13e0a7149de5e536a2",
+    "src/dual.cpp": "48072892360c9a3e0c7060415fbba8cae3e52f2ad04b62561b82ef176bc07281",
+    "src/ipm.cpp": "2d3fff20043d0004eac279d3e9155481953de9e91ee4ab8240026a14d761455a",
+    "src/ipm.hpp": "d502975819d022c2e4936f142d92a4bec99ad7eeefc24e7ba5fcd5999be39111",
+    "src/kkt_gate.cpp": "25fd274162a5b1426283de22ec76cc12515a4da87c2d7866ec95a9f3116717dd",
+    "src/lu.cpp": "488c5a1faaa2daaa68472bd4a09c7e80be03b81847a92da964be6626869ce393",
+    "src/main.cpp": "31fefb8f1e318ce1a48f8f9bcb5210b646f6dcde7514e668fb8d7cfc73da699c",
+    "src/milp.cpp": "671cf680d4469aaa8dbf2a32cce84d50e49f286dfbb91f1a0d6a0c5198e4f218",
+    "src/mps.cpp": "b1c453e3e971a33042e3e872a9a7c039b36817e06cd0facb787a09709b7fa90d",
+    "src/nonoptimal_certificate.cpp": "de4893e64ec3cdee9cddf80e1559d26506c2657afa5dae89a928f837a7319a9b",
+    "src/simplex.cpp": "8d9b43da779e61c15a9e0c55febca09f426b60a1193abfdfb289b0ed014d2843",
+    "src/taral.hpp": "d5761cf4608a36e2cf3a31c2b0ffd497463867f1d0c7fdd4dc12b97615a67eea"
+  },
+  "engine_binary_sha256": "c01d367931e94eb4a98ebb69f7e2976884dd053bf98a3641c15f0849fb97b8ea",
+  "highspy_version": "1.11.0",
+  "engine_cap_seconds": 30,
+  "cases": [
+    {
+      "case": "steel_production",
+      "model_sha256": "595d6ab4786c4f6dac32e33d8cff3c59e8fac010dba6957d6d45c2efccb4a68c",
+      "status": "optimal",
+      "objective": 192000,
+      "process_wall_seconds": 0.0026972070008923765,
+      "engine_wall_seconds": null,
+      "iterations": 3,
+      "point": {
+        "BANDS": 6000.0,
+        "COILS": 1400.0
+      },
+      "independent_original_model_check": {
+        "objective": 192000.0,
+        "row_violation_rel": 0.0,
+        "worst_row": null,
+        "bound_violation": 0.0
+      },
+      "reference_status": "Optimal",
+      "reference_objective": 192000.0,
+      "relative_objective_error": 0.0,
+      "passed": true
+    },
+    {
+      "case": "transportation",
+      "model_sha256": "48738715dca130d83aee5fb646f32b90f51c4d41026f69b0e39b9735b925c86c",
+      "status": "optimal",
+      "objective": 153.675,
+      "process_wall_seconds": 0.0023599000014655758,
+      "engine_wall_seconds": null,
+      "iterations": 7,
+      "point": {
+        "SEA_NY": 50.0,
+        "SEA_CHI": 300.0,
+        "SEA_TOP": 0.0,
+        "SD_NY": 275.0,
+        "SD_CHI": 0.0,
+        "SD_TOP": 275.0
+      },
+      "independent_original_model_check": {
+        "objective": 153.675,
+        "row_violation_rel": 0.0,
+        "worst_row": null,
+        "bound_violation": 0.0
+      },
+      "reference_status": "Optimal",
+      "reference_objective": 153.675,
+      "relative_objective_error": 0.0,
+      "passed": true
+    }
+  ],
+  "build_flags": "g++ -O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic src/*.cpp",
+  "build_warning_count": 0,
+  "compiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "platform": "Linux-6.1.158+-x86_64-with-glibc2.35",
+  "measurement_scope": "One run per small published LP, local integration host; no performance comparison."
+}

@@ -1,0 +1,1 @@
+status optimal objective 192000 iterations 3 wall 0.000s 
