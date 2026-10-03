@@ -1,0 +1,13 @@
+{
+  "evaluated_source_snapshot": "34ea8b4b8700bb659b96c3be5ea2c746f0b9124b",
+  "source_identical_to_current": true,
+  "inspection_method": "Read all src include directives and CMake build; warning-free GCC build; ldd executable. No solver-library linking in evaluated CMake/build command.",
+  "compiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "build_flags": "-O3 -march=native -std=c++17 -Wall -Wextra -Wpedantic",
+  "binary_sha256": "c01d367931e94eb4a98ebb69f7e2976884dd053bf98a3641c15f0849fb97b8ea",
+  "artifact_sha256": {
+    "includes.txt": "aab5e3281f7f389a7ee06265bad3c00b6f34c319e30399818be84364f98df0c9",
+    "build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dynamic_libraries.txt": "2fd9ea788d9c189e63ae6bb68e77264982a1687f0ae2c2d3f939d5071ce9d215"
+  }
+}

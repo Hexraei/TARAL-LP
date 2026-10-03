@@ -19,14 +19,14 @@ Checked means **measured in the linked scope**, not complete industrial coverage
 - [ ] **R6 - Multi-core solve:** planned; evaluated CPU engine is single-threaded.
 - [x] **R7 - GPU method:** measured [approximate PDHG on T4](results/gpu_pdhg/t4_industrial_20261003/); no exact-solver speed advantage claimed.
 - [x] **R8 - Numerical checks:** measured [Netlib checks against the original constraints](results/netlib_postmerge_58f77af/); broader reliable convergence remains unverified.
-- [ ] **R9 - Independent solver core:** prototype [standard-library-only C++ engine](src/), [build definition](CMakeLists.txt); reference solvers are test-only.
+- [x] **R9 - Independent solver core:** [C++ dependency inspection, warning-free build and independent validation](docs/foundation.md); reference solvers are test-only, not proof of full correctness.
 - [x] **R10 - Large models:** measured [GPU LPs up to 1,092,610 decision variables](results/gpu_pdhg/t4_industrial_20261003/ledger.csv), approximately; not consistent exact industrial-scale solves.
 - [x] **R11 - Difficult numerical models:** measured [seeded adversarial LP/MILP](results/adversarial_4517277/tests2_base_full.csv); failures and unresolved cases retained.
 - [x] **R12 - Basic interface:** [documented command-line and C++ interfaces](docs/interface.md), measured 31/31 command-line checks and one LP API example; stable versioning and broader integration coverage remain.
 - [x] **R13 - Standard benchmarks:** measured [Netlib](results/netlib_postmerge_58f77af/) and [selected MIPLIB](benchmarks/results/miplib_ledger.csv); broader benchmark coverage planned.
 - [x] **R14 - Established-solver comparison:** measured [HiGHS objective and feasibility checks](results/netlib_postmerge_58f77af/); no general speed claim.
 - [x] **R15 - Challenging large models:** measured [historical large-model stress](results/adversarial_4517277/tests2_methods_dual_full.csv); weak-relaxation industrial coverage remains incomplete.
-- [ ] **R16 - Inspectable, extensible foundation:** prototype [source](src/) and [independent checks](benchmarks/orig_check.py); see [access terms](LICENSE).
+- [x] **R16 - Inspectable, extensible foundation:** [documented module layout, independent checks and measured API use](docs/foundation.md); proprietary evaluation access only, broader extension validation remains.
 - [ ] **R17 - Representative applications:** prototype [refinery examples](examples/); [dataset scope](docs/limitations.md#qplib-scope) is documented, broader literature case studies planned.
 
 </details>
