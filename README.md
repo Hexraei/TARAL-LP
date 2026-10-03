@@ -1,4 +1,4 @@
-![TARAL-LP - Optimization from the core.](docs/assets/banner.svg)
+![TARAL-LP - A sovereign solver core for refinery planning.](docs/assets/TARAL-LP.png)
 
 [![C++17 core](docs/assets/badge-cpp.svg)](src/) [![Netlib 93/93](docs/assets/badge-netlib.svg)](results/netlib_postmerge_58f77af/) [![Proprietary license](docs/assets/badge-license.svg)](LICENSE)
 
