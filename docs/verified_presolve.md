@@ -9,7 +9,7 @@ space before reporting. Default behaviour (no flag) is unchanged. Not supported:
 
 | op | rule |
 |---|---|
-| `round_int_bounds` | integer column bounds become ceil(lo) / floor(up); a bound within 1e-6 (ABSOLUTE) of an integer snaps to it. The slack is absolute because a relative slack exceeds a whole integer for |bound| above about 1e9. An empty integer interval is infeasible by exact comparison |
+| `round_int_bounds` | integer column bounds become ceil(lo) / floor(up): strict inward rounding, NO snap in either direction. An interval with no integer ([4e-7,8e-7], [1.0000004,1.0000008]) is infeasible by exact comparison; an interval containing an integer (including width 0 or 8e-7 around 0, 1, -1, 1e3, 1e9) stays feasible. Without `--presolve` the MILP solver keeps its own documented 1e-6 integrality tolerance and may call such a sub-1e-6 interval optimal; that divergence is recorded, not unified |
 | `fix_col` | a column with lo == up is substituted: row bounds and the objective constant shift |
 | `empty_row` | a row with no active column is dropped if 0 lies in its bounds, otherwise infeasible |
 | `singleton_row` | a one-column row becomes a column bound (integer-rounded); conflict means infeasible |
@@ -78,3 +78,18 @@ explicit upper bound because readers differ on the default.
 - No dominated-column, doubleton, coefficient-tightening or probing reductions; no exact arithmetic.
 - Reductions are not applied inside branch and bound (root only, `src/milp.cpp` unchanged).
 - Comparisons to SCIP/PaPILO/HiGHS presolve are attributed to their documentation only, not measured.
+
+## Output after presolve (primal-only) and replay strictness
+
+- Dual postsolve is not implemented. With `--presolve` the JSON reports the original-space primal point `x`, the
+  objective, and `row_activity` recomputed in original space. Reduced-model dual/KKT fields (`dual_objective`,
+  `primal_res`, `dual_res`, `gap`, `complementarity`, `max_*`, `row_dual`, `reduced_cost`, residual arrays) are
+  `null`, with `original_space_primal_only: true` and `certificate_quality: presolve_primal_only`.
+- Infeasible/unbounded results from the reduced model: certificates are not mapped back, `certificate_verified`
+  is false, `certificate_quality: presolve_reduced_model_only`, and the message says so. They are reduced-model
+  evidence, not original-space verified proofs; the original-space audit applies to reported points only.
+  (The presolve-infeasible path with a logged reduction is checked by log replay, not by a certificate.)
+- MILP JSON written by the MILP path is unchanged by this change (not re-audited for these fields; unrun).
+- Replay comparisons of logged values use a tight tolerance (1e-12 relative, same double arithmetic as the
+  engine) and fixed values must equal the bound exactly and be integral for integer columns, so a +1 shift at 1e9
+  is rejected. Limit: a shift below about 1e-12 x magnitude is not detected.
