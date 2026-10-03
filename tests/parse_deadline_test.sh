@@ -18,7 +18,7 @@ set +e
 "$BIN" "$T/lp.mps" --time-limit 0.000000001 --json "$T/result.json" > "$T/out" 2> "$T/err"
 rc=$?
 set -e
-test "$rc" = 1
+test "$rc" = 4
 grep -q '^status time_limit: parse exceeded the time limit' "$T/out"
 python3 - "$T/result.json" <<'PY'
 import json,sys
