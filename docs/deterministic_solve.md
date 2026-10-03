@@ -49,9 +49,8 @@ N=1e5 and N=1e7 once the solve completes; flag off reproduces the baseline binar
 objective on the 6 fixtures and writes no work fields; usage and scope errors exit 2 or report `unsupported`.
 
 Cross-build comparison (one host, Intel Xeon 2.6 GHz, g++ 11.4, `--work-limit 100000`, 6 fixtures):
-`-O3 -march=native` versus `-O2` versus `-O3 -march=x86-64` versus `-O3 -march=native -ffast-math`. `-O2` and
-`-O3 -march=x86-64` agree with each other on all 6; `-O3 -march=native` differs from them on all 6 except
-`base_lp_t6`, which matches the `-ffast-math` build only; the `-ffast-math` build differs on the other 5. So the
+`-O3 -march=native` versus `-O2` versus `-O3 -march=x86-64` versus `-O3 -march=native -ffast-math`. `-O2` and `-O3 -march=x86-64` agree with each other on all 6; `-O3 -march=native` differs from both on all 6;
+the `-ffast-math` build equals the `-march=native` build on `base_lp_t6` only and differs from it on the other 5. So the
 hash is NOT stable across these build settings, which is why the claim above is limited to one binary.
 
 ## Not run / not claimed
