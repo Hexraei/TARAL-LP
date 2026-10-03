@@ -11,15 +11,41 @@ Scope is the LP relaxation (integrality ignored). 'Irreducible' = row-irreducibl
 column bounds; it is not claimed globally minimum.
 Usage: infeasibility_explanation_check.py MODEL.mps EXPLANATION.json   (exit 0 pass, 1 fail)
 """
-import json, sys
+import json, math, os, sys, tempfile
 import numpy as np, highspy, scipy.sparse as sp
 from scipy.optimize import linprog
 
 TOL = 1e-7
 
+def normalize_mps(path):
+    """Sum duplicate (column,row) coefficients in COLUMNS (the engine's semantics; highspy keeps the first).
+    Free-format token lines only; MARKER lines, other sections, ranges and bounds are copied unchanged."""
+    out, sec, seen, cur = [], None, {}, None
+    for raw in open(path).read().splitlines():
+        if not raw.strip() or raw.startswith("*"): out.append(raw); continue
+        if not raw[0].isspace():
+            if sec == "COLUMNS": out.extend(flush(seen))
+            sec = raw.split()[0]; seen = {}; out.append(raw); continue
+        if sec != "COLUMNS": out.append(raw); continue
+        t = raw.split()
+        if "'MARKER'" in t or "MARKER" in t: out.extend(flush(seen)); seen = {}; out.append(raw); continue
+        if len(t) not in (3, 5): raise ValueError("unsupported COLUMNS line (need free format): " + raw)
+        for k in range(1, len(t), 2):
+            seen.setdefault(t[0], {}); seen[t[0]][t[k]] = seen[t[0]].get(t[k], 0.0) + float(t[k + 1].replace("D", "E").replace("d", "e"))
+    fd, tmp = tempfile.mkstemp(suffix=".mps"); os.close(fd)
+    open(tmp, "w").write("\n".join(out) + "\n")
+    return tmp
+
+def flush(seen):
+    L = []
+    for c, d in seen.items():
+        for r, v in d.items(): L.append(" %s %s %.17g" % (c, r, v))
+    return L
+
 def load(path):
+    path = normalize_mps(path)
     h = highspy.Highs(); h.setOptionValue("output_flag", False)
-    h.readModel(path)
+    if h.readModel(path) != highspy.HighsStatus.kOk: raise RuntimeError("oracle could not read the model")
     lp = h.getLp()
     n, m = lp.num_col_, lp.num_row_
     A = sp.csc_matrix((lp.a_matrix_.value_, lp.a_matrix_.index_, lp.a_matrix_.start_), shape=(m, n)).tocsr()
@@ -39,6 +65,7 @@ def feasible(A, rl, ru, cl, cu, rows):
     Ae = sub[Aeq] if Aeq else None
     r = linprog(np.zeros(n), A_ub=Au, b_ub=bub or None, A_eq=Ae, b_eq=beq or None,
                 bounds=list(zip(np.where(np.isfinite(cl), cl, None), np.where(np.isfinite(cu), cu, None))), method="highs")
+    if r.status not in (0, 2): raise RuntimeError("oracle LP ended with status %d (neither optimal nor infeasible)" % r.status)
     return r.status == 0, r.status
 
 def viol(A, rl, ru, cl, cu, x, rows):
@@ -54,10 +81,40 @@ def viol(A, rl, ru, cl, cu, x, rows):
 
 def check(mps, jpath):
     A, rl, ru, cl, cu, names = load(mps)
-    e = json.load(open(jpath))
+    def bad_const(c): raise ValueError("non-standard JSON constant " + c)
+    e = json.load(open(jpath), parse_constant=bad_const)
     errs = []
     st = e["status"]
+    m, n = A.shape
+    fin = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+    def vec(v, size, nonneg=False):
+        return isinstance(v, list) and len(v) == size and all(fin(a) and (a >= 0 or not nonneg) for a in v)
+    for r in e["rows"]:
+        if not (isinstance(r.get("index"), int) and 0 <= r["index"] < m): return st, 0, ["invalid row index %r" % r.get("index")]
     rows = [r["index"] for r in e["rows"]]
+    if len(set(rows)) != len(rows): return st, 0, ["duplicate explained rows"]
+    if st in ("irreducible", "reduced_unproven", "bounds_only"):
+        # independent Farkas verification from the ORIGINAL model; the verified flag is never trusted
+        yl, yu, zl, zu = (e.get("farkas_row_lower"), e.get("farkas_row_upper"), e.get("farkas_col_lower"), e.get("farkas_col_upper"))
+        if not (vec(yl, m, True) and vec(yu, m, True) and vec(zl, n, True) and vec(zu, n, True)):
+            return st, len(rows), ["Farkas multipliers: wrong dimension, non-finite or negative entries"]
+        yl, yu, zl, zu = (np.array(v, float) for v in (yl, yu, zl, zu))
+        l1 = yl.sum() + yu.sum() + zl.sum() + zu.sum()
+        if not l1 > 0: errs.append("Farkas multipliers are all zero")
+        else:
+            for lab, mult, bound in (("row_lower", yl, rl), ("row_upper", yu, ru), ("col_lower", zl, cl), ("col_upper", zu, cu)):
+                if np.any((mult > 0) & ~np.isfinite(bound)): errs.append("multiplier on an infinite bound (%s)" % lab)
+            if not errs:
+                stat = A.T @ (yu - yl) + zu - zl                      # must vanish: the combination has no x term
+                resid = float(np.max(np.abs(stat))) / l1
+                gap = (float(np.dot(yu, np.where(yu > 0, ru, 0))) - float(np.dot(yl, np.where(yl > 0, rl, 0)))
+                       + float(np.dot(zu, np.where(zu > 0, cu, 0))) - float(np.dot(zl, np.where(zl > 0, cl, 0))))
+                margin = -gap / l1                                     # >0: 0 = combination <= gap < 0, contradiction
+                if resid > 1e-9: errs.append("Farkas stationarity residual %.3g > 1e-9" % resid)
+                if not margin > 1e-8: errs.append("Farkas contradiction margin %.3g not > 1e-8" % margin)
+                support = set(np.nonzero(yl + yu)[0].tolist())
+                if st != "bounds_only" and not support <= set(rows): errs.append("multipliers use rows outside the explained set")
+        if errs: return st, len(rows), errs
     for r in e["rows"]:
         if names and names[r["index"]] != r["name"]: errs.append("row name mismatch %s" % r["name"])
     if st == "irreducible":
@@ -68,7 +125,7 @@ def check(mps, jpath):
             ok, _ = feasible(A, rl, ru, cl, cu, rest)
             if not ok: errs.append("row %s is removable (rest still infeasible)" % e["rows"][pos]["name"])
             w = e["rows"][pos]["removal_witness"]
-            if w is None: errs.append("missing witness for %s" % e["rows"][pos]["name"]); continue
+            if not vec(w, n): errs.append("witness for %s is missing, wrong length or non-finite" % e["rows"][pos]["name"]); continue
             v = viol(A, rl, ru, cl, cu, np.array(w), rest)
             if v > TOL: errs.append("witness for %s violates by %.3g" % (e["rows"][pos]["name"], v))
     elif st == "bounds_only":
@@ -81,8 +138,10 @@ def check(mps, jpath):
     # relaxation (only meaningful when infeasible)
     rx = e["relaxation"]
     if rx["status"] == "optimal" and st in ("irreducible", "reduced_unproven"):
-        x = np.array(rx["x"]); m, n = A.shape
-        lo = np.array([r["lower_relaxed_by"] for r in rx["rows"]]); idx = [r["index"] for r in rx["rows"]]
+        if not (vec(rx["x"], n) and all(isinstance(r.get("index"), int) and 0 <= r["index"] < m and fin(r["lower_relaxed_by"]) and fin(r["upper_relaxed_by"])
+                and r["lower_relaxed_by"] >= 0 and r["upper_relaxed_by"] >= 0 for r in rx["rows"]) and fin(rx["objective"])):
+            errs.append("relaxation: invalid x/slack/objective values"); return st, len(rows), errs
+        x = np.array(rx["x"])
         sl, su = np.zeros(m), np.zeros(m); w = np.zeros(m)
         for r in rx["rows"]: sl[r["index"]] = r["lower_relaxed_by"]; su[r["index"]] = r["upper_relaxed_by"]; w[r["index"]] = r["weight"]
         ax = A @ x
@@ -111,7 +170,10 @@ def check(mps, jpath):
     return st, len(rows), errs
 
 if __name__ == "__main__":
-    st, k, errs = check(sys.argv[1], sys.argv[2])
+    try:
+        st, k, errs = check(sys.argv[1], sys.argv[2])
+    except Exception as ex:  # malformed evidence or an oracle that could not run is a failure, never a pass
+        print("status=? FAIL\n  - %s: %s" % (type(ex).__name__, ex)); sys.exit(1)
     print("status=%s rows=%d %s" % (st, k, "PASS" if not errs else "FAIL"))
     for x in errs: print("  -", x)
     sys.exit(1 if errs else 0)
