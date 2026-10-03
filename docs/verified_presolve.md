@@ -9,7 +9,7 @@ space before reporting. Default behaviour (no flag) is unchanged. Not supported:
 
 | op | rule |
 |---|---|
-| `round_int_bounds` | integer column bounds become ceil(lo) / floor(up) (1e-9 relative slack) |
+| `round_int_bounds` | integer column bounds become ceil(lo) / floor(up); a bound within 1e-6 (ABSOLUTE) of an integer snaps to it. The slack is absolute because a relative slack exceeds a whole integer for |bound| above about 1e9. An empty integer interval is infeasible by exact comparison |
 | `fix_col` | a column with lo == up is substituted: row bounds and the objective constant shift |
 | `empty_row` | a row with no active column is dropped if 0 lies in its bounds, otherwise infeasible |
 | `singleton_row` | a one-column row becomes a column bound (integer-rounded); conflict means infeasible |
@@ -19,6 +19,24 @@ space before reporting. Default behaviour (no flag) is unchanged. Not supported:
 Infeasibility found by presolve is reported as `infeasible` with the reason in the log and JSON message.
 It is a floating-point finding re-derivable from the log, not an exact-rational proof.
 
+## Review fixes (second version)
+
+- Wrong-answer fix: integer bounds [1000000000.4, 1000000000.6] used to round to 1e9 (relative slack 1e-9 x 1e9 = 1) and
+  report optimal; now rounding is absolute-slack, the empty interval is `infeasible`, and the original-space bound
+  audit uses a capped scale (relative up to 1e3, absolute 1e-6 x 1e3 beyond) so a 0.4 violation at 1e9 fails.
+  Regressions: empty integer intervals at 1e9, 1e12 and small scale, plus non-empty and integral big intervals,
+  each checked against the plain engine and by the independent replay.
+- Fully eliminated models now write the original-space objective and point to `--json`.
+- An unwritable or failing `--presolve-log` (fopen, ferror or fclose) exits 5 with `status output_error`.
+- Deadline discipline: presolve checks the budget at the start of each pass and every 256 rows/columns. On timeout it
+  reports `time_limit` (exit 4), does not use the partial reduction, and writes a log marked `timed_out`. Tested with a
+  deterministic hook (`TARAL_PRESOLVE_TEST_TIMEOUT_AFTER_OPS`, test-only) and a C++ API test; a real wall-clock overrun
+  was not reproduced or measured (the original finding was static code inspection).
+- Replay checker: strict schema validation (integer index ranges per op type, no `-1` where a column is needed, finite
+  coefficients and values, NaN/null rejected, audit fields finite and self-consistent), optional `.sol` argument to
+  recompute the audit objective, oracle read status checked, duplicate MPS coefficients summed like the engine
+  (free-format only; fixed-format names with spaces are unsupported and raise).
+
 ## What is verified, and how
 
 - **Replayable log.** `--presolve-log` writes every reduction with the numbers it used. The independent
@@ -27,7 +45,7 @@ It is a floating-point finding re-derivable from the log, not an exact-rational 
   match the log. For an infeasible claim the replayed state must show a violated condition.
 - **Original-space audit.** Every point is expanded and checked on the original model by the engine (rows,
   bounds, integrality, recomputed objective incl. the objective constant, vs the solver's reported objective;
-  tolerance 1e-6 relative). A failed audit turns the result into `numerical_failure`, never a reported optimum.
+  tolerance 1e-6 relative for rows, scaled as above for column bounds, absolute 1e-6 for integrality). A failed audit turns the result into `numerical_failure`, never a reported optimum.
   The same recheck is repeated in the test harness from the `.sol` file.
 
 ## Measured (this branch)
