@@ -17,10 +17,25 @@
 namespace {
 constexpr double kRel = 1e-9;
 double sc(double b) { return 1 + (std::isfinite(b) ? std::abs(b) : 0); }
+// Sound integer rounding: a value within kIntSnap (absolute) of an integer snaps to it, otherwise ceil/floor.
+// The slack is absolute, never relative: a relative slack exceeds a whole integer once |bound| > ~1e9.
+constexpr double kIntSnap = 1e-6;
+double int_up(double l) { double r = std::round(l); return std::abs(l - r) <= kIntSnap ? r : std::ceil(l); }
+double int_dn(double u) { double r = std::round(u); return std::abs(u - r) <= kIntSnap ? r : std::floor(u); }
+// Audit scale for column bounds: relative up to 1e3, absolute (1e-6 * 1e3) beyond, so large bounds stay strict.
+double scb(double b) { return 1 + (std::isfinite(b) ? std::min(std::abs(b), 1e3) : 0); }
 }  // namespace
 
-PresolveResult presolve_model(const Model& orig) {
+PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time_point deadline, long test_timeout_after_ops) {
     PresolveResult P;
+    long ticks = 0;
+    auto expired = [&]() {
+        if (P.timed_out) return true;
+        if (test_timeout_after_ops >= 0 && (long)P.log.size() >= test_timeout_after_ops) return P.timed_out = true;
+        if (std::chrono::steady_clock::now() > deadline) return P.timed_out = true;
+        return false;
+    };
+    auto tick = [&]() { return (test_timeout_after_ops >= 0 || (++ticks & 255) == 0) && expired(); };
     const int n = (int)orig.cols.size(), m = (int)orig.row_lo.size();
     std::vector<double> lo = orig.col_lo, up = orig.col_up, rlo = orig.row_lo, rup = orig.row_up;
     double objc = orig.obj_const;
@@ -32,22 +47,27 @@ PresolveResult presolve_model(const Model& orig) {
     P.fixed_value.assign(n, 0.0);
     auto fail = [&](const std::string& why) { P.infeasible = true; P.infeasible_reason = why; };
 
-    for (int j = 0; j < n && !P.infeasible; ++j) {
+    if (expired()) { P.removed_col.assign(n, 0); P.fixed_value.assign(n, 0.0); return P; }
+    for (int j = 0; j < n && !P.infeasible && !P.timed_out; ++j) {
+        if (tick()) break;
         if (!orig.is_int.empty() && orig.is_int[j]) {
-            double nl = std::isfinite(lo[j]) ? std::ceil(lo[j] - kRel * sc(lo[j])) : lo[j];
-            double nu = std::isfinite(up[j]) ? std::floor(up[j] + kRel * sc(up[j])) : up[j];
+            double nl = std::isfinite(lo[j]) ? int_up(lo[j]) : lo[j];
+            double nu = std::isfinite(up[j]) ? int_dn(up[j]) : up[j];
             if (nl != lo[j] || nu != up[j]) {
                 P.log.push_back({"round_int_bounds", -1, j, 0, lo[j], up[j], nl, nu});
                 lo[j] = nl, up[j] = nu;
             }
         }
-        if (lo[j] > up[j] + kRel * sc(up[j])) fail("column " + std::to_string(j) + " has lower bound above upper bound");
+        const bool jint = !orig.is_int.empty() && orig.is_int[j];
+        if (jint ? lo[j] > up[j] : lo[j] > up[j] + kRel * sc(up[j])) fail("column " + std::to_string(j) + " has lower bound above upper bound");
     }
-    bool changed = !P.infeasible;
+    bool changed = !P.infeasible && !P.timed_out;
     while (changed && P.passes < 50) {
+        if (expired()) break;
         changed = false;
         ++P.passes;
-        for (int j = 0; j < n && !P.infeasible; ++j) {  // fixed columns
+        for (int j = 0; j < n && !P.infeasible && !P.timed_out; ++j) {  // fixed columns
+            if (tick()) break;
             if (crem[j] || !(lo[j] == up[j]) || !std::isfinite(lo[j])) continue;
             double v = lo[j];
             P.log.push_back({"fix_col", -1, j, 0, v, 0, 0, 0});
@@ -59,7 +79,8 @@ PresolveResult presolve_model(const Model& orig) {
             }
             objc += orig.cost[j] * v;
         }
-        for (int i = 0; i < m && !P.infeasible; ++i) {
+        for (int i = 0; i < m && !P.infeasible && !P.timed_out; ++i) {
+            if (tick()) break;
             if (rrem[i]) continue;
             int cnt = 0, last = -1;
             double lastv = 0;
@@ -75,11 +96,12 @@ PresolveResult presolve_model(const Model& orig) {
                 double l = rlo[i] / lastv, u = rup[i] / lastv;
                 if (lastv < 0) std::swap(l, u);
                 if (!orig.is_int.empty() && orig.is_int[last]) {
-                    if (std::isfinite(l)) l = std::ceil(l - kRel * sc(l));
-                    if (std::isfinite(u)) u = std::floor(u + kRel * sc(u));
+                    if (std::isfinite(l)) l = int_up(l);
+                    if (std::isfinite(u)) u = int_dn(u);
                 }
                 double nl = std::max(lo[last], l), nu = std::min(up[last], u);
-                if (nl > nu + kRel * sc(nu)) { fail("singleton row " + std::to_string(i) + " conflicts with bounds of column " + std::to_string(last)); break; }
+                const bool lint = !orig.is_int.empty() && orig.is_int[last];  // integer interval: exact comparison
+                if (lint ? nl > nu : nl > nu + kRel * sc(nu)) { fail("singleton row " + std::to_string(i) + " conflicts with bounds of column " + std::to_string(last)); break; }
                 if (nl > nu) nu = nl;  // equal within tolerance
                 lo[last] = nl, up[last] = nu;
                 P.log.push_back({"singleton_row", i, last, lastv, rlo[i], rup[i], nl, nu});
@@ -110,7 +132,8 @@ PresolveResult presolve_model(const Model& orig) {
                 rrem[i] = 1, changed = true;
             }
         }
-        for (int j = 0; j < n && !P.infeasible; ++j) {  // empty columns
+        for (int j = 0; j < n && !P.infeasible && !P.timed_out; ++j) {  // empty columns
+            if (tick()) break;
             if (crem[j]) continue;
             bool any = false;
             for (const Entry& e : orig.cols[j])
@@ -128,7 +151,7 @@ PresolveResult presolve_model(const Model& orig) {
     }
     // the loop only ends when no reduction applied (or the pass cap was hit); state is final
     P.removed_col = crem;
-    if (P.infeasible) return P;
+    if (P.infeasible || P.timed_out) return P;
     std::vector<int> rmap(m, -1), cmap(n, -1);
     Model& R = P.reduced;
     R.name = orig.name, R.maximize = orig.maximize, R.obj_const = objc;
@@ -167,7 +190,7 @@ PresolveAudit presolve_audit(const Model& o, const std::vector<double>& x, doubl
     for (size_t j = 0; j < n; ++j) {
         obj += o.cost[j] * x[j];
         for (const Entry& e : o.cols[j]) ax[e.index] += e.value * x[j];
-        a.max_bound_violation = std::max({a.max_bound_violation, (o.col_lo[j] - x[j]) / sc(o.col_lo[j]), (x[j] - o.col_up[j]) / sc(o.col_up[j])});
+        a.max_bound_violation = std::max({a.max_bound_violation, (o.col_lo[j] - x[j]) / scb(o.col_lo[j]), (x[j] - o.col_up[j]) / scb(o.col_up[j])});
         if (!o.is_int.empty() && o.is_int[j]) a.max_int_violation = std::max(a.max_int_violation, std::abs(x[j] - std::round(x[j])));
     }
     for (size_t i = 0; i < m; ++i)
@@ -183,11 +206,11 @@ static void jnum(std::FILE* f, double v) {
     else std::fprintf(f, v > 0 ? "\"inf\"" : (v < 0 ? "\"-inf\"" : "null"));
 }
 
-void write_presolve_log(const char* path, const Model& o, const PresolveResult& p, const PresolveAudit* au) {
+bool write_presolve_log(const char* path, const Model& o, const PresolveResult& p, const PresolveAudit* au) {
     std::FILE* f = std::fopen(path, "w");
-    if (!f) return;
-    std::fprintf(f, "{\"original\": {\"rows\": %zu, \"cols\": %zu}, \"infeasible\": %s, \"passes\": %d, \"tolerance_rel\": 1e-9",
-                 o.row_lo.size(), o.cols.size(), p.infeasible ? "true" : "false", p.passes);
+    if (!f) return false;
+    std::fprintf(f, "{\"original\": {\"rows\": %zu, \"cols\": %zu}, \"infeasible\": %s, \"timed_out\": %s, \"passes\": %d, \"tolerance_rel\": 1e-9",
+                 o.row_lo.size(), o.cols.size(), p.infeasible ? "true" : "false", p.timed_out ? "true" : "false", p.passes);
     std::string r;
     for (char ch : p.infeasible_reason) r += (ch == '"' || ch == '\\') ? '_' : ch;
     std::fprintf(f, ", \"infeasible_reason\": \"%s\", \"ops\": [", r.c_str());
@@ -225,5 +248,7 @@ void write_presolve_log(const char* path, const Model& o, const PresolveResult& 
         std::fprintf(f, "}");
     }
     std::fprintf(f, "}\n");
-    std::fclose(f);
+    bool ok = !std::ferror(f);
+    if (std::fclose(f) != 0) ok = false;
+    return ok;
 }

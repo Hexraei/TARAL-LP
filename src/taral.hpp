@@ -202,8 +202,13 @@ struct PresolveResult {
     std::vector<char> removed_col;
     std::vector<PresolveOp> log;
     int passes = 0;
+    bool timed_out = false;  // deadline hit: the partial reduction is NOT used; the log is kept for inspection
 };
-PresolveResult presolve_model(const Model& orig);
+// The deadline is checked at the start of every pass and every 256 rows/columns. test_timeout_after_ops >= 0 is a
+// test hook that behaves as if the deadline passed once that many reductions are logged.
+PresolveResult presolve_model(const Model& orig,
+                              std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max(),
+                              long test_timeout_after_ops = -1);
 std::vector<double> presolve_expand(const Model& orig, const PresolveResult& p, const std::vector<double>& x_reduced);
 struct PresolveAudit {
     bool ok = false;
@@ -211,4 +216,4 @@ struct PresolveAudit {
     double objective = 0, reported_objective = 0, objective_diff = 0;
 };
 PresolveAudit presolve_audit(const Model& orig, const std::vector<double>& x, double reported_objective);
-void write_presolve_log(const char* path, const Model& orig, const PresolveResult& p, const PresolveAudit* audit);
+bool write_presolve_log(const char* path, const Model& orig, const PresolveResult& p, const PresolveAudit* audit);
