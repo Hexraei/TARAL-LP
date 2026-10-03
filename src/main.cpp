@@ -156,6 +156,87 @@ void write_ipm_json(const char* path, const IpmResult& r, double wall) {
     std::fclose(f);
 }
 
+
+void write_explanation_json(const char* path, const Model& md, const InfeasibilityExplanation& e) {
+    std::FILE* f = std::fopen(path, "w");
+    if (!f) return;
+    auto arr = [&](const std::vector<double>& v) {
+        std::fprintf(f, "[");
+        for (size_t k = 0; k < v.size(); ++k) { if (k) std::fprintf(f, ", "); num_or_null(f, v[k]); }
+        std::fprintf(f, "]");
+    };
+    std::fprintf(f, "{\"scope\": \"lp_relaxation_row_irreducible_retained_column_bounds\", \"status\": \"%s\", \"message\": \"%s\"",
+                 e.status.c_str(), json_escape(e.message).c_str());
+    std::fprintf(f, ", \"witness_tolerance\": 1e-7, \"certificate_verified\": %s, \"certificate_margin\": ",
+                 e.certificate_verified ? "true" : "false");
+    num_or_null(f, e.certificate_margin);
+    std::fprintf(f, ", \"certificate_residual\": ");
+    num_or_null(f, e.certificate_residual);
+    std::fprintf(f, ", \"rows\": [");
+    for (size_t k = 0; k < e.rows.size(); ++k) {
+        int i = e.rows[k];
+        std::fprintf(f, "%s{\"index\": %d, \"name\": \"%s\", \"lower\": ", k ? ", " : "", i, json_escape(md.row_names[i]).c_str());
+        num_or_null(f, md.row_lo[i]);
+        std::fprintf(f, ", \"upper\": ");
+        num_or_null(f, md.row_up[i]);
+        std::fprintf(f, ", \"multiplier_lower\": ");
+        num_or_null(f, e.farkas_row_lower[i]);
+        std::fprintf(f, ", \"multiplier_upper\": ");
+        num_or_null(f, e.farkas_row_upper[i]);
+        std::fprintf(f, ", \"removal_witness_violation\": ");
+        num_or_null(f, e.witness[k].empty() ? kInf : e.witness_violation[k]);
+        std::fprintf(f, ", \"removal_witness\": ");
+        if (e.witness[k].empty()) std::fprintf(f, "null"); else arr(e.witness[k]);
+        std::fprintf(f, "}");
+    }
+    std::fprintf(f, "], \"unproven_rows\": [");
+    for (size_t k = 0; k < e.unproven_rows.size(); ++k) std::fprintf(f, "%s%d", k ? ", " : "", e.unproven_rows[k]);
+    std::fprintf(f, "], \"bound_columns\": [");
+    for (size_t k = 0; k < e.bound_columns.size(); ++k) {
+        int j = e.bound_columns[k];
+        std::fprintf(f, "%s{\"index\": %d, \"name\": \"%s\", \"lower\": ", k ? ", " : "", j, json_escape(md.col_names[j]).c_str());
+        num_or_null(f, md.col_lo[j]);
+        std::fprintf(f, ", \"upper\": ");
+        num_or_null(f, md.col_up[j]);
+        std::fprintf(f, ", \"multiplier_lower\": ");
+        num_or_null(f, e.farkas_col_lower[j]);
+        std::fprintf(f, ", \"multiplier_upper\": ");
+        num_or_null(f, e.farkas_col_upper[j]);
+        std::fprintf(f, "}");
+    }
+    std::fprintf(f, "], \"inconsistent_bound_columns\": [");
+    for (size_t k = 0; k < e.inconsistent_bound_columns.size(); ++k)
+        std::fprintf(f, "%s%d", k ? ", " : "", e.inconsistent_bound_columns[k]);
+    std::fprintf(f, "]");
+    std::fprintf(f, ", \"farkas_row_lower\": "); arr(e.farkas_row_lower);
+    std::fprintf(f, ", \"farkas_row_upper\": "); arr(e.farkas_row_upper);
+    std::fprintf(f, ", \"farkas_col_lower\": "); arr(e.farkas_col_lower);
+    std::fprintf(f, ", \"farkas_col_upper\": "); arr(e.farkas_col_upper);
+    std::fprintf(f, ", \"relaxation\": {\"status\": \"%s\", \"objective\": ", e.relaxation_status.c_str());
+    num_or_null(f, e.relaxation_status == "optimal" ? e.relaxation_objective : kInf);
+    std::fprintf(f, ", \"objective_definition\": \"sum_i w_i*(lower_relax_i+upper_relax_i), w_i=1/(1+max finite |row bound|), all rows, column bounds retained\"");
+    std::fprintf(f, ", \"kkt_gap\": "); num_or_null(f, e.relaxation_gap);
+    std::fprintf(f, ", \"max_violation\": "); num_or_null(f, e.relaxation_violation);
+    std::fprintf(f, ", \"rows\": [");
+    bool first = true;
+    for (size_t i = 0; i < e.relax_lower.size(); ++i) {
+        double lo = e.relax_lower[i], up = e.relax_upper[i];
+        if (!(lo > 1e-12 * (1 + std::abs(md.row_lo[i])) || up > 1e-12 * (1 + std::abs(md.row_up[i])))) continue;
+        std::fprintf(f, "%s{\"index\": %zu, \"name\": \"%s\", \"lower_relaxed_by\": ", first ? "" : ", ", i,
+                     json_escape(md.row_names[i]).c_str());
+        first = false;
+        num_or_null(f, lo);
+        std::fprintf(f, ", \"upper_relaxed_by\": ");
+        num_or_null(f, up);
+        std::fprintf(f, ", \"weight\": ");
+        num_or_null(f, e.relax_weight[i]);
+        std::fprintf(f, "}");
+    }
+    std::fprintf(f, "], \"x\": "); arr(e.relaxation_x);
+    std::fprintf(f, "}, \"lp_solves\": %ld, \"wall_s\": %.6f}\n", e.lp_solves, e.wall_s);
+    std::fclose(f);
+}
+
 void write_sol(const char* path, const Model& md, const std::vector<double>& x) {
     if (std::FILE* f = std::fopen(path, "w")) {
         for (size_t j = 0; j < md.col_names.size(); ++j) std::fprintf(f, "%s %.17g\n", md.col_names[j].c_str(), x[j]);
@@ -175,7 +256,7 @@ int exit_code(const std::string& status) {
 const char* kUsage =
     "usage: taral MODEL.mps [--time-limit S] [--node-limit N] [--method simplex|dual|ipm]\n"
     "             [--sol OUT.sol] [--json OUT.json] [--warm-sol F [--warm-dual F] [--cross-tol T]]\n"
-    "             [--no-fallback] [--audit-prop] [--no-prop-prune]\n";
+    "             [--no-fallback] [--audit-prop] [--no-prop-prune] [--explain-infeasible OUT.json]\n";
 
 void print_help() {
     std::printf("%s"
@@ -190,6 +271,7 @@ void print_help() {
                 "  --no-fallback     LP simplex: do not hand a stalled primal run to the dual simplex\n"
                 "  --audit-prop      MILP: re-check propagation prunes (diagnostic)\n"
                 "  --no-prop-prune   MILP: disable propagation pruning\n"
+                "  --explain-infeasible FILE  write a verified LP-relaxation infeasibility explanation (irreducible rows + minimum relaxation) and exit\n"
                 "  --sol FILE        write the solution (name value per line) when optimal\n"
                 "  --json FILE       write a JSON result summary\n"
                 "  -h, --help        show this help and exit\n",
@@ -232,6 +314,7 @@ int main(int argc, char** argv) {
     std::string method = "simplex";  // "ipm": interior point; "dual": dual simplex (LPs)
     bool fallback = true;            // primal simplex that stalls hands the rest of the time to the dual (--no-fallback: off)
     bool only_files = false;
+    const char* explain_path = nullptr;  // --explain-infeasible FILE
     for (int i = 1; i < argc; ++i) {
         const char* a = argv[i];
         if (!only_files && !std::strcmp(a, "--")) { only_files = true; continue; }
@@ -264,6 +347,8 @@ int main(int argc, char** argv) {
                 if (!value(warm_sol)) return usage_error("--warm-sol requires a value");
             } else if (!std::strcmp(a, "--warm-dual")) {
                 if (!value(warm_dual)) return usage_error("--warm-dual requires a value");
+            } else if (!std::strcmp(a, "--explain-infeasible")) {
+                if (!value(explain_path)) return usage_error("--explain-infeasible requires a value");
             } else if (!std::strcmp(a, "--no-fallback")) {
                 fallback = false;
             } else if (!std::strcmp(a, "--audit-prop")) {
@@ -300,6 +385,14 @@ int main(int argc, char** argv) {
         if (json) write_json(json, "parse_error", nullptr, wall(), e.what());
         std::printf("status parse_error: %s\n", e.what());
         return exit_code("parse_error");
+    }
+    if (explain_path) {  // LP-relaxation infeasibility explanation; ignores integrality and the objective
+        InfeasibilityExplanation ex = explain_infeasibility(md, limit - wall());
+        write_explanation_json(explain_path, md, ex);
+        std::printf("explain %s rows %zu unproven %zu solves %ld wall %.3fs %s\n", ex.status.c_str(), ex.rows.size(),
+                    ex.unproven_rows.size(), ex.lp_solves, wall(), ex.message.c_str());
+        if (ex.status == "no_verified_proof") return 5;
+        return ex.status == "reduced_unproven" && ex.wall_s >= limit - 1e-3 ? 4 : 0;
     }
     if ((!md.qobj.empty() || method == "ipm") && !md.has_integers()) {  // convex QP, or LP by interior point
         IpmOptions opt;
