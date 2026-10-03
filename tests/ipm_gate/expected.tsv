@@ -1,0 +1,7 @@
+# file	expected status with --method ipm (the DualInfeasible -> Unbounded gate: both a verified feasible point and a verified ray, on the original model)
+a_unbounded_via_feasibility_solve.mps	unbounded
+b_unbounded_returned_point_ok.mps	unbounded
+c_infeasible_farkas.mps	infeasible
+d_optimal_control.mps	optimal
+e_infeasible_with_ray_stays_dual_infeasible.mps	dual_infeasible
+f_infeasible_farkas_with_ray.mps	infeasible

@@ -1,0 +1,15 @@
+NAME F
+ROWS
+ N OBJ
+ G R0
+ L R1
+COLUMNS
+    X1 OBJ -1.0 R0 1.0
+    X1 R1 1.0
+    X2 OBJ -1.0 R0 1.0
+    X2 R1 1.0
+    X3 OBJ -1.0 R0 -1.0
+RHS
+    RHS R0 4.0
+    RHS R1 1.0
+ENDATA

@@ -1,0 +1,15 @@
+NAME GATE_A
+ROWS
+ N OBJ
+ E R0
+ G R1
+ L R2
+COLUMNS
+    X1 OBJ -1.0 R0 1.0
+    X2 R0 -1.0 R1 1.0
+    X2 R2 1.0
+    X3 OBJ -1.0 R1 1.0
+RHS
+    RHS R1 1.0
+    RHS R2 0.0
+ENDATA
