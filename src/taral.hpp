@@ -37,7 +37,15 @@ struct ParseError : std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
-Model read_mps(const std::string& path);  // throws ParseError
+// Thrown when the optional deadline passes while reading. Not a ParseError: the free-format to fixed-column
+// fallback in read_mps must not retry after a timeout.
+struct ParseTimeLimit : std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
+// Throws ParseError, or ParseTimeLimit when `deadline` passes while reading (checked every few thousand lines).
+Model read_mps(const std::string& path,
+               std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max());
 
 // Sparse LU of a square basis matrix with Markowitz pivoting and a column threshold.
 class SparseLU {

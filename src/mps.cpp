@@ -79,7 +79,7 @@ std::vector<std::string> tokens(const std::string& line, const std::string& sect
     return t;
 }
 
-Model parse(const std::string& path, bool fixed) {
+Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time_point deadline) {
     std::ifstream in(path);
     if (!in) throw ParseError("cannot open " + path);
     Model md;
@@ -117,7 +117,12 @@ Model parse(const std::string& path, bool fixed) {
         throw ParseError("unknown row '" + name + "'");
     };
 
+    unsigned long lines_read = 0;
+    auto check_deadline = [&] {
+        if (std::chrono::steady_clock::now() > deadline) throw ParseTimeLimit("parse exceeded the time limit");
+    };
     while (std::getline(in, line)) {
+        if ((++lines_read & 4095) == 0) check_deadline();
         if (!line.empty() && line.back() == '\r') line.pop_back();
         if (line.find_first_not_of(" \t") == std::string::npos || line[0] == '*') continue;
         if (line[0] != ' ' && line[0] != '\t') {
@@ -270,6 +275,7 @@ Model parse(const std::string& path, bool fixed) {
             q[{std::max(a, b), std::min(a, b)}] += v;
         }
     }
+    check_deadline();
     if (!saw_endata) throw ParseError("missing ENDATA");
     for (const auto& [rc, v] : q)
         if (v != 0) md.qobj.push_back({rc.first, rc.second, v});
@@ -311,9 +317,11 @@ Model parse(const std::string& path, bool fixed) {
         for (double& v : *up)
             if (v >= kHugeBound) v = kInf;
     md.cols.resize(n);
-    for (size_t j = 0; j < n; ++j)
+    for (size_t j = 0; j < n; ++j) {
+        if ((j & 4095) == 4095) check_deadline();
         for (auto [r, v] : colmap[j])
             if (v != 0) md.cols[j].push_back({r, v});
+    }
     return md;
 }
 
@@ -325,12 +333,12 @@ bool Model::has_integers() const {
     return false;
 }
 
-Model read_mps(const std::string& path) {
+Model read_mps(const std::string& path, std::chrono::steady_clock::time_point deadline) {
     try {
-        return parse(path, false);
+        return parse(path, false, deadline);
     } catch (const ParseError& free_err) {
         try {
-            return parse(path, true);
+            return parse(path, true, deadline);
         } catch (const ParseError& fixed_err) {  // report both readings, not just the fallback's
             if (std::string(free_err.what()) == fixed_err.what()) throw;
             throw ParseError(std::string(free_err.what()) + " (free format); " + fixed_err.what() + " (fixed columns)");

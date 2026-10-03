@@ -290,7 +290,12 @@ int main(int argc, char** argv) {
     auto wall = [&] { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(); };
     Model md;
     try {
-        md = read_mps(model);
+        md = read_mps(model, limit < 1e8 ? t0 + std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(limit))
+                              : std::chrono::steady_clock::time_point::max());
+    } catch (const ParseTimeLimit& e) {
+        if (json) write_json(json, "time_limit", nullptr, wall(), e.what());
+        std::printf("status time_limit: %s\n", e.what());
+        return exit_code("time_limit");
     } catch (const ParseError& e) {
         if (json) write_json(json, "parse_error", nullptr, wall(), e.what());
         std::printf("status parse_error: %s\n", e.what());
