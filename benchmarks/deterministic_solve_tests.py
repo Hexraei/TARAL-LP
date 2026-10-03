@@ -82,4 +82,52 @@ milp = os.path.join(ROOT, "benchmarks/refinery_stress/campaign_milp_t6.mps")
 if os.path.exists(milp):
     p, j = run(milp, ["--work-limit", "50"])
     expect("milp_unsupported", "unsupported" in p.stdout and p.returncode == 5, p.stdout[-120:])
+# 8. accounting: work_used counts performed iterations (no denied entries), equal to the reported iteration count
+for m in FIX[:3]:
+    for cap in (3, 11, 40, 100000):
+        _, j = run(m, ["--work-limit", str(cap)])
+        expect("work_used_equals_iterations_%d_%s" % (cap, os.path.basename(m)), j["work_used"] == j["iterations"] and j["work_used"] <= cap, (j["work_used"], j["iterations"]))
+
+# 9. KKT retry fixture: a capped retry keeps the iteration_limit contract (was numerical_failure before the fix)
+retry = os.path.join(ROOT, "tests/fixtures/scaled_retry_c87.mps")
+if os.path.exists(retry):
+    sts = {}
+    for cap in (1, 5, 10, 15, 20, 30, 36, 37, 50, 100):
+        p, j = run(retry, ["--work-limit", str(cap)])
+        sts[cap] = j["status"]
+        expect("retry_fixture_no_numerical_failure_cap_%d" % cap, j["status"] in ("iteration_limit", "optimal"), j["status"])
+        expect("retry_fixture_exit_code_cap_%d" % cap, p.returncode == (4 if j["status"] == "iteration_limit" else 0), p.returncode)
+    p, j = run(retry, ["--work-limit", "20"])
+    expect("retry_path_executed", "recovered by equilibrated retry" in json.dumps(run(retry, ["--work-limit", "100"])[1]) and j["status"] == "iteration_limit")
+
+# 10. hash is standard FNV-1a 64 over the documented canonical text (known vectors + engine cross-check)
+def fnv(bs, h=0xcbf29ce484222325):
+    for b in bs: h = ((h ^ b) * 0x100000001b3) & 0xFFFFFFFFFFFFFFFF
+    return h
+expect("fnv1a64_empty_vector", fnv(b"") == 0xcbf29ce484222325)
+expect("fnv1a64_a_vector", fnv(b"a") == 0xaf63dc4c8601ec8c)
+expect("fnv1a64_foobar_vector", fnv(b"foobar") == 0x85944171f73967e8)
+def canon(j):
+    h = 0xcbf29ce484222325
+    def feed(t):
+        nonlocal h
+        h = fnv(t.encode(), h); h = fnv(b"\xff", h)
+    j = json.load(open(os.path.join(TMP, "r.json")), parse_int=float)  # "-0" must stay negative zero
+    feed(j["status"]); feed(str(int(j["iterations"]))); feed("%.17g" % (j["objective"] if j["status"] == "optimal" else 0.0))
+    for v in j.get("x", []): feed("%.17g" % v)
+    return "%016x" % h
+for m in FIX[:3]:
+    _, j = run(m, ["--work-limit", "100000"])
+    expect("engine_hash_matches_python_fnv_" + os.path.basename(m), canon(j) == j["result_hash"], (canon(j), j["result_hash"]))
+
+# 11. wall limit field and API-level wall enforcement
+_, j = run(FIX[0], ["--work-limit", "100000"]); expect("wall_limit_inactive_by_default", j["wall_limit_active"] is False)
+_, j = run(FIX[0], ["--work-limit", "100000", "--time-limit", "30"]); expect("wall_limit_active_when_given", j["wall_limit_active"] is True)
+api = os.path.join(TMP, "det_api")
+srcs = [os.path.join(ROOT, "src", f) for f in os.listdir(os.path.join(ROOT, "src")) if f.endswith(".cpp") and f != "main.cpp"]
+cc = subprocess.run(["g++", "-O1", "-std=c++17", "-o", api, os.path.join(ROOT, "benchmarks/deterministic_solve_api_tests.cpp")] + srcs, capture_output=True, text=True)
+expect("det_api_builds", cc.returncode == 0, cc.stderr[-300:])
+if cc.returncode == 0:
+    r = subprocess.run([api, FIX[-1]], capture_output=True, text=True); expect("det_api_wall_limit_enforced", r.returncode == 0, r.stdout + r.stderr)
+
 print("FAILED %s" % fails if fails else "ALL PASS"); sys.exit(1 if fails else 0)
