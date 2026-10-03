@@ -19,9 +19,7 @@ finishes `fome12` in 270.56 seconds and `fome21` in 253.76 seconds. The checked
 relative objective errors are 7.9e-15 and 0. Iteration throughput is about 1.25x
 higher for the newer build. These are single runs per build/case on the same
 reported host, not a repeated performance study or an isolated attribution to
-one individual patch. The attached comparison CSV is a transcription of the
-measurement report, not the executor's original file bytes; its own hash is
-recorded separately.
+one individual patch. The comparison CSV and `isolation_logs.tgz` are the executor's original bytes, with hashes independently verified against the owner-supplied measurement report. They replace the earlier transcribed comparison; the original solution-vector tarball was not delivered.
 
 This supersedes the unresolved attribution in the original `SUMMARY.md` item 5 and adds
 the single-run isolation context to item 9 for these two cases only. The four
