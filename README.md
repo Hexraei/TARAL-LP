@@ -1,6 +1,8 @@
 ![TARAL-LP - A sovereign solver core for refinery planning.](docs/assets/TARAL-LP.png)
 
-[![C++17 core](docs/assets/badge-cpp.svg)](src/) [![Netlib 93/93](docs/assets/badge-netlib.svg)](results/netlib_postmerge_58f77af/) [![Proprietary license](docs/assets/badge-license.svg)](LICENSE)
+[Official website](https://taral-lp.vercel.app/) · [Canonical Kaggle notebook](https://www.kaggle.com/code/hexraei/notebookeb52168008)
+
+[![C++17 core](docs/assets/badge-cpp.svg)](src/) [![Netlib measured 93/93](docs/assets/badge-netlib.svg)](results/netlib_postmerge_58f77af/) [![MIPLIB 40 measured](docs/assets/badge-miplib.svg)](results/miplib_widening_20261003/) [![QPLIB 19 measured](docs/assets/badge-qplib.svg)](results/qplib_widening_20261003/) [![Website](docs/assets/badge-website.svg)](https://taral-lp.vercel.app/) [![Kaggle notebook](docs/assets/badge-kaggle.svg)](https://www.kaggle.com/code/hexraei/notebookeb52168008) [![Proprietary license](docs/assets/badge-license.svg)](LICENSE)
 
 TARAL-LP is a from-scratch C++17 solver core for sparse industrial optimization: CPU linear programming (LP), mixed-integer linear programming (MILP) and convex quadratic programming (QP), with an approximate CUDA primal-dual hybrid gradient (PDHG) method for large continuous LPs. The evaluated CPU engine uses only the C++ standard library; HiGHS, SciPy and NumPy belong to benchmark tools, not the optimization engine. Experimental, not a production replacement for established solvers.
 
@@ -54,6 +56,14 @@ The tighter CPU check requires row and bound violations and relative objective e
 
 GPU results are approximate, double precision, one run on a shared T4. Solver tolerance is not a bound on objective error or violation of the original constraints; rail objective references are unavailable. [Full measurements and historical tables](docs/measured-results.md).
 
+## Sparse algebra scaling profile
+
+[Sparse LU measurements](results/r5_factorization_20261003/r5_factorization.csv) and [full summary](results/r5_factorization_20261003/r5_summary.md): dual simplex, 34 benchmark instances, 300 s cap, one run each, source commit 6215801. No singular or failed factorizations were measured. Fill ratio is about 1.0 on Kennington/OSA/PDS structure (maximum 1.04 on PDS), and refactorization time grows about linearly with basis size.
+
+The large-model limit in this measurement is the per-iteration forward/backward solves: at 40,000 rows and above they take 21% to 74% of wall time. Wall time per iteration grows from 0.14 ms at 2,426 rows to 8 ms at 156,243 rows. The measured implementation does not yet exploit right-hand-side sparsity in those solves. This is a scaling profile, not a speed advantage.
+
+21 instances solved to optimality and match HiGHS within 1e-6 relative; 13 reach the 300 s cap with no answer, while HiGHS finished all of them. PDS-30 refactorizes about three times as often as its neighbors; the cause was not isolated. These historical measurements do not close R5's broader scalability work.
+
 ## Reproduce in three commands
 
 From the repository root, with Python 3, g++ and git installed:
@@ -84,11 +94,3 @@ This builds the CPU engine, verifies the fixed benchmark files and runs the defa
 [Limitations, unsupported models and numerical caveats](docs/limitations.md) · [Detailed results](docs/measured-results.md) · [License](LICENSE)
 
 Proprietary submission. Access is restricted to official competition judges and organizers for evaluation. This README does not change repository visibility or grant reuse rights.
-
-## Sparse algebra scaling profile
-
-[Sparse LU measurements](results/r5_factorization_20261003/r5_factorization.csv) and [full summary](results/r5_factorization_20261003/r5_summary.md): dual simplex, 34 benchmark instances, 300 s cap, one run each, source commit 6215801. No singular or failed factorizations were measured. Fill ratio is about 1.0 on Kennington/OSA/PDS structure (maximum 1.04 on PDS), and refactorization time grows about linearly with basis size.
-
-The large-model limit in this measurement is the per-iteration forward/backward solves: at 40,000 rows and above they take 21% to 74% of wall time. Wall time per iteration grows from 0.14 ms at 2,426 rows to 8 ms at 156,243 rows. The measured implementation does not yet exploit right-hand-side sparsity in those solves. This is a scaling profile, not a speed advantage.
-
-21 instances solved to optimality and match HiGHS within 1e-6 relative; 13 reach the 300 s cap with no answer, while HiGHS finished all of them. PDS-30 refactorizes about three times as often as its neighbors; the cause was not isolated. These historical measurements do not close R5's broader scalability work.
