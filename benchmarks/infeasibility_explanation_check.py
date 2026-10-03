@@ -19,19 +19,47 @@ TOL = 1e-7
 
 def normalize_mps(path):
     """Sum duplicate (column,row) coefficients in COLUMNS (the engine's semantics; highspy keeps the first).
-    Free-format token lines only; MARKER lines, other sections, ranges and bounds are copied unchanged."""
-    out, sec, seen, cur = [], None, {}, None
+    Also keeps only the LAST BOUNDS entry of each (type, column) (the engine overwrites; HiGHS keeps the first and warns). Free-format token lines only; MARKER lines and other sections are copied unchanged."""
+    out, sec, seen, cur, bsides, bpos, bset = [], None, {}, None, {}, None, None
     for raw in open(path).read().splitlines():
         if not raw.strip() or raw.startswith("*"): out.append(raw); continue
         if not raw[0].isspace():
             if sec == "COLUMNS": out.extend(flush(seen))
             sec = raw.split()[0]; seen = {}; out.append(raw); continue
+        if sec == "BOUNDS":  # engine semantics: only the first bound set is used; within it the last LO/UP/FX/MI/PL/FR per side wins (HiGHS keeps the first)
+            t = raw.split(); ty = t[0].upper()
+            noval = ty in ("MI", "PL", "FR")
+            if ty in ("LO", "UP", "FX", "MI", "PL", "FR") and len(t) in ((2, 3) if noval else (3, 4)):
+                has_set = len(t) == (3 if noval else 4)
+                if has_set:
+                    if bset is None: bset = t[1]
+                    if t[1] != bset: continue  # engine (and the MPS format): only the first bound set is used
+                col = t[2] if has_set else t[1]
+                val = None if noval else float(t[-1].replace("D", "E").replace("d", "e"))
+                d = bsides.setdefault(col, {})
+                if ty in ("LO", "FX"): d["lo"] = val
+                if ty in ("UP", "FX"): d["up"] = val
+                if ty in ("MI", "FR"): d["lo"] = -math.inf
+                if ty in ("PL", "FR"): d["up"] = math.inf
+                if bpos is None: bpos = len(out); out.append("@@BOUNDS@@")
+                continue
+            out.append(raw); continue
         if sec != "COLUMNS": out.append(raw); continue
         t = raw.split()
         if "'MARKER'" in t or "MARKER" in t: out.extend(flush(seen)); seen = {}; out.append(raw); continue
         if len(t) not in (3, 5): raise ValueError("unsupported COLUMNS line (need free format): " + raw)
         for k in range(1, len(t), 2):
             seen.setdefault(t[0], {}); seen[t[0]][t[k]] = seen[t[0]].get(t[k], 0.0) + float(t[k + 1].replace("D", "E").replace("d", "e"))
+    if bpos is not None:
+        L = []
+        for col, d in bsides.items():
+            lo, up = d.get("lo"), d.get("up")
+            if lo == -math.inf: L.append(" MI BND %s" % col)
+            elif lo is not None: L.append(" LO BND %s %.17g" % (col, lo))
+            elif up is not None and up < 0: L.append(" LO BND %s 0" % col)
+            if up == math.inf: L.append(" PL BND %s" % col)
+            elif up is not None: L.append(" UP BND %s %.17g" % (col, up))
+        out[bpos:bpos + 1] = L
     fd, tmp = tempfile.mkstemp(suffix=".mps"); os.close(fd)
     open(tmp, "w").write("\n".join(out) + "\n")
     return tmp
