@@ -25,8 +25,9 @@ double int_dn(double u, double e = 0) { return std::floor(u + e); }
 // rounding error. `e` is a running absolute error bound (kEps = DBL_EPSILON, one rounding per operation, the
 // substituted column's own error propagated), and the derived integer bound is rounded OUTWARD by e only:
 // ceil(l - e), floor(u + e). It never snaps input bounds (e = 0 there, so the direct case stays strict), and with
-// exact data (|a| = 1, no substitution) e = 0 as well. Outward rounding only relaxes, so an infeasible claim stays sound.
+// exact data (|a| = 1, no substitution) e = 0 as well. This is a first-order, non-directed error model scaled by kSafety: it is a heuristic guard against false infeasibility, NOT a proof. Infeasible claims decline (no claim, row kept) when the conflict margin is inside the tracked uncertainty; the replay checker accepts a claim only if an independent exact-rational enclosure proves it.
 constexpr double kEps = 2.220446049250313e-16;
+constexpr double kSafety = 4.0;  // hedge factor on the first-order error model; see docs for what this does NOT guarantee
 // Audit scale for column bounds: relative up to 1e3, absolute (1e-6 * 1e3) beyond, so large bounds stay strict.
 double scb(double b) { return 1 + (std::isfinite(b) ? std::min(std::abs(b), 1e3) : 0); }
 }  // namespace
@@ -96,7 +97,9 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
             for (const Entry& e : rows[i])
                 if (!crem[e.index]) ++cnt, last = e.index, lastv = e.value;
             if (cnt == 0) {
-                if (rlo[i] > kRel * sc(rlo[i]) || rup[i] < -kRel * sc(rup[i])) { fail("row " + std::to_string(i) + " empty and violated"); break; }
+                const double ru = kSafety * rerr[i];
+                if (rlo[i] > kRel * sc(rlo[i]) + ru || rup[i] < -kRel * sc(rup[i]) - ru) { fail("row " + std::to_string(i) + " empty and violated"); break; }
+                if (rlo[i] > kRel * sc(rlo[i]) || rup[i] < -kRel * sc(rup[i])) continue;  // violated only inside the tracked uncertainty: no claim, keep the row
                 P.log.push_back({"empty_row", i, -1, 0, rlo[i], rup[i], 0, 0});
                 rrem[i] = 1, changed = true;
                 continue;
@@ -104,16 +107,19 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
             if (cnt == 1) {
                 double l = rlo[i] / lastv, u = rup[i] / lastv;
                 if (lastv < 0) std::swap(l, u);
-                double de = rerr[i] / std::abs(lastv) +
+                double de0 = rerr[i] / std::abs(lastv) +
                             (std::abs(lastv) == 1.0 ? 0.0 : kEps * std::max(std::isfinite(l) ? std::abs(l) : 0.0, std::isfinite(u) ? std::abs(u) : 0.0));
+                double de = de0;
                 if (!orig.is_int.empty() && orig.is_int[last]) {
-                    if (std::isfinite(l)) l = int_up(l, de);
-                    if (std::isfinite(u)) u = int_dn(u, de);
+                    if (std::isfinite(l)) l = int_up(l, kSafety * de0);
+                    if (std::isfinite(u)) u = int_dn(u, kSafety * de0);
                     de = 0;  // an integer bound is a relaxed integer; fixing there carries no further error
                 }
                 double nl = std::max(lo[last], l), nu = std::min(up[last], u);
                 const bool lint = !orig.is_int.empty() && orig.is_int[last];  // integer interval: exact comparison
-                if (lint ? nl > nu : nl > nu + kRel * sc(nu)) { fail("singleton row " + std::to_string(i) + " conflicts with bounds of column " + std::to_string(last)); break; }
+                const double su = lint ? 0.0 : kSafety * (de0 + cerr[last]);
+                if (lint ? nl > nu : nl > nu + kRel * sc(nu) + su) { fail("singleton row " + std::to_string(i) + " conflicts with bounds of column " + std::to_string(last)); break; }
+                if (!lint && nl > nu + kRel * sc(nu)) continue;  // conflict only inside the tracked uncertainty: no claim, keep the row
                 if (nl > nu) nu = nl;  // equal within tolerance
                 lo[last] = nl, up[last] = nu;
                 cerr[last] = std::max(cerr[last], de);
@@ -128,19 +134,33 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
                 mn += a > 0 ? a * l : a * u;
                 mx += a > 0 ? a * u : a * l;
             }
+            double unc = kSafety * rerr[i], mag = 0;  // tracked uncertainty of the activity range
+            int cntc = 0;
+            for (const Entry& e : rows[i]) {
+                if (crem[e.index]) continue;
+                unc += kSafety * std::abs(e.value) * cerr[e.index];
+                double b = e.value > 0 ? lo[e.index] : up[e.index], b2 = e.value > 0 ? up[e.index] : lo[e.index];
+                if (std::isfinite(b)) mag += std::abs(e.value * b);
+                if (std::isfinite(b2)) mag += std::abs(e.value * b2);
+                ++cntc;
+            }
+            const double unc_conflict = unc + kSafety * kEps * (cntc + 1) * mag;
             if (std::isfinite(mn) && std::isfinite(mx)) {
                 if (mn > rup[i] + kRel * sc(rup[i]) || mx < rlo[i] - kRel * sc(rlo[i])) {
+                  if (mn > rup[i] + kRel * sc(rup[i]) + unc_conflict || mx < rlo[i] - kRel * sc(rlo[i]) - unc_conflict) {
                     fail("row " + std::to_string(i) + " activity range [" + std::to_string(mn) + "," + std::to_string(mx) + "] outside row bounds");
                     break;
+                  }
+                  continue;  // conflict only inside the tracked uncertainty: no claim, no reduction of this row
                 }
             }
-            if (std::isfinite(mn) && std::isfinite(mx) && mn >= rlo[i] && mx <= rup[i]) {
+            if (std::isfinite(mn) && std::isfinite(mx) && mn >= rlo[i] + unc && mx <= rup[i] - unc) {
                 P.log.push_back({"redundant_row", i, -1, 0, rlo[i], rup[i], mn, mx});
                 rrem[i] = 1, changed = true;
-            } else if (!std::isfinite(rlo[i]) && std::isfinite(mx) && mx <= rup[i]) {
+            } else if (!std::isfinite(rlo[i]) && std::isfinite(mx) && mx <= rup[i] - unc) {
                 P.log.push_back({"redundant_row", i, -1, 0, rlo[i], rup[i], mn, mx});
                 rrem[i] = 1, changed = true;
-            } else if (!std::isfinite(rup[i]) && std::isfinite(mn) && mn >= rlo[i]) {
+            } else if (!std::isfinite(rup[i]) && std::isfinite(mn) && mn >= rlo[i] + unc) {
                 P.log.push_back({"redundant_row", i, -1, 0, rlo[i], rup[i], mn, mx});
                 rrem[i] = 1, changed = true;
             }
