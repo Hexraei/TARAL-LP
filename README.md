@@ -15,7 +15,7 @@ Checked means **measured in the linked scope**, not complete industrial coverage
 - [ ] **R2 - Future solver classes:** prototype [module boundaries](src/taral.hpp); mixed-integer quadratic, nonlinear and mixed-integer nonlinear programming not started.
 - [x] **R3 - Continuous methods:** measured [simplex, dual and interior-point paths](results/adversarial_4517277/); historical source snapshot, not a universal pass.
 - [ ] **R4 - Mixed-integer search:** prototype [branch and bound with propagation](src/milp.cpp); full cutting-plane, presolve and heuristic coverage planned.
-- [ ] **R5 - Sparse algebra:** prototype [own sparse factorization](src/); broader scalability validation planned.
+- [ ] **R5 - Sparse algebra:** prototype [own sparse factorization](src/); [34-instance scaling profile](results/r5_factorization_20261003/r5_summary.md) measured, broader scalability work remains.
 - [ ] **R6 - Multi-core solve:** planned; evaluated CPU engine is single-threaded.
 - [x] **R7 - GPU method:** measured [approximate PDHG on T4](results/gpu_pdhg/t4_industrial_20261003/); no exact-solver speed advantage claimed.
 - [x] **R8 - Numerical checks:** measured [Netlib checks against the original constraints](results/netlib_postmerge_58f77af/); broader reliable convergence remains unverified.
@@ -84,3 +84,11 @@ This builds the CPU engine, verifies the fixed benchmark files and runs the defa
 [Limitations, unsupported models and numerical caveats](docs/limitations.md) · [Detailed results](docs/measured-results.md) · [License](LICENSE)
 
 Proprietary submission. Access is restricted to official competition judges and organizers for evaluation. This README does not change repository visibility or grant reuse rights.
+
+## Sparse algebra scaling profile
+
+[Sparse LU measurements](results/r5_factorization_20261003/r5_factorization.csv) and [full summary](results/r5_factorization_20261003/r5_summary.md): dual simplex, 34 benchmark instances, 300 s cap, one run each, source commit 6215801. No singular or failed factorizations were measured. Fill ratio is about 1.0 on Kennington/OSA/PDS structure (maximum 1.04 on PDS), and refactorization time grows about linearly with basis size.
+
+The large-model limit in this measurement is the per-iteration forward/backward solves: at 40,000 rows and above they take 21% to 74% of wall time. Wall time per iteration grows from 0.14 ms at 2,426 rows to 8 ms at 156,243 rows. The measured implementation does not yet exploit right-hand-side sparsity in those solves. This is a scaling profile, not a speed advantage.
+
+21 instances solved to optimality and match HiGHS within 1e-6 relative; 13 reach the 300 s cap with no answer, while HiGHS finished all of them. PDS-30 refactorizes about three times as often as its neighbors; the cause was not isolated. These historical measurements do not close R5's broader scalability work.
