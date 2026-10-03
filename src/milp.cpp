@@ -46,6 +46,7 @@ constexpr double kPropPivot = 1e-9;  // coefficients below this are not used to 
 constexpr double kRcMin = 1e-7;      // never fix on a reduced cost with a smaller magnitude
 constexpr double kRcDualTol = 1e-7;  // dual infeasibility (scaled by 1 + max|cost|) that voids a basis for fixing
 constexpr int kMaxSplitDepth = 8;    // consecutive bisections of nodes whose LP failed, along one path
+constexpr size_t kMaxOpenChanges = 12'000'000;  // bound-change records held by open nodes (24 bytes each, ~0.3 GB): stop before running out of memory
 constexpr int kRcMaxBackoff = 4;     // after a call that fixes nothing, skip up to 2^4 - 1 later calls
 
 double tol_at(double z) { return kGapTol * std::max(1.0, std::abs(z)); }
@@ -429,6 +430,7 @@ End Search::run() {
         return all_cnt[d] ? all_sum[d] / double(all_cnt[d]) : 1.0;
     };
     bool have_cur = true;
+    size_t open_changes = 0;  // bound-change records stored in open nodes (each node keeps its full path)
     End end = End::Complete;
     std::vector<double> lo, up;
     for (;;) {
@@ -436,13 +438,15 @@ End Search::run() {
             if (open.empty()) break;
             cur = open.top();
             open.pop();
+            open_changes -= std::min(open_changes, cur.changes.size());
         }
         have_cur = false;
         if (has_inc && cur.bound >= z - tol_at(z)) {
             pruned = std::min(pruned, cur.bound);
             continue;
         }
-        if (fj_hook && !fj_tried && !has_inc && elapsed() >= std::min(0.5, 0.02 * limit_)) {
+        if (fj_hook && !fj_tried && !has_inc && elapsed() >= std::min(0.5, 0.02 * limit_) &&
+            elapsed() + std::min(2.0, 0.05 * limit_) <= limit_) {  // the hook never runs past the time limit
             fj_tried = true;  // pays only when the search has found nothing after 0.5 s; costs at most the time so far
             std::vector<double> px;
             if (fj_hook(std::min(2.0, 0.05 * limit_), px)) offer(px);
@@ -450,6 +454,18 @@ End Search::run() {
                 pruned = std::min(pruned, cur.bound);
                 continue;
             }
+        }
+        if (open_changes > kMaxOpenChanges && fj_hook && !fj_tried && !has_inc &&
+            elapsed() + std::min(2.0, 0.05 * limit_) <= limit_) {  // last chance for an incumbent
+            fj_tried = true;
+            std::vector<double> px;
+            if (fj_hook(std::min(2.0, 0.05 * limit_), px)) offer(px);
+        }
+        if (open_changes > kMaxOpenChanges) {  // a deep dive keeps every sibling's whole path: memory grows with depth squared
+            end = End::NodeLimit;
+            note = "open-node memory cap reached (" + std::to_string(open.size()) + " open nodes, depth " + std::to_string(cur.depth) + "); search stopped, bound and incumbent are valid";
+            open.push(std::move(cur));
+            break;
         }
         if (elapsed() > limit_ || nodes >= node_limit_) {
             end = elapsed() > limit_ ? End::TimeLimit : End::NodeLimit;
@@ -533,6 +549,7 @@ End Search::run() {
                 Node a{cur.bound, cur.changes, cur.basis, 0, 0, -1, cur.depth + 1, {sj}, cur.splits + 1}, b = a;
                 a.changes.push_back({sj, lo[sj], mid});
                 b.changes.push_back({sj, mid + 1, up[sj]});
+                open_changes += a.changes.size() + b.changes.size();
                 open.push(std::move(a));
                 open.push(std::move(b));
                 continue;
@@ -592,6 +609,7 @@ End Search::run() {
         down.changes.push_back({bj, lo[bj], fl});
         upn.changes.push_back({bj, fl + 1, up[bj]});
         bool dive_up = v - fl >= 0.5;
+        open_changes += (dive_up ? down : upn).changes.size();
         open.push(dive_up ? std::move(down) : std::move(upn));
         cur = dive_up ? std::move(upn) : std::move(down);
         have_cur = true;
