@@ -64,9 +64,16 @@ This builds the CPU engine, verifies the pinned corpus and runs the default 60s 
 
 ## Team
 
-<img src="docs/assets/team-placeholder.svg" width="48" height="48" alt="Profile placeholder" />
+**Team IRIZ_**
 
-**Team profiles coming soon.** Names, avatars and GitHub/profile links will be added once confirmed. No identities shown yet.
+| Member | GitHub |
+| --- | --- |
+| Navin | [Hexraei](https://github.com/Hexraei) |
+| Sutharshan | [muffedd](https://github.com/muffedd) |
+| Sailakshmi | [Saibts](https://github.com/Saibts) |
+| Madhesh | [Professor-Mady](https://github.com/Professor-Mady) |
+| Manaswini | [ksm-13](https://github.com/ksm-13) |
+| Abinaya | [abinaya2006](https://github.com/abinaya2006) |
 
 ## Scope and access
 
