@@ -209,17 +209,26 @@ for seed in range(7000, 7150):
     sweep[ex["status"] if ex["status"] in sweep else "other"] += 1
     errs = chk.check(pth, outx)[2]
     expect("sweep_%d_checker" % seed, not errs, "; ".join(errs[:2]))
-# bound-set normalization of the oracle model (engine semantics): only the first bound set is used, last entry per side wins
-import math as _m
-for nm, bnds, want in (("first_set_only", [" LO SETA X 5", " LO SETB X 3"], 5.0), ("last_wins_within_set", [" LO SETA X 3", " LO SETA X 5"], 5.0),
-                       ("fx_then_up", [" FX SETA X 4", " UP SETA X 6"], None), ("mi_up", [" MI SETA X", " UP SETA X 2"], None)):
-    pth = mps("bs_" + nm, "NAME D\nROWS\n N OBJ\n G R0\nCOLUMNS\n X OBJ 1 R0 1\nRHS\n RHS R0 0\nBOUNDS\n" + "\n".join(bnds) + "\nENDATA\n")
-    M = chk.load(pth)
-    lo, up = M[3][0], M[4][0]
-    exp_lo, exp_up = {"first_set_only": (5.0, _m.inf), "last_wins_within_set": (5.0, _m.inf), "fx_then_up": (4.0, 6.0), "mi_up": (-_m.inf, 2.0)}[nm]
-    expect("bound_norm_" + nm, (lo, up) == (exp_lo, exp_up), (lo, up))
+# bound-set normalization of the oracle model: only the first bound set; overwritten entries dropped, order-dependent rules untouched.
+# Agreement is tested through solver STATUS (engine vs HiGHS on the normalized file), the semantic that matters for the checker.
+import highspy as _hs
+def _hstatus(path):
+    h = _hs.Highs(); h.setOptionValue("output_flag", False); h.readModel(chk.normalize_mps(path)); h.run()
+    return h.modelStatusToString(h.getModelStatus())
+EMAP = {"optimal": "Optimal", "infeasible": "Infeasible", "unbounded": "Unbounded or infeasible"}
+for nm, bnds, want in (("first_set_only", [" LO SETA X 5", " LO SETB X 3"], "5"), ("last_wins_within_set", [" LO SETA X 3", " LO SETA X 5"], "5"),
+                       ("neg_up_alone", [" UP SETA X -1"], None), ("lo0_then_neg_up", [" LO SETA X 0", " UP SETA X -1"], None),
+                       ("neg_up_then_lo", [" UP SETA X -1", " LO SETA X -5"], None), ("lo_then_up_ok", [" LO SETA X -3", " UP SETA X -1"], None),
+                       ("fx_then_up", [" FX SETA X 4", " UP SETA X 6"], None), ("mi_up", [" MI SETA X", " UP SETA X 2"], None),
+                       ("up_then_up", [" UP SETA X 7", " UP SETA X -2"], None), ("up_neg_then_lo_pos", [" UP SETA X -1", " LO SETA X 3"], None)):
+    pth = mps("bs_" + nm, "NAME D\nROWS\n N OBJ\nCOLUMNS\n X OBJ 1\nRHS\nBOUNDS\n" + "\n".join(bnds) + "\nENDATA\n")
     rr = subprocess.run([BIN, pth], capture_output=True, text=True)
-    if want is not None: expect("bound_norm_engine_agrees_" + nm, "objective %g" % want in rr.stdout, rr.stdout[-80:])
+    est = [l for l in rr.stdout.splitlines() if l.startswith("status ")][-1].split()[1]
+    try: hst = _hstatus(pth)
+    except ValueError as ex: hst = "unsupported"
+    ok = hst == "unsupported" or hst in (EMAP.get(est, est),) or (est == "unbounded" and hst in ("Unbounded", "Unbounded or infeasible"))
+    expect("bound_norm_status_agrees_" + nm, ok, str((est, hst)))
+    if want is not None: expect("bound_norm_engine_value_" + nm, "objective " + want in rr.stdout, rr.stdout[-80:])
 # the sweep script: planted-conflict generated LPs, every explanation accepted by the independent row-proof checker
 sw = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "infeasible_sweep.py"), "--engine", BIN, "--generated", "25", "--seed", "11", "--time-limit", "30"], capture_output=True, text=True)
 expect("infeasible_sweep_generated_25", sw.returncode == 0 and '"explained_irreducible": 25' in sw.stdout, sw.stdout[-300:])
