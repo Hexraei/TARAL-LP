@@ -2,13 +2,14 @@
   "artifact_sha256": {
     "HOST.txt": "0049d6a9755509cd2e451e86d47cfd5be91fb4916174938363f1138dcbcbdfea",
     "SUMMARY.md": "49bfb2682980eaa76b5349577b332894bcaff0a0a02920ab46776b6d82c52d1a",
-    "inputs_manifest.csv": "218ce4366a084406125ef18c536334fe2697f4c1dd1999598b3086d64ecb76af",
-    "ledger.csv": "21d478d62ae8e1e3933d17ba1d8665daf00be90a7f9f6691bbdbb2527ef4a225"
+    "inputs_manifest.csv": "318b400c687647c9b49e3fcee421be361292be835454e6b56c893c1e1cafcc05",
+    "isolation_442ca16_vs_58f77af_fome12_fome21.csv": "9e37d6f56e7b91b91cb3ef4791a174ef2608dead064d8b6beeb994c317d34a93",
+    "ledger.csv": "32c1b3609e9320cdbf554f3e36d0cdb7675c609b3255421dc2c8e9eb3130147d"
   },
   "source_commit": "58f77afbb8e85e51ad2cb9971be9e12d8e2bd96b",
   "engine_cap_seconds": 300,
   "reference_cap_seconds": 600,
-  "publication_state": "Raw evidence archived. Engine-attributable improvement wording withheld pending same-host pre-merge isolation comparison.",
+  "publication_state": "Same-host single-run evidence supports an engine-version effect on fome12 and fome21 in dual mode; no same-host attribution for the four default-mode changes.",
   "checked_counts": {
     "dual": {
       "optimal": 21,
@@ -20,5 +21,28 @@
     }
   },
   "default_optimal_using_dual_switch": 7,
-  "worst_objective_relative_error": 7.935720242099985e-15
+  "worst_objective_relative_error": 7.935720242099985e-15,
+  "hash_correction": {
+    "previous_lf_hashes": {
+      "ledger.csv": "21d478d62ae8e1e3933d17ba1d8665daf00be90a7f9f6691bbdbb2527ef4a225",
+      "inputs_manifest.csv": "218ce4366a084406125ef18c536334fe2697f4c1dd1999598b3086d64ecb76af"
+    },
+    "reason": "Original CRLF byte representation restored from corrected attachments; CSV fields unchanged under CRLF normalization."
+  },
+  "isolation_provenance": {
+    "source": "CSV transcribed by parent from measurement report; original executor CSV bytes/hash were not delivered. Attached transcription hash is recorded above.",
+    "same_host_reported": true,
+    "runs_per_build_case": 1,
+    "method": "dual",
+    "cap_seconds": 300,
+    "builds": [
+      "442ca161f266c99ab4cf00ac29e1265c4213caa4",
+      "58f77afbb8e85e51ad2cb9971be9e12d8e2bd96b"
+    ],
+    "cases": [
+      "fome12",
+      "fome21"
+    ],
+    "supersedes": "SUMMARY.md items 5 and 9 for these two isolation comparisons only; raw SUMMARY.md retained unchanged."
+  }
 }
