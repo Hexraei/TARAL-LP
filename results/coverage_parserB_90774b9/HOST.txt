@@ -1,0 +1,31 @@
+== K/M k4 notebook5dd1958ba0 (Kaggle, private)
+tree: Parser B src (CPU source of main 90774b9, identical to 03ddb92), g++ -O2 -std=c++17
+cpu: Model name:                              Intel(R) Xeon(R) CPU @ 2.20GHz
+cores: 4
+ram: Mem:              31           1          25           0           4          30
+highs 1.15.1
+src fp: 024fd7f4abae1b8caf60068bad769082b7a6af02c4400a60768407fc2da1408a  -
+c88fe33d18f93bcc795d5e27bd415bb99e912557867638caf50d401e55f95a39  run.py
+d1e872807e427c76f1041108f79c5b43965dab4167c5a7c6f4724aca046c49b8  kenn.py
+
+== MIPLIB m1 notebook010cad25ae (Kaggle, private)
+tree: Parser B src (CPU source of main 90774b9, identical to 03ddb92), g++ -O3 -march=native -std=c++17
+cpu: Model name:                              Intel(R) Xeon(R) CPU @ 2.20GHz
+cores: 4
+ram: Mem:              31           1          25           0           4          30
+highs 1.15.1
+src fp: 024fd7f4abae1b8caf60068bad769082b7a6af02c4400a60768407fc2da1408a  -
+c88fe33d18f93bcc795d5e27bd415bb99e912557867638caf50d401e55f95a39  run.py
+d1e872807e427c76f1041108f79c5b43965dab4167c5a7c6f4724aca046c49b8  kenn.py
+
+== QPLIB q1 notebookf805813cee (Kaggle, private)
+tree: Parser B src (CPU source of main 90774b9, identical to 03ddb92), g++ -O3 -march=native -std=c++17
+cpu: Model name:                              Intel(R) Xeon(R) CPU @ 2.20GHz
+cores: 4
+ram: Mem:              31           1          25           0           4          30
+highs 1.15.1
+src fp: 024fd7f4abae1b8caf60068bad769082b7a6af02c4400a60768407fc2da1408a  -
+c88fe33d18f93bcc795d5e27bd415bb99e912557867638caf50d401e55f95a39  run.py
+d1e872807e427c76f1041108f79c5b43965dab4167c5a7c6f4724aca046c49b8  kenn.py
+
+Ledger CSVs are derived from the per-case lines in each notebook log (verdict lines; K/M ROWK lines carry status/objective/wall/iterations/verdict/ref). K/M engine cap 300s, HiGHS 600s, default and --method dual. MIPLIB/QPLIB engine cap 120s, HiGHS 300s, -O3 -march=native. K/M -O2.

@@ -1,0 +1,42 @@
+{
+  "source_tree_description": "Parser B CPU source of 90774b9, reported identical to 03ddb92",
+  "source_commit": "90774b999363b95af121a8171fd851525d8e1f28",
+  "reported_src_fingerprint": "024fd7f4abae1b8caf60068bad769082b7a6af02c4400a60768407fc2da1408a",
+  "host": "Kaggle Xeon 2.20GHz, 4 cores,31GB RAM",
+  "reference_version": "HiGHS1.15.1",
+  "compiler_flags": {
+    "kennington_mittelmann": "g++ -O2 -std=c++17",
+    "miplib_qplib": "g++ -O3 -march=native -std=c++17"
+  },
+  "requested_caps_seconds": {
+    "kennington_mittelmann": {
+      "engine": 300,
+      "reference": 600
+    },
+    "miplib_qplib": {
+      "engine": 120,
+      "reference": 300
+    }
+  },
+  "provenance_limits": [
+    "CSVs derived from notebook per-case log lines, not results.jsonl",
+    "MIPLIB40/QPLIB19 coverage CSVs contain verdict only; no objectives or timings manufactured",
+    "Not comparable to older 20261003 ledger wall times from another host",
+    "CPU source identity and host are producer-reported in HOST.txt; only delivered artifact hashes independently verified here"
+  ],
+  "artifact_sha256": {
+    "fj_noise_rows.csv": "9e3dfe058c41c007e1c4649fa1e2907e87711cf711895174a4495ef12fe799bc",
+    "HOST.txt": "f61a4321ba277484c5c5f90842358dd177f3b02325d7137d6624f46fc61deef1",
+    "coverage_qplib_90774b9.csv": "26845c5ceb8f84813bd5b5454fb5ba026db0007f55212ecfdee051e1c69c5698",
+    "coverage_kennington_mittelmann_90774b9.csv": "065c621c1f654d3437d343f0b03ae75bcefa42417be06f9fcd653220d94af7ac",
+    "miplib_26_timeouts.csv": "e0c124a066a9b456e8e9ff528e7e17775cdeb5e1f4e411d2790ffaf2a1a208ae",
+    "coverage_miplib_90774b9.csv": "49a4232db017888b47433705364c41b0871d681938bbedcd7e6feb5b5bb9c148"
+  },
+  "row_counts": {
+    "fj_noise_rows.csv": 24,
+    "coverage_qplib_90774b9.csv": 19,
+    "coverage_kennington_mittelmann_90774b9.csv": 33,
+    "miplib_26_timeouts.csv": 26,
+    "coverage_miplib_90774b9.csv": 40
+  }
+}

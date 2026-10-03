@@ -1,0 +1,27 @@
+case,engine_status,engine_wall_s,engine_cap_s,best_bound,nodes,ref_status,ref_wall_s,ref_cap_s,source_notebook,source_tree
+ej,time_limit,120.06,120,3269.4847322090736,4921988,Time limit reached,300.04,300,hexraei/notebook89d59928c7 v1,58f77af
+p2m2p1m1p0n100,time_limit,120.0,120,80424,3352259,Time limit reached,300.03,300,hexraei/notebook89d59928c7 v1,58f77af
+markshare_5_0,time_limit,120.2,120,0,1430463,Time limit reached,300.02,300,hexraei/notebook89d59928c7 v1,58f77af
+b-ball,time_limit,120.04,120,-1.7999999999999998,56459,Optimal,0.31,300,hexraei/notebook89d59928c7 v1,58f77af
+markshare1,time_limit,120.29,120,0,1121155,Time limit reached,300.01,300,hexraei/notebook89d59928c7 v1,58f77af
+enlight8,time_limit,120.14,120,23,253018,Optimal,5.23,300,hexraei/notebook89d59928c7 v1,58f77af
+enlight9,time_limit,120.28,120,20,184221,Infeasible,14.04,300,hexraei/notebook89d59928c7 v1,58f77af
+gen-ip054,time_limit,120.33,120,6788.352419649516,262983,Time limit reached,300.03,300,hexraei/notebook89d59928c7 v1,58f77af
+enlight_hard,time_limit,120.16,120,24,131250,Optimal,23.7,300,hexraei/notebook89d59928c7 v1,58f77af
+gen-ip016,time_limit,120.53,120,-9500.029118293787,351634,Time limit reached,300.02,300,hexraei/notebook89d59928c7 v1,58f77af
+ran13x13,time_limit,120.09,120,3038.943833943834,68756,Optimal,54.22,300,hexraei/notebook89d59928c7 v1,58f77af
+enlight11,time_limit,120.19,120,17,136185,Infeasible,97.94,300,hexraei/notebook89d59928c7 v1,58f77af
+timtab1,time_limit,120.08,120,297107.0000001,100532,Optimal,102.13,300,hexraei/notebook89d59928c7 v1,58f77af
+neos-5140963-mincio,time_limit,120.08,120,11172.42857142857,68750,Time limit reached,300.03,300,hexraei/notebook89d59928c7 v1,58f77af
+rlp1,time_limit,120.01,120,13.244444444444456,6156,Optimal,0.57,300,hexraei/notebook89d59928c7 v1,58f77af
+gen-ip002,time_limit,120.33,120,-4815.467161408667,183598,Time limit reached,300.02,300,hexraei/notebook89d59928c7 v1,58f77af
+gen-ip021,time_limit,120.23,120,2345.9862861619213,191541,Time limit reached,300.03,300,hexraei/notebook89d59928c7 v1,58f77af
+k16x240b,time_limit,120.1,120,6619.133,97560,Time limit reached,300.01,300,hexraei/notebook89d59928c7 v1,58f77af
+beavma,time_limit,120.01,120,261116.78045891694,55974,Optimal,0.38,300,hexraei/notebook89d59928c7 v1,58f77af
+ran12x21,time_limit,120.06,120,3399.9438137626207,60818,Optimal,55.77,300,hexraei/notebook89d59928c7 v1,58f77af
+neos-3611689-kaihu,time_limit,120.03,120,109.994,41132,Optimal,3.37,300,hexraei/notebook89d59928c7 v1,58f77af
+neos-3610040-iskar,time_limit,120.04,120,35.335625,42309,Optimal,2.93,300,hexraei/notebook89d59928c7 v1,58f77af
+neos-3611447-jijia,time_limit,120.03,120,102.42375000000001,40559,Optimal,4.1,300,hexraei/notebook89d59928c7 v1,58f77af
+sp150x300d,time_limit,120.01,120,10.68579862249918,20588,Optimal,0.12,300,hexraei/notebook89d59928c7 v1,58f77af
+nexp-50-20-1-1,time_limit,120.01,120,14.848484848484853,5137,Optimal,0.11,300,hexraei/notebook89d59928c7 v1,58f77af
+neos-3046615-murg,time_limit,120.02,120,404,24578,Time limit reached,300.01,300,hexraei/notebook89d59928c7 v1,58f77af
