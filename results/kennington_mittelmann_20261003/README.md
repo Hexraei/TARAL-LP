@@ -4,7 +4,7 @@ Measured evidence with a scoped same-host comparison. This is a different benchm
 Netlib validation, with a 300-second engine limit and 600-second HiGHS limit.
 The evaluated source snapshot is `58f77af`; it predates the later quadratic
 programming changes. `ledger.csv`, `SUMMARY.md`, `HOST.txt` and
-`inputs_manifest.csv` are retained in their corrected original CRLF byte form. The first archived copies used LF line endings; the field values are unchanged. Artifact hashes now match the corrected delivery. `SUMMARY.md` and `HOST.txt` remain unchanged.
+`inputs_manifest.csv` are retained in their corrected original CRLF byte form. The first archived copies used LF line endings; the field values are unchanged. Artifact hashes now match the corrected delivery. `HOST.txt` remains unchanged. `SUMMARY.md` items 5 and 9 were later revised from the full measurement report; its original and revised hashes are recorded in provenance.
 
 Independent table checks find 21 optimal / 12 time-limit results using dual
 simplex and 19 / 14 using the default method. All recorded optimal results
@@ -23,7 +23,7 @@ one individual patch. The attached comparison CSV is a transcription of the
 measurement report, not the executor's original file bytes; its own hash is
 recorded separately.
 
-This supersedes the unresolved attribution in raw `SUMMARY.md` item 5 and adds
+This supersedes the unresolved attribution in the original `SUMMARY.md` item 5 and adds
 the single-run isolation context to item 9 for these two cases only. The four
 newly optimal default-method cases still have no same-host control. Seven of
 the 19 default optimal results switched to dual simplex, so their improvement
