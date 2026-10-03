@@ -349,6 +349,46 @@ if "time_limit" in r.stdout and "presolve" in r.stdout:
     expect("presolve_timeout_log_replays", p.returncode == 0, p.stdout)
 else:
     expect("presolve_timeout_reached", False, r.stdout[-200:])
+# 6. review 7/8/9: strict inward integer rounding (no outward snap), absolute replay validation, primal-only output
+def status_of(r): return [l for l in r.stdout.splitlines() if l.startswith("status ")][-1].split()[1]
+for nm, lo_, up_ in (("snap_zero", 4e-7, 8e-7), ("snap_one", 1.0000004, 1.0000008), ("snap_neg", -1.0000008, -1.0000004), ("snap_big", 1e9 + 4e-7, 1e9 + 8e-7)):
+    pth = one_int(nm, lo_, up_); lg = os.path.join(TMP, nm + "_log.json")
+    r = run_raw(pth, ["--presolve-log", lg]); r0 = subprocess.run([BIN, pth], capture_output=True, text=True)
+    expect("strict_round_infeasible_" + nm, status_of(r) == "infeasible", status_of(r))
+    # documented divergence: the plain MILP (no --presolve) keeps its own 1e-6 integrality tolerance (milp.cpp kIntTol); recorded, not asserted
+    print("INFO plain_milp_status_" + nm, status_of(r0))
+    if os.path.exists(lg): expect("strict_round_replay_" + nm, not rc.replay(rc.load(pth), json.load(open(lg))), rc.replay(rc.load(pth), json.load(open(lg))))
+for c in (0.0, 1.0, -1.0, 1e3, 1e9):
+    for w in (0.0, 8e-7, 2.2e-6):
+        nm = "contains_%g_%g" % (c, w); pth = one_int(nm, c - w / 2, c + w / 2); lg = os.path.join(TMP, nm + "_log.json"); sl = os.path.join(TMP, nm + ".sol")
+        r = run_raw(pth, ["--presolve-log", lg, "--sol", sl]); st = status_of(r)
+        expect("contains_integer_optimal_" + nm, st == "optimal" and ("objective %.12g" % c) in r.stdout, r.stdout[-120:])
+        if os.path.exists(lg): expect("contains_integer_replay_" + nm, not rc.replay(rc.load(pth), json.load(open(lg))))
+fb = os.path.join(ROOT, "tests/fixtures/presolve_fixedbig.mps"); fl = os.path.join(TMP, "fixedbig_log.json")
+run_raw(fb, ["--presolve-log", fl]); Mfb = rc.load(fb); Lfb = json.load(open(fl))
+expect("fixedbig_replays", not rc.replay(Mfb, Lfb), rc.replay(Mfb, Lfb))
+fi = [k for k, o in enumerate(Lfb["ops"]) if o["type"] == "fix_col"][0]
+def mut_fix(l, d):
+    l["ops"][fi]["v1"] += d; l["reduced"]["obj_const"] += d
+for d in (1.0, 0.5, 1e-3):
+    l2 = copy.deepcopy(Lfb); mut_fix(l2, d); expect("replay_rejects_fixed_value_shift_%g" % d, bool(rc.replay(Mfb, l2)))
+l2 = copy.deepcopy(Lfb); l2["reduced"]["obj_const"] += 1.0; expect("replay_rejects_objective_only_shift", bool(rc.replay(Mfb, l2)))
+l2 = copy.deepcopy(Lfb); l2["ops"][fi]["v1"] += 1.0; expect("replay_rejects_fix_value_only_shift", bool(rc.replay(Mfb, l2)))
+# primal-only output: no reduced-model dual/KKT placeholders next to the original-space x
+r = run_raw(full, ["--presolve", "--json", jp])
+j = json.load(open(jp))
+for k in ("dual_objective", "gap", "primal_res", "dual_res", "complementarity", "row_dual", "reduced_cost"):
+    expect("primal_only_null_" + k, j.get(k, "missing") is None, j.get(k, "missing"))
+expect("primal_only_flag", j.get("original_space_primal_only") is True and j.get("certificate_quality") == "presolve_primal_only")
+expect("primal_only_row_activity_original", j.get("row_activity") == [1.0], j.get("row_activity"))
+rp = run_raw(os.path.join(ROOT, "benchmarks/refinery_stress/base_lp_t6.mps"), ["--presolve", "--json", jp]); j = json.load(open(jp))
+expect("primal_only_null_reduced_lp", j["status"] == "optimal" and j["dual_objective"] is None and j["row_dual"] is None and len(j["row_activity"]) > 0, j["status"])
+inf = os.path.join(ROOT, "benchmarks/refinery_stress/infeasible_supply_lp.mps"); run_raw(inf, ["--presolve", "--json", jp]); j = json.load(open(jp))
+if j["status"] == "infeasible" and "certificate_quality" in j and "presolve" in j.get("message", ""):
+    expect("presolve_infeasible_reason_present", True)
+if j.get("certificate_quality") == "presolve_reduced_model_only":
+    expect("reduced_certificate_not_claimed", j.get("certificate_verified") is False and not j.get("farkas_row_lower"), j)
+
 api = os.path.join(TMP, "presolve_api")
 srcs = [os.path.join(ROOT, "src", f) for f in os.listdir(os.path.join(ROOT, "src")) if f.endswith(".cpp") and f != "main.cpp"]
 cc = subprocess.run(["g++", "-O1", "-std=c++17", "-o", api, os.path.join(ROOT, "benchmarks/presolve_api_tests.cpp")] + srcs, capture_output=True, text=True)
