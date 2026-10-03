@@ -291,7 +291,7 @@ void print_help() {
                 "  --warm-dual FILE  optional row multipliers for --warm-sol (name value per line)\n"
                 "  --cross-tol T     crossover: distance from a bound that counts as interior (default 1e-3)\n"
                 "  --no-fallback     LP simplex: do not hand a stalled primal run to the dual simplex\n"
-                "  --work-limit N    LP (simplex/dual): deterministic iteration budget; routing never uses the wall clock\n"
+                "  --work-limit N    LP (simplex/dual): deterministic iteration budget; routing never uses the wall clock (an explicit --time-limit that fires still stops the run, non-deterministically)\n"
                 "  --audit-prop      MILP: re-check propagation prunes (diagnostic)\n"
                 "  --no-prop-prune   MILP: disable propagation pruning\n"
                 "  --explain-infeasible FILE  write a verified LP-relaxation infeasibility explanation (irreducible rows + minimum relaxation) and exit\n"
