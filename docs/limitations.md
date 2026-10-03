@@ -36,4 +36,13 @@ The [QPLIB instance table](https://qplib.zib.de/instances.html), read on October
 
 In-class IDs: 10034, 10038, 8495, 8500, 8515, 8547, 8559, 8567, 8602, 8616, 8785, 8790, 8792, 8845, 8906, 8938, 8991, 9002, 9008.
 
-This selection includes models with 250,997, 1,003,001 and 1,009,306 variables. Their performance must be measured; size alone does not establish a timeout or a successful solve. Out-of-class counts describe the library, not engine failures.
+This selection includes models with 250,997, 1,003,001 and 1,009,306 variables. The widening run below measures this selection; size alone does not establish a timeout or a successful solve. Out-of-class counts describe the library, not engine failures.
+
+## QPLIB measurements
+
+The [19-case widening CSV](../results/qplib_widening_20261003/ledger.csv) records five objective matches and six feasible engine-reported optima without an optimal HiGHS reference. These six are not independently certified optimal solves. Four engine time limits and two numerical failures coincide with reference time limits or solve errors. [Protocol and provenance](../results/qplib_widening_20261003/).
+
+- **8991, reference-gap adjudication:** the raw CSV labels the 5.97e-6 objective discrepancy `WRONG`, but [local reproduction](../results/qplib_widening_20261003/adjudication_8991.md) verifies positive curvature and interior stationarity at the engine point. The recorded reference stopped short by about 6e-6 absolute. This illustrates why a solver-to-reference objective mismatch needs an independent optimality check, not automatic blame. Original run MPS/point bytes were not retained; the local model is re-converted from the reported same-source LP and matches the recorded engine objective.
+- **9008, time-cap overrun under investigation:** no JSON after 480.17s under a requested 120s engine cap. The engine investigation identifies a missing deadline check during IPM symbolic factorization setup; a fix is in progress, not verified on main. Other time-limit rows also overrun the requested cap, including 10038 at 140.68s.
+
+Source `58f77af` was verified by matching source-file fingerprints; build and soft caps are recorded with the [provenance](../results/qplib_widening_20261003/provenance.json). Do not extrapolate into a general speed or correctness claim.

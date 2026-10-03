@@ -1,0 +1,28 @@
+{
+  "origin_notebook": "hexraei/notebooke8186a2053",
+  "reported_version": 1,
+  "engine_requested_cap_seconds": 120,
+  "reference_requested_cap_seconds": 300,
+  "source_commit": "58f77afbb8e85e51ad2cb9971be9e12d8e2bd96b",
+  "compiler_flags": "g++ -O2 -std=c++17 src/*.cpp -o taral",
+  "host": "Kaggle CPU, Intel Xeon 2.20GHz,4 logical cores,31GB RAM (run report)",
+  "comparison_tolerance_reported": "1e-6*(1+abs(reference objective))",
+  "verdict_counts": {
+    "optimal_ref_not_optimal": 6,
+    "other:numerical_failure": 2,
+    "match": 5,
+    "WRONG": 1,
+    "time_limit": 4,
+    "other:no_json": 1
+  },
+  "ledger_sha256": "711b8bcd7b8f09be5e110c90cda23881cdfdf1d7b7ca662774fe452d99364390",
+  "interpretation": "optimal_ref_not_optimal means engine reported optimal and its point passed feasibility checks; no independent optimal objective reference, not certified optimality",
+  "source_archive_sha256": "c6ee678901e317dca9a9603c0fec8b9d480baf988f6259859320a2c2f847685c",
+  "reported_src_fingerprint": "e38148f79fbf2fce169a73017e3258ab05ec8d2abf71ef0a19a80ac884412ee4",
+  "compiler_version": "g++ 13.3.0",
+  "reference_version": "HiGHS 1.15.1",
+  "feasibility_tolerance_reported": "row/bound/integrality each <=1e-6 relative using 1+abs(bound)",
+  "cap_kind": "soft; engine up to140.68s ordinary timeout,9008 killed480.17s; HiGHS up to363.74s",
+  "source_fingerprint_verification": "verified sha256(sum files as sha256sum lines,git ls-tree src ordering) equals reported fingerprint",
+  "adjudication": "8991 locally reproduced positive-definite interior-stationary point; raw WRONG label retained"
+}

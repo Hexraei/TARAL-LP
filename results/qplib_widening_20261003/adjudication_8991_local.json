@@ -1,0 +1,18 @@
+{
+ "n": 14400,
+ "rows": 0,
+ "nnz_Q_full": 71520,
+ "gershgorin_min": 2.0,
+ "lam_min": 2.0006740694060765,
+ "bound_violation": 0.0,
+ "strictly_interior_vars": 14400,
+ "projected_gradient_inf": 1.1207059585904844e-12,
+ "c_inf": 0.000683013455,
+ "objective_recomputed": -0.0016678673779135361,
+ "half_c_dot_x": -0.0016678673775629878,
+ "reference_objective": -0.0016618993072833967,
+ "ref_minus_engine": 5.9680706301394e-06,
+ "ref_is_higher_than_engine": true,
+ "harness_rule_threshold": 1.0016618993072835e-06,
+ "abs_diff": 5.9680706301394e-06
+}
