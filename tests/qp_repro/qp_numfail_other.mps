@@ -1,0 +1,56 @@
+NAME maximize_88059
+OBJSENSE
+    MAX
+ROWS
+ N OBJ
+ G R0
+ E R1
+ E R2
+ G R3
+ E R4
+COLUMNS
+    C0 OBJ -1.5
+    C0 R1 -0.125
+    C0 R2 1
+    C1 OBJ -10.5
+    C1 R0 -2
+    C1 R1 2.125
+    C1 R4 -3
+    C2 OBJ -3.75
+    C2 R0 1.75
+    C2 R3 -2.25
+    C2 R4 0.125
+    C3 OBJ -28.4375
+    C3 R0 1.375
+    C3 R1 1
+    C3 R2 2.75
+    C3 R3 1.375
+RHS
+    RHS OBJ -1000000
+    RHS R0 -3.453125
+    RHS R1 -1.9375
+    RHS R2 -4.15625
+    RHS R3 -1.078125
+    RHS R4 -2.21875
+RANGES
+    RNG R1 1
+    RNG R4 2
+BOUNDS
+ LO BND C0 -1.625
+ UP BND C1 2
+ LO BND C1 -1.5
+ MI BND C2
+ UP BND C2 0.375
+ LO BND C3 -1.375
+QUADOBJ
+    C0 C0 -2
+    C0 C1 3
+    C0 C2 -3
+    C0 C3 3
+    C1 C1 -14
+    C1 C2 7
+    C1 C3 -15
+    C2 C2 -11
+    C2 C3 6
+    C3 C3 -19
+ENDATA

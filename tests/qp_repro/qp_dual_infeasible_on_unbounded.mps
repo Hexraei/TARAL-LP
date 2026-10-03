@@ -1,0 +1,21 @@
+NAME unbounded_73012
+ROWS
+ N OBJ
+ E R0
+COLUMNS
+    C0 OBJ 0
+    C0 R0 2
+    C1 OBJ -2
+    C1 R0 -1
+    C2 OBJ -2
+    C2 R0 1
+RHS
+    RHS R0 -2.125
+BOUNDS
+ UP BND C0 4
+ LO BND C0 -2
+ LO BND C1 -0.125
+ LO BND C2 -3.25
+QUADOBJ
+    C0 C0 2
+ENDATA

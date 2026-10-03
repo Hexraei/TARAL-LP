@@ -1,0 +1,1781 @@
+id,category,verdict,engine_status,ref_status,truth,engine_obj,ref_obj,msg
+active_set-80000,active_set,PASS,optimal,optimal,optimal,-138.374999518,-138.375,
+active_set-80001,active_set,PASS,optimal,optimal,optimal,93.0390620452,93.0390625,
+active_set-80002,active_set,PASS,optimal,optimal,optimal,-118.402343682,-118.40234375,
+active_set-80003,active_set,PASS,optimal,optimal,optimal,717.95898415,717.958984375,
+active_set-80004,active_set,PASS,optimal,optimal,optimal,-903.675781227,-903.67578125,
+active_set-80005,active_set,PASS,optimal,optimal,optimal,-140.716796844,-140.716796875,
+active_set-80006,active_set,PASS,optimal,optimal,optimal,3.56249999641,3.5625,
+active_set-80007,active_set,PASS,optimal,optimal,optimal,-426.460936985,-426.4609375,
+active_set-80008,active_set,PASS,optimal,optimal,optimal,-666.757810539,-666.7578125,
+active_set-80009,active_set,PASS,optimal,optimal,optimal,-1094.03710829,-1094.03710938,
+active_set-80010,active_set,PASS,optimal,optimal,optimal,-78.5351562451,-78.53515625,
+active_set-80011,active_set,PASS,optimal,optimal,optimal,-4.9921875,-4.9921875,
+active_set-80012,active_set,PASS,optimal,optimal,optimal,-9.0566406249,-9.056640625,
+active_set-80013,active_set,PASS,optimal,optimal,optimal,158.023437492,158.0234375,
+active_set-80014,active_set,PASS,optimal,optimal,optimal,7.11718747633,7.1171875,
+active_set-80015,active_set,PASS,optimal,optimal,optimal,-121.453124859,-121.453125,
+active_set-80016,active_set,PASS,optimal,optimal,optimal,-606.203123802,-606.203125,
+active_set-80017,active_set,PASS,optimal,optimal,optimal,47.8984374097,47.8984375,
+active_set-80018,active_set,PASS,optimal,optimal,optimal,38.9101563279,38.91015625,
+active_set-80019,active_set,PASS,optimal,optimal,optimal,958.597655453,958.59765625,
+active_set-80020,active_set,PASS,optimal,optimal,optimal,-253.621093574,-253.62109375,
+active_set-80021,active_set,PASS,optimal,optimal,optimal,9.64648437472,9.646484375,
+active_set-80022,active_set,PASS,optimal,optimal,optimal,0.1953125,0.1953125,
+active_set-80023,active_set,PASS,optimal,optimal,optimal,-74.8828124824,-74.8828125,
+active_set-80024,active_set,PASS,optimal,optimal,optimal,-938.035153929,-938.03515625,
+active_set-80025,active_set,PASS,optimal,optimal,optimal,15.416015632,15.416015625,
+active_set-80026,active_set,PASS,optimal,optimal,optimal,-365.169921484,-365.169921875,
+active_set-80027,active_set,PASS,optimal,optimal,optimal,-395.570310809,-395.5703125,
+active_set-80028,active_set,PASS,optimal,optimal,optimal,-1.2851562456,-1.28515625,
+active_set-80029,active_set,PASS,optimal,optimal,optimal,-7.97656246654,-7.9765625,
+active_set-80030,active_set,PASS,optimal,optimal,optimal,59.9374999191,59.9375,
+active_set-80031,active_set,PASS,optimal,optimal,optimal,-82.8749998524,-82.875,
+active_set-80032,active_set,PASS,optimal,optimal,optimal,-115.634765248,-115.634765625,
+active_set-80033,active_set,PASS,optimal,optimal,optimal,330.718749076,330.71875,
+active_set-80034,active_set,PASS,optimal,optimal,optimal,-634.326170882,-634.326171875,
+active_set-80035,active_set,PASS,optimal,optimal,optimal,-19.537109375,-19.537109375,
+active_set-80036,active_set,PASS,optimal,optimal,optimal,6.3300780992,6.330078125,
+active_set-80037,active_set,PASS,optimal,optimal,optimal,-58.9238281134,-58.923828125,
+active_set-80038,active_set,PASS,optimal,optimal,optimal,-251.109374482,-251.109375,
+active_set-80039,active_set,PASS,optimal,optimal,optimal,17.2285156227,17.228515625,
+active_set-80040,active_set,PASS,optimal,optimal,optimal,249.134765361,249.134765625,
+active_set-80041,active_set,PASS,optimal,optimal,optimal,-14.296875,-14.296875,
+active_set-80042,active_set,PASS,optimal,optimal,optimal,-2.83593749703,-2.8359375,
+active_set-80043,active_set,PASS,optimal,optimal,optimal,-541.976560445,-541.9765625,
+active_set-80044,active_set,PASS,optimal,optimal,optimal,3.58593750268,3.5859375,
+active_set-80045,active_set,PASS,optimal,optimal,optimal,-63.7812498343,-63.78125,
+active_set-80046,active_set,PASS,optimal,optimal,optimal,411.388670746,411.388671875,
+active_set-80047,active_set,PASS,optimal,optimal,optimal,509.443357962,509.443359375,
+active_set-80048,active_set,PASS,optimal,optimal,optimal,-52.0468748723,-52.046875,
+active_set-80049,active_set,PASS,optimal,optimal,optimal,-59.1796874816,-59.1796875,
+active_set-80050,active_set,PASS,optimal,optimal,optimal,-346.265624987,-346.265624752,
+active_set-80051,active_set,PASS,optimal,optimal,optimal,-42.78125,-42.78125,
+active_set-80052,active_set,PASS,optimal,optimal,optimal,-554.947265583,-554.947265625,
+active_set-80053,active_set,PASS,optimal,optimal,optimal,42.0625000649,42.0625000008,
+active_set-80054,active_set,PASS,optimal,optimal,optimal,-20.02734375,-20.02734375,
+active_set-80055,active_set,PASS,optimal,optimal,optimal,-383.220703116,-383.220703125,
+active_set-80056,active_set,PASS,optimal,optimal,optimal,-32.8437499411,-32.84375,
+active_set-80057,active_set,PASS,optimal,optimal,optimal,19.6874999737,19.6875,
+active_set-80058,active_set,PASS,optimal,optimal,optimal,-28.205078093,-28.205078125,
+active_set-80059,active_set,PASS,optimal,optimal,optimal,-812.50781049,-812.5078125,
+active_set-80060,active_set,PASS,optimal,optimal,optimal,-73.7617187476,-73.76171875,
+active_set-80061,active_set,PASS,optimal,optimal,optimal,-0.53124999882,-0.53125,
+active_set-80062,active_set,PASS,optimal,not_set,optimal,-10.4492187497,,
+active_set-80063,active_set,PASS,optimal,optimal,optimal,-22.4062500049,-22.40625,
+active_set-80064,active_set,PASS,optimal,optimal,optimal,-15.0117187708,-15.01171875,
+active_set-80065,active_set,PASS,optimal,optimal,optimal,5.51562501369,5.515625,
+active_set-80066,active_set,PASS,optimal,optimal,optimal,-688.851562496,-688.8515625,
+active_set-80067,active_set,PASS,optimal,optimal,optimal,-823.261718718,-823.26171875,
+active_set-80068,active_set,PASS,optimal,optimal,optimal,-113.992186873,-113.9921875,
+active_set-80069,active_set,PASS,optimal,optimal,optimal,85.9394531166,85.939453125,
+active_set-80070,active_set,PASS,optimal,optimal,optimal,-142.324218421,-142.32421875,
+active_set-80071,active_set,PASS,optimal,optimal,optimal,-410.544921348,-410.544921875,
+active_set-80072,active_set,PASS,optimal,optimal,optimal,-43.134765569,-43.134765625,
+active_set-80073,active_set,PASS,optimal,optimal,optimal,9.75781249932,9.7578125,
+active_set-80074,active_set,PASS,optimal,optimal,optimal,-602.761718401,-602.76171875,
+active_set-80075,active_set,PASS,optimal,optimal,optimal,8.64257812854,8.642578125,
+active_set-80076,active_set,PASS,optimal,optimal,optimal,-154.296874496,-154.296875,
+active_set-80077,active_set,PASS,optimal,optimal,optimal,21.6562499952,21.65625,
+active_set-80078,active_set,PASS,optimal,optimal,optimal,260.33398276,260.333984375,
+active_set-80079,active_set,PASS,optimal,optimal,optimal,-450.390624878,-450.390625,
+bounds_huge-82000,bounds_huge,PASS,optimal,optimal,optimal,-10.5937499897,-10.59375,
+bounds_huge-82001,bounds_huge,PASS,optimal,optimal,optimal,-11.8281249647,-11.828125,
+bounds_huge-82002,bounds_huge,PASS,optimal,optimal,optimal,-307.515625,-307.515891808,
+bounds_huge-82003,bounds_huge,PASS,optimal,optimal,optimal,-30.6406249497,-30.640625,
+bounds_huge-82004,bounds_huge,PASS,optimal,optimal,optimal,-0.0390625,-0.0390625,
+bounds_huge-82005,bounds_huge,PASS,optimal,optimal,optimal,-46.3359373931,-46.3359375,
+bounds_huge-82006,bounds_huge,PASS,optimal,optimal,optimal,-14.1796875,-14.1796875,
+bounds_huge-82007,bounds_huge,PASS,optimal,optimal,optimal,-27.01171875,-27.01171875,
+bounds_huge-82008,bounds_huge,PASS,optimal,optimal,optimal,22.5937499693,22.59375,
+bounds_huge-82009,bounds_huge,PASS,optimal,optimal,optimal,-175.257812119,-175.2578125,
+bounds_huge-82010,bounds_huge,NOANS,numerical_failure,time_limit,optimal,,,converged on the scaled problem but not on the original model
+bounds_huge-82011,bounds_huge,PASS,optimal,optimal,optimal,20.3125,20.3125,
+bounds_huge-82012,bounds_huge,PASS,optimal,optimal,optimal,114.947265484,114.947265625,
+bounds_huge-82013,bounds_huge,PASS,optimal,optimal,optimal,-52.1152342371,-52.115234375,
+bounds_huge-82014,bounds_huge,PASS,optimal,other:Solve error,optimal,-163.929687013,,
+bounds_huge-82015,bounds_huge,PASS,optimal,optimal,optimal,-11.2812499627,-11.28125,
+bounds_huge-82016,bounds_huge,PASS,optimal,optimal,optimal,2.49218749055,2.4921875,
+bounds_huge-82017,bounds_huge,PASS,optimal,other:Solve error,optimal,-2.55468749867,,
+bounds_huge-82018,bounds_huge,PASS,optimal,optimal,optimal,-91.6953124604,-91.6953125,
+bounds_huge-82019,bounds_huge,PASS,optimal,optimal,optimal,-12.5234374942,-12.5234375,
+bounds_huge-82020,bounds_huge,PASS,optimal,optimal,optimal,-24.21875,-24.21875,
+bounds_huge-82021,bounds_huge,PASS,optimal,optimal,optimal,-54.21875,-54.21875,
+bounds_huge-82022,bounds_huge,PASS,optimal,optimal,optimal,105.085937186,105.0859375,
+bounds_huge-82023,bounds_huge,PASS,optimal,optimal,optimal,28.0253906224,28.025390625,
+bounds_huge-82024,bounds_huge,PASS,optimal,optimal,optimal,-1.52343749574,-1.5234375,
+bounds_huge-82025,bounds_huge,PASS,optimal,optimal,optimal,154.546874943,154.546875,
+bounds_huge-82026,bounds_huge,NOANS,numerical_failure,optimal,optimal,,-45.7187499898,no progress in 30 iterations
+bounds_huge-82027,bounds_huge,PASS,optimal,other:Solve error,optimal,-296.21874981,,
+bounds_huge-82028,bounds_huge,NOANS,numerical_failure,optimal,optimal,,-275.880859375,converged on the scaled problem but not on the original model
+bounds_huge-82029,bounds_huge,PASS,optimal,optimal,optimal,-221.912109121,-221.912109375,
+bounds_huge-82030,bounds_huge,PASS,optimal,optimal,optimal,-2.53125,-2.53125,
+bounds_huge-82031,bounds_huge,PASS,optimal,optimal,optimal,14.8046874987,14.8046875,
+bounds_huge-82032,bounds_huge,PASS,optimal,optimal,optimal,-213.695312377,-213.6953125,
+bounds_huge-82033,bounds_huge,NOANS,numerical_failure,other:Solve error,optimal,,,converged on the scaled problem but not on the original model
+bounds_huge-82034,bounds_huge,PASS,optimal,optimal,optimal,6.31249999909,6.3125,
+bounds_huge-82035,bounds_huge,PASS,optimal,optimal,optimal,-57.507812499,-57.5078125,
+bounds_huge-82036,bounds_huge,PASS,optimal,other:Solve error,optimal,7.13281251158,,
+bounds_huge-82037,bounds_huge,PASS,optimal,optimal,optimal,-18.4921874987,-18.4921875,
+bounds_huge-82038,bounds_huge,PASS,optimal,optimal,optimal,-68.9374997193,-68.9375,
+bounds_huge-82039,bounds_huge,PASS,optimal,optimal,optimal,-144.937499972,-144.9375,
+bounds_huge-82040,bounds_huge,NOANS,numerical_failure,optimal,optimal,,-13.2265625,no progress in 30 iterations
+bounds_huge-82041,bounds_huge,PASS,optimal,optimal,optimal,-9.43749998746,-9.4375,
+bounds_huge-82042,bounds_huge,PASS,optimal,optimal,optimal,173.499999981,173.5,
+bounds_huge-82043,bounds_huge,PASS,optimal,other:Solve error,optimal,15.283203067,,
+bounds_huge-82044,bounds_huge,NOANS,numerical_failure,optimal,optimal,,82617024.6977,converged on the scaled problem but not on the original model
+bounds_huge-82045,bounds_huge,PASS,optimal,optimal,optimal,158.697265469,158.697265625,
+bounds_huge-82046,bounds_huge,PASS,optimal,optimal,optimal,23.8437499045,23.84375,
+bounds_huge-82047,bounds_huge,PASS,optimal,optimal,optimal,-44.0937495971,-44.09375,
+bounds_huge-82048,bounds_huge,PASS,optimal,optimal,optimal,-54.6171874064,-54.6171875,
+bounds_huge-82049,bounds_huge,PASS,optimal,optimal,optimal,-67.3574218743,-67.357421875,
+bounds_huge-82050,bounds_huge,PASS,optimal,optimal,optimal,-3.42968748661,-3.4296875,
+bounds_huge-82051,bounds_huge,FAIL_KKT,optimal,optimal,optimal,33.2806249999,33.34375,
+bounds_huge-82052,bounds_huge,PASS,optimal,other:Solve error,optimal,-124.98046875,,
+bounds_huge-82053,bounds_huge,PASS,optimal,optimal,optimal,-155.386718629,-155.38671875,
+bounds_huge-82054,bounds_huge,PASS,optimal,optimal,optimal,-404.607420361,-404.607421875,
+bounds_huge-82055,bounds_huge,PASS,optimal,optimal,optimal,16.414062485,16.4140625,
+bounds_huge-82056,bounds_huge,NOANS,numerical_failure,optimal,optimal,,-26.6582031247,no progress in 30 iterations
+bounds_huge-82057,bounds_huge,PASS,optimal,optimal,optimal,-9.08984374998,-9.08984397352,
+bounds_huge-82058,bounds_huge,PASS,optimal,optimal,optimal,-21.310546875,-21.3128112791,
+bounds_huge-82059,bounds_huge,PASS,optimal,time_limit,optimal,-53.1464842519,,
+bounds_huge-82060,bounds_huge,PASS,optimal,optimal,optimal,-47.8125,-47.8125,
+bounds_huge-82061,bounds_huge,PASS,optimal,optimal,optimal,23.6953124544,23.6953125,
+bounds_huge-82062,bounds_huge,PASS,optimal,optimal,optimal,-11.9765623972,-11.9765625,
+bounds_huge-82063,bounds_huge,PASS,optimal,optimal,optimal,-8.51757807322,-8.517578125,
+bounds_huge-82064,bounds_huge,PASS,optimal,optimal,optimal,-106.171874844,-106.171875,
+bounds_huge-82065,bounds_huge,PASS,optimal,optimal,optimal,191.373046875,191.373046875,
+bounds_huge-82066,bounds_huge,PASS,optimal,optimal,optimal,-7.64843749248,-7.6484375,
+bounds_huge-82067,bounds_huge,PASS,optimal,optimal,optimal,-7.03125,-7.03125,
+bounds_huge-82068,bounds_huge,NOANS,numerical_failure,optimal,optimal,,-130.65625,no progress in 30 iterations
+bounds_huge-82069,bounds_huge,PASS,optimal,optimal,optimal,-83.4414058633,-83.44140625,
+bounds_huge-82070,bounds_huge,PASS,optimal,optimal,optimal,-8.35156247778,-8.3515625,
+bounds_huge-82071,bounds_huge,PASS,optimal,optimal,optimal,-99.9804687539,-99.98046875,
+bounds_huge-82072,bounds_huge,PASS,optimal,optimal,optimal,-116.857421871,-116.857421875,
+bounds_huge-82073,bounds_huge,PASS,optimal,optimal,optimal,-9.57031248487,-9.5703125,
+bounds_huge-82074,bounds_huge,NOANS,numerical_failure,optimal,optimal,,-21.2578123915,no progress in 30 iterations
+bounds_huge-82075,bounds_huge,NOANS,numerical_failure,optimal,optimal,,-46.044921875,converged on the scaled problem but not on the original model
+bounds_huge-82076,bounds_huge,PASS,optimal,optimal,optimal,-169.968749419,6573384.41755,
+bounds_huge-82077,bounds_huge,PASS,optimal,optimal,optimal,-10.7187499981,-10.71875,
+bounds_huge-82078,bounds_huge,PASS,optimal,optimal,optimal,-40.5664062408,-40.56640625,
+bounds_huge-82079,bounds_huge,PASS,optimal,optimal,optimal,-29.4687499989,-29.46875,
+bounds_special-81000,bounds_special,PASS,optimal,optimal,optimal,1.93164061379,1.931640625,
+bounds_special-81001,bounds_special,PASS,optimal,optimal,optimal,-45.0234372553,-45.0234375,
+bounds_special-81002,bounds_special,PASS,optimal,optimal,optimal,-31.9843749988,-31.984375,
+bounds_special-81003,bounds_special,PASS,optimal,optimal,optimal,6.0585937499,6.05859375,
+bounds_special-81004,bounds_special,PASS,optimal,optimal,optimal,-36.2343748756,-36.234375,
+bounds_special-81005,bounds_special,PASS,optimal,optimal,optimal,-92.109374552,-92.109375,
+bounds_special-81006,bounds_special,PASS,optimal,optimal,optimal,-17.4843749484,-17.484375,
+bounds_special-81007,bounds_special,PASS,optimal,optimal,optimal,-261.775389212,-261.775390625,
+bounds_special-81008,bounds_special,PASS,optimal,optimal,optimal,-182.925781184,-182.92578125,
+bounds_special-81009,bounds_special,PASS,optimal,optimal,optimal,-93.6796872262,-93.6796875,
+bounds_special-81010,bounds_special,PASS,optimal,optimal,optimal,-114.82031241,0,
+bounds_special-81011,bounds_special,PASS,optimal,optimal,optimal,-106.562499988,-106.5625,
+bounds_special-81012,bounds_special,PASS,optimal,optimal,optimal,-90.1347656104,-90.134765625,
+bounds_special-81013,bounds_special,PASS,optimal,optimal,optimal,34.7851562486,34.78515625,
+bounds_special-81014,bounds_special,PASS,optimal,optimal,optimal,173.492187084,173.4921875,
+bounds_special-81015,bounds_special,PASS,optimal,optimal,optimal,42.4453125,42.4453125,
+bounds_special-81016,bounds_special,PASS,optimal,optimal,optimal,-148.515624478,-148.515625,
+bounds_special-81017,bounds_special,PASS,optimal,unbounded,optimal,-6.5703125,,
+bounds_special-81018,bounds_special,PASS,optimal,optimal,optimal,16.8007812355,16.80078125,
+bounds_special-81019,bounds_special,PASS,optimal,optimal,optimal,122.853515227,122.853515625,
+bounds_special-81020,bounds_special,PASS,optimal,optimal,optimal,93.0703124969,93.0703125,
+bounds_special-81021,bounds_special,PASS,optimal,optimal,optimal,68.453124997,68.453125,
+bounds_special-81022,bounds_special,PASS,optimal,optimal,optimal,-5.01562499549,-5.015625,
+bounds_special-81023,bounds_special,PASS,optimal,optimal,optimal,-135.453124932,-135.453125,
+bounds_special-81024,bounds_special,PASS,optimal,optimal,optimal,3.55468747985,3.5546875,
+bounds_special-81025,bounds_special,PASS,optimal,optimal,optimal,-21.1582031249,-21.158203125,
+bounds_special-81026,bounds_special,PASS,optimal,optimal,optimal,185.167967553,185.16796875,
+bounds_special-81027,bounds_special,PASS,optimal,optimal,optimal,48.8671875014,48.8671875,
+bounds_special-81028,bounds_special,PASS,optimal,optimal,optimal,-13.6328124848,-13.6328125,
+bounds_special-81029,bounds_special,PASS,optimal,optimal,optimal,-199.355468498,-199.35546875,
+bounds_special-81030,bounds_special,PASS,optimal,optimal,optimal,-221.273436586,-221.2734375,
+bounds_special-81031,bounds_special,PASS,optimal,optimal,optimal,-34.1562498931,-34.15625,
+bounds_special-81032,bounds_special,PASS,optimal,optimal,optimal,-51.8281249659,-51.828125,
+bounds_special-81033,bounds_special,PASS,optimal,other:Solve error,optimal,190.89062498,,
+bounds_special-81034,bounds_special,PASS,optimal,optimal,optimal,-10.828125,-10.828125,
+bounds_special-81035,bounds_special,PASS,optimal,optimal,optimal,-81.1933592229,-81.193359375,
+bounds_special-81036,bounds_special,PASS,optimal,optimal,optimal,347.257811983,347.2578125,
+bounds_special-81037,bounds_special,PASS,optimal,optimal,optimal,-80.3320308532,-80.33203125,
+bounds_special-81038,bounds_special,PASS,optimal,optimal,optimal,-15.3085937451,-15.30859375,
+bounds_special-81039,bounds_special,PASS,optimal,optimal,optimal,-0.507812503176,-0.5078125,
+bounds_special-81040,bounds_special,PASS,optimal,optimal,optimal,-19.8203124804,-19.8203125,
+bounds_special-81041,bounds_special,PASS,optimal,optimal,optimal,-118.474609351,-118.474609375,
+bounds_special-81042,bounds_special,PASS,optimal,optimal,optimal,51.748046875,51.748046875,
+bounds_special-81043,bounds_special,PASS,optimal,optimal,optimal,-121.242187361,-121.2421875,
+bounds_special-81044,bounds_special,PASS,optimal,optimal,optimal,-91.2304686052,-91.23046875,
+bounds_special-81045,bounds_special,PASS,optimal,optimal,optimal,-2.28125,-2.28125,
+bounds_special-81046,bounds_special,PASS,optimal,optimal,optimal,106.292968749,106.29296875,
+bounds_special-81047,bounds_special,PASS,optimal,optimal,optimal,257.531249897,257.53125,
+bounds_special-81048,bounds_special,PASS,optimal,optimal,optimal,-124.32617154,-124.326171875,
+bounds_special-81049,bounds_special,PASS,optimal,other:Solve error,optimal,-290.906249748,,
+bounds_special-81050,bounds_special,PASS,optimal,optimal,optimal,-14.156249908,-14.15625,
+bounds_special-81051,bounds_special,PASS,optimal,optimal,optimal,-635.861328123,-635.861328125,
+bounds_special-81052,bounds_special,PASS,optimal,optimal,optimal,83.6328124987,83.6328125,
+bounds_special-81053,bounds_special,PASS,optimal,optimal,optimal,141.335937385,141.3359375,
+bounds_special-81054,bounds_special,PASS,optimal,optimal,optimal,-183.664061931,-183.6640625,
+bounds_special-81055,bounds_special,PASS,optimal,optimal,optimal,-15.4042968442,-15.404296875,
+bounds_special-81056,bounds_special,PASS,optimal,other:Solve error,optimal,-162.593749983,,
+bounds_special-81057,bounds_special,PASS,optimal,optimal,optimal,-173.787109151,-173.787109375,
+bounds_special-81058,bounds_special,PASS,optimal,optimal,optimal,-14.0468749591,-14.046875,
+bounds_special-81059,bounds_special,PASS,optimal,optimal,optimal,308.765624994,308.765625,
+bounds_special-81060,bounds_special,PASS,optimal,optimal,optimal,-115.552734274,-115.552734375,
+bounds_special-81061,bounds_special,PASS,optimal,optimal,optimal,321.062499934,321.0625,
+bounds_special-81062,bounds_special,PASS,optimal,optimal,optimal,97.8183593718,97.818359375,
+bounds_special-81063,bounds_special,PASS,optimal,optimal,optimal,-161.517577948,-161.517578125,
+bounds_special-81064,bounds_special,PASS,optimal,optimal,optimal,-93.6640625,-93.6640625,
+bounds_special-81065,bounds_special,PASS,optimal,optimal,optimal,-464.632811522,-464.6328125,
+bounds_special-81066,bounds_special,PASS,optimal,optimal,optimal,6.88671875,6.88671875,
+bounds_special-81067,bounds_special,PASS,optimal,optimal,optimal,10.6874999659,10.6875,
+bounds_special-81068,bounds_special,PASS,optimal,optimal,optimal,-34.968749919,-34.96875,
+bounds_special-81069,bounds_special,PASS,optimal,optimal,optimal,-169.152343147,-169.15234375,
+bounds_special-81070,bounds_special,PASS,optimal,optimal,optimal,6.71093749807,6.7109375,
+bounds_special-81071,bounds_special,PASS,optimal,optimal,optimal,-7.96484374953,-7.96484375,
+bounds_special-81072,bounds_special,PASS,optimal,optimal,optimal,2.71874999859,2.71875,
+bounds_special-81073,bounds_special,PASS,optimal,optimal,optimal,-97.6874999548,-97.6875,
+bounds_special-81074,bounds_special,PASS,optimal,optimal,optimal,170.923827701,170.923828125,
+bounds_special-81075,bounds_special,PASS,optimal,optimal,optimal,-10.5859374568,-10.5859375,
+bounds_special-81076,bounds_special,PASS,optimal,optimal,optimal,-11.3828124991,-11.3828125,
+bounds_special-81077,bounds_special,PASS,optimal,optimal,optimal,-45.7871092916,-45.787109375,
+bounds_special-81078,bounds_special,PASS,optimal,optimal,optimal,-46.6249999999,-46.625,
+bounds_special-81079,bounds_special,PASS,optimal,optimal,optimal,-52.7871093714,-52.787109375,
+bounds_special-81080,bounds_special,PASS,optimal,optimal,optimal,-79.6093748758,-79.609375,
+bounds_special-81081,bounds_special,PASS,optimal,optimal,optimal,-2.99999999156,-3,
+bounds_special-81082,bounds_special,PASS,optimal,optimal,optimal,-103.718749989,-103.71875,
+bounds_special-81083,bounds_special,PASS,optimal,optimal,optimal,-41.1640625,-41.1640625,
+bounds_special-81084,bounds_special,PASS,optimal,optimal,optimal,-81.0546875,-81.0546875,
+bounds_special-81085,bounds_special,PASS,optimal,optimal,optimal,-143.656249949,-143.65625,
+bounds_special-81086,bounds_special,PASS,optimal,optimal,optimal,171.179687433,171.1796875,
+bounds_special-81087,bounds_special,PASS,optimal,optimal,optimal,-27.8203125,-27.8203125,
+bounds_special-81088,bounds_special,PASS,optimal,optimal,optimal,-151.847655669,-151.84765625,
+bounds_special-81089,bounds_special,PASS,optimal,optimal,optimal,-731.701170839,-731.701171875,
+bounds_tight-83000,bounds_tight,PASS,optimal,optimal,optimal,21.6874999993,21.6875000013,
+bounds_tight-83001,bounds_tight,PASS,optimal,optimal,optimal,-105.281249772,-105.28125,
+bounds_tight-83002,bounds_tight,PASS,optimal,optimal,optimal,49.3242186478,49.32421875,
+bounds_tight-83003,bounds_tight,PASS,optimal,optimal,optimal,-56.3828125,-56.3828125,
+bounds_tight-83004,bounds_tight,PASS,optimal,other:Solve error,optimal,-578.765625,,
+bounds_tight-83005,bounds_tight,PASS,optimal,unbounded,optimal,-103.570312181,,
+bounds_tight-83006,bounds_tight,PASS,optimal,optimal,optimal,93.1953123396,93.1953125,
+bounds_tight-83007,bounds_tight,PASS,optimal,optimal,optimal,-99.2324218642,-99.232421875,
+bounds_tight-83008,bounds_tight,PASS,optimal,optimal,optimal,-5.05859373861,-5.05859375169,
+bounds_tight-83009,bounds_tight,PASS,optimal,other:Solve error,optimal,-107.966796484,,
+bounds_tight-83010,bounds_tight,PASS,optimal,optimal,optimal,-65.2031247773,-65.203125,
+bounds_tight-83011,bounds_tight,PASS,optimal,optimal,optimal,107.335937498,107.3359375,
+bounds_tight-83012,bounds_tight,PASS,optimal,optimal,optimal,377.253906249,377.253906252,
+bounds_tight-83013,bounds_tight,PASS,optimal,optimal,optimal,-455.64062473,-455.640625,
+bounds_tight-83014,bounds_tight,PASS,optimal,optimal,optimal,-0.992187498768,-0.9921875,
+bounds_tight-83015,bounds_tight,PASS,optimal,optimal,optimal,-5.24218749418,-5.2421875,
+bounds_tight-83016,bounds_tight,PASS,optimal,optimal,optimal,-91.3144528622,-91.314453125,
+bounds_tight-83017,bounds_tight,PASS,optimal,optimal,optimal,-168.851562318,-168.8515625,
+bounds_tight-83018,bounds_tight,PASS,optimal,optimal,optimal,-274.220703021,-274.220703125,
+bounds_tight-83019,bounds_tight,PASS,optimal,optimal,optimal,-26.8046874506,-26.8046875,
+bounds_tight-83020,bounds_tight,PASS,optimal,optimal,optimal,2.40625000353,2.40625,
+bounds_tight-83021,bounds_tight,PASS,optimal,optimal,optimal,514.226561694,514.2265625,
+bounds_tight-83022,bounds_tight,PASS,optimal,optimal,optimal,216.238281062,216.23828125,
+bounds_tight-83023,bounds_tight,PASS,optimal,optimal,optimal,135.687499874,135.6875,
+bounds_tight-83024,bounds_tight,PASS,optimal,optimal,optimal,-42.4531250025,-42.453125,
+bounds_tight-83025,bounds_tight,PASS,optimal,optimal,optimal,90.6562499072,90.65625,
+bounds_tight-83026,bounds_tight,PASS,optimal,optimal,optimal,-93.3828124291,-93.3828125,
+bounds_tight-83027,bounds_tight,PASS,optimal,optimal,optimal,-39.3164062496,-39.31640625,
+bounds_tight-83028,bounds_tight,PASS,optimal,optimal,optimal,-52.3867186659,-52.38671875,
+bounds_tight-83029,bounds_tight,PASS,optimal,optimal,optimal,-22.5624999535,-22.5625,
+bounds_tight-83030,bounds_tight,PASS,optimal,optimal,optimal,-141.656249997,-141.65625,
+bounds_tight-83031,bounds_tight,PASS,optimal,optimal,optimal,292.605468745,292.60546875,
+bounds_tight-83032,bounds_tight,PASS,optimal,optimal,optimal,-25.5898437224,-25.58984375,
+bounds_tight-83033,bounds_tight,PASS,optimal,optimal,optimal,123.730468329,123.73046875,
+bounds_tight-83034,bounds_tight,PASS,optimal,optimal,optimal,13.173828127,13.173828125,
+bounds_tight-83035,bounds_tight,PASS,optimal,optimal,optimal,-127.242187459,-127.2421875,
+bounds_tight-83036,bounds_tight,PASS,optimal,optimal,optimal,233.708984148,233.708984375,
+bounds_tight-83037,bounds_tight,PASS,optimal,other:Solve error,optimal,80.0117183708,,
+bounds_tight-83038,bounds_tight,PASS,optimal,optimal,optimal,22.3359374963,22.3359375,
+bounds_tight-83039,bounds_tight,PASS,optimal,optimal,optimal,88.4999999998,88.5,
+bounds_tight-83040,bounds_tight,PASS,optimal,optimal,optimal,-87.7226559368,-87.7226562596,
+bounds_tight-83041,bounds_tight,PASS,optimal,optimal,optimal,-239.632811988,-239.6328125,
+bounds_tight-83042,bounds_tight,PASS,optimal,optimal,optimal,4.45312500022,4.453125,
+bounds_tight-83043,bounds_tight,PASS,optimal,optimal,optimal,3.70898437045,3.708984375,
+bounds_tight-83044,bounds_tight,PASS,optimal,other:Solve error,optimal,-410.562498741,,
+bounds_tight-83045,bounds_tight,PASS,optimal,optimal,optimal,120.77343749,120.7734375,
+bounds_tight-83046,bounds_tight,PASS,optimal,optimal,optimal,-22.1054687338,-22.10546875,
+bounds_tight-83047,bounds_tight,PASS,optimal,optimal,optimal,-112.208984177,-112.208984375,
+bounds_tight-83048,bounds_tight,PASS,optimal,optimal,optimal,-49.7343749546,-49.734375,
+bounds_tight-83049,bounds_tight,PASS,optimal,optimal,optimal,-34.5332030909,-34.533203125,
+bounds_tight-83050,bounds_tight,PASS,optimal,optimal,optimal,92.0800777892,92.080078125,
+bounds_tight-83051,bounds_tight,PASS,optimal,optimal,optimal,-0.499999999835,-0.5,
+bounds_tight-83052,bounds_tight,PASS,optimal,optimal,optimal,-194.300781074,-194.30078125,
+bounds_tight-83053,bounds_tight,PASS,optimal,optimal,optimal,153.796874987,153.796875,
+bounds_tight-83054,bounds_tight,PASS,optimal,optimal,optimal,-11.3124999608,-11.3125,
+bounds_tight-83055,bounds_tight,PASS,optimal,optimal,optimal,-127.976562268,-127.9765625,
+bounds_tight-83056,bounds_tight,PASS,optimal,optimal,optimal,17.7851562327,17.78515625,
+bounds_tight-83057,bounds_tight,PASS,optimal,optimal,optimal,-67.4101560007,-67.41015625,
+bounds_tight-83058,bounds_tight,PASS,optimal,optimal,optimal,12.2988281162,12.298828125,
+bounds_tight-83059,bounds_tight,PASS,optimal,optimal,optimal,-340.265624957,-340.265625,
+degenerate_cons-79000,degenerate_cons,PASS,optimal,optimal,optimal,1.97656249493,1.9765625,
+degenerate_cons-79001,degenerate_cons,PASS,optimal,optimal,optimal,-7.22656247357,-7.2265625,
+degenerate_cons-79002,degenerate_cons,PASS,optimal,optimal,optimal,-19.4433593751,-19.443359375,
+degenerate_cons-79003,degenerate_cons,PASS,optimal,optimal,optimal,-1.328125,-1.328125,
+degenerate_cons-79004,degenerate_cons,PASS,optimal,optimal,optimal,21.5898437379,21.58984375,
+degenerate_cons-79005,degenerate_cons,PASS,optimal,optimal,optimal,-109.474609375,-109.474609375,
+degenerate_cons-79006,degenerate_cons,PASS,optimal,optimal,optimal,2.5078125,2.5078125,
+degenerate_cons-79007,degenerate_cons,PASS,optimal,optimal,optimal,0.636718754494,0.63671875,
+degenerate_cons-79008,degenerate_cons,PASS,optimal,optimal,optimal,-23.7519531207,-23.751953125,
+degenerate_cons-79009,degenerate_cons,PASS,optimal,optimal,optimal,-2.45703125425,-2.45703125,
+degenerate_cons-79010,degenerate_cons,PASS,optimal,optimal,optimal,13.9531249657,13.953125,
+degenerate_cons-79011,degenerate_cons,PASS,optimal,optimal,optimal,-129.300781243,-129.30078125,
+degenerate_cons-79012,degenerate_cons,PASS,optimal,optimal,optimal,-25.9394531224,-25.939453125,
+degenerate_cons-79013,degenerate_cons,PASS,optimal,optimal,optimal,0.033203125,0.033203125,
+degenerate_cons-79014,degenerate_cons,PASS,optimal,optimal,optimal,1.18359375,1.18359375,
+degenerate_cons-79015,degenerate_cons,PASS,optimal,optimal,optimal,-16.9374999702,-16.9375,
+degenerate_cons-79016,degenerate_cons,PASS,optimal,optimal,optimal,15.0449218457,15.044921875,
+degenerate_cons-79017,degenerate_cons,PASS,optimal,optimal,optimal,63.783202878,63.783203125,
+degenerate_cons-79018,degenerate_cons,PASS,optimal,optimal,optimal,-36.0566406197,-36.056640625,
+degenerate_cons-79019,degenerate_cons,PASS,optimal,optimal,optimal,54.7031249171,54.703125,
+degenerate_cons-79020,degenerate_cons,PASS,optimal,optimal,optimal,1.0429687482,1.04296875,
+degenerate_cons-79021,degenerate_cons,PASS,optimal,optimal,optimal,-80.0273437319,-80.02734375,
+degenerate_cons-79022,degenerate_cons,PASS,optimal,optimal,optimal,0,0,
+degenerate_cons-79023,degenerate_cons,PASS,optimal,optimal,optimal,-14.8769530576,-14.876953125,
+degenerate_cons-79024,degenerate_cons,PASS,optimal,optimal,optimal,-7.97460936215,-7.974609375,
+degenerate_cons-79025,degenerate_cons,PASS,optimal,optimal,optimal,7.45312498984,7.453125,
+degenerate_cons-79026,degenerate_cons,PASS,optimal,optimal,optimal,-11.6718749598,-11.671875,
+degenerate_cons-79027,degenerate_cons,PASS,optimal,optimal,optimal,4.32617185828,4.326171875,
+degenerate_cons-79028,degenerate_cons,PASS,optimal,optimal,optimal,4.29687499844,4.296875,
+degenerate_cons-79029,degenerate_cons,PASS,optimal,optimal,optimal,-1.162109375,-1.162109375,
+degenerate_cons-79030,degenerate_cons,PASS,optimal,optimal,optimal,0.195312499266,0.1953125,
+degenerate_cons-79031,degenerate_cons,PASS,optimal,optimal,optimal,-16.9394530569,-16.939453125,
+degenerate_cons-79032,degenerate_cons,PASS,optimal,optimal,optimal,-17.0234374969,-17.0234375,
+degenerate_cons-79033,degenerate_cons,PASS,optimal,optimal,optimal,-5.54296874181,-5.54296875,
+degenerate_cons-79034,degenerate_cons,PASS,optimal,optimal,optimal,3.783203125,3.783203125,
+degenerate_cons-79035,degenerate_cons,PASS,optimal,optimal,optimal,-3.00390625049,-3.00390625,
+degenerate_cons-79036,degenerate_cons,PASS,optimal,optimal,optimal,-85.8222648264,-85.822265625,
+degenerate_cons-79037,degenerate_cons,PASS,optimal,optimal,optimal,49.812499988,49.8125,
+degenerate_cons-79038,degenerate_cons,PASS,optimal,optimal,optimal,-3.49023437369,-3.490234375,
+degenerate_cons-79039,degenerate_cons,PASS,optimal,optimal,optimal,14.808593696,14.80859375,
+degenerate_cons-79040,degenerate_cons,PASS,optimal,optimal,optimal,-26.8183591346,-26.818359375,
+degenerate_cons-79041,degenerate_cons,PASS,optimal,optimal,optimal,-217.787109375,-217.787109375,
+degenerate_cons-79042,degenerate_cons,PASS,optimal,optimal,optimal,-0.691406239869,-0.69140625,
+degenerate_cons-79043,degenerate_cons,PASS,optimal,optimal,optimal,-0.187499996233,-0.1875,
+degenerate_cons-79044,degenerate_cons,PASS,optimal,optimal,optimal,-33.8632812146,-33.86328125,
+degenerate_cons-79045,degenerate_cons,PASS,optimal,optimal,optimal,-0.0488281252423,-0.048828125,
+degenerate_cons-79046,degenerate_cons,PASS,optimal,optimal,optimal,-3.3046875,-3.3046875,
+degenerate_cons-79047,degenerate_cons,PASS,optimal,optimal,optimal,0.515624994528,0.515625,
+degenerate_cons-79048,degenerate_cons,PASS,optimal,optimal,optimal,-7.14062498133,-7.140625,
+degenerate_cons-79049,degenerate_cons,PASS,optimal,optimal,optimal,-28.3769531084,-28.376953125,
+degenerate_cons-79050,degenerate_cons,PASS,optimal,optimal,optimal,4.58007812323,4.580078125,
+degenerate_cons-79051,degenerate_cons,PASS,optimal,optimal,optimal,3.912109375,3.912109375,
+degenerate_cons-79052,degenerate_cons,PASS,optimal,optimal,optimal,-63.6640624941,-63.6640625,
+degenerate_cons-79053,degenerate_cons,PASS,optimal,optimal,optimal,19.0058593214,19.005859375,
+degenerate_cons-79054,degenerate_cons,PASS,optimal,optimal,optimal,-3.37109375001,-3.37109375,
+degenerate_cons-79055,degenerate_cons,PASS,optimal,optimal,optimal,-2.88281249305,-2.8828125,
+degenerate_cons-79056,degenerate_cons,PASS,optimal,optimal,optimal,9.888671875,9.888671875,
+degenerate_cons-79057,degenerate_cons,PASS,optimal,optimal,optimal,4.779296875,4.779296875,
+degenerate_cons-79058,degenerate_cons,PASS,optimal,optimal,optimal,49.9726562253,49.97265625,
+degenerate_cons-79059,degenerate_cons,PASS,optimal,optimal,optimal,-4.15624999967,-4.15625,
+degenerate_cons-79060,degenerate_cons,PASS,optimal,optimal,optimal,-12.7851561795,-12.78515625,
+degenerate_cons-79061,degenerate_cons,PASS,optimal,optimal,optimal,-57.1816405219,-57.181640625,
+degenerate_cons-79062,degenerate_cons,PASS,optimal,optimal,optimal,9.36914062064,9.369140625,
+degenerate_cons-79063,degenerate_cons,PASS,optimal,optimal,optimal,-15.3496093687,-15.349609375,
+degenerate_cons-79064,degenerate_cons,PASS,optimal,optimal,optimal,-51.0253906159,-51.025390625,
+degenerate_cons-79065,degenerate_cons,PASS,optimal,optimal,optimal,-59.0390624219,-59.0390625,
+degenerate_cons-79066,degenerate_cons,PASS,optimal,optimal,optimal,-0.1640625,-0.1640625,
+degenerate_cons-79067,degenerate_cons,PASS,optimal,optimal,optimal,9.48437496182,9.484375,
+degenerate_cons-79068,degenerate_cons,PASS,optimal,optimal,optimal,-0.746093749978,-0.74609375,
+degenerate_cons-79069,degenerate_cons,PASS,optimal,optimal,optimal,-15.8007812332,-15.80078125,
+degenerate_cons-79070,degenerate_cons,PASS,optimal,optimal,optimal,24.2734374948,24.2734375,
+degenerate_cons-79071,degenerate_cons,PASS,optimal,optimal,optimal,5.47265627724,5.47265625,
+degenerate_cons-79072,degenerate_cons,PASS,optimal,optimal,optimal,14.7089843723,14.708984375,
+degenerate_cons-79073,degenerate_cons,PASS,optimal,optimal,optimal,-3.18554687297,-3.185546875,
+degenerate_cons-79074,degenerate_cons,PASS,optimal,optimal,optimal,22.2343749985,22.234375,
+degenerate_cons-79075,degenerate_cons,PASS,optimal,optimal,optimal,-3.9921875,-3.9921875,
+degenerate_cons-79076,degenerate_cons,PASS,optimal,optimal,optimal,-6.41015626614,-6.41015625,
+degenerate_cons-79077,degenerate_cons,PASS,optimal,optimal,optimal,-0.544921882631,-0.544921875,
+degenerate_cons-79078,degenerate_cons,PASS,optimal,optimal,optimal,193.167968184,193.16796875,
+degenerate_cons-79079,degenerate_cons,PASS,optimal,optimal,optimal,-4.75781249999,-4.7578125,
+degenerate_cons-79080,degenerate_cons,PASS,optimal,optimal,optimal,0.8125,0.8125,
+degenerate_cons-79081,degenerate_cons,PASS,optimal,optimal,optimal,10.0156249947,10.015625,
+degenerate_cons-79082,degenerate_cons,PASS,optimal,optimal,optimal,28.7460937493,28.74609375,
+degenerate_cons-79083,degenerate_cons,PASS,optimal,optimal,optimal,-2.79492186911,-2.794921875,
+degenerate_cons-79084,degenerate_cons,PASS,optimal,optimal,optimal,-39.6132812463,-39.61328125,
+degenerate_cons-79085,degenerate_cons,PASS,optimal,optimal,optimal,-5.72656249891,-5.7265625,
+degenerate_cons-79086,degenerate_cons,PASS,optimal,optimal,optimal,-9.41210936294,-9.412109375,
+degenerate_cons-79087,degenerate_cons,PASS,optimal,optimal,optimal,-17.5097655918,-17.509765625,
+degenerate_cons-79088,degenerate_cons,PASS,optimal,optimal,optimal,13.1582031081,13.158203125,
+degenerate_cons-79089,degenerate_cons,PASS,optimal,optimal,optimal,1.54296875,1.54296875,
+degenerate_cons-79090,degenerate_cons,PASS,optimal,optimal,optimal,39.005859375,39.005859375,
+degenerate_cons-79091,degenerate_cons,PASS,optimal,optimal,optimal,-35.1171873577,-35.1171875,
+degenerate_cons-79092,degenerate_cons,PASS,optimal,optimal,optimal,-6.921875,-6.921875,
+degenerate_cons-79093,degenerate_cons,PASS,optimal,optimal,optimal,-10.1406249919,-10.140625,
+degenerate_cons-79094,degenerate_cons,PASS,optimal,optimal,optimal,-35.910156212,-35.91015625,
+degenerate_cons-79095,degenerate_cons,PASS,optimal,optimal,optimal,-1.49609375,-1.49609375,
+degenerate_cons-79096,degenerate_cons,PASS,optimal,optimal,optimal,9.20312499915,9.203125,
+degenerate_cons-79097,degenerate_cons,PASS,optimal,optimal,optimal,8.09570312466,8.095703125,
+degenerate_cons-79098,degenerate_cons,PASS,optimal,optimal,optimal,110.449218576,110.44921875,
+degenerate_cons-79099,degenerate_cons,PASS,optimal,optimal,optimal,2.2441406254,2.244140625,
+empty_structure-91000,empty_structure,PASS,optimal,optimal,optimal,-8.59375,-8.59375,
+empty_structure-91001,empty_structure,PASS,optimal,optimal,optimal,0,0,
+empty_structure-91002,empty_structure,PASS,optimal,optimal,optimal,0.0546875002641,0.0546875,
+empty_structure-91003,empty_structure,PASS,optimal,optimal,optimal,-6.09375,-6.09375,
+empty_structure-91004,empty_structure,PASS,optimal,optimal,optimal,-108.171875,-108.171875,
+empty_structure-91005,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+empty_structure-91006,empty_structure,PASS,optimal,optimal,optimal,-7.90625,-7.90625,
+empty_structure-91007,empty_structure,PASS,optimal,optimal,optimal,-3.82031249862,-3.8203125,
+empty_structure-91008,empty_structure,PASS,optimal,optimal,optimal,0,0,
+empty_structure-91009,empty_structure,PASS,optimal,optimal,optimal,3.8828125,3.8828125,
+empty_structure-91010,empty_structure,PASS,optimal,optimal,optimal,34.8671875,34.8671875,
+empty_structure-91011,empty_structure,PASS,optimal,optimal,optimal,-100.070312077,-100.0703125,
+empty_structure-91012,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+empty_structure-91013,empty_structure,PASS,optimal,optimal,optimal,-71.4062496684,-71.40625,
+empty_structure-91014,empty_structure,PASS,optimal,optimal,optimal,-119.234374833,-119.22428978,
+empty_structure-91015,empty_structure,PASS,optimal,optimal,optimal,-6.53125,-3.9617064762,
+empty_structure-91016,empty_structure,PASS,optimal,optimal,optimal,4.26455649901e-09,0,
+empty_structure-91017,empty_structure,PASS,optimal,optimal,optimal,2.15234375,2.15234375,
+empty_structure-91018,empty_structure,PASS,optimal,optimal,optimal,-31.4023436644,-31.40234375,
+empty_structure-91019,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+empty_structure-91020,empty_structure,PASS,optimal,optimal,optimal,-25.7265624466,-25.7265625,
+empty_structure-91021,empty_structure,PASS,optimal,optimal,optimal,-17.7968749987,-17.796875,
+empty_structure-91022,empty_structure,PASS,optimal,optimal,optimal,-39.2421874329,-39.2421875,
+empty_structure-91023,empty_structure,PASS,optimal,optimal,optimal,0.28125,0.28125,
+empty_structure-91024,empty_structure,PASS,optimal,optimal,optimal,72.60546875,72.60546875,
+empty_structure-91025,empty_structure,PASS,optimal,optimal,optimal,-225.031249587,-225.03125,
+empty_structure-91026,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R0 has no free columns and is violated
+empty_structure-91027,empty_structure,PASS,optimal,optimal,optimal,-14.7812499638,-14.78125,
+empty_structure-91028,empty_structure,PASS,optimal,optimal,optimal,-47.9374999209,-47.9375,
+empty_structure-91029,empty_structure,PASS,optimal,optimal,optimal,9.84375010385,9.84375,
+empty_structure-91030,empty_structure,PASS,optimal,optimal,optimal,3.30468750925,3.3046875,
+empty_structure-91031,empty_structure,PASS,optimal,optimal,optimal,4.78515625,4.78515625,
+empty_structure-91032,empty_structure,PASS,optimal,optimal,optimal,20.2910156219,20.291015625,
+empty_structure-91033,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+empty_structure-91034,empty_structure,PASS,optimal,optimal,optimal,-31.5664062469,-31.56640625,
+empty_structure-91035,empty_structure,PASS,optimal,optimal,optimal,-177.796873983,-177.796875,
+empty_structure-91036,empty_structure,PASS,optimal,optimal,optimal,2.46875,2.46875,
+empty_structure-91037,empty_structure,PASS,optimal,optimal,optimal,3.0625,3.0625,
+empty_structure-91038,empty_structure,PASS,optimal,optimal,optimal,0.2421875,0.2421875,
+empty_structure-91039,empty_structure,PASS,optimal,optimal,optimal,-130.935546465,-130.935546875,
+empty_structure-91040,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R1 has no free columns and is violated
+empty_structure-91041,empty_structure,PASS,optimal,optimal,optimal,12.5898437315,12.58984375,
+empty_structure-91042,empty_structure,PASS,optimal,optimal,optimal,-41.7031249976,-41.703125,
+empty_structure-91043,empty_structure,PASS,optimal,optimal,optimal,-31.490234375,-31.490234375,
+empty_structure-91044,empty_structure,PASS,optimal,optimal,optimal,-1.5625,-1.5625,
+empty_structure-91045,empty_structure,PASS,optimal,optimal,optimal,-105.9453125,-105.9453125,
+empty_structure-91046,empty_structure,PASS,optimal,optimal,optimal,38.765625,38.765625,
+empty_structure-91047,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R0 has no free columns and is violated
+empty_structure-91048,empty_structure,PASS,optimal,optimal,optimal,0,0,
+empty_structure-91049,empty_structure,PASS,optimal,optimal,optimal,155.664062143,155.6640625,
+empty_structure-91050,empty_structure,PASS,optimal,optimal,optimal,0,0,
+empty_structure-91051,empty_structure,PASS,optimal,optimal,optimal,4.22040689088e-15,4.81482486097e-35,
+empty_structure-91052,empty_structure,PASS,optimal,optimal,optimal,-3.953125,-3.953125,
+empty_structure-91053,empty_structure,PASS,optimal,optimal,optimal,-2.42187499999,-2.421875,
+empty_structure-91054,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R2 has no free columns and is violated
+empty_structure-91055,empty_structure,PASS,optimal,optimal,optimal,-63.16015625,-63.16015625,
+empty_structure-91056,empty_structure,PASS,optimal,optimal,optimal,13.8124999992,13.8125,
+empty_structure-91057,empty_structure,PASS,optimal,optimal,optimal,-13.203125,-13.203125,
+empty_structure-91058,empty_structure,PASS,optimal,optimal,optimal,4.1015625,4.1015625,
+empty_structure-91059,empty_structure,PASS,optimal,optimal,optimal,-285.2578125,-285.2578125,
+empty_structure-91060,empty_structure,PASS,optimal,optimal,optimal,4.939453125,4.939453125,
+empty_structure-91061,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+empty_structure-91062,empty_structure,PASS,optimal,optimal,optimal,5.5234375,5.5234375,
+empty_structure-91063,empty_structure,PASS,optimal,optimal,optimal,-5.48437498624,-5.484375,
+empty_structure-91064,empty_structure,PASS,optimal,optimal,optimal,-40.2128906249,-40.212890625,
+empty_structure-91065,empty_structure,PASS,optimal,optimal,optimal,-2.625,-2.625,
+empty_structure-91066,empty_structure,PASS,optimal,optimal,optimal,132.46875,132.46875,
+empty_structure-91067,empty_structure,PASS,optimal,optimal,optimal,-56.8124999248,-56.8125,
+empty_structure-91068,empty_structure,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+empty_structure-91069,empty_structure,PASS,optimal,optimal,optimal,-22.3378905307,-22.337890625,
+fuzz_mixed-94000,fuzz_mixed,PASS,optimal,optimal,optimal,-81.9707029611,-81.970703125,
+fuzz_mixed-94001,fuzz_mixed,PASS,optimal,optimal,optimal,-125.70312472,-125.703125,
+fuzz_mixed-94002,fuzz_mixed,PASS,optimal,optimal,optimal,101.66406211,101.6640625,
+fuzz_mixed-94003,fuzz_mixed,PASS,optimal,optimal,optimal,-846.673826733,-846.673828125,
+fuzz_mixed-94004,fuzz_mixed,PASS,optimal,optimal,optimal,58.6835937523,58.68359375,
+fuzz_mixed-94005,fuzz_mixed,PASS,optimal,optimal,optimal,-74.6640625,-74.6640625,
+fuzz_mixed-94006,fuzz_mixed,PASS,optimal,optimal,optimal,214.130859248,214.130859375,
+fuzz_mixed-94007,fuzz_mixed,PASS,optimal,optimal,optimal,-7.37499998625,-7.375,
+fuzz_mixed-94008,fuzz_mixed,PASS,optimal,optimal,optimal,4.406249999,4.40625,
+fuzz_mixed-94009,fuzz_mixed,PASS,optimal,optimal,optimal,42.1855467969,42.185546875,
+fuzz_mixed-94010,fuzz_mixed,PASS,optimal,optimal,optimal,-212.214843128,-212.21484375,
+fuzz_mixed-94011,fuzz_mixed,PASS,optimal,optimal,optimal,-258.275390624,-258.275390625,
+fuzz_mixed-94012,fuzz_mixed,PASS,optimal,optimal,optimal,28.8124999796,28.8125,
+fuzz_mixed-94013,fuzz_mixed,PASS,optimal,optimal,optimal,-38.8984374826,-38.8984375,
+fuzz_mixed-94014,fuzz_mixed,PASS,optimal,optimal,optimal,-808.664061861,-808.6640625,
+fuzz_mixed-94015,fuzz_mixed,PASS,optimal,optimal,optimal,-107.246093544,-107.24609375,
+fuzz_mixed-94016,fuzz_mixed,PASS,optimal,optimal,optimal,-2.025390625,-2.025390625,
+fuzz_mixed-94017,fuzz_mixed,PASS,optimal,optimal,optimal,248.021483793,248.021484375,
+fuzz_mixed-94018,fuzz_mixed,PASS,optimal,optimal,optimal,39.5449218722,39.544921875,
+fuzz_mixed-94019,fuzz_mixed,PASS,optimal,optimal,optimal,-28.179687378,-28.1796875,
+fuzz_mixed-94020,fuzz_mixed,PASS,optimal,optimal,optimal,-15.4609375,-15.4609375,
+fuzz_mixed-94021,fuzz_mixed,PASS,optimal,optimal,optimal,-21.0273437499,-21.02734375,
+fuzz_mixed-94022,fuzz_mixed,PASS,optimal,optimal,optimal,-56.6875,-56.6875,
+fuzz_mixed-94023,fuzz_mixed,PASS,optimal,optimal,optimal,-5.52343749522,-5.5234375,
+fuzz_mixed-94024,fuzz_mixed,PASS,optimal,optimal,optimal,-13.1328124998,-13.1328125,
+fuzz_mixed-94025,fuzz_mixed,PASS,optimal,optimal,optimal,-21.7499999301,-21.75,
+fuzz_mixed-94026,fuzz_mixed,PASS,optimal,optimal,optimal,-115.435546827,-115.435546875,
+fuzz_mixed-94027,fuzz_mixed,PASS,optimal,optimal,optimal,-1.48828125,-1.48828125,
+fuzz_mixed-94028,fuzz_mixed,PASS,optimal,optimal,optimal,-212.294921624,-212.294921875,
+fuzz_mixed-94029,fuzz_mixed,PASS,optimal,optimal,optimal,49.1835936177,49.18359375,
+fuzz_mixed-94030,fuzz_mixed,PASS,optimal,optimal,optimal,-193.67382811,-193.673828125,
+fuzz_mixed-94031,fuzz_mixed,PASS,optimal,optimal,optimal,-32.4355467366,-32.435546875,
+fuzz_mixed-94032,fuzz_mixed,PASS,optimal,optimal,optimal,-27.5078124887,-27.5078125,
+fuzz_mixed-94033,fuzz_mixed,PASS,optimal,optimal,optimal,-22.1679687495,-22.16796875,
+fuzz_mixed-94034,fuzz_mixed,PASS,optimal,optimal,optimal,220.984374196,220.984375,
+fuzz_mixed-94035,fuzz_mixed,PASS,optimal,optimal,optimal,154.970703119,154.970703125,
+fuzz_mixed-94036,fuzz_mixed,PASS,optimal,optimal,optimal,-17.697265625,-17.697265625,
+fuzz_mixed-94037,fuzz_mixed,PASS,optimal,optimal,optimal,-446.619140585,-446.619140625,
+fuzz_mixed-94038,fuzz_mixed,PASS,optimal,optimal,optimal,94.7617187498,94.76171875,
+fuzz_mixed-94039,fuzz_mixed,PASS,optimal,optimal,optimal,116.765624724,116.765625,
+fuzz_mixed-94040,fuzz_mixed,PASS,optimal,optimal,optimal,-205.71484278,-205.71484375,
+fuzz_mixed-94041,fuzz_mixed,PASS,optimal,optimal,optimal,0.1953125,0.1953125,
+fuzz_mixed-94042,fuzz_mixed,PASS,optimal,optimal,optimal,-1.86718750002,-1.8671875,
+fuzz_mixed-94043,fuzz_mixed,PASS,optimal,optimal,optimal,26.9296874693,26.9296875,
+fuzz_mixed-94044,fuzz_mixed,PASS,optimal,optimal,optimal,737.392574559,737.392578125,
+fuzz_mixed-94045,fuzz_mixed,PASS,optimal,optimal,optimal,749.734373764,749.734375,
+fuzz_mixed-94046,fuzz_mixed,PASS,optimal,unbounded,optimal,3.21875,,
+fuzz_mixed-94047,fuzz_mixed,PASS,optimal,optimal,optimal,-1.3515625,-1.3515625,
+fuzz_mixed-94048,fuzz_mixed,PASS,optimal,optimal,optimal,-93.7304687501,-93.73046875,
+fuzz_mixed-94049,fuzz_mixed,PASS,optimal,optimal,optimal,76.7968748607,76.796875,
+fuzz_mixed-94050,fuzz_mixed,PASS,optimal,optimal,optimal,64.3046874152,64.3046875,
+fuzz_mixed-94051,fuzz_mixed,PASS,optimal,optimal,optimal,-185.927734369,-185.927734375,
+fuzz_mixed-94052,fuzz_mixed,PASS,optimal,optimal,optimal,2.86718750477,2.8671875,
+fuzz_mixed-94053,fuzz_mixed,PASS,optimal,optimal,optimal,0.19921874892,0.19921875,
+fuzz_mixed-94054,fuzz_mixed,PASS,optimal,optimal,optimal,-286.599609362,-286.599609375,
+fuzz_mixed-94055,fuzz_mixed,PASS,optimal,optimal,optimal,-403.214843076,-403.21484375,
+fuzz_mixed-94056,fuzz_mixed,PASS,optimal,optimal,optimal,261.781249474,261.78125,
+fuzz_mixed-94057,fuzz_mixed,PASS,optimal,optimal,optimal,-171.874999416,-171.875,
+fuzz_mixed-94058,fuzz_mixed,PASS,optimal,optimal,optimal,-57.0468749004,-57.046875,
+fuzz_mixed-94059,fuzz_mixed,PASS,optimal,optimal,optimal,-47.9804685993,-47.98046875,
+fuzz_mixed-94060,fuzz_mixed,PASS,optimal,optimal,optimal,-168.535156251,-168.53515625,
+fuzz_mixed-94061,fuzz_mixed,PASS,optimal,optimal,optimal,-148.757812296,-148.7578125,
+fuzz_mixed-94062,fuzz_mixed,PASS,optimal,optimal,optimal,6.83593746877,6.8359375,
+fuzz_mixed-94063,fuzz_mixed,PASS,optimal,other:Solve error,optimal,-561.664061287,,
+fuzz_mixed-94064,fuzz_mixed,PASS,optimal,optimal,optimal,-667.757812048,-667.7578125,
+fuzz_mixed-94065,fuzz_mixed,PASS,optimal,optimal,optimal,-510.87304625,-510.873046875,
+fuzz_mixed-94066,fuzz_mixed,PASS,optimal,optimal,optimal,-4.53124999374,-4.53125,
+fuzz_mixed-94067,fuzz_mixed,PASS,optimal,optimal,optimal,-193.976561841,-193.9765625,
+fuzz_mixed-94068,fuzz_mixed,PASS,optimal,optimal,optimal,-177.652343593,-177.65234375,
+fuzz_mixed-94069,fuzz_mixed,PASS,optimal,optimal,optimal,-121.464843496,-121.46484375,
+fuzz_mixed-94070,fuzz_mixed,PASS,optimal,optimal,optimal,-16.5468748928,-16.546875,
+fuzz_mixed-94071,fuzz_mixed,PASS,optimal,optimal,optimal,-80.9179687081,-80.91796875,
+fuzz_mixed-94072,fuzz_mixed,PASS,optimal,optimal,optimal,-160.132812462,-160.1328125,
+fuzz_mixed-94073,fuzz_mixed,PASS,optimal,optimal,optimal,-18.6621093383,-18.662109375,
+fuzz_mixed-94074,fuzz_mixed,PASS,optimal,other:Solve error,optimal,-40.8046874981,,
+fuzz_mixed-94075,fuzz_mixed,PASS,optimal,optimal,optimal,-68.8906249774,-68.890625,
+fuzz_mixed-94076,fuzz_mixed,PASS,optimal,optimal,optimal,59.4589843413,59.458984375,
+fuzz_mixed-94077,fuzz_mixed,PASS,optimal,optimal,optimal,-690.464841847,-690.46484375,
+fuzz_mixed-94078,fuzz_mixed,PASS,optimal,optimal,optimal,1.68945313388,1.689453125,
+fuzz_mixed-94079,fuzz_mixed,PASS,optimal,optimal,optimal,-717.078124943,-717.078125,
+fuzz_mixed-94080,fuzz_mixed,PASS,optimal,optimal,optimal,-172.541015608,-172.541015625,
+fuzz_mixed-94081,fuzz_mixed,PASS,optimal,optimal,optimal,10.6210937528,10.62109375,
+fuzz_mixed-94082,fuzz_mixed,PASS,optimal,optimal,optimal,165.484374803,165.484375,
+fuzz_mixed-94083,fuzz_mixed,PASS,optimal,optimal,optimal,-104.378906226,-104.37890625,
+fuzz_mixed-94084,fuzz_mixed,PASS,optimal,optimal,optimal,67.7734374847,67.7734375,
+fuzz_mixed-94085,fuzz_mixed,PASS,optimal,optimal,optimal,-2.69921875004,-2.69921875,
+fuzz_mixed-94086,fuzz_mixed,PASS,optimal,optimal,optimal,52.1289062759,52.12890625,
+fuzz_mixed-94087,fuzz_mixed,PASS,optimal,optimal,optimal,-3.85156248643,-3.8515625,
+fuzz_mixed-94088,fuzz_mixed,PASS,optimal,optimal,optimal,26.314453125,26.314453125,
+fuzz_mixed-94089,fuzz_mixed,PASS,optimal,optimal,optimal,93.6796870526,93.6796875,
+fuzz_mixed-94090,fuzz_mixed,PASS,optimal,optimal,optimal,-28.5,-28.5,
+fuzz_mixed-94091,fuzz_mixed,PASS,optimal,optimal,optimal,3.48437499936,3.484375,
+fuzz_mixed-94092,fuzz_mixed,PASS,optimal,optimal,optimal,-24.5429687159,-24.54296875,
+fuzz_mixed-94093,fuzz_mixed,PASS,optimal,optimal,optimal,-20.277343768,-20.27734375,
+fuzz_mixed-94094,fuzz_mixed,PASS,optimal,optimal,optimal,15.5703125,15.5703125,
+fuzz_mixed-94095,fuzz_mixed,PASS,optimal,optimal,optimal,-29.3203125,-29.3203125,
+fuzz_mixed-94096,fuzz_mixed,PASS,optimal,optimal,optimal,3.64843747781,3.6484375,
+fuzz_mixed-94097,fuzz_mixed,PASS,optimal,optimal,optimal,-15.21875,-15.21875,
+fuzz_mixed-94098,fuzz_mixed,PASS,optimal,optimal,optimal,212.064453066,212.064453125,
+fuzz_mixed-94099,fuzz_mixed,PASS,optimal,optimal,optimal,-340.855468741,-340.85546875,
+fuzz_mixed-94100,fuzz_mixed,PASS,optimal,optimal,optimal,-183.76953125,-183.76953125,
+fuzz_mixed-94101,fuzz_mixed,PASS,optimal,optimal,optimal,-169.257812331,-169.2578125,
+fuzz_mixed-94102,fuzz_mixed,PASS,optimal,optimal,optimal,-47.6953125,-47.6953125,
+fuzz_mixed-94103,fuzz_mixed,PASS,optimal,optimal,optimal,33.1718749006,33.171875,
+fuzz_mixed-94104,fuzz_mixed,PASS,optimal,optimal,optimal,316.484374781,316.484375,
+fuzz_mixed-94105,fuzz_mixed,PASS,optimal,optimal,optimal,-63.7011718126,-63.701171875,
+fuzz_mixed-94106,fuzz_mixed,PASS,optimal,optimal,optimal,-514.187498772,-514.1875,
+fuzz_mixed-94107,fuzz_mixed,PASS,optimal,optimal,optimal,48.9492186761,48.94921875,
+fuzz_mixed-94108,fuzz_mixed,PASS,optimal,optimal,optimal,-1.6015625,-1.6015625,
+fuzz_mixed-94109,fuzz_mixed,PASS,optimal,optimal,optimal,5.90625,5.90625,
+fuzz_mixed-94110,fuzz_mixed,PASS,optimal,optimal,optimal,-21.3007811923,-21.30078125,
+fuzz_mixed-94111,fuzz_mixed,PASS,optimal,optimal,optimal,-151.632812171,-151.6328125,
+fuzz_mixed-94112,fuzz_mixed,PASS,optimal,optimal,optimal,-25.765625,-25.765625,
+fuzz_mixed-94113,fuzz_mixed,PASS,optimal,optimal,optimal,-19.7226561924,-19.72265625,
+fuzz_mixed-94114,fuzz_mixed,PASS,optimal,optimal,optimal,171.335937499,171.3359375,
+fuzz_mixed-94115,fuzz_mixed,PASS,optimal,optimal,optimal,0,0,
+fuzz_mixed-94116,fuzz_mixed,PASS,optimal,optimal,optimal,219.367187408,219.3671875,
+fuzz_mixed-94117,fuzz_mixed,PASS,optimal,optimal,optimal,-2.51171877661,-2.51171875,
+fuzz_mixed-94118,fuzz_mixed,PASS,optimal,optimal,optimal,-171.216796749,-171.216796875,
+fuzz_mixed-94119,fuzz_mixed,PASS,optimal,optimal,optimal,-20.9570312672,-20.95703125,
+fuzz_mixed-94120,fuzz_mixed,PASS,optimal,optimal,optimal,5.171875,5.171875,
+fuzz_mixed-94121,fuzz_mixed,PASS,optimal,optimal,optimal,256.316406178,256.31640625,
+fuzz_mixed-94122,fuzz_mixed,PASS,optimal,optimal,optimal,77.9453124943,77.9453125,
+fuzz_mixed-94123,fuzz_mixed,PASS,optimal,optimal,optimal,41.1445310984,41.14453125,
+fuzz_mixed-94124,fuzz_mixed,PASS,optimal,optimal,optimal,13.281250014,13.28125,
+fuzz_mixed-94125,fuzz_mixed,PASS,optimal,optimal,optimal,-192.777343548,-192.77734375,
+fuzz_mixed-94126,fuzz_mixed,PASS,optimal,optimal,optimal,-42.296875,-42.296875,
+fuzz_mixed-94127,fuzz_mixed,PASS,optimal,optimal,optimal,19.5624999587,19.5625,
+fuzz_mixed-94128,fuzz_mixed,PASS,optimal,optimal,optimal,-32.35546875,-32.35546875,
+fuzz_mixed-94129,fuzz_mixed,PASS,optimal,optimal,optimal,451.693358278,451.693359375,
+fuzz_mixed-94130,fuzz_mixed,PASS,optimal,optimal,optimal,-1.423828125,-1.423828125,
+fuzz_mixed-94131,fuzz_mixed,PASS,optimal,optimal,optimal,-163.216796875,-163.216796875,
+fuzz_mixed-94132,fuzz_mixed,PASS,optimal,optimal,optimal,-294.164060053,-294.1640625,
+fuzz_mixed-94133,fuzz_mixed,PASS,optimal,optimal,optimal,268.134765143,268.134765625,
+fuzz_mixed-94134,fuzz_mixed,PASS,optimal,optimal,optimal,-20.0449218759,-20.044921875,
+fuzz_mixed-94135,fuzz_mixed,PASS,optimal,other:Solve error,optimal,33.390625,,
+fuzz_mixed-94136,fuzz_mixed,PASS,optimal,optimal,optimal,-31.2832029593,-31.283203125,
+fuzz_mixed-94137,fuzz_mixed,PASS,optimal,optimal,optimal,-827.031249333,-827.03125,
+fuzz_mixed-94138,fuzz_mixed,PASS,optimal,optimal,optimal,445.064452598,445.064453125,
+fuzz_mixed-94139,fuzz_mixed,PASS,optimal,optimal,optimal,142.232421855,142.232421875,
+fuzz_mixed-94140,fuzz_mixed,PASS,optimal,optimal,optimal,217.832031001,217.83203125,
+fuzz_mixed-94141,fuzz_mixed,PASS,optimal,optimal,optimal,11.9882812786,11.98828125,
+fuzz_mixed-94142,fuzz_mixed,PASS,optimal,optimal,optimal,-308.937499988,-308.9375,
+fuzz_mixed-94143,fuzz_mixed,PASS,optimal,optimal,optimal,-63.0195312467,-63.01953125,
+fuzz_mixed-94144,fuzz_mixed,PASS,optimal,optimal,optimal,327.964843001,327.96484375,
+fuzz_mixed-94145,fuzz_mixed,PASS,optimal,other:Solve error,optimal,418.257812126,,
+fuzz_mixed-94146,fuzz_mixed,PASS,optimal,optimal,optimal,136.933593382,136.93359375,
+fuzz_mixed-94147,fuzz_mixed,PASS,optimal,optimal,optimal,98.5390625,98.5390625,
+fuzz_mixed-94148,fuzz_mixed,PASS,optimal,optimal,optimal,-303.664062499,-303.6640625,
+fuzz_mixed-94149,fuzz_mixed,PASS,optimal,optimal,optimal,10.7675781251,10.767578125,
+ill_cond-87000,ill_cond,PASS,optimal,optimal,optimal,-3.83083636632,-3.83083636634,
+ill_cond-87001,ill_cond,PASS,optimal,optimal,optimal,-65.6248830199,-65.6248830235,
+ill_cond-87002,ill_cond,NOANS,numerical_failure,optimal,optimal,,6.04282682119,no progress in 30 iterations
+ill_cond-87003,ill_cond,NOANS,numerical_failure,optimal,optimal,,-22.2809059797,no progress in 30 iterations
+ill_cond-87004,ill_cond,PASS,optimal,optimal,optimal,41140.093768,41140.0937612,
+ill_cond-87005,ill_cond,PASS,optimal,optimal,optimal,37.4141871736,37.4141875759,
+ill_cond-87006,ill_cond,NOANS,numerical_failure,optimal,optimal,,-0.360517586062,converged on the scaled problem but not on the original model
+ill_cond-87007,ill_cond,NOANS,numerical_failure,optimal,optimal,,-9.55834281949,no progress in 30 iterations
+ill_cond-87008,ill_cond,PASS,optimal,optimal,optimal,-32.2068234536,-32.2068234537,
+ill_cond-87009,ill_cond,PASS,optimal,optimal,optimal,14.1728022471,14.1728022482,
+ill_cond-87010,ill_cond,NOANS,numerical_failure,optimal,optimal,,-30.1992187004,no progress in 30 iterations
+ill_cond-87011,ill_cond,NOANS,numerical_failure,optimal,optimal,,-67.6730494898,no progress in 30 iterations
+ill_cond-87012,ill_cond,PASS,optimal,optimal,optimal,-5.86279733516,-5.86279733516,
+ill_cond-87013,ill_cond,PASS,optimal,optimal,optimal,-34.4580450805,-34.4580451515,
+ill_cond-87014,ill_cond,NOANS,numerical_failure,optimal,optimal,,-19.9824517199,no progress in 30 iterations
+ill_cond-87015,ill_cond,NOANS,numerical_failure,optimal,optimal,,5828.02962904,no progress in 30 iterations
+ill_cond-87016,ill_cond,PASS,optimal,optimal,optimal,14.0792595918,14.0792595918,
+ill_cond-87017,ill_cond,PASS,optimal,optimal,optimal,-1.63321593544,-1.63321593548,
+ill_cond-87018,ill_cond,NOANS,numerical_failure,optimal,optimal,,-185.095902873,no progress in 30 iterations
+ill_cond-87019,ill_cond,NOANS,numerical_failure,optimal,optimal,,12.609295649,no progress in 30 iterations
+ill_cond-87020,ill_cond,PASS,optimal,optimal,optimal,-2.72243345847,-2.72243347947,
+ill_cond-87021,ill_cond,PASS,optimal,optimal,optimal,-7.34133142666,-7.34133142665,
+ill_cond-87022,ill_cond,PASS,optimal,optimal,optimal,14637.8182872,14637.8182871,
+ill_cond-87023,ill_cond,NOANS,numerical_failure,optimal,optimal,,1504.73627178,no progress in 30 iterations
+ill_cond-87024,ill_cond,PASS,optimal,optimal,optimal,-9.72421639027,-9.72421639054,
+ill_cond-87025,ill_cond,PASS,optimal,optimal,optimal,-124.240096204,-124.240096208,
+ill_cond-87026,ill_cond,NOANS,numerical_failure,optimal,optimal,,-37.4092188559,no progress in 30 iterations
+ill_cond-87027,ill_cond,PASS,optimal,optimal,optimal,428625.881786,428625.881756,
+ill_cond-87028,ill_cond,PASS,optimal,optimal,optimal,-11.3345883744,-11.3345883744,
+ill_cond-87029,ill_cond,PASS,optimal,optimal,optimal,-9.18040380253,-9.18040380369,
+ill_cond-87030,ill_cond,NOANS,numerical_failure,optimal,optimal,,-3.89930633126,no progress in 30 iterations
+ill_cond-87031,ill_cond,NOANS,numerical_failure,optimal,optimal,,-22.3902731797,no progress in 30 iterations
+ill_cond-87032,ill_cond,PASS,optimal,optimal,optimal,-6.15663553315,-6.15663553394,
+ill_cond-87033,ill_cond,PASS,optimal,optimal,optimal,-72.3270776871,-72.3270776838,
+ill_cond-87034,ill_cond,NOANS,numerical_failure,optimal,optimal,,-35.0199083813,converged on the scaled problem but not on the original model
+ill_cond-87035,ill_cond,NOANS,numerical_failure,optimal,optimal,,2199.12981928,converged on the scaled problem but not on the original model
+ill_cond-87036,ill_cond,PASS,optimal,optimal,optimal,121.09616798,121.096167977,
+ill_cond-87037,ill_cond,PASS,optimal,optimal,optimal,-5.90612026792,-5.9061202906,
+ill_cond-87038,ill_cond,NOANS,numerical_failure,optimal,optimal,,-16.8151951408,no progress in 30 iterations
+ill_cond-87039,ill_cond,NOANS,numerical_failure,optimal,optimal,,-14.8554665456,no progress in 30 iterations
+ill_cond-87040,ill_cond,PASS,optimal,optimal,optimal,22.9283191067,22.9283191056,
+ill_cond-87041,ill_cond,PASS,optimal,optimal,optimal,-11.007510771,-11.007510768,
+ill_cond-87042,ill_cond,PASS,optimal,optimal,optimal,-0.0516594624652,-0.0516594624753,
+ill_cond-87043,ill_cond,NOANS,numerical_failure,optimal,optimal,,-4.50831994344,no progress in 30 iterations
+ill_cond-87044,ill_cond,PASS,optimal,optimal,optimal,-45.8388796745,-45.8388796795,
+ill_cond-87045,ill_cond,PASS,optimal,optimal,optimal,-5.43779781139,-5.43779781185,
+ill_cond-87046,ill_cond,NOANS,numerical_failure,optimal,optimal,,-1.75910640924,converged on the scaled problem but not on the original model
+ill_cond-87047,ill_cond,NOANS,numerical_failure,optimal,optimal,,-79.0136267971,no progress in 30 iterations
+ill_cond-87048,ill_cond,PASS,optimal,optimal,optimal,-18.1094508009,-18.1094508007,
+ill_cond-87049,ill_cond,PASS,optimal,optimal,optimal,-51.8518796118,-51.851879612,
+ill_cond-87050,ill_cond,PASS,optimal,optimal,optimal,1769176.764,1769176.76383,
+ill_cond-87051,ill_cond,NOANS,numerical_failure,optimal,optimal,,42.4783154141,no progress in 30 iterations
+ill_cond-87052,ill_cond,PASS,optimal,optimal,optimal,-18.649591681,-18.6495917849,
+ill_cond-87053,ill_cond,PASS,optimal,optimal,optimal,-9.81710432737,-9.81710432628,
+ill_cond-87054,ill_cond,NOANS,numerical_failure,optimal,optimal,,-0.659114601645,converged on the scaled problem but not on the original model
+ill_cond-87055,ill_cond,NOANS,numerical_failure,optimal,optimal,,-35.3313357886,no progress in 30 iterations
+ill_cond-87056,ill_cond,PASS,optimal,optimal,optimal,-8.05603711617,-8.05603711616,
+ill_cond-87057,ill_cond,PASS,optimal,optimal,optimal,-26.4997730069,-26.4997730002,
+ill_cond-87058,ill_cond,PASS,optimal,optimal,optimal,-14.3236801822,-14.3236801965,
+ill_cond-87059,ill_cond,NOANS,numerical_failure,optimal,optimal,,-2.88650411674,no progress in 30 iterations
+indef_convex_feasible-76000,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-8.56467771196,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76001,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-3.68003422153,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76002,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76003,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76004,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-2.01518770793,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76005,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76006,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-7.68265220259,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76007,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76008,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-14.2699205946,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76009,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-1.80499924996,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76010,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76011,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76012,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-1.20861902669,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76013,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76014,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-1.76831549899,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76015,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76016,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76017,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76018,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-6.7973978249,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76019,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-8.23800426503,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76020,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76021,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76022,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-2.89452037579,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76023,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-9.5429388148,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76024,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76025,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-5.45845629731,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76026,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-2.80283812013,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76027,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-11.7325313444,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76028,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-5.77092867583,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76029,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76030,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76031,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-0.474339363251,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76032,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-12.1923080644,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76033,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-4.7323407858,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76034,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76035,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76036,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76037,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76038,indef_convex_feasible,NOANS,nonconvex,optimal,optimal,,-7.44837125112,Q is not positive semidefinite in the minimisation sense
+indef_convex_feasible-76039,indef_convex_feasible,NOANS,nonconvex,not_set,optimal,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75000,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75001,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75002,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75003,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75004,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75005,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75006,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75007,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75008,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75009,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75010,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75011,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75012,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75013,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75014,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75015,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75016,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75017,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75018,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75019,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75020,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75021,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75022,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75023,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75024,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75025,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75026,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75027,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75028,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75029,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75030,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75031,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75032,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75033,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75034,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75035,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75036,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75037,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75038,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75039,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75040,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75041,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75042,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75043,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75044,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75045,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75046,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75047,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75048,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75049,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75050,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75051,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75052,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75053,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75054,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75055,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75056,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75057,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75058,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75059,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75060,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75061,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75062,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75063,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75064,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75065,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75066,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75067,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75068,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75069,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75070,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75071,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75072,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75073,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75074,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75075,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75076,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75077,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75078,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+indefinite-75079,indefinite,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+infeasible-74000,infeasible,PASS,infeasible,infeasible,infeasible,,,
+infeasible-74001,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74002,infeasible,PASS,infeasible,infeasible,infeasible,,,
+infeasible-74003,infeasible,PASS,infeasible,infeasible,infeasible,,,column C1 has empty bounds
+infeasible-74004,infeasible,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+infeasible-74005,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74006,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74007,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74008,infeasible,PASS,infeasible,infeasible,infeasible,,,column C6 has empty bounds
+infeasible-74009,infeasible,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+infeasible-74010,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74011,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74012,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74013,infeasible,PASS,infeasible,infeasible,infeasible,,,column C8 has empty bounds
+infeasible-74014,infeasible,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+infeasible-74015,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74016,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74017,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74018,infeasible,PASS,infeasible,infeasible,infeasible,,,column C2 has empty bounds
+infeasible-74019,infeasible,PASS,infeasible,infeasible,infeasible,,,row R1 has no free columns and is violated
+infeasible-74020,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74021,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74022,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74023,infeasible,PASS,infeasible,infeasible,infeasible,,,column C0 has empty bounds
+infeasible-74024,infeasible,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+infeasible-74025,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74026,infeasible,PASS,infeasible,infeasible,infeasible,,,
+infeasible-74027,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74028,infeasible,PASS,infeasible,infeasible,infeasible,,,column C1 has empty bounds
+infeasible-74029,infeasible,PASS,infeasible,infeasible,infeasible,,,row R4 has no free columns and is violated
+infeasible-74030,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74031,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74032,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74033,infeasible,PASS,infeasible,infeasible,infeasible,,,column C0 has empty bounds
+infeasible-74034,infeasible,PASS,infeasible,infeasible,infeasible,,,row R4 has no free columns and is violated
+infeasible-74035,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74036,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74037,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74038,infeasible,PASS,infeasible,infeasible,infeasible,,,column C2 has empty bounds
+infeasible-74039,infeasible,PASS,infeasible,infeasible,infeasible,,,row R4 has no free columns and is violated
+infeasible-74040,infeasible,PASS,infeasible,infeasible,infeasible,,,
+infeasible-74041,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74042,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74043,infeasible,PASS,infeasible,infeasible,infeasible,,,column C5 has empty bounds
+infeasible-74044,infeasible,PASS,infeasible,infeasible,infeasible,,,row R4 has no free columns and is violated
+infeasible-74045,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74046,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74047,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74048,infeasible,PASS,infeasible,infeasible,infeasible,,,column C5 has empty bounds
+infeasible-74049,infeasible,PASS,infeasible,infeasible,infeasible,,,row R2 has no free columns and is violated
+infeasible-74050,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74051,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74052,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74053,infeasible,PASS,infeasible,infeasible,infeasible,,,column C1 has empty bounds
+infeasible-74054,infeasible,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+infeasible-74055,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74056,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74057,infeasible,NOANS,numerical_failure,infeasible,infeasible,,,nonoptimal original-model proof failed or unavailable
+infeasible-74058,infeasible,PASS,infeasible,infeasible,infeasible,,,inconsistent bounds
+infeasible-74059,infeasible,PASS,infeasible,infeasible,infeasible,,,row R1 has no free columns and is violated
+infeasible-74060,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74061,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74062,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74063,infeasible,PASS,infeasible,infeasible,infeasible,,,column C2 has empty bounds
+infeasible-74064,infeasible,PASS,infeasible,infeasible,infeasible,,,
+infeasible-74065,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74066,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74067,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74068,infeasible,PASS,infeasible,infeasible,infeasible,,,column C0 has empty bounds
+infeasible-74069,infeasible,PASS,infeasible,infeasible,infeasible,,,row R1 has no free columns and is violated
+infeasible-74070,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74071,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74072,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74073,infeasible,PASS,infeasible,infeasible,infeasible,,,column C1 has empty bounds
+infeasible-74074,infeasible,PASS,infeasible,infeasible,infeasible,,,row R2 has no free columns and is violated
+infeasible-74075,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74076,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74077,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74078,infeasible,PASS,infeasible,infeasible,infeasible,,,column C2 has empty bounds
+infeasible-74079,infeasible,PASS,infeasible,infeasible,infeasible,,,row R1 has no free columns and is violated
+infeasible-74080,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74081,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74082,infeasible,PASS,infeasible,infeasible,infeasible,,,
+infeasible-74083,infeasible,PASS,infeasible,infeasible,infeasible,,,column C0 has empty bounds
+infeasible-74084,infeasible,PASS,infeasible,infeasible,infeasible,,,
+infeasible-74085,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74086,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74087,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74088,infeasible,PASS,infeasible,infeasible,infeasible,,,column C1 has empty bounds
+infeasible-74089,infeasible,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+infeasible-74090,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74091,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74092,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74093,infeasible,PASS,infeasible,infeasible,infeasible,,,column C9 has empty bounds
+infeasible-74094,infeasible,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+infeasible-74095,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74096,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74097,infeasible,PASS,infeasible,infeasible,infeasible,,,Farkas certificate
+infeasible-74098,infeasible,PASS,infeasible,infeasible,infeasible,,,column C2 has empty bounds
+infeasible-74099,infeasible,PASS,infeasible,infeasible,infeasible,,,row R3 has no free columns and is violated
+large_sparse-93000,large_sparse,PASS,optimal,time_limit,optimal,-1219.87304427,,
+large_sparse-93001,large_sparse,PASS,optimal,not_set,optimal,-385.816405865,,
+large_sparse-93002,large_sparse,PASS,optimal,optimal,optimal,-3289.88085662,-3289.88085938,
+large_sparse-93003,large_sparse,PASS,optimal,optimal,optimal,-3691.35546573,-3691.35546875,
+large_sparse-93004,large_sparse,PASS,optimal,optimal,optimal,-2251.99023236,-2251.99023437,
+large_sparse-93005,large_sparse,PASS,optimal,optimal,optimal,-2761.35546456,-2761.35546875,
+large_sparse-93006,large_sparse,PASS,optimal,optimal,optimal,4515.04100143,4515.04101562,
+large_sparse-93007,large_sparse,PASS,optimal,optimal,optimal,2401.03124755,2401.03125,
+large_sparse-93008,large_sparse,PASS,optimal,optimal,optimal,-2843.49022879,-2843.49023437,
+large_sparse-93009,large_sparse,PASS,optimal,optimal,optimal,-2527.92772912,-2527.92773438,
+large_sparse-93010,large_sparse,PASS,optimal,optimal,optimal,-3250.08007453,-3250.08007813,
+large_sparse-93011,large_sparse,PASS,optimal,optimal,optimal,-1911.26367029,-1911.26367188,
+large_sparse-93012,large_sparse,PASS,optimal,optimal,optimal,-2420.76171437,-2420.76171875,
+large_sparse-93013,large_sparse,PASS,optimal,optimal,optimal,-1568.08788721,-1568.08789062,
+large_sparse-93014,large_sparse,PASS,optimal,optimal,optimal,-4050.31835612,-4050.31835938,
+large_sparse-93015,large_sparse,PASS,optimal,optimal,optimal,-1917.80273226,-1917.80273437,
+large_sparse-93016,large_sparse,PASS,optimal,optimal,optimal,-2739.77734118,-2739.77734375,
+large_sparse-93017,large_sparse,PASS,optimal,optimal,optimal,-1808.66015149,-1808.66015625,
+large_sparse-93018,large_sparse,PASS,optimal,optimal,optimal,-1494.85741676,-1494.85742187,
+large_sparse-93019,large_sparse,PASS,optimal,optimal,optimal,-4204.51366782,-4204.51367188,
+maximize-88000,maximize,PASS,optimal,optimal,optimal,-9901.45312507,-9901.453125,
+maximize-88001,maximize,PASS,optimal,optimal,optimal,1000139.17968,1000139.17969,
+maximize-88002,maximize,PASS,optimal,optimal,optimal,1000303.08789,1000303.08789,
+maximize-88003,maximize,PASS,optimal,optimal,optimal,215.355467661,215.35546875,
+maximize-88004,maximize,PASS,optimal,optimal,optimal,58.26171857,58.26171875,
+maximize-88005,maximize,PASS,optimal,optimal,optimal,1141.9238251,1141.92382812,
+maximize-88006,maximize,PASS,optimal,optimal,optimal,1000010.24219,1000010.24219,
+maximize-88007,maximize,PASS,optimal,optimal,optimal,67.0468749593,67.046875,
+maximize-88008,maximize,PASS,optimal,optimal,optimal,-1.10937500187,-1.109375,
+maximize-88009,maximize,PASS,optimal,optimal,optimal,-9380.9765625,-9380.9765625,
+maximize-88010,maximize,PASS,optimal,optimal,optimal,1000228.70703,1000228.70703,
+maximize-88011,maximize,PASS,optimal,optimal,optimal,319.23828041,319.23828125,
+maximize-88012,maximize,PASS,optimal,optimal,optimal,-9845.88672029,-9845.88671875,
+maximize-88013,maximize,PASS,optimal,optimal,optimal,230.566406208,230.56640625,
+maximize-88014,maximize,PASS,optimal,optimal,optimal,120.332030856,120.33203125,
+maximize-88015,maximize,PASS,optimal,optimal,optimal,37.2363280842,37.236328125,
+maximize-88016,maximize,PASS,optimal,optimal,optimal,1.1718749962,1.171875,
+maximize-88017,maximize,PASS,optimal,optimal,optimal,15.9062499999,15.90625,
+maximize-88018,maximize,PASS,optimal,optimal,optimal,-9804.75781332,-9804.7578125,
+maximize-88019,maximize,PASS,optimal,optimal,optimal,418.556640588,418.556640625,
+maximize-88020,maximize,PASS,optimal,optimal,optimal,1000103.69336,1000103.69336,
+maximize-88021,maximize,PASS,optimal,optimal,optimal,185.419921875,185.419921875,
+maximize-88022,maximize,PASS,optimal,optimal,optimal,-10001.0195313,-10001.0195312,
+maximize-88023,maximize,PASS,optimal,optimal,optimal,152.445312356,152.4453125,
+maximize-88024,maximize,PASS,optimal,optimal,optimal,379.945311514,379.9453125,
+maximize-88025,maximize,PASS,optimal,optimal,optimal,244.91210918,244.912109375,
+maximize-88026,maximize,PASS,optimal,optimal,optimal,21.1015624984,21.1015625,
+maximize-88027,maximize,PASS,optimal,optimal,optimal,1000001.71875,1000001.71875,
+maximize-88028,maximize,PASS,optimal,other:Solve error,optimal,118.132812465,,
+maximize-88029,maximize,PASS,optimal,optimal,optimal,95.9785154936,95.978515625,
+maximize-88030,maximize,PASS,optimal,optimal,optimal,7.74999998606,7.75,
+maximize-88031,maximize,PASS,optimal,optimal,optimal,47.371093695,47.37109375,
+maximize-88032,maximize,PASS,optimal,optimal,optimal,999989.916015,999989.916016,
+maximize-88033,maximize,PASS,optimal,optimal,optimal,-9760.84765855,-9760.84765625,
+maximize-88034,maximize,PASS,optimal,optimal,optimal,22.007812497,22.0078125,
+maximize-88035,maximize,PASS,optimal,optimal,optimal,-10022.671875,-10022.671875,
+maximize-88036,maximize,PASS,optimal,optimal,optimal,1000017.43359,1000017.43359,
+maximize-88037,maximize,PASS,optimal,optimal,optimal,577.095700946,577.095703125,
+maximize-88038,maximize,PASS,optimal,optimal,optimal,1000124.71094,1000124.71094,
+maximize-88039,maximize,PASS,optimal,optimal,optimal,192.203123821,192.203125,
+maximize-88040,maximize,PASS,optimal,optimal,optimal,321.312499549,321.3125,
+maximize-88041,maximize,PASS,optimal,optimal,optimal,13.5312500013,13.53125,
+maximize-88042,maximize,PASS,optimal,optimal,optimal,-21.9394531646,-21.939453125,
+maximize-88043,maximize,PASS,optimal,optimal,optimal,997.060546858,997.060546875,
+maximize-88044,maximize,PASS,optimal,optimal,optimal,534.439451627,534.439453125,
+maximize-88045,maximize,PASS,optimal,optimal,optimal,10.4101562487,10.41015625,
+maximize-88046,maximize,PASS,optimal,optimal,optimal,88.7187499681,88.71875,
+maximize-88047,maximize,PASS,optimal,optimal,optimal,1000255.60546,1000255.60547,
+maximize-88048,maximize,PASS,optimal,optimal,optimal,43.7382810364,43.73828125,
+maximize-88049,maximize,PASS,optimal,optimal,optimal,32.6523435773,32.65234375,
+maximize-88050,maximize,PASS,optimal,optimal,optimal,28.8593749666,28.859375,
+maximize-88051,maximize,PASS,optimal,optimal,optimal,140.992187356,140.9921875,
+maximize-88052,maximize,PASS,optimal,optimal,optimal,435.837890327,435.837890625,
+maximize-88053,maximize,PASS,optimal,optimal,optimal,238.148437352,238.1484375,
+maximize-88054,maximize,PASS,optimal,optimal,optimal,1000094.84766,1000094.84766,
+maximize-88055,maximize,PASS,optimal,optimal,optimal,248.148437248,248.1484375,
+maximize-88056,maximize,PASS,optimal,optimal,optimal,492.999998584,493,
+maximize-88057,maximize,PASS,optimal,optimal,optimal,41.5957030683,41.595703125,
+maximize-88058,maximize,PASS,optimal,optimal,optimal,166.279296391,166.279296875,
+maximize-88059,maximize,NOANS,numerical_failure,optimal,optimal,,1000028.53125,no progress in 30 iterations
+near_psd-77000,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77001,near_psd,PASS,optimal,optimal,optimal,-1.04051400938,-1.04051401699,
+near_psd-77002,near_psd,PASS,optimal,optimal,optimal,-3.27898276261,-3.27898276543,
+near_psd-77003,near_psd,BORDER,optimal,optimal,optimal,-31.2500000275,-31.2500000317,
+near_psd-77004,near_psd,BORDER,optimal,optimal,optimal,-13.1249999611,-13.125,
+near_psd-77005,near_psd,PASS,optimal,optimal,optimal,-0.607832980496,-0.607832980496,
+near_psd-77006,near_psd,PASS,optimal,optimal,optimal,-25.2638888524,-25.2638888889,
+near_psd-77007,near_psd,PASS_REF,optimal,optimal,optimal,-16.8760837104,0,
+near_psd-77008,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77009,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77010,near_psd,BORDER,optimal,optimal,optimal,-1.92952286745,0,
+near_psd-77011,near_psd,BORDER,optimal,optimal,optimal,-22.963888881,-22.9638888893,
+near_psd-77012,near_psd,BORDER,optimal,optimal,optimal,2.38769644713,2.38769644712,
+near_psd-77013,near_psd,PASS,optimal,optimal,optimal,-23.2067900734,-23.2067901235,
+near_psd-77014,near_psd,PASS,optimal,optimal,optimal,-28.2857142855,-28.2857142857,
+near_psd-77015,near_psd,PASS,optimal,optimal,optimal,-33.9356901254,-33.9356902428,
+near_psd-77016,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77017,near_psd,BORDER,nonconvex,not_set,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77018,near_psd,BORDER,optimal,optimal,optimal,-18.8106428539,-18.810642855,
+near_psd-77019,near_psd,PASS,optimal,optimal,optimal,-7.90943857877,-7.90943857909,
+near_psd-77020,near_psd,BORDER,optimal,optimal,optimal,-21.9991843939,-21.9991843946,
+near_psd-77021,near_psd,PASS,optimal,optimal,optimal,-45.010155827,-45.0101558398,
+near_psd-77022,near_psd,PASS,optimal,optimal,optimal,-13.0401676677,-13.0401676682,
+near_psd-77023,near_psd,PASS,optimal,optimal,optimal,-5.45979023778,-5.45979023778,
+near_psd-77024,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77025,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77026,near_psd,BORDER,optimal,optimal,optimal,-4.22746419179,0,
+near_psd-77027,near_psd,BORDER,optimal,optimal,optimal,-10.5555555735,0,
+near_psd-77028,near_psd,BORDER,optimal,optimal,optimal,-1.09976638175,-1.09976639376,
+near_psd-77029,near_psd,PASS,optimal,optimal,optimal,-26.6499999179,-26.65,
+near_psd-77030,near_psd,PASS,optimal,optimal,optimal,-8.375,-8.375,
+near_psd-77031,near_psd,REF_UNRESOLVED,optimal,other:Solve error,,-46.5690511447,,
+near_psd-77032,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77033,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77034,near_psd,BORDER,optimal,optimal,optimal,-15.491816123,-15.4918161386,
+near_psd-77035,near_psd,BORDER,optimal,optimal,optimal,-27.3472222057,0,
+near_psd-77036,near_psd,BORDER,optimal,optimal,optimal,5.81994647004,5.81994645481,
+near_psd-77037,near_psd,PASS,optimal,optimal,optimal,-65.2499997855,-65.25,
+near_psd-77038,near_psd,PASS,optimal,optimal,optimal,-0.0555555555556,-0.0555555555556,
+near_psd-77039,near_psd,PASS,optimal,optimal,optimal,-4.18908709992,-4.18908710766,
+near_psd-77040,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77041,near_psd,BORDER,nonconvex,optimal,optimal,,0,Q is not positive semidefinite in the minimisation sense
+near_psd-77042,near_psd,REF_UNRESOLVED,optimal,not_set,,-9.19450395991,,
+near_psd-77043,near_psd,PASS,optimal,optimal,optimal,-4.19167796183,-4.191677962,
+near_psd-77044,near_psd,BORDER,optimal,optimal,optimal,-21.2791179881,-21.2791180123,
+near_psd-77045,near_psd,PASS,optimal,optimal,optimal,-4.56050934377,-4.56050934385,
+near_psd-77046,near_psd,PASS,optimal,optimal,optimal,-17.5919381131,-17.5919381753,
+near_psd-77047,near_psd,PASS,optimal,optimal,optimal,-0.499999999972,-0.499999999972,
+near_psd-77048,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77049,near_psd,BORDER,nonconvex,optimal,optimal,,-15.6607196996,Q is not positive semidefinite in the minimisation sense
+near_psd-77050,near_psd,PASS,optimal,optimal,optimal,-2.51519693827,-2.51519693827,
+near_psd-77051,near_psd,BORDER,optimal,optimal,optimal,-44.1661313973,-44.1661313986,
+near_psd-77052,near_psd,BORDER,optimal,optimal,optimal,-42.2361689615,0,
+near_psd-77053,near_psd,PASS_REF,optimal,optimal,optimal,-14.6521519375,0,
+near_psd-77054,near_psd,PASS,optimal,optimal,optimal,-29.0351979639,-29.0351979748,
+near_psd-77055,near_psd,PASS,optimal,optimal,optimal,0.645459469889,0.645459468028,
+near_psd-77056,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77057,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77058,near_psd,BORDER,optimal,optimal,optimal,-31.3125000043,0,
+near_psd-77059,near_psd,PASS,optimal,optimal,optimal,-3.37499998831,-3.37500000073,
+near_psd-77060,near_psd,BORDER,optimal,optimal,optimal,-5.20499478247,-5.20499478253,
+near_psd-77061,near_psd,PASS,optimal,optimal,optimal,0.319223835929,0.319223834735,
+near_psd-77062,near_psd,PASS,optimal,optimal,optimal,-4.77657850371,-4.77657850383,
+near_psd-77063,near_psd,PASS,optimal,optimal,optimal,-24.3880375265,-24.3880375587,
+near_psd-77064,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77065,near_psd,BORDER,nonconvex,optimal,optimal,,0,Q is not positive semidefinite in the minimisation sense
+near_psd-77066,near_psd,REF_UNRESOLVED,optimal,not_set,,-50.7945053238,,
+near_psd-77067,near_psd,BORDER,optimal,optimal,optimal,-3.91071429962,-3.9107143043,
+near_psd-77068,near_psd,BORDER,optimal,optimal,optimal,-18.3479736993,-18.3479737033,
+near_psd-77069,near_psd,PASS_REF,optimal,optimal,optimal,-50.9687499004,0,
+near_psd-77070,near_psd,PASS,optimal,optimal,optimal,-6.95671105365,-6.95671106557,
+near_psd-77071,near_psd,PASS,optimal,optimal,optimal,-4.1249999966,-4.1249999966,
+near_psd-77072,near_psd,PASS,nonconvex,,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77073,near_psd,BORDER,nonconvex,not_set,,,,Q is not positive semidefinite in the minimisation sense
+near_psd-77074,near_psd,PASS,optimal,optimal,optimal,-2.69409185172,-2.69409185272,
+near_psd-77075,near_psd,BORDER,optimal,optimal,optimal,-14.5972221894,-14.5972222228,
+near_psd-77076,near_psd,PASS,optimal,optimal,optimal,2.17829239199,2.17829239197,
+near_psd-77077,near_psd,PASS_REF,optimal,optimal,optimal,-12.4139197514,0,
+near_psd-77078,near_psd,PASS,optimal,optimal,optimal,3.29620066799,3.2962006668,
+near_psd-77079,near_psd,PASS,optimal,optimal,optimal,-49.0803489145,-49.080348937,
+obj_const-89000,obj_const,PASS,optimal,optimal,optimal,-1000000078.12,-1000000078.12,
+obj_const-89001,obj_const,PASS,optimal,optimal,optimal,7.72656249995,7.7265625,
+obj_const-89002,obj_const,PASS,optimal,optimal,optimal,23.9531249323,23.953125,
+obj_const-89003,obj_const,PASS,optimal,optimal,optimal,-999999845.781,-999999845.781,
+obj_const-89004,obj_const,PASS,optimal,optimal,optimal,-999999914.994,-999999914.994,
+obj_const-89005,obj_const,PASS,optimal,optimal,optimal,-1000.33203151,-1000.33203125,
+obj_const-89006,obj_const,PASS,optimal,optimal,optimal,-999999953.955,-999999953.955,
+obj_const-89007,obj_const,PASS,optimal,optimal,optimal,999999990.414,999999990.414,
+obj_const-89008,obj_const,PASS,optimal,optimal,optimal,123389.937438,123389.937438,
+obj_const-89009,obj_const,PASS,optimal,optimal,optimal,999999852.086,999999852.086,
+obj_const-89010,obj_const,PASS,optimal,optimal,optimal,1000000111.12,1000000111.12,
+obj_const-89011,obj_const,PASS,optimal,optimal,optimal,30.0957030419,30.095703125,
+obj_const-89012,obj_const,PASS,optimal,optimal,optimal,133.195312463,133.1953125,
+obj_const-89013,obj_const,PASS,optimal,optimal,optimal,-73.7265625748,-73.7265625,
+obj_const-89014,obj_const,PASS,optimal,optimal,optimal,999999998.484,999999998.484,
+obj_const-89015,obj_const,PASS,optimal,optimal,optimal,-999999959.463,-999999959.463,
+obj_const-89016,obj_const,PASS,optimal,optimal,optimal,999999973.477,999999973.477,
+obj_const-89017,obj_const,PASS,optimal,optimal,optimal,-885.45703419,-885.45703125,
+obj_const-89018,obj_const,PASS,optimal,optimal,optimal,-999999910.686,-999999910.686,
+obj_const-89019,obj_const,PASS,optimal,optimal,optimal,-986.6875,-986.6875,
+obj_const-89020,obj_const,PASS,optimal,optimal,optimal,990.345704063,990.345703125,
+obj_const-89021,obj_const,PASS,optimal,optimal,optimal,-999999985.436,-999999985.436,
+obj_const-89022,obj_const,PASS,optimal,optimal,optimal,-999999961.064,-999999961.064,
+obj_const-89023,obj_const,PASS,optimal,optimal,optimal,118.437499952,118.4375,
+obj_const-89024,obj_const,PASS,optimal,optimal,optimal,-6.4296875,-6.4296875,
+obj_const-89025,obj_const,PASS,optimal,other:Solve error,optimal,47.0546874822,,
+obj_const-89026,obj_const,PASS,optimal,optimal,optimal,168.710937499,168.7109375,
+obj_const-89027,obj_const,PASS,optimal,optimal,optimal,86.1953124172,86.1953125,
+obj_const-89028,obj_const,PASS,optimal,optimal,optimal,-20.4843749356,-20.484375,
+obj_const-89029,obj_const,PASS,optimal,optimal,optimal,-87.5937498317,-87.59375,
+obj_const-89030,obj_const,PASS,optimal,optimal,optimal,-25.4765625,-25.4765625,
+obj_const-89031,obj_const,PASS,optimal,optimal,optimal,-149.773436467,-149.7734375,
+obj_const-89032,obj_const,PASS,optimal,optimal,optimal,99.3593748782,99.359375,
+obj_const-89033,obj_const,PASS,optimal,optimal,optimal,999999923.873,999999923.873,
+obj_const-89034,obj_const,PASS,optimal,optimal,optimal,1078.98046788,1078.98046875,
+obj_const-89035,obj_const,PASS,optimal,optimal,optimal,-934.423828193,-934.423828125,
+obj_const-89036,obj_const,PASS,optimal,optimal,optimal,79.3867187327,79.38671875,
+obj_const-89037,obj_const,PASS,optimal,optimal,optimal,1000000053.12,1000000053.12,
+obj_const-89038,obj_const,PASS,optimal,optimal,optimal,-1000000095.83,-1000000095.83,
+obj_const-89039,obj_const,PASS,optimal,optimal,optimal,-26.9531249458,-26.953125,
+obj_const-89040,obj_const,PASS,optimal,optimal,optimal,-25.7089843549,-25.708984375,
+obj_const-89041,obj_const,PASS,optimal,optimal,optimal,-999999765.055,-999999765.055,
+obj_const-89042,obj_const,PASS,optimal,optimal,optimal,-1000000010.26,-1000000010.26,
+obj_const-89043,obj_const,PASS,optimal,optimal,optimal,-1047.92968734,-1047.9296875,
+obj_const-89044,obj_const,PASS,optimal,optimal,optimal,-14.318359375,-14.318359375,
+obj_const-89045,obj_const,PASS,optimal,optimal,optimal,-1011.90234375,-1011.90234375,
+obj_const-89046,obj_const,PASS,optimal,optimal,optimal,37.7421875,37.7421875,
+obj_const-89047,obj_const,PASS,optimal,optimal,optimal,123604.265563,123604.265563,
+obj_const-89048,obj_const,PASS,optimal,optimal,optimal,-63.0527342379,-63.052734375,
+obj_const-89049,obj_const,PASS,optimal,optimal,optimal,214.33984355,214.33984375,
+obj_const-89050,obj_const,PASS,optimal,optimal,optimal,-730.748048334,-730.748046875,
+obj_const-89051,obj_const,PASS,optimal,optimal,optimal,1000000014.18,1000000014.18,
+obj_const-89052,obj_const,PASS,optimal,optimal,optimal,4.20312500699,4.203125,
+obj_const-89053,obj_const,PASS,optimal,optimal,optimal,-1000000002.89,-1000000002.89,
+obj_const-89054,obj_const,PASS,optimal,optimal,optimal,999999936.047,999999936.047,
+obj_const-89055,obj_const,PASS,optimal,optimal,optimal,-3.92187499926,-3.921875,
+obj_const-89056,obj_const,PASS,optimal,optimal,optimal,974.523437483,974.5234375,
+obj_const-89057,obj_const,PASS,optimal,optimal,optimal,1000000001.02,1000000001.02,
+obj_const-89058,obj_const,PASS,optimal,optimal,optimal,8.74218749053,8.7421875,
+obj_const-89059,obj_const,PASS,optimal,optimal,optimal,-105.181640215,-105.181640625,
+pd_baseline-70000,pd_baseline,PASS,optimal,optimal,optimal,-788.062499272,-788.0625,
+pd_baseline-70001,pd_baseline,PASS,optimal,optimal,optimal,-46.0703123736,-46.0703125,
+pd_baseline-70002,pd_baseline,PASS,optimal,optimal,optimal,482.583983216,482.583984375,
+pd_baseline-70003,pd_baseline,PASS,optimal,optimal,optimal,-291.109374731,-291.109375,
+pd_baseline-70004,pd_baseline,PASS,optimal,optimal,optimal,697.078121859,697.078125,
+pd_baseline-70005,pd_baseline,PASS,optimal,optimal,optimal,-354.01953082,-354.01953125,
+pd_baseline-70006,pd_baseline,PASS,optimal,optimal,optimal,-69.2421874945,-69.2421875,
+pd_baseline-70007,pd_baseline,PASS,optimal,optimal,optimal,12.396484324,12.396484375,
+pd_baseline-70008,pd_baseline,PASS,optimal,optimal,optimal,-503.515622763,-503.515625,
+pd_baseline-70009,pd_baseline,PASS,optimal,optimal,optimal,50.0761718486,50.076171875,
+pd_baseline-70010,pd_baseline,PASS,optimal,optimal,optimal,-367.427734357,-367.427734375,
+pd_baseline-70011,pd_baseline,PASS,optimal,optimal,optimal,-994.925777249,-994.92578125,
+pd_baseline-70012,pd_baseline,PASS,optimal,optimal,optimal,-440.208983921,-440.208984375,
+pd_baseline-70013,pd_baseline,PASS,optimal,optimal,optimal,21.703125,21.703125,
+pd_baseline-70014,pd_baseline,PASS,optimal,optimal,optimal,-43.9082030151,-43.908203125,
+pd_baseline-70015,pd_baseline,PASS,optimal,optimal,optimal,-156.476562325,-156.4765625,
+pd_baseline-70016,pd_baseline,PASS,optimal,optimal,optimal,715.19335926,715.193359375,
+pd_baseline-70017,pd_baseline,PASS,optimal,optimal,optimal,-103.5546875,-103.5546875,
+pd_baseline-70018,pd_baseline,PASS,optimal,optimal,optimal,312.261717395,312.26171875,
+pd_baseline-70019,pd_baseline,PASS,optimal,optimal,optimal,-632.203123419,-632.203125,
+pd_baseline-70020,pd_baseline,PASS,optimal,optimal,optimal,-1080.08593332,-1080.0859375,
+pd_baseline-70021,pd_baseline,PASS,optimal,optimal,optimal,-760.089842343,-760.08984375,
+pd_baseline-70022,pd_baseline,PASS,optimal,optimal,optimal,-232.49609339,-232.49609375,
+pd_baseline-70023,pd_baseline,PASS,optimal,optimal,optimal,-581.322265151,-581.322265625,
+pd_baseline-70024,pd_baseline,PASS,optimal,optimal,optimal,-186.023436757,-186.0234375,
+pd_baseline-70025,pd_baseline,PASS,optimal,optimal,optimal,-360.611325979,-360.611328125,
+pd_baseline-70026,pd_baseline,PASS,optimal,optimal,optimal,37.1660155143,37.166015625,
+pd_baseline-70027,pd_baseline,PASS,optimal,optimal,optimal,-93.6054686366,-93.60546875,
+pd_baseline-70028,pd_baseline,PASS,optimal,optimal,optimal,-26.7558592904,-26.755859375,
+pd_baseline-70029,pd_baseline,PASS,optimal,optimal,optimal,-710.812495986,-710.8125,
+pd_baseline-70030,pd_baseline,PASS,optimal,optimal,optimal,165.552734375,165.552734375,
+pd_baseline-70031,pd_baseline,PASS,optimal,optimal,optimal,-41.0976562496,-41.09765625,
+pd_baseline-70032,pd_baseline,PASS,optimal,optimal,optimal,-522.980468602,-522.98046875,
+pd_baseline-70033,pd_baseline,PASS,optimal,optimal,optimal,264.693359009,264.693359375,
+pd_baseline-70034,pd_baseline,PASS,optimal,optimal,optimal,-740.488280426,-740.48828125,
+pd_baseline-70035,pd_baseline,PASS,optimal,optimal,optimal,-60.632812068,-60.6328125,
+pd_baseline-70036,pd_baseline,PASS,optimal,optimal,optimal,-1279.74413846,-1279.74414063,
+pd_baseline-70037,pd_baseline,PASS,optimal,optimal,optimal,-957.671872401,-957.671875,
+pd_baseline-70038,pd_baseline,PASS,optimal,optimal,optimal,-634.874999446,-634.875,
+pd_baseline-70039,pd_baseline,PASS,optimal,optimal,optimal,-79.3984372772,-79.3984375,
+pd_baseline-70040,pd_baseline,PASS,optimal,optimal,optimal,275.457030743,275.45703125,
+pd_baseline-70041,pd_baseline,PASS,optimal,optimal,optimal,-893.26953003,-893.26953125,
+pd_baseline-70042,pd_baseline,PASS,optimal,optimal,optimal,-210.757812171,-210.7578125,
+pd_baseline-70043,pd_baseline,PASS,optimal,optimal,optimal,-356.447265213,-356.447265625,
+pd_baseline-70044,pd_baseline,PASS,optimal,optimal,optimal,-193.470703125,-193.470703125,
+pd_baseline-70045,pd_baseline,PASS,optimal,optimal,optimal,-45.4374999628,-45.4375,
+pd_baseline-70046,pd_baseline,PASS,optimal,optimal,optimal,67.9921874714,67.9921875,
+pd_baseline-70047,pd_baseline,PASS,optimal,optimal,optimal,-51.8867186014,-51.88671875,
+pd_baseline-70048,pd_baseline,PASS,optimal,optimal,optimal,-74.8593749582,-74.859375,
+pd_baseline-70049,pd_baseline,PASS,optimal,optimal,optimal,-111.042968743,-111.04296875,
+pd_baseline-70050,pd_baseline,PASS,optimal,optimal,optimal,-94.2695311768,-94.26953125,
+pd_baseline-70051,pd_baseline,PASS,optimal,optimal,optimal,-13.8984374999,-13.8984375,
+pd_baseline-70052,pd_baseline,PASS,optimal,optimal,optimal,1029.99609363,1029.99609375,
+pd_baseline-70053,pd_baseline,PASS,optimal,optimal,optimal,-137.97265625,-137.97265625,
+pd_baseline-70054,pd_baseline,PASS,optimal,optimal,optimal,-168.097656064,-168.09765625,
+pd_baseline-70055,pd_baseline,PASS,optimal,optimal,optimal,331.160155728,331.16015625,
+pd_baseline-70056,pd_baseline,PASS,optimal,optimal,optimal,933.867182266,933.8671875,
+pd_baseline-70057,pd_baseline,PASS,optimal,optimal,optimal,381.550779579,381.55078125,
+pd_baseline-70058,pd_baseline,PASS,optimal,optimal,optimal,-63.2265624467,-63.2265625,
+pd_baseline-70059,pd_baseline,PASS,optimal,optimal,optimal,-120.277343741,-120.27734375,
+pd_baseline-70060,pd_baseline,PASS,optimal,optimal,optimal,-821.058593745,-821.05859375,
+pd_baseline-70061,pd_baseline,PASS,optimal,optimal,optimal,-369.460937481,-369.4609375,
+pd_baseline-70062,pd_baseline,PASS,optimal,optimal,optimal,-594.958983853,-594.958984375,
+pd_baseline-70063,pd_baseline,PASS,optimal,optimal,optimal,40.869140625,40.869140625,
+pd_baseline-70064,pd_baseline,PASS,optimal,optimal,optimal,-136.999999846,-137,
+pd_baseline-70065,pd_baseline,PASS,optimal,optimal,optimal,463.984374548,463.984375,
+pd_baseline-70066,pd_baseline,PASS,optimal,optimal,optimal,6.44140625054,6.44140625,
+pd_baseline-70067,pd_baseline,PASS,optimal,optimal,optimal,-85.43359375,-85.43359375,
+pd_baseline-70068,pd_baseline,PASS,optimal,optimal,optimal,228.474608587,228.474609375,
+pd_baseline-70069,pd_baseline,PASS,optimal,optimal,optimal,-688.064452151,-688.064453125,
+pd_baseline-70070,pd_baseline,PASS,optimal,optimal,optimal,-87.7988281243,-87.798828125,
+pd_baseline-70071,pd_baseline,PASS,optimal,optimal,optimal,-36.765624986,-36.765625,
+pd_baseline-70072,pd_baseline,PASS,optimal,optimal,optimal,-460.070310656,-460.0703125,
+pd_baseline-70073,pd_baseline,PASS,optimal,optimal,optimal,0.562500004431,0.5625,
+pd_baseline-70074,pd_baseline,PASS,optimal,optimal,optimal,17.378906247,17.37890625,
+pd_baseline-70075,pd_baseline,PASS,optimal,optimal,optimal,64.42578125,64.42578125,
+pd_baseline-70076,pd_baseline,PASS,optimal,optimal,optimal,1016.05468642,1016.0546875,
+pd_baseline-70077,pd_baseline,PASS,optimal,optimal,optimal,-906.562499374,-906.5625,
+pd_baseline-70078,pd_baseline,PASS,optimal,optimal,optimal,3.2734375,3.2734375,
+pd_baseline-70079,pd_baseline,PASS,optimal,optimal,optimal,238.300781172,238.30078125,
+portfolio-92000,portfolio,PASS,optimal,optimal,optimal,0.00283373754894,0.00283373754895,
+portfolio-92001,portfolio,PASS,optimal,optimal,optimal,0.00346944839894,0.00346944839729,
+portfolio-92002,portfolio,PASS,optimal,optimal,optimal,0.00551708669737,0.00551708583619,
+portfolio-92003,portfolio,PASS,optimal,optimal,optimal,0.00172301049754,0.00172301049754,
+portfolio-92004,portfolio,PASS,optimal,optimal,optimal,0.00239777568192,0.0023977756722,
+portfolio-92005,portfolio,PASS,optimal,optimal,optimal,0.00206447612075,0.00206447611246,
+portfolio-92006,portfolio,PASS,optimal,optimal,optimal,0.00140915415683,0.00140915415683,
+portfolio-92007,portfolio,PASS,optimal,optimal,optimal,0.00118346939566,0.00118346939547,
+portfolio-92008,portfolio,PASS,optimal,optimal,optimal,0.0026695874285,0.00266958490671,
+portfolio-92009,portfolio,PASS,optimal,optimal,optimal,0.00280235575217,0.00280235574525,
+portfolio-92010,portfolio,PASS,optimal,optimal,optimal,0.00205368355821,0.00205368348062,
+portfolio-92011,portfolio,PASS,optimal,optimal,optimal,0.00150838057551,0.00150838036966,
+portfolio-92012,portfolio,PASS,optimal,optimal,optimal,0.0014253145082,0.00142531407084,
+portfolio-92013,portfolio,PASS,optimal,optimal,optimal,0.00155759044856,0.00155759043499,
+portfolio-92014,portfolio,PASS,optimal,optimal,optimal,0.00122659757093,0.00122659756875,
+portfolio-92015,portfolio,PASS,optimal,optimal,optimal,0.00297862963992,0.00297862961904,
+portfolio-92016,portfolio,PASS,optimal,optimal,optimal,0.00138862515831,0.00138862515717,
+portfolio-92017,portfolio,PASS,optimal,optimal,optimal,0.00128689528476,0.00128689528476,
+portfolio-92018,portfolio,PASS,optimal,optimal,optimal,0.0038113731507,0.00381137059914,
+portfolio-92019,portfolio,PASS,optimal,optimal,optimal,0.00621414279265,0.00621414197624,
+portfolio-92020,portfolio,PASS,optimal,optimal,optimal,0.00338048834578,0.00338048824227,
+portfolio-92021,portfolio,PASS,optimal,optimal,optimal,0.0235202471149,0.0235202468118,
+portfolio-92022,portfolio,PASS,optimal,optimal,optimal,0.00365592713465,0.00365592712648,
+portfolio-92023,portfolio,PASS,optimal,optimal,optimal,0.00285708970428,0.00285708970428,
+portfolio-92024,portfolio,PASS,optimal,optimal,optimal,0.00101408094934,0.00101408094933,
+portfolio-92025,portfolio,PASS,optimal,optimal,optimal,0.00182339895006,0.00182339895006,
+portfolio-92026,portfolio,PASS,optimal,optimal,optimal,0.00108536457545,0.00108536457545,
+portfolio-92027,portfolio,PASS,optimal,optimal,optimal,0.001170806775,0.00117080677501,
+portfolio-92028,portfolio,PASS,optimal,optimal,optimal,0.0311685772941,0.0311685772941,
+portfolio-92029,portfolio,PASS,optimal,optimal,optimal,0.0135443960008,0.0135443945862,
+portfolio-92030,portfolio,PASS,optimal,optimal,optimal,0.00129037324838,0.00129037121175,
+portfolio-92031,portfolio,PASS,optimal,optimal,optimal,0.00176182005842,0.0017618200584,
+portfolio-92032,portfolio,PASS,optimal,optimal,optimal,0.00572539850708,0.00572539826185,
+portfolio-92033,portfolio,PASS,optimal,optimal,optimal,0.00146470008881,0.00146469981864,
+portfolio-92034,portfolio,PASS,optimal,optimal,optimal,0.0133675615018,0.013367561479,
+portfolio-92035,portfolio,PASS,optimal,optimal,optimal,0.00160365364903,0.00160365364326,
+portfolio-92036,portfolio,PASS,optimal,optimal,optimal,0.018839922081,0.0188399185736,
+portfolio-92037,portfolio,PASS,optimal,optimal,optimal,0.00750469454726,0.00750469454626,
+portfolio-92038,portfolio,PASS,optimal,optimal,optimal,0.0130082242259,0.0130082220908,
+portfolio-92039,portfolio,PASS,optimal,optimal,optimal,0.00701301459476,0.0070130136273,
+psd_free_null-72000,psd_free_null,PASS,optimal,optimal,optimal,-197.812500002,-197.8125,
+psd_free_null-72001,psd_free_null,PASS,optimal,optimal,optimal,-511.690520398,-511.690520471,
+psd_free_null-72002,psd_free_null,PASS,optimal,optimal,optimal,-1224.1875,-1224.1875,
+psd_free_null-72003,psd_free_null,PASS,optimal,optimal,optimal,-407.499999995,-407.5,
+psd_free_null-72004,psd_free_null,PASS,optimal,optimal,optimal,-174.390625,-174.390625,
+psd_free_null-72005,psd_free_null,PASS,optimal,optimal,optimal,-360.03125,-360.03125,
+psd_free_null-72006,psd_free_null,PASS,optimal,optimal,optimal,-447.703125,-447.703125,
+psd_free_null-72007,psd_free_null,PASS,optimal,optimal,optimal,-113.015625,-113.015625,
+psd_free_null-72008,psd_free_null,PASS,optimal,optimal,optimal,-20,-20,
+psd_free_null-72009,psd_free_null,PASS,optimal,optimal,optimal,-9.54687503004,-9.546875,
+psd_free_null-72010,psd_free_null,PASS,optimal,optimal,optimal,-22.5937499921,-22.59375,
+psd_free_null-72011,psd_free_null,PASS,optimal,optimal,optimal,-61,-61,
+psd_free_null-72012,psd_free_null,PASS,optimal,optimal,optimal,-81,-81,
+psd_free_null-72013,psd_free_null,PASS,optimal,optimal,optimal,-40.8125000006,-40.8125,
+psd_free_null-72014,psd_free_null,PASS,optimal,optimal,optimal,-89.2343750029,-89.234375,
+psd_free_null-72015,psd_free_null,PASS,optimal,optimal,optimal,-1478.34375,-1478.34375,
+psd_free_null-72016,psd_free_null,PASS,optimal,optimal,optimal,-110.847919653,-110.847919818,
+psd_free_null-72017,psd_free_null,PASS,optimal,optimal,optimal,-8.531249999,-8.53125,
+psd_free_null-72018,psd_free_null,PASS,optimal,optimal,optimal,-181.031249998,-181.03125,
+psd_free_null-72019,psd_free_null,PASS,optimal,optimal,optimal,-503.828124999,-503.828125,
+psd_free_null-72020,psd_free_null,PASS,optimal,optimal,optimal,-665.29746437,-665.297464369,
+psd_free_null-72021,psd_free_null,PASS,optimal,optimal,optimal,-208.937499993,-208.9375,
+psd_free_null-72022,psd_free_null,PASS,optimal,optimal,optimal,-59.5433826458,-59.543382649,
+psd_free_null-72023,psd_free_null,PASS,optimal,optimal,optimal,-2,-2,
+psd_free_null-72024,psd_free_null,PASS,optimal,optimal,optimal,-262,-262,
+psd_free_null-72025,psd_free_null,PASS,optimal,optimal,optimal,-1251.703125,-1251.703125,
+psd_free_null-72026,psd_free_null,PASS,optimal,optimal,optimal,-398.187500001,-398.1875,
+psd_free_null-72027,psd_free_null,PASS,optimal,optimal,optimal,-989.252602392,-989.252602382,
+psd_free_null-72028,psd_free_null,PASS,optimal,optimal,optimal,-49,-49,
+psd_free_null-72029,psd_free_null,PASS,optimal,optimal,optimal,-334.95312498,-334.953125,
+psd_free_null-72030,psd_free_null,PASS,optimal,optimal,optimal,-18,-18,
+psd_free_null-72031,psd_free_null,PASS,optimal,optimal,optimal,-22.5937500007,-22.59375,
+psd_free_null-72032,psd_free_null,PASS,optimal,optimal,optimal,-41.7499999901,-41.75,
+psd_free_null-72033,psd_free_null,PASS,optimal,optimal,optimal,-707,-707,
+psd_free_null-72034,psd_free_null,PASS,optimal,optimal,optimal,-362.781249994,-362.78125,
+psd_free_null-72035,psd_free_null,PASS,optimal,optimal,optimal,-346.018602536,-346.018602577,
+psd_free_null-72036,psd_free_null,PASS,optimal,optimal,optimal,-721.343749989,-721.34375,
+psd_free_null-72037,psd_free_null,PASS,optimal,optimal,optimal,-37.2031250016,-37.203125,
+psd_free_null-72038,psd_free_null,PASS,optimal,optimal,optimal,-185.5,-185.5,
+psd_free_null-72039,psd_free_null,PASS,optimal,optimal,optimal,-218.5,-218.5,
+psd_free_null-72040,psd_free_null,PASS,optimal,optimal,optimal,-116.796875001,-116.796875,
+psd_free_null-72041,psd_free_null,PASS,optimal,optimal,optimal,-495.5,-495.5,
+psd_free_null-72042,psd_free_null,PASS,optimal,optimal,optimal,-142.999999997,-143,
+psd_free_null-72043,psd_free_null,PASS,optimal,optimal,optimal,-59.5624999997,-59.5625,
+psd_free_null-72044,psd_free_null,PASS_REF,optimal,optimal,optimal,-1184.5,0,
+psd_free_null-72045,psd_free_null,PASS,optimal,optimal,optimal,-236.812499999,-236.8125,
+psd_free_null-72046,psd_free_null,PASS,optimal,optimal,optimal,-287.921874997,-287.921875,
+psd_free_null-72047,psd_free_null,PASS,optimal,optimal,optimal,-37.8593749801,-37.859375,
+psd_free_null-72048,psd_free_null,PASS,optimal,optimal,optimal,-31.7656249618,-31.765625,
+psd_free_null-72049,psd_free_null,PASS,optimal,optimal,optimal,-166.89062502,-166.890625,
+psd_free_null-72050,psd_free_null,PASS,optimal,optimal,optimal,-391.984375,-391.984375,
+psd_free_null-72051,psd_free_null,PASS,optimal,optimal,optimal,-73.8124999927,-73.8125,
+psd_free_null-72052,psd_free_null,PASS,optimal,optimal,optimal,-162,-162,
+psd_free_null-72053,psd_free_null,PASS_REF,optimal,optimal,optimal,-13,0,
+psd_free_null-72054,psd_free_null,PASS_REF,optimal,optimal,optimal,-543,0,
+psd_free_null-72055,psd_free_null,PASS_REF,optimal,optimal,optimal,-504.5,0,
+psd_free_null-72056,psd_free_null,PASS,optimal,optimal,optimal,4.9921875,4.9921875,
+psd_free_null-72057,psd_free_null,PASS,optimal,optimal,optimal,-3.28125000083,-3.28125,
+psd_free_null-72058,psd_free_null,PASS,optimal,optimal,optimal,-36.265625,-36.265625,
+psd_free_null-72059,psd_free_null,PASS,optimal,optimal,optimal,-25.0937500015,-25.09375,
+psd_rank_def-71000,psd_rank_def,PASS,optimal,optimal,optimal,-882.812497357,-882.8125,
+psd_rank_def-71001,psd_rank_def,PASS,optimal,optimal,optimal,-201.757812478,-201.7578125,
+psd_rank_def-71002,psd_rank_def,PASS,optimal,optimal,optimal,59.6093748,59.609375,
+psd_rank_def-71003,psd_rank_def,PASS,optimal,other:Solve error,optimal,-118.007812371,,
+psd_rank_def-71004,psd_rank_def,PASS,optimal,optimal,optimal,-109.667968421,-109.66796875,
+psd_rank_def-71005,psd_rank_def,PASS,optimal,optimal,optimal,-212.628906195,-212.62890625,
+psd_rank_def-71006,psd_rank_def,PASS,optimal,optimal,optimal,-195.976562442,-195.9765625,
+psd_rank_def-71007,psd_rank_def,PASS,optimal,optimal,optimal,-98.6230466904,-98.623046875,
+psd_rank_def-71008,psd_rank_def,PASS,optimal,optimal,optimal,19.5585937333,19.55859375,
+psd_rank_def-71009,psd_rank_def,PASS,optimal,optimal,optimal,-25.0410155764,-25.041015625,
+psd_rank_def-71010,psd_rank_def,PASS,optimal,optimal,optimal,26.7734374644,26.7734375,
+psd_rank_def-71011,psd_rank_def,PASS,optimal,optimal,optimal,-212.517576821,-212.517578125,
+psd_rank_def-71012,psd_rank_def,PASS,optimal,optimal,optimal,719.095702615,719.095703125,
+psd_rank_def-71013,psd_rank_def,PASS,optimal,optimal,optimal,-17.740234375,-17.740234375,
+psd_rank_def-71014,psd_rank_def,PASS,optimal,optimal,optimal,11.1953125,11.1953125,
+psd_rank_def-71015,psd_rank_def,PASS,optimal,optimal,optimal,8.97656248918,8.9765625,
+psd_rank_def-71016,psd_rank_def,PASS,optimal,optimal,optimal,-6.29296874092,-6.29296875,
+psd_rank_def-71017,psd_rank_def,PASS,optimal,optimal,optimal,-14.8710937491,-14.87109375,
+psd_rank_def-71018,psd_rank_def,PASS,optimal,optimal,optimal,341.400390402,341.400390625,
+psd_rank_def-71019,psd_rank_def,PASS,optimal,optimal,optimal,2.50000000144,2.5,
+psd_rank_def-71020,psd_rank_def,PASS,optimal,optimal,optimal,-242.136717991,-242.13671875,
+psd_rank_def-71021,psd_rank_def,PASS,optimal,optimal,optimal,-5.62109374268,-5.62109375,
+psd_rank_def-71022,psd_rank_def,PASS,optimal,optimal,optimal,150.999999996,151,
+psd_rank_def-71023,psd_rank_def,PASS,optimal,optimal,optimal,-19.515625,-19.515625,
+psd_rank_def-71024,psd_rank_def,PASS,optimal,optimal,optimal,-17.8984374819,-17.8984375,
+psd_rank_def-71025,psd_rank_def,PASS,optimal,optimal,optimal,93.5468745656,93.546875,
+psd_rank_def-71026,psd_rank_def,PASS,optimal,optimal,optimal,-14.4218749781,-14.421875,
+psd_rank_def-71027,psd_rank_def,PASS,optimal,optimal,optimal,-60.8124999989,-60.8125,
+psd_rank_def-71028,psd_rank_def,PASS,optimal,optimal,optimal,0.8828125,0.8828125,
+psd_rank_def-71029,psd_rank_def,PASS,optimal,optimal,optimal,-1.25,-1.25,
+psd_rank_def-71030,psd_rank_def,PASS,optimal,optimal,optimal,176.101562497,176.1015625,
+psd_rank_def-71031,psd_rank_def,PASS,optimal,optimal,optimal,-15.7851562493,-15.78515625,
+psd_rank_def-71032,psd_rank_def,PASS,optimal,optimal,optimal,-3.236328125,-3.236328125,
+psd_rank_def-71033,psd_rank_def,PASS,optimal,optimal,optimal,-99.5468744137,-99.546875,
+psd_rank_def-71034,psd_rank_def,PASS,optimal,optimal,optimal,378.441406003,378.44140625,
+psd_rank_def-71035,psd_rank_def,PASS,optimal,optimal,optimal,-215.109374997,-215.109375,
+psd_rank_def-71036,psd_rank_def,PASS,optimal,optimal,optimal,-113.085937359,-113.0859375,
+psd_rank_def-71037,psd_rank_def,PASS,optimal,optimal,optimal,22.408203058,22.408203125,
+psd_rank_def-71038,psd_rank_def,PASS,optimal,optimal,optimal,17.1875,17.1875,
+psd_rank_def-71039,psd_rank_def,PASS,optimal,optimal,optimal,-244.539061505,-244.5390625,
+psd_rank_def-71040,psd_rank_def,PASS,optimal,optimal,optimal,-330.310546862,-330.310546875,
+psd_rank_def-71041,psd_rank_def,PASS,optimal,optimal,optimal,-37.1874999951,-37.1875,
+psd_rank_def-71042,psd_rank_def,PASS,optimal,optimal,optimal,2.984375,2.984375,
+psd_rank_def-71043,psd_rank_def,PASS,optimal,optimal,optimal,35.7148438095,35.71484375,
+psd_rank_def-71044,psd_rank_def,PASS,optimal,optimal,optimal,-9.39453122141,-9.39453125,
+psd_rank_def-71045,psd_rank_def,PASS,optimal,optimal,optimal,5.453125,5.453125,
+psd_rank_def-71046,psd_rank_def,PASS,optimal,optimal,optimal,42.68359375,42.68359375,
+psd_rank_def-71047,psd_rank_def,PASS,optimal,optimal,optimal,36.572265625,36.572265625,
+psd_rank_def-71048,psd_rank_def,PASS,optimal,optimal,optimal,-18.6328125103,-18.6328125,
+psd_rank_def-71049,psd_rank_def,PASS,optimal,optimal,optimal,178.164061936,178.1640625,
+psd_rank_def-71050,psd_rank_def,PASS,optimal,optimal,optimal,25.0703124716,25.0703125,
+psd_rank_def-71051,psd_rank_def,PASS,optimal,optimal,optimal,-19.6171875,-19.6171875,
+psd_rank_def-71052,psd_rank_def,PASS,optimal,optimal,optimal,21.4218749978,21.421875,
+psd_rank_def-71053,psd_rank_def,PASS,optimal,optimal,optimal,-109.654296867,-109.654296875,
+psd_rank_def-71054,psd_rank_def,PASS,optimal,optimal,optimal,-117.589843666,-117.58984375,
+psd_rank_def-71055,psd_rank_def,PASS,optimal,optimal,optimal,-733.69531188,-733.6953125,
+psd_rank_def-71056,psd_rank_def,PASS,optimal,optimal,optimal,-259.984374997,-259.984375,
+psd_rank_def-71057,psd_rank_def,PASS,optimal,optimal,optimal,60.1796875,60.1796875,
+psd_rank_def-71058,psd_rank_def,PASS,optimal,optimal,optimal,-11.6953125,-11.6953125,
+psd_rank_def-71059,psd_rank_def,PASS,optimal,optimal,optimal,-2.96875,-2.96875,
+psd_rank_def-71060,psd_rank_def,PASS,optimal,optimal,optimal,-60.4042968727,-60.404296875,
+psd_rank_def-71061,psd_rank_def,PASS,optimal,optimal,optimal,-1.68749999645,-1.6875,
+psd_rank_def-71062,psd_rank_def,PASS,optimal,optimal,optimal,-53.8867187495,-53.88671875,
+psd_rank_def-71063,psd_rank_def,PASS,optimal,optimal,optimal,8.8125,8.8125,
+psd_rank_def-71064,psd_rank_def,PASS,optimal,optimal,optimal,-3.22265625003,-3.22265625,
+psd_rank_def-71065,psd_rank_def,PASS,optimal,optimal,optimal,-102.562500175,-102.5625,
+psd_rank_def-71066,psd_rank_def,PASS,optimal,optimal,optimal,5.6875,5.6875,
+psd_rank_def-71067,psd_rank_def,PASS,optimal,optimal,optimal,-106.492187251,-106.4921875,
+psd_rank_def-71068,psd_rank_def,PASS,optimal,optimal,optimal,-0.695312499841,-0.6953125,
+psd_rank_def-71069,psd_rank_def,PASS,optimal,other:Solve error,optimal,-16.2499999963,,
+psd_rank_def-71070,psd_rank_def,PASS,optimal,optimal,optimal,-28.6054687374,-28.60546875,
+psd_rank_def-71071,psd_rank_def,PASS,optimal,optimal,optimal,-34.5078125,-34.5078125,
+psd_rank_def-71072,psd_rank_def,PASS,optimal,optimal,optimal,4.375,4.375,
+psd_rank_def-71073,psd_rank_def,PASS,optimal,optimal,optimal,318.199218754,318.19921875,
+psd_rank_def-71074,psd_rank_def,PASS,optimal,optimal,optimal,-26.6796874923,-26.6796875,
+psd_rank_def-71075,psd_rank_def,PASS,optimal,optimal,optimal,-49.029296875,-49.029296875,
+psd_rank_def-71076,psd_rank_def,PASS,optimal,optimal,optimal,-442.361324628,-442.361328125,
+psd_rank_def-71077,psd_rank_def,PASS,optimal,optimal,optimal,16.94921875,16.94921875,
+psd_rank_def-71078,psd_rank_def,PASS,optimal,optimal,optimal,-373.957030504,-373.95703125,
+psd_rank_def-71079,psd_rank_def,PASS,optimal,optimal,optimal,-357.951171252,-357.951171876,
+qform-90000,qform,PASS,optimal,optimal,optimal,-3.3125,-3.3125,
+qform-90001,qform,PASS,optimal,optimal,optimal,-38.4921874982,-38.4921875,
+qform-90002,qform,PASS,optimal,optimal,optimal,6.72070314391,6.720703125,
+qform-90003,qform,PASS,optimal,optimal,optimal,0.578125005972,0.578125,
+qform-90004,qform,PASS,optimal,optimal,optimal,51.015625,51.015625,
+qform-90005,qform,PASS,optimal,optimal,optimal,-217.824218046,-217.82421875,
+qform-90006,qform,PASS,optimal,optimal,optimal,-76.8281248997,-76.828125,
+qform-90007,qform,PASS,optimal,optimal,optimal,-15.281249997,-15.28125,
+qform-90008,qform,PASS,optimal,optimal,optimal,-160.906249818,-160.90625,
+qform-90009,qform,PASS,optimal,optimal,optimal,-7.26562499301,-7.265625,
+qform-90010,qform,PASS,optimal,optimal,optimal,-13.41015625,-13.41015625,
+qform-90011,qform,PASS,optimal,optimal,optimal,-73.5624999139,-73.5625,
+qform-90012,qform,PASS,optimal,other:Solve error,optimal,-301.96093747,,
+qform-90013,qform,PASS,optimal,optimal,optimal,-62.187499792,-62.1875,
+qform-90014,qform,PASS,optimal,optimal,optimal,-145.484374911,-145.484375,
+qform-90015,qform,PASS,optimal,optimal,optimal,61.0039061717,61.00390625,
+qform-90016,qform,PASS,optimal,optimal,optimal,-98.7675775968,-98.767578125,
+qform-90017,qform,PASS,optimal,optimal,optimal,-26.1425780929,-26.142578125,
+qform-90018,qform,PASS,optimal,optimal,optimal,9.41796875287,9.41796875,
+qform-90019,qform,PASS,optimal,optimal,optimal,-21.5820312209,-21.58203125,
+qform-90020,qform,PASS,optimal,optimal,optimal,2.10937499669,2.109375,
+qform-90021,qform,PASS,optimal,optimal,optimal,-66.6445311442,-66.64453125,
+qform-90022,qform,PASS,optimal,optimal,optimal,-3.3125,-3.3125,
+qform-90023,qform,PASS,optimal,optimal,optimal,-35.548828125,-35.548828125,
+qform-90024,qform,PASS,optimal,optimal,optimal,-6.1875,-6.1875,
+qform-90025,qform,PASS,optimal,optimal,optimal,2.90624999942,2.90625,
+qform-90026,qform,PASS,optimal,optimal,optimal,-8.4531249606,-8.453125,
+qform-90027,qform,PASS,optimal,optimal,optimal,-1.5703125,-1.5703125,
+qform-90028,qform,PASS,optimal,optimal,optimal,-43.5292967616,-43.529296875,
+qform-90029,qform,PASS,optimal,optimal,optimal,-1.49999999431,-1.5,
+qform-90030,qform,PASS,optimal,optimal,optimal,-14.8203124767,-14.8203125,
+qform-90031,qform,PASS,optimal,optimal,optimal,-95.0058593726,-95.005859375,
+qform-90032,qform,PASS,optimal,optimal,optimal,-13.3515624961,-13.3515625,
+qform-90033,qform,PASS,optimal,optimal,optimal,-71.851562356,-71.8515625,
+qform-90034,qform,PASS,optimal,optimal,optimal,-28.0507811762,-28.05078125,
+qform-90035,qform,PASS,optimal,optimal,optimal,14.3828124595,14.3828125,
+qform-90036,qform,PASS,optimal,optimal,optimal,-57.9531249183,-57.953125,
+qform-90037,qform,PASS,optimal,optimal,optimal,83.8437499913,83.84375,
+qform-90038,qform,PASS,optimal,optimal,optimal,-46.2910156231,-46.291015625,
+qform-90039,qform,PASS,optimal,optimal,optimal,-6.6953125,-6.6953125,
+qform-90040,qform,PASS,optimal,optimal,optimal,-143.501952689,-143.501953125,
+qform-90041,qform,PASS,optimal,optimal,optimal,-20.6328124628,-20.6328125,
+qform-90042,qform,PASS,optimal,optimal,optimal,-0.609375,-0.609375,
+qform-90043,qform,PASS,optimal,optimal,optimal,-248.578123873,-248.578125,
+qform-90044,qform,PASS,optimal,optimal,optimal,-2.5996093523,-2.599609375,
+qform-90045,qform,PASS,optimal,optimal,optimal,68.1074216669,68.107421875,
+qform-90046,qform,PASS,optimal,optimal,optimal,-119.625,-119.625,
+qform-90047,qform,PASS,optimal,optimal,optimal,-28.0859375,-28.0859375,
+qform-90048,qform,PASS,optimal,optimal,optimal,-11.3984375,-11.3984375,
+qform-90049,qform,PASS,optimal,optimal,optimal,313.351562323,313.3515625,
+qform-90050,qform,PASS,optimal,optimal,optimal,-13.7265624473,-13.7265625,
+qform-90051,qform,PASS,optimal,optimal,optimal,50.4843749997,50.484375,
+qform-90052,qform,PASS,optimal,optimal,optimal,-344.281249644,-344.28125,
+qform-90053,qform,PASS,optimal,optimal,optimal,-12.0117187395,-12.01171875,
+qform-90054,qform,PASS,optimal,optimal,optimal,-258.027342768,-258.02734375,
+qform-90055,qform,PASS,optimal,optimal,optimal,-40.1640624993,-40.1640625,
+qform-90056,qform,PASS,optimal,optimal,optimal,74.58398417,74.583984375,
+qform-90057,qform,PASS,optimal,optimal,optimal,-67.158203016,-67.158203125,
+qform-90058,qform,PASS,optimal,optimal,optimal,-62.8457031238,-62.845703125,
+qform-90059,qform,PASS,optimal,optimal,optimal,-47.44921875,-47.44921875,
+scale_cols-85000,scale_cols,PASS,optimal,optimal,optimal,-275.148436958,-275.108862038,
+scale_cols-85001,scale_cols,PASS,optimal,optimal,optimal,-6.5625,-6.22189011856,
+scale_cols-85002,scale_cols,PASS,optimal,optimal,optimal,-504.427734341,-504.311887918,
+scale_cols-85003,scale_cols,PASS,optimal,optimal,optimal,-74.7773435493,-74.77734375,
+scale_cols-85004,scale_cols,PASS,optimal,optimal,optimal,-163.390624823,-163.390449485,
+scale_cols-85005,scale_cols,PASS,optimal,optimal,optimal,-2.96874998812,-2.96874999835,
+scale_cols-85006,scale_cols,PASS,optimal,optimal,optimal,-226.203124457,-226.074382786,
+scale_cols-85007,scale_cols,PASS,optimal,optimal,optimal,-70.5429687494,-70.4761364247,
+scale_cols-85008,scale_cols,PASS,optimal,other:Solve error,optimal,-409.515623536,,
+scale_cols-85009,scale_cols,PASS,optimal,optimal,optimal,-702.021484253,-702.021484373,
+scale_cols-85010,scale_cols,PASS,optimal,optimal,optimal,-444.476561223,-444.457211718,
+scale_cols-85011,scale_cols,PASS,optimal,optimal,optimal,-223.816405746,-223.81640625,
+scale_cols-85012,scale_cols,PASS,optimal,optimal,optimal,-136.839843708,-136.839843614,
+scale_cols-85013,scale_cols,PASS,optimal,optimal,optimal,-169.394531245,-169.340740176,
+scale_cols-85014,scale_cols,PASS,optimal,optimal,optimal,-210.6328125,-210.607335539,
+scale_cols-85015,scale_cols,PASS,optimal,optimal,optimal,-75.4277343751,-75.427734375,
+scale_cols-85016,scale_cols,PASS,optimal,optimal,optimal,-58.890625,-58.890625,
+scale_cols-85017,scale_cols,PASS,optimal,optimal,optimal,-26.71484375,-26.71484375,
+scale_cols-85018,scale_cols,PASS,optimal,optimal,optimal,-90.2304686212,-90.23046875,
+scale_cols-85019,scale_cols,PASS,optimal,optimal,optimal,-84.2382811342,-84.2382812493,
+scale_cols-85020,scale_cols,PASS,optimal,optimal,optimal,-39.1718749995,-39.171875,
+scale_cols-85021,scale_cols,PASS,optimal,optimal,optimal,-323.914061305,-323.914062479,
+scale_cols-85022,scale_cols,PASS,optimal,other:Solve error,optimal,-165.623046574,,
+scale_cols-85023,scale_cols,PASS,optimal,optimal,optimal,-12.1874999709,-12.1873041705,
+scale_cols-85024,scale_cols,PASS,optimal,optimal,optimal,-32.3906249583,-32.3906246605,
+scale_cols-85025,scale_cols,PASS,optimal,other:Solve error,optimal,-106.935546875,,
+scale_cols-85026,scale_cols,PASS,optimal,optimal,optimal,-70.8320311953,-70.83203125,
+scale_cols-85027,scale_cols,PASS,optimal,optimal,optimal,-166.46093664,-166.460769216,
+scale_cols-85028,scale_cols,PASS,optimal,optimal,optimal,-231.874999822,-231.874998847,
+scale_cols-85029,scale_cols,PASS,optimal,optimal,optimal,-128.398437495,-128.376562689,
+scale_cols-85030,scale_cols,PASS,optimal,optimal,optimal,-20.4843749582,-20.484375,
+scale_cols-85031,scale_cols,PASS,optimal,optimal,optimal,-48.673828125,-48.673828125,
+scale_cols-85032,scale_cols,PASS,optimal,optimal,optimal,-38.3749998542,-38.3749024043,
+scale_cols-85033,scale_cols,PASS,optimal,other:Solve error,optimal,-25.2890624794,,
+scale_cols-85034,scale_cols,PASS,optimal,optimal,optimal,-18.3339843727,-17.8249365756,
+scale_cols-85035,scale_cols,PASS,optimal,optimal,optimal,-21.0859374865,-21.0859375,
+scale_cols-85036,scale_cols,PASS,optimal,optimal,optimal,-4.53124999949,-4.53125,
+scale_cols-85037,scale_cols,PASS,optimal,optimal,optimal,-9.375,-9.375,
+scale_cols-85038,scale_cols,PASS,optimal,optimal,optimal,-228.835936782,-228.8359375,
+scale_cols-85039,scale_cols,PASS,optimal,optimal,optimal,-279.355468721,-279.346576134,
+scale_cols-85040,scale_cols,PASS,optimal,optimal,optimal,-58.7265624968,-58.7265625,
+scale_cols-85041,scale_cols,PASS,optimal,optimal,optimal,-41.0195312006,-41.01953125,
+scale_cols-85042,scale_cols,PASS,optimal,optimal,optimal,-33.9960937482,-33.99609375,
+scale_cols-85043,scale_cols,PASS,optimal,optimal,optimal,-302.820309876,-302.757770174,
+scale_cols-85044,scale_cols,PASS,optimal,optimal,optimal,-50.2871093281,-50.1661733426,
+scale_cols-85045,scale_cols,PASS,optimal,optimal,optimal,-95.1113277861,-95.1113053253,
+scale_cols-85046,scale_cols,PASS,optimal,optimal,optimal,-95.4472654486,-95.0529485697,
+scale_cols-85047,scale_cols,PASS,optimal,optimal,optimal,-242.492187477,-242.492187473,
+scale_cols-85048,scale_cols,PASS,optimal,optimal,optimal,-257.240233965,-257.215065515,
+scale_cols-85049,scale_cols,PASS,optimal,optimal,optimal,-51.0312499977,-48.9069668386,
+scale_cols-85050,scale_cols,PASS,optimal,optimal,optimal,-15.8203125,-15.8203088693,
+scale_cols-85051,scale_cols,PASS,optimal,other:Solve error,optimal,-70.1445311387,,
+scale_cols-85052,scale_cols,PASS,optimal,optimal,optimal,-13.8593749991,-13.859375,
+scale_cols-85053,scale_cols,PASS,optimal,optimal,optimal,-96.63476562,-96.634765625,
+scale_cols-85054,scale_cols,PASS,optimal,optimal,optimal,5.23437501015,5.23437500002,
+scale_cols-85055,scale_cols,PASS,optimal,optimal,optimal,-29.71875,-29.7187499997,
+scale_cols-85056,scale_cols,PASS,optimal,optimal,optimal,-28.2460937402,-28.24609375,
+scale_cols-85057,scale_cols,PASS,optimal,optimal,optimal,-25.3906249998,-25.390624974,
+scale_cols-85058,scale_cols,PASS,optimal,optimal,optimal,-169.517577681,-169.517578042,
+scale_cols-85059,scale_cols,PASS,optimal,other:Solve error,optimal,-5.13281247236,,
+scale_q-84000,scale_q,PASS,optimal,time_limit,optimal,-12.507798244,,
+scale_q-84001,scale_q,PASS,optimal,time_limit,optimal,0.0351312489844,,
+scale_q-84002,scale_q,PASS,optimal,optimal,optimal,-0.16890625,-0.168906249999,
+scale_q-84003,scale_q,PASS,optimal,optimal,optimal,493.949218719,493.94921875,
+scale_q-84004,scale_q,PASS,optimal,optimal,optimal,-5974658.83665,-5974658.8418,
+scale_q-84005,scale_q,PASS,optimal,optimal,optimal,101640622.357,101640622.437,
+scale_q-84006,scale_q,PASS,optimal,optimal,optimal,9.60146883104,9.60146909809,
+scale_q-84007,scale_q,PASS,optimal,optimal,optimal,12.7406554687,12.7406554687,
+scale_q-84008,scale_q,PASS,optimal,optimal,optimal,3.4346875,3.4346875,
+scale_q-84009,scale_q,PASS,optimal,optimal,optimal,11093.2226482,11093.2226563,
+scale_q-84010,scale_q,PASS,optimal,other:Solve error,optimal,-2615470.10875,,
+scale_q-84011,scale_q,PASS,optimal,optimal,optimal,-31882813.8828,-31882813.8828,
+scale_q-84012,scale_q,PASS,optimal,time_limit,optimal,47.4693027066,,
+scale_q-84013,scale_q,PASS,optimal,optimal,optimal,8.86469453131,8.86469453125,
+scale_q-84014,scale_q,PASS,optimal,optimal,optimal,4.40429687501,4.404296875,
+scale_q-84015,scale_q,PASS,optimal,optimal,optimal,-9887.87304517,-9887.87304688,
+scale_q-84016,scale_q,PASS,optimal,optimal,optimal,110857.12441,110857.125,
+scale_q-84017,scale_q,PASS,optimal,optimal,optimal,344445412.889,344445412.889,
+scale_q-84018,scale_q,PASS,optimal,optimal,optimal,-10.7541727657,-10.7541727812,
+scale_q-84019,scale_q,PASS,optimal,optimal,optimal,0.20287265626,0.202872656389,
+scale_q-84020,scale_q,PASS,optimal,optimal,optimal,2.74109374946,2.74109375,
+scale_q-84021,scale_q,PASS,optimal,other:Solve error,optimal,-8769.34375,,
+scale_q-84022,scale_q,PASS,optimal,optimal,optimal,58594.78125,58594.78125,
+scale_q-84023,scale_q,PASS,optimal,not_set,optimal,-40476574.1968,,
+scale_q-84024,scale_q,PASS,optimal,time_limit,optimal,-1.87493406359,,
+scale_q-84025,scale_q,PASS,optimal,optimal,optimal,-4.84322187743,-4.843221875,
+scale_q-84026,scale_q,PASS,optimal,optimal,optimal,-0.290546875,-0.290546875001,
+scale_q-84027,scale_q,PASS,optimal,optimal,optimal,4237.01562202,4237.015625,
+scale_q-84028,scale_q,PASS,optimal,optimal,optimal,-158212.202532,-158212.203125,
+scale_q-84029,scale_q,PASS,optimal,optimal,optimal,-69101548.9206,-69101548.9336,
+scale_q-84030,scale_q,PASS,optimal,time_limit,optimal,-7.40546743864e-05,,
+scale_q-84031,scale_q,PASS,optimal,optimal,optimal,30.837343021,30.8373429688,
+scale_q-84032,scale_q,PASS,optimal,optimal,optimal,-9.59585936466,-9.595859375,
+scale_q-84033,scale_q,PASS,optimal,optimal,optimal,-55812.540947,-55812.5410156,
+scale_q-84034,scale_q,PASS,optimal,optimal,optimal,-31567.75,-31567.75,
+scale_q-84035,scale_q,PASS,optimal,optimal,optimal,-10124993.282,-10124993.3008,
+scale_q-84036,scale_q,PASS,optimal,optimal,optimal,4.52890624957e-05,4.52870694931e-05,
+scale_q-84037,scale_q,PASS,optimal,unbounded,optimal,30.1086320312,,
+scale_q-84038,scale_q,PASS,optimal,optimal,optimal,-8.25109374985,-8.25109375,
+scale_q-84039,scale_q,PASS,optimal,optimal,optimal,-85715.7653012,-85715.765625,
+scale_q-84040,scale_q,PASS,optimal,optimal,optimal,-257741.47656,-257741.476563,
+scale_q-84041,scale_q,PASS,optimal,optimal,optimal,-248312500,-248312500,
+scale_q-84042,scale_q,PASS,optimal,optimal,optimal,0.968912893653,0.968912886648,
+scale_q-84043,scale_q,PASS,optimal,optimal,optimal,2.22414843754,2.22414843752,
+scale_q-84044,scale_q,PASS,optimal,optimal,optimal,-1.84039062254,-1.840390625,
+scale_q-84045,scale_q,PASS,optimal,optimal,optimal,-4146.15624178,-4146.15625,
+scale_q-84046,scale_q,PASS,optimal,optimal,optimal,-175393.757208,-175393.757812,
+scale_q-84047,scale_q,PASS,optimal,optimal,optimal,26453124.9599,26453125,
+scale_q-84048,scale_q,PASS,optimal,optimal,optimal,-5.09177113281,-5.09177113281,
+scale_q-84049,scale_q,PASS,optimal,optimal,optimal,-1.953125e-05,-1.95312305078e-05,
+scale_q-84050,scale_q,PASS,optimal,optimal,optimal,0.301562501047,0.301562500001,
+scale_q-84051,scale_q,PASS,optimal,optimal,optimal,12592.4764841,12592.4765625,
+scale_q-84052,scale_q,PASS,optimal,other:Solve error,optimal,-1288134.03097,,
+scale_q-84053,scale_q,PASS,optimal,optimal,optimal,-5210941.86295,-5210941.875,
+scale_q-84054,scale_q,PASS,optimal,optimal,optimal,21.4686961409,21.4686961348,
+scale_q-84055,scale_q,PASS,optimal,optimal,optimal,-0.600476559336,-0.600476562492,
+scale_q-84056,scale_q,PASS,optimal,optimal,optimal,2.73640624629,2.73640625,
+scale_q-84057,scale_q,PASS,optimal,optimal,optimal,15297.3437478,15297.34375,
+scale_q-84058,scale_q,PASS,optimal,optimal,optimal,300.314453124,300.314453125,
+scale_q-84059,scale_q,PASS,optimal,optimal,optimal,-74414059.3459,-74414059.4062,
+scale_rows-86000,scale_rows,PASS,optimal,optimal,optimal,-48.0468749972,-48.046875,
+scale_rows-86001,scale_rows,PASS,optimal,optimal,optimal,-80.4902342886,-80.490234375,
+scale_rows-86002,scale_rows,PASS,optimal,optimal,optimal,-264.347655903,-264.142228834,
+scale_rows-86003,scale_rows,PASS,optimal,optimal,optimal,-40.0312498624,-40.03125,
+scale_rows-86004,scale_rows,PASS,optimal,optimal,optimal,-54.4804686136,-54.48046875,
+scale_rows-86005,scale_rows,PASS,optimal,optimal,optimal,-18.0234375,-18.0234375,
+scale_rows-86006,scale_rows,PASS,optimal,optimal,optimal,-42.8867187343,-42.88671875,
+scale_rows-86007,scale_rows,PASS,optimal,optimal,optimal,-21.0468749499,-21.046875,
+scale_rows-86008,scale_rows,PASS,optimal,optimal,optimal,-124.679687477,-124.6796875,
+scale_rows-86009,scale_rows,PASS,optimal,optimal,optimal,-11.0390625,-11.0390625,
+scale_rows-86010,scale_rows,PASS,optimal,optimal,optimal,-330.988280932,-330.98828125,
+scale_rows-86011,scale_rows,PASS,optimal,optimal,optimal,-1.38085937258,-1.380859375,
+scale_rows-86012,scale_rows,PASS,optimal,optimal,optimal,-20.4375,-20.4375,
+scale_rows-86013,scale_rows,PASS,optimal,optimal,optimal,-140.769530783,-140.76953125,
+scale_rows-86014,scale_rows,PASS,optimal,optimal,optimal,-142.476562054,-142.4765625,
+scale_rows-86015,scale_rows,PASS,optimal,optimal,optimal,-221.097655954,-221.09765625,
+scale_rows-86016,scale_rows,PASS,optimal,optimal,optimal,-30.1738280685,-30.173828125,
+scale_rows-86017,scale_rows,PASS,optimal,optimal,optimal,-60.3730464604,-60.373046875,
+scale_rows-86018,scale_rows,PASS,optimal,optimal,optimal,-229.800780303,-229.80078125,
+scale_rows-86019,scale_rows,PASS,optimal,optimal,optimal,-31.8515624991,-31.8515625,
+scale_rows-86020,scale_rows,PASS,optimal,optimal,optimal,-146.685546699,-146.685546875,
+scale_rows-86021,scale_rows,PASS,optimal,optimal,optimal,-37.537109375,-37.537109375,
+scale_rows-86022,scale_rows,PASS,optimal,optimal,optimal,-132.007812338,-132.0078125,
+scale_rows-86023,scale_rows,PASS,optimal,optimal,optimal,-25.3046874969,-25.3046875,
+scale_rows-86024,scale_rows,PASS,optimal,optimal,optimal,-76.4374999947,-76.4375,
+scale_rows-86025,scale_rows,PASS,optimal,optimal,optimal,-58.0937499114,-58.09375,
+scale_rows-86026,scale_rows,PASS,optimal,optimal,optimal,-44.6015625,-44.6015625,
+scale_rows-86027,scale_rows,PASS,optimal,optimal,optimal,-139.228515402,-139.063835894,
+scale_rows-86028,scale_rows,PASS,optimal,optimal,optimal,-9.81640625,-9.81640625,
+scale_rows-86029,scale_rows,PASS,optimal,unbounded,optimal,0.398437500022,,
+scale_rows-86030,scale_rows,PASS,optimal,optimal,optimal,-72.8457030642,-72.845703125,
+scale_rows-86031,scale_rows,PASS,optimal,optimal,optimal,-138.021484191,-138.021484375,
+scale_rows-86032,scale_rows,PASS,optimal,optimal,optimal,-448.162109334,-448.162109375,
+scale_rows-86033,scale_rows,PASS,optimal,optimal,optimal,-268.882812427,-268.8828125,
+scale_rows-86034,scale_rows,PASS,optimal,optimal,optimal,-24.8749999919,-24.875,
+scale_rows-86035,scale_rows,PASS,optimal,optimal,optimal,-28.1406249966,-28.140625,
+scale_rows-86036,scale_rows,PASS,optimal,optimal,optimal,-47.2382812187,-47.23828125,
+scale_rows-86037,scale_rows,PASS,optimal,optimal,optimal,-165.605468202,-165.60546875,
+scale_rows-86038,scale_rows,PASS,optimal,optimal,optimal,-68.3124999995,-68.3125,
+scale_rows-86039,scale_rows,PASS,optimal,optimal,optimal,-23.8984374781,-23.8984375,
+scale_rows-86040,scale_rows,PASS,optimal,optimal,optimal,-0.976562500084,-0.9765625,
+scale_rows-86041,scale_rows,PASS,optimal,time_limit,optimal,-242.837890624,,
+scale_rows-86042,scale_rows,PASS,optimal,optimal,optimal,-25.7558593638,-25.755859375,
+scale_rows-86043,scale_rows,PASS,optimal,optimal,optimal,-51.7890624609,-51.7890625,
+scale_rows-86044,scale_rows,NOANS,numerical_failure,optimal,optimal,,-586.6171875,no progress in 30 iterations
+scale_rows-86045,scale_rows,PASS,optimal,optimal,optimal,-81.9296874983,-81.9296875,
+scale_rows-86046,scale_rows,PASS,optimal,optimal,optimal,-26.197265603,-26.197265625,
+scale_rows-86047,scale_rows,PASS,optimal,optimal,optimal,-132.664062026,-132.6640625,
+scale_rows-86048,scale_rows,PASS,optimal,optimal,optimal,1.611328125,1.611328125,
+scale_rows-86049,scale_rows,PASS,optimal,optimal,optimal,-251.76562481,-251.377138888,
+scale_rows-86050,scale_rows,PASS,optimal,optimal,optimal,-188.359374991,-188.359375,
+scale_rows-86051,scale_rows,PASS,optimal,optimal,optimal,-3.8984374671,-3.8984375,
+scale_rows-86052,scale_rows,PASS,optimal,optimal,optimal,-619.169919977,-619.169921875,
+scale_rows-86053,scale_rows,PASS,optimal,optimal,optimal,-327.128905294,-327.12890625,
+scale_rows-86054,scale_rows,PASS,optimal,optimal,optimal,-99.9355467119,-99.935546875,
+scale_rows-86055,scale_rows,PASS,optimal,optimal,optimal,-16.3124999976,-16.3125,
+scale_rows-86056,scale_rows,PASS,optimal,optimal,optimal,-162.587890258,-162.587890625,
+scale_rows-86057,scale_rows,PASS,optimal,optimal,optimal,-10.2812499835,-10.28125,
+scale_rows-86058,scale_rows,PASS,optimal,optimal,optimal,-116.83593735,-116.8359375,
+scale_rows-86059,scale_rows,PASS,optimal,optimal,optimal,-46.8203124442,-46.8203125,
+unbounded-73000,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,319999998.763,recession direction
+unbounded-73001,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73002,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C9 is unbounded in its cost direction
+unbounded-73003,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,45000017.1708,recession direction
+unbounded-73004,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C5 is unbounded in its cost direction
+unbounded-73005,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C3 is unbounded in its cost direction
+unbounded-73006,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,404999999.773,recession direction
+unbounded-73007,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C6 is unbounded in its cost direction
+unbounded-73008,unbounded,PASS,unbounded,optimal,unbounded,,250000020.486,empty column C1 is unbounded in its cost direction
+unbounded-73009,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-180000015.308,recession direction
+unbounded-73010,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C8 is unbounded in its cost direction
+unbounded-73011,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73012,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-80000000,recession direction
+unbounded-73013,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C7 is unbounded in its cost direction
+unbounded-73014,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C3 is unbounded in its cost direction
+unbounded-73015,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-244999997.538,recession direction
+unbounded-73016,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73017,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C5 is unbounded in its cost direction
+unbounded-73018,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-245000014.004,recession direction
+unbounded-73019,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C3 is unbounded in its cost direction
+unbounded-73020,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C4 is unbounded in its cost direction
+unbounded-73021,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-80000022.6093,recession direction
+unbounded-73022,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C7 is unbounded in its cost direction
+unbounded-73023,unbounded,PASS,unbounded,optimal,unbounded,,-250000035.62,empty column C2 is unbounded in its cost direction
+unbounded-73024,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-180000005.814,recession direction
+unbounded-73025,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C4 is unbounded in its cost direction
+unbounded-73026,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C4 is unbounded in its cost direction
+unbounded-73027,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-180000001.719,recession direction
+unbounded-73028,unbounded,PASS,unbounded,optimal,unbounded,,10000023.3984,empty column C1 is unbounded in its cost direction
+unbounded-73029,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73030,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-244999998.258,recession direction
+unbounded-73031,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C8 is unbounded in its cost direction
+unbounded-73032,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73033,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-320000016.911,recession direction
+unbounded-73034,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73035,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73036,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,180000007.585,recession direction
+unbounded-73037,unbounded,PASS,unbounded,optimal,unbounded,,-159999999.461,empty column C1 is unbounded in its cost direction
+unbounded-73038,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C3 is unbounded in its cost direction
+unbounded-73039,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,245000005.431,recession direction
+unbounded-73040,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C5 is unbounded in its cost direction
+unbounded-73041,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C6 is unbounded in its cost direction
+unbounded-73042,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-499999999.089,recession direction
+unbounded-73043,unbounded,PASS,unbounded,optimal,unbounded,,-249999996.629,empty column C2 is unbounded in its cost direction
+unbounded-73044,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73045,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C4 is unbounded in its cost direction
+unbounded-73046,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C4 is unbounded in its cost direction
+unbounded-73047,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C3 is unbounded in its cost direction
+unbounded-73048,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-319999989.457,recession direction
+unbounded-73049,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73050,unbounded,PASS,unbounded,optimal,unbounded,,-40000011.5531,empty column C2 is unbounded in its cost direction
+unbounded-73051,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C6 is unbounded in its cost direction
+unbounded-73052,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C5 is unbounded in its cost direction
+unbounded-73053,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C5 is unbounded in its cost direction
+unbounded-73054,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-125000009.842,recession direction
+unbounded-73055,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73056,unbounded,PASS,unbounded,optimal,unbounded,,-40000001.002,empty column C1 is unbounded in its cost direction
+unbounded-73057,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73058,unbounded,PASS,unbounded,optimal,unbounded,,-160000018.398,empty column C1 is unbounded in its cost direction
+unbounded-73059,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73060,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,125000073.036,recession direction
+unbounded-73061,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73062,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73063,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,124999996.05,recession direction
+unbounded-73064,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73065,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73066,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C4 is unbounded in its cost direction
+unbounded-73067,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73068,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73069,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,80000059.6331,recession direction
+unbounded-73070,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73071,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73072,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,80000012.3566,recession direction
+unbounded-73073,unbounded,PASS,unbounded,optimal,unbounded,,-249999999.5,empty column C1 is unbounded in its cost direction
+unbounded-73074,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C4 is unbounded in its cost direction
+unbounded-73075,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-125000027.795,recession direction
+unbounded-73076,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73077,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C6 is unbounded in its cost direction
+unbounded-73078,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-80000017.8236,recession direction
+unbounded-73079,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C5 is unbounded in its cost direction
+unbounded-73080,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73081,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-245000021.063,recession direction
+unbounded-73082,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C3 is unbounded in its cost direction
+unbounded-73083,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73084,unbounded,PARTIAL,dual_infeasible,optimal,unbounded,,-180000045.1,recession direction
+unbounded-73085,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C5 is unbounded in its cost direction
+unbounded-73086,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+unbounded-73087,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C3 is unbounded in its cost direction
+unbounded-73088,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C1 is unbounded in its cost direction
+unbounded-73089,unbounded,PASS,unbounded,unbounded,unbounded,,,empty column C2 is unbounded in its cost direction
+zero_q-78000,zero_q,PASS,optimal,optimal,optimal,-11.66796875,-11.66796875,
+zero_q-78001,zero_q,PASS,optimal,optimal,optimal,9.2890625,9.2890625,
+zero_q-78002,zero_q,PASS,optimal,optimal,optimal,-46.384765624,-46.384765625,
+zero_q-78003,zero_q,PASS,optimal,optimal,optimal,5.0625,5.0625,
+zero_q-78004,zero_q,PASS,optimal,optimal,optimal,33.240234375,33.240234375,
+zero_q-78005,zero_q,PASS,optimal,optimal,optimal,3.3046875,3.3046875,
+zero_q-78006,zero_q,PASS,optimal,optimal,optimal,-51.3261719733,-51.326171875,
+zero_q-78007,zero_q,PASS,optimal,optimal,optimal,-13.2265625,-13.2265625,
+zero_q-78008,zero_q,PASS,optimal,optimal,optimal,2.65625,2.65625,
+zero_q-78009,zero_q,PASS,optimal,optimal,optimal,-2.642578125,-2.642578125,
+zero_q-78010,zero_q,PASS,optimal,optimal,optimal,7.98242187276,7.982421875,
+zero_q-78011,zero_q,PASS,optimal,optimal,optimal,-10.62109375,-10.62109375,
+zero_q-78012,zero_q,PASS,optimal,optimal,optimal,9.46875,9.46875,
+zero_q-78013,zero_q,PASS,optimal,optimal,optimal,4.1953125,4.1953125,
+zero_q-78014,zero_q,PASS,optimal,optimal,optimal,-18.7910156175,-18.791015625,
+zero_q-78015,zero_q,PASS,optimal,optimal,optimal,0.0703125,0.0703125,
+zero_q-78016,zero_q,PASS,optimal,optimal,optimal,0.138671875,0.138671875,
+zero_q-78017,zero_q,PASS,optimal,optimal,optimal,38.365234375,38.365234375,
+zero_q-78018,zero_q,PASS,optimal,optimal,optimal,-4.21679687463,-4.216796875,
+zero_q-78019,zero_q,PASS,optimal,optimal,optimal,-10.705078125,-10.705078125,
+zero_q-78020,zero_q,PASS,optimal,optimal,optimal,12.205078125,12.205078125,
+zero_q-78021,zero_q,PASS,optimal,optimal,optimal,31.5078125,31.5078125,
+zero_q-78022,zero_q,PASS,optimal,optimal,optimal,4.86914063076,4.869140625,
+zero_q-78023,zero_q,PASS,optimal,optimal,optimal,7.34375,7.34375,
+zero_q-78024,zero_q,PASS,optimal,optimal,optimal,12.890625,12.890625,
+zero_q-78025,zero_q,PASS,optimal,optimal,optimal,-18.326171875,-18.326171875,
+zero_q-78026,zero_q,PASS,optimal,optimal,optimal,6.16796875398,6.16796875,
+zero_q-78027,zero_q,PASS,optimal,optimal,optimal,-22.16015625,-22.16015625,
+zero_q-78028,zero_q,PASS,optimal,optimal,optimal,18.013671875,18.013671875,
+zero_q-78029,zero_q,PASS,optimal,optimal,optimal,0.77734375,0.77734375,
+zero_q-78030,zero_q,PASS,optimal,optimal,optimal,11.3046875235,11.3046875,
+zero_q-78031,zero_q,PASS,optimal,optimal,optimal,-50.79296875,-50.79296875,
+zero_q-78032,zero_q,PASS,optimal,optimal,optimal,68.275390625,68.275390625,
+zero_q-78033,zero_q,PASS,optimal,optimal,optimal,29.59375,29.59375,
+zero_q-78034,zero_q,PASS,optimal,optimal,optimal,-0.802734375061,-0.802734375002,
+zero_q-78035,zero_q,PASS,optimal,optimal,optimal,-16.7421875,-16.7421875,
+zero_q-78036,zero_q,PASS,optimal,optimal,optimal,-20.0078125,-20.0078125,
+zero_q-78037,zero_q,PASS,optimal,optimal,optimal,-6.970703125,-6.970703125,
+zero_q-78038,zero_q,PASS,optimal,optimal,optimal,-22.8144530561,-22.814453125,
+zero_q-78039,zero_q,PASS,optimal,optimal,optimal,70.568359375,70.568359375,
+zero_q-78040,zero_q,PASS,optimal,optimal,optimal,13.96875,13.96875,
+zero_q-78041,zero_q,PASS,optimal,optimal,optimal,-13.42578125,-13.42578125,
+zero_q-78042,zero_q,PASS,optimal,optimal,optimal,1.35937499773,1.359375,
+zero_q-78043,zero_q,PASS,optimal,optimal,optimal,1.078125,1.078125,
+zero_q-78044,zero_q,PASS,optimal,optimal,optimal,5.5546875,5.5546875,
+zero_q-78045,zero_q,PASS,optimal,optimal,optimal,-16.765625,-16.765625,
+zero_q-78046,zero_q,PASS,optimal,optimal,optimal,16.1249999872,16.125,
+zero_q-78047,zero_q,PASS,optimal,optimal,optimal,13.466796875,13.466796875,
+zero_q-78048,zero_q,PASS,optimal,optimal,optimal,-7.65625,-7.65625,
+zero_q-78049,zero_q,PASS,optimal,optimal,optimal,31.0859375,31.0859375,
+zero_q-78050,zero_q,PASS,optimal,optimal,optimal,6.37499999277,6.375,
+zero_q-78051,zero_q,PASS,optimal,optimal,optimal,14.52734375,14.52734375,
+zero_q-78052,zero_q,PASS,optimal,optimal,optimal,14.12890625,14.12890625,
+zero_q-78053,zero_q,PASS,optimal,optimal,optimal,11.923828125,11.923828125,
+zero_q-78054,zero_q,PASS,optimal,optimal,optimal,-6.45507811983,-6.455078125,
+zero_q-78055,zero_q,PASS,optimal,optimal,optimal,34.7421875,34.7421875,
+zero_q-78056,zero_q,PASS,optimal,optimal,optimal,-21.44921875,-21.44921875,
+zero_q-78057,zero_q,PASS,optimal,optimal,optimal,3.904296875,3.904296875,
+zero_q-78058,zero_q,PASS,optimal,optimal,optimal,-20.9765624976,-20.9765625,
+zero_q-78059,zero_q,PASS,optimal,optimal,optimal,8.765625,8.765625,

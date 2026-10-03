@@ -1,0 +1,27 @@
+# category  first_seed  last_seed  count   (case i has seed first_seed + i; numpy RandomState only; fixed, deterministic)
+pd_baseline            70000 70079 80
+psd_rank_def           71000 71079 80
+psd_free_null          72000 72059 60
+unbounded              73000 73089 90
+infeasible             74000 74099 100
+indefinite             75000 75079 80
+indef_convex_feasible  76000 76039 40
+near_psd               77000 77079 80
+zero_q                 78000 78059 60
+degenerate_cons        79000 79099 100
+active_set             80000 80079 80
+bounds_special         81000 81089 90
+bounds_huge            82000 82079 80
+bounds_tight           83000 83059 60
+scale_q                84000 84059 60
+scale_cols             85000 85059 60
+scale_rows             86000 86059 60
+ill_cond               87000 87059 60
+maximize               88000 88059 60
+obj_const              89000 89059 60
+qform                  90000 90059 60
+empty_structure        91000 91069 70
+portfolio              92000 92039 40
+large_sparse           93000 93019 20
+fuzz_mixed             94000 94149 150
+# total 1780

@@ -1,0 +1,21 @@
+NAME indef_convex_feasible_76003
+ROWS
+ N OBJ
+ E R0
+COLUMNS
+    C0 OBJ -3
+    C0 R0 -1
+    C1 OBJ -4
+    C2 OBJ 0
+RHS
+    RHS R0 -1.125
+BOUNDS
+ FR BND C0
+ FR BND C1
+ FR BND C2
+QUADOBJ
+    C0 C0 -3
+    C1 C1 6
+    C1 C2 -3
+    C2 C2 6
+ENDATA
