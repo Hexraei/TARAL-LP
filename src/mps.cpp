@@ -8,6 +8,7 @@
 // Names must be declared before they are used: a BOUNDS, RHS or RANGES entry for a column or row that COLUMNS
 // or ROWS never declared is rejected (the format defines them over declared names; HiGHS silently ignores
 // the entry, which would hide a typo in the model).
+#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
@@ -44,10 +45,15 @@ double number(const std::string& s) {
         ok = digits() > 0;
     }
     if (!ok || i != n) throw ParseError("bad number '" + s + "'");
-    std::string t = s;
-    for (char& ch : t)
-        if (ch == 'D' || ch == 'd') ch = 'E';
-    double v = std::strtod(t.c_str(), nullptr);
+    double v;
+    if (s.find_first_of("Dd") == std::string::npos) {
+        v = std::strtod(s.c_str(), nullptr);
+    } else {
+        std::string t = s;
+        for (char& ch : t)
+            if (ch == 'D' || ch == 'd') ch = 'E';
+        v = std::strtod(t.c_str(), nullptr);
+    }
     if (!std::isfinite(v)) throw ParseError("number '" + s + "' is not finite");
     return v;
 }
@@ -62,8 +68,16 @@ std::string field(const std::string& line, size_t a, size_t b) {
 std::vector<std::string> tokens(const std::string& line, const std::string& section, bool fixed) {
     std::vector<std::string> t;
     if (!fixed) {
-        std::istringstream in(line);
-        for (std::string w; in >> w;) t.push_back(w);
+        // Same split as `istream >> string` in the C locale: runs of space, \t, \n, \v, \f, \r separate tokens.
+        const char* p = line.data();
+        const char* e = p + line.size();
+        auto ws = [](char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r'; };
+        while (p < e) {
+            while (p < e && ws(*p)) ++p;
+            const char* s = p;
+            while (p < e && !ws(*p)) ++p;
+            if (p > s) t.emplace_back(s, p - s);
+        }
         return t;
     }
     auto push = [&](size_t a, size_t b) { t.push_back(field(line, a, b)); };
@@ -90,10 +104,23 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
     std::vector<double> rhs;
     std::vector<double> range;
     std::vector<char> has_range;
-    std::vector<std::map<int, double>> colmap;
     bool in_int = false;
     bool saw_endata = false;
     int cur_col = -1;                              // column whose entries are being read
+    std::vector<Entry> col_entries;  // entries of the column being read, in file order
+    // Turns the pending entries of column cur_col into its sorted row list: duplicate rows are summed in file
+    // order (as the former per-column std::map did) and zero sums are dropped.
+    auto flush_column = [&] {
+        if (cur_col < 0 || col_entries.empty()) return;
+        std::stable_sort(col_entries.begin(), col_entries.end(), [](const Entry& x, const Entry& y) { return x.index < y.index; });
+        std::vector<Entry>& out = md.cols[cur_col];
+        for (const Entry& e : col_entries) {
+            if (!out.empty() && out.back().index == e.index) out.back().value += e.value;
+            else out.push_back(e);
+        }
+        out.erase(std::remove_if(out.begin(), out.end(), [](const Entry& e) { return e.value == 0; }), out.end());
+        col_entries.clear();
+    };
     std::unordered_set<std::string> seen_sections;  // ROWS and COLUMNS may each appear once
     std::string rhs_set, range_set, bound_set;  // first named set of each kind
     std::map<std::pair<int, int>, double> q;      // (row >= col) -> Q value
@@ -188,25 +215,30 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
                 continue;
             }
             if (t.size() != 3 && t.size() != 5) throw ParseError("bad COLUMNS line");
-            auto it = col_id.find(t[0]);
             int j;
-            if (it == col_id.end()) {
-                j = static_cast<int>(md.col_names.size());
-                col_id[t[0]] = j;
-                md.col_names.push_back(t[0]);
-                md.cost.push_back(0);
-                md.is_int.push_back(in_int);
-                colmap.emplace_back();
+            if (cur_col >= 0 && t[0] == md.col_names[cur_col]) {  // entries of one column are consecutive: skip the lookup
+                j = cur_col;
             } else {
-                j = it->second;
-                if (j != cur_col) throw ParseError("column '" + t[0] + "' is listed in two separate blocks");
+                auto it = col_id.find(t[0]);
+                if (it == col_id.end()) {
+                    flush_column();
+                    j = static_cast<int>(md.col_names.size());
+                    col_id[t[0]] = j;
+                    md.col_names.push_back(t[0]);
+                    md.cost.push_back(0);
+                    md.is_int.push_back(in_int);
+                    md.cols.emplace_back();
+                } else {
+                    j = it->second;
+                    if (j != cur_col) throw ParseError("column '" + t[0] + "' is listed in two separate blocks");
+                }
             }
             cur_col = j;
             for (size_t k = 1; k + 1 < t.size(); k += 2) {
                 int r = row_of(t[k]);
                 double v = number(t[k + 1]);
                 if (r == -1) md.cost[j] += v;
-                else if (r >= 0) colmap[j][r] += v;
+                else if (r >= 0) col_entries.push_back({r, v});
             }
         } else if (section == "RHS" || section == "RANGES") {
             size_t start = t.size() % 2 == 1 ? 1 : 0;  // optional set name
@@ -275,6 +307,7 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
             q[{std::max(a, b), std::min(a, b)}] += v;
         }
     }
+    flush_column();
     check_deadline();
     if (!saw_endata) throw ParseError("missing ENDATA");
     for (const auto& [rc, v] : q)
@@ -316,12 +349,6 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
     for (std::vector<double>* up : {&md.col_up, &md.row_up})
         for (double& v : *up)
             if (v >= kHugeBound) v = kInf;
-    md.cols.resize(n);
-    for (size_t j = 0; j < n; ++j) {
-        if ((j & 4095) == 4095) check_deadline();
-        for (auto [r, v] : colmap[j])
-            if (v != 0) md.cols[j].push_back({r, v});
-    }
     return md;
 }
 
