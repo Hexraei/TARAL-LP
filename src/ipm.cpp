@@ -303,6 +303,7 @@ struct RunOut {
     long iters = 0;
     std::string msg;
     long long fnnz = 0;
+    Vec ray;  // recession direction behind a DualInfeasible status (internal scale, max-norm 1)
 };
 
 // accept(z, y) re-checks a candidate on the original model and returns true when it passes.
@@ -564,7 +565,9 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
         if (viol > 1e-9 || cd > -1e-6 * (1 + cnorm)) return false;
         P.mul_A(d, Ad);
         P.mul_Q(d, Qd);
-        return norm_inf(Ad) <= 1e-9 && norm_inf(Qd) <= 1e-9;
+        if (!(norm_inf(Ad) <= 1e-9 && norm_inf(Qd) <= 1e-9)) return false;
+        out.ray = d;
+        return true;
     };
 
     int stall = 0, extra = 0;
@@ -619,7 +622,7 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
             return out;
         }
         if (recession(z) || (it > 0 && recession(dz))) {
-            out.status = pres <= 1e-6 ? IpmStatus::Unbounded : IpmStatus::DualInfeasible;
+            out.status = IpmStatus::DualInfeasible;  // ipm_solve promotes it to Unbounded only after re-checking on the original model
             out.msg = "recession direction";
             return out;
         }
@@ -1010,6 +1013,69 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     else x = x0, yo.assign(m0, 0);
     Measures ms = finish(x, yo);
     res.status = ro.status;
+    if (res.status == IpmStatus::DualInfeasible) {
+        // "Unbounded" needs two facts, both checked here on the original unscaled model and nowhere else:
+        //   (1) a feasible point (row and column violation <= opt.tol, the measure used for Optimal), and
+        //   (2) an improving ray d (max-norm 1): d in the column cone (0 for a boxed column, >= 0 with only a lower bound,
+        //       <= 0 with only an upper bound), A d in the row cone (0 for a two-sided row, >= 0 / <= 0 for one-sided),
+        //       Q d = 0 and c'd < -1e-6 (1 + |c|inf), each with slack opt.tol (row slack scaled by the row's sum |a_j d_j|).
+        // If the returned iterate is not feasible, a zero-objective solve of the same constraints (c = 0, Q = 0) supplies a
+        // point; it must pass the same check. Anything that fails stays DualInfeasible.
+        auto ray_ok = [&]() {
+            const double rtol = opt.tol;  // same tolerance as the point check
+            if (ro.ray.size() != static_cast<size_t>(P.N) || nk == 0) return false;  // first nk entries: columns, rest: slacks
+            Vec d(n0, 0);
+            double nd = 0;
+            for (int k = 0; k < nk; ++k) d[cols[k]] = ro.ray[k] * D[k], nd = std::max(nd, std::abs(d[cols[k]]));
+            if (!(nd > 0) || !std::isfinite(nd)) return false;
+            for (double& v : d) v /= nd;
+            for (int j = 0; j < n0; ++j) {
+                bool lo = std::isfinite(clo[j]), up = std::isfinite(cup[j]);
+                if ((lo && d[j] < -rtol) || (up && d[j] > rtol)) return false;
+                if (lo && up && std::abs(d[j]) > rtol) return false;
+            }
+            Vec ad(m0, 0), sc(m0, 0);
+            for (int j = 0; j < n0; ++j)
+                for (const Entry& e : md.cols[j]) ad[e.index] += e.value * d[j], sc[e.index] += std::abs(e.value * d[j]);
+            for (int i = 0; i < m0; ++i) {
+                bool lo = std::isfinite(rlo[i]), up = std::isfinite(rup[i]);
+                double tol = rtol * (1 + sc[i]);
+                if ((lo && ad[i] < -tol) || (up && ad[i] > tol)) return false;
+                if (lo && up && std::abs(ad[i]) > tol) return false;
+            }
+            Vec qd(n0, 0), qs(n0, 0);
+            for (const QEntry& q : Q) {
+                qd[q.row] += q.value * d[q.col], qs[q.row] += std::abs(q.value * d[q.col]);
+                if (q.row != q.col) qd[q.col] += q.value * d[q.row], qs[q.col] += std::abs(q.value * d[q.row]);
+            }
+            for (int j = 0; j < n0; ++j)
+                if (std::abs(qd[j]) > rtol * (1 + qs[j])) return false;
+            double cd = 0;
+            for (int j = 0; j < n0; ++j) cd += c[j] * d[j];
+            return cd < -1e-6 * (1 + norm_inf(c));
+        };
+        if (ray_ok()) {
+            if (ms.pres <= opt.tol) {
+                res.status = IpmStatus::Unbounded;
+                res.message = "recession direction and returned point verified on the original model";
+            } else {
+                Model fm = md;  // same constraints, no objective
+                std::fill(fm.cost.begin(), fm.cost.end(), 0.0);
+                fm.qobj.clear();
+                fm.obj_const = 0;
+                fm.maximize = false;
+                IpmOptions fo = opt;
+                fo.time_limit = std::max(0.0, std::chrono::duration<double>(deadline - Clock::now()).count());
+                IpmResult fr = ipm_solve(fm, fo);
+                if (fr.status == IpmStatus::Optimal && fr.x.size() == static_cast<size_t>(n0) &&
+                    measure(md, c, Q, clo, cup, rlo, rup, fr.x, Vec(m0, 0)).pres <= opt.tol) {
+                    res.status = IpmStatus::Unbounded;
+                    res.message = "recession direction verified; feasible point from a zero-objective solve, verified on the original model";
+                    finish(fr.x, Vec(m0, 0));
+                }
+            }
+        }
+    }
     if (res.status == IpmStatus::Optimal && !ray_col.empty()) {
         // The ray column is dual infeasible by construction, so only primal feasibility of the rest is
         // checkable: feasible point plus a free improving ray means unbounded.

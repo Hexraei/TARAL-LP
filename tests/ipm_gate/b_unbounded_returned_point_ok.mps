@@ -1,0 +1,11 @@
+NAME B
+ROWS
+ N OBJ
+ E R0
+ G R1
+COLUMNS
+    X1 OBJ -1.0 R0 1.0
+    X2 R0 -1.0 R1 1.0
+RHS
+    RHS R1 1.0
+ENDATA
