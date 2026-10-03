@@ -9,11 +9,12 @@
 // averages; KKT-based adaptive restarts to the better of current/average (beta 0.2 / 0.8 / artificial 0.36).
 // Every --eval-freq iterations the KKT error of current and average is reduced on the device to a few scalars.
 // Stop when, on the ORIGINAL (unscaled) problem, ||primal res||_2 <= tol (1 + ||b||_2), ||dual res||_2 <= tol (1 +
-// ||c||_2) and |pobj - dobj| <= tol (1 + |pobj| + |dobj|).
+// ||c||_2) and |pobj - dobj| <= tol (1 + |pobj| + |dobj|), and, only when --row-rel K is given (default 0 = off), the per-row relative primal
+// residual ||viol_i / (1 + |b_i|)||_2 <= K tol, so one row cannot hide behind a large ||b|| (pds-100, fome21).
 //
 // Build: nvcc -O3 -arch=sm_120 -std=c++17 -Xcompiler "-O3 -march=native -pthread" -o out/pdhg gpu/pdhg.cu src/mps.cpp
 // Run:   out/pdhg MODEL.mps --device gpu|cpu [--threads N] [--tol 1e-4] [--time-limit S] [--max-iter N]
-//                 [--json OUT.json] [--sol OUT.sol] [--dual OUT.dual] [--fp32] [--eval-freq 64] [--no-graph] [--verbose]
+//                 [--json OUT.json] [--sol OUT.sol] [--dual OUT.dual] [--fp32] [--eval-freq 64] [--row-rel 0] [--no-graph] [--verbose]
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -130,7 +131,15 @@ static Scaled build_scaled(const Model& md, double sign) {
 }
 
 // Scalars of one KKT evaluation (row part + column part), s = scaled space, o = original space.
-enum { PR2S, PR2O, DROW, DZ2, NROW };
+enum { PR2S, PR2O, PR2R, DROW, DZ2, NROW };
+// 1/(1+|b_i|) in original row units (b_i = larger finite |row bound|): weight of row i in the per-row-relative residual PR2R.
+template <class T>
+__host__ __device__ inline double row_rel_weight(double lo, double up, T dr) {
+    double b = 0;
+    if (lo > -INFINITY) b = lo < 0 ? -lo : lo;
+    if (up < INFINITY) { double a = up < 0 ? -up : up; b = a > b ? a : b; }
+    return 1.0 / (1.0 + b / double(dr));
+}
 enum { DR2S, DR2O, POBJ, DCOL, DX2, NCOL };
 struct Kkt {
     double r[NROW] = {}, c[NCOL] = {};
@@ -229,7 +238,8 @@ __global__ void k_eval_row(int m, double f, const T* Ax, const T* z, const T* rl
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < m; i += gridDim.x * blockDim.x) {
         double ax = Ax[i] * f, zz = z[i] * f, lo = rl[i], up = ru[i];
         double r = ax < lo ? lo - ax : (ax > up ? ax - up : 0), ro = r / double(Dr[i]);
-        v[PR2S] += r * r, v[PR2O] += ro * ro;
+        double rr = ro * row_rel_weight(lo, up, Dr[i]);
+        v[PR2S] += r * r, v[PR2O] += ro * ro, v[PR2R] += rr * rr;
         if (zz > 0 && up < INFINITY) v[DROW] -= zz * up;
         if (zz < 0 && lo > -INFINITY) v[DROW] -= zz * lo;
         double dz = zz - zlast[i];
@@ -687,7 +697,8 @@ struct Cpu {
             for (int i = A.part[t]; i < A.part[t + 1]; ++i) {
                 double ax = Axv[i] * f, zz = zv[i] * f, lo = rl[i], up = ru[i];
                 double r = ax < lo ? lo - ax : (ax > up ? ax - up : 0), ro = r / double(Dr[i]);
-                v[PR2S] += r * r, v[PR2O] += ro * ro;
+                double rr = ro * row_rel_weight(lo, up, Dr[i]);
+                v[PR2S] += r * r, v[PR2O] += ro * ro, v[PR2R] += rr * rr;
                 if (zz > 0 && up < kInf) v[DROW] -= zz * up;
                 if (zz < 0 && lo > -kInf) v[DROW] -= zz * lo;
                 double dz = zz - zlast[i];
@@ -732,6 +743,7 @@ struct Options {
     double tol = 1e-4, time_limit = 3600;
     long max_iter = 2000000000L;
     int eval_freq = 64;
+    double row_rel = 0;  // opt-in (0 = off, the old stop test only; 100 for pds-100/fome21): also require ||(row violation)/(1+|row bound|)||_2 <= row_rel * tol 
     bool verbose = false, graph = true;
 };
 
@@ -776,7 +788,8 @@ Outcome run(B& b, const Scaled& P, const Options& o, double time_budget) {
     };
     auto rel = [&](const Kkt& k) {
         double po = k.pobj(), du = k.dobj();
-        return Rel{std::sqrt(k.r[PR2O]) / (1 + P.bnorm), std::sqrt(k.c[DR2O]) / (1 + P.cnorm),
+        double prow = o.row_rel > 0 ? std::sqrt(k.r[PR2R]) / o.row_rel : 0;  // per-row relative: no single row can hide in ||b||
+        return Rel{std::max(std::sqrt(k.r[PR2O]) / (1 + P.bnorm), prow), std::sqrt(k.c[DR2O]) / (1 + P.cnorm),
                    std::fabs(po - du) / (1 + std::fabs(po) + std::fabs(du))};
     };
     double k_last = wkkt(b.eval(false, 1.0)), k_prev = kInf;
@@ -939,6 +952,7 @@ int main(int argc, char** argv) {
         else if (a == "--tol") o.tol = std::atof(next());
         else if (a == "--time-limit") o.time_limit = std::atof(next());
         else if (a == "--max-iter") o.max_iter = std::atol(next());
+        else if (a == "--row-rel") o.row_rel = std::atof(next());
         else if (a == "--eval-freq") o.eval_freq = std::max(1, std::atoi(next()));
         else if (a == "--json") json = next();
         else if (a == "--sol") sol = next();
@@ -950,7 +964,7 @@ int main(int argc, char** argv) {
     }
     if (!model || (device != "gpu" && device != "cpu")) {
         std::fprintf(stderr, "usage: pdhg MODEL.mps --device gpu|cpu [--threads N] [--tol 1e-4] [--time-limit S] "
-                             "[--max-iter N] [--json OUT.json] [--sol OUT.sol] [--fp32] [--eval-freq 64] [--no-graph]\n");
+                             "[--max-iter N] [--json OUT.json] [--sol OUT.sol] [--fp32] [--eval-freq 64] [--row-rel 0] [--no-graph]\n");
         return 2;
     }
     auto t_start = Clock::now();
