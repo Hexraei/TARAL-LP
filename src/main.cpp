@@ -416,23 +416,44 @@ int main(int argc, char** argv) {
         if (!md.qobj.empty() || method == "ipm")
             return usage_error("--presolve supports linear models with --method simplex or dual only");
         orig_md = md;
-        pre = presolve_model(orig_md);
+        auto log_fail = [&]() {
+            std::fprintf(stderr, "error: cannot write presolve log to '%s'\n", presolve_log);
+            std::printf("status output_error: cannot write '%s'\n", presolve_log);
+            return 5;
+        };
+        const auto dl = std::chrono::steady_clock::now() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+                                                              std::chrono::duration<double>(std::max(0.0, std::min(limit - wall(), 1e8))));
+        long hook = -1;  // test hook: TARAL_PRESOLVE_TEST_TIMEOUT_AFTER_OPS=K behaves as if the deadline passed after K reductions
+        if (const char* h = std::getenv("TARAL_PRESOLVE_TEST_TIMEOUT_AFTER_OPS")) hook = std::atol(h);
+        pre = presolve_model(orig_md, dl, hook);
+        if (pre.timed_out) {  // honest incomplete state: the partial reduction is not used
+            if (presolve_log && !write_presolve_log(presolve_log, orig_md, pre, nullptr)) return log_fail();
+            if (json) write_json(json, "time_limit", nullptr, wall(), "presolve did not finish within the time limit");
+            std::printf("status time_limit (presolve incomplete after %zu reductions) wall %.3fs\n", pre.log.size(), wall());
+            return exit_code("time_limit");
+        }
         if (pre.infeasible) {
-            if (presolve_log) write_presolve_log(presolve_log, orig_md, pre, nullptr);
+            if (presolve_log && !write_presolve_log(presolve_log, orig_md, pre, nullptr)) return log_fail();
             if (json) write_json(json, "infeasible", nullptr, wall(), "presolve: " + pre.infeasible_reason);
             std::printf("status infeasible (presolve: %s) wall %.3fs\n", pre.infeasible_reason.c_str(), wall());
             return exit_code("infeasible");
         }
         std::printf("presolve: %zu -> %zu rows, %zu -> %zu cols, %zu reductions, %d passes\n", orig_md.row_lo.size(),
                     pre.kept_rows.size(), orig_md.cols.size(), pre.kept_cols.size(), pre.log.size(), pre.passes);
-        if (presolve_log) write_presolve_log(presolve_log, orig_md, pre, nullptr);  // rewritten with the audit when a point is reported
+        if (presolve_log && !write_presolve_log(presolve_log, orig_md, pre, nullptr)) return log_fail();  // rewritten with the audit when a point is reported
         md = pre.reduced;
         if (md.cols.empty()) {  // everything fixed: the answer is the substitution itself
             std::vector<double> x = presolve_expand(orig_md, pre, {});
             PresolveAudit au = presolve_audit(orig_md, x, md.obj_const);
-            if (presolve_log) write_presolve_log(presolve_log, orig_md, pre, &au);
+            if (presolve_log && !write_presolve_log(presolve_log, orig_md, pre, &au)) return log_fail();
             const char* st = au.ok ? "optimal" : "numerical_failure";
-            if (json) write_json(json, st, nullptr, wall(), "presolve solved the model");
+            Result full;  // original-space result, so the JSON carries the objective and point
+            full.status = au.ok ? Status::Optimal : Status::NumericalFailure;
+            full.x = x;
+            full.objective = au.objective;
+            full.certificate_quality = "presolve_substitution";
+            full.message = "presolve solved the model";
+            if (json) write_json(json, st, &full, wall(), "presolve solved the model");
             if (sol && au.ok) write_sol(sol, orig_md, x);
             std::printf("status %s objective %.12g (presolve) wall %.3fs\n", st, au.objective, wall());
             return exit_code(st);
@@ -444,7 +465,10 @@ int main(int argc, char** argv) {
             x = presolve_expand(orig_md, pre, x);
             au = presolve_audit(orig_md, x, obj);
             ok = au.ok;
-            if (presolve_log) write_presolve_log(presolve_log, orig_md, pre, &au);
+            if (presolve_log && !write_presolve_log(presolve_log, orig_md, pre, &au)) {
+                std::fprintf(stderr, "error: cannot write presolve log to '%s'\n", presolve_log);
+                ok = false;
+            }
             std::printf("presolve audit %s: row %.3g bound %.3g int %.3g objective diff %.3g\n", au.ok ? "ok" : "FAILED",
                         au.max_row_violation, au.max_bound_violation, au.max_int_violation, au.objective_diff);
         }
@@ -475,7 +499,7 @@ int main(int argc, char** argv) {
         if (r.has_solution && do_presolve) {
             bool ok = true;
             presolve_report(r.x, r.objective, ok);
-            if (!ok) r.status = "numerical_failure", r.has_solution = false, r.message = "presolve audit failed";
+            if (!ok) r.status = "numerical_failure", r.has_solution = false, r.message = "presolve audit or log write failed";
         }
         double w = wall();
         if (json) write_milp_json(json, r, w);
@@ -513,7 +537,7 @@ int main(int argc, char** argv) {
     if (r.status == Status::Optimal && do_presolve) {
         bool ok = true;
         presolve_report(r.x, r.objective, ok);
-        if (!ok) r.status = Status::NumericalFailure, r.message = "presolve audit failed";
+        if (!ok) r.status = Status::NumericalFailure, r.message = "presolve audit or log write failed";
     }
     double w = wall();
     if (json) write_json(json, status_name(r.status), &r, w, r.message);
