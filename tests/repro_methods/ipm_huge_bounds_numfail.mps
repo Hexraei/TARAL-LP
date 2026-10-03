@@ -1,0 +1,16 @@
+NAME          REPRO
+ROWS
+ N  OBJ
+ L  R0
+ E  R1
+COLUMNS
+    C0  R0  -4.0
+    C1  R0  3.0
+    C2  R1  -5.0
+    C3  R1  5.0
+RHS
+    RHS  R0  -10.0
+    RHS  R1  -1.0
+BOUNDS
+ UP BND  C3  1000000000000000.0
+ENDATA
