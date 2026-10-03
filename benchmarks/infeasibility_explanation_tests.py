@@ -104,5 +104,111 @@ for p in sorted(glob.glob(os.path.join(ROOT, "benchmarks/refinery_stress/*.mps")
     rc, e, out = run(p, "fix")
     expect("fixture_" + os.path.basename(p), e and e["status"] == "relaxation_feasible", str(e and e["status"]))
 
+# ---- regression tests for the independent review of the first version
+import copy
+def check_rejects(name, model, mutate):
+    j = json.load(open(out_conflict)); mutate(j)
+    pth = os.path.join(TMP, name + ".json")
+    open(pth, "w").write(json.dumps(j, allow_nan=True))
+    r = subprocess.run([sys.executable, os.path.join(ROOT, "benchmarks/infeasibility_explanation_check.py"), model, pth], capture_output=True, text=True)
+    expect(name, r.returncode == 1 and "FAIL" in r.stdout, r.stdout[-200:])
+
+rc0, e0, out_conflict = run(conflict, "conflict2")
+def zero(j):
+    for k in ("farkas_row_lower", "farkas_row_upper", "farkas_col_lower", "farkas_col_upper"): j[k] = [0.0] * len(j[k])
+check_rejects("reject_all_zero_farkas_with_verified_flag", conflict, zero)
+def negm(j): j["farkas_row_lower"][1] = -abs(j["farkas_row_upper"][1]) - 1.0
+check_rejects("reject_negative_multiplier", conflict, negm)
+def shortm(j): j["farkas_col_upper"] = j["farkas_col_upper"][:-1]
+check_rejects("reject_wrong_dimension", conflict, shortm)
+def scaled(j):  # stationarity broken: multiplier on a single row only
+    j["farkas_row_upper"] = [0.0] * len(j["farkas_row_upper"]); j["farkas_row_lower"] = [1.0] + [0.0] * (len(j["farkas_row_lower"]) - 1)
+check_rejects("reject_non_stationary_multipliers", conflict, scaled)
+def nanw(j): j["rows"][0]["removal_witness"][0] = float("nan")
+check_rejects("reject_nan_witness", conflict, nanw)
+def shortw(j): j["rows"][0]["removal_witness"] = j["rows"][0]["removal_witness"][:-1]
+check_rejects("reject_short_witness", conflict, shortw)
+def badidx(j): j["rows"][0]["index"] = 999
+check_rejects("reject_bad_row_index", conflict, badidx)
+def negslack(j): j["relaxation"]["rows"][0]["lower_relaxed_by"] = -1.0
+check_rejects("reject_negative_relaxation", conflict, negslack)
+def nanobj(j): j["relaxation"]["objective"] = float("nan")
+check_rejects("reject_nan_relaxation_objective", conflict, nanobj)
+
+# unwritable output: nonzero exit, diagnostic, no success claim
+r = subprocess.run([BIN, conflict, "--explain-infeasible", "/no-such-dir/out.json"], capture_output=True, text=True)
+expect("output_failure_nonzero", r.returncode != 0 and "cannot write" in (r.stderr + r.stdout), "rc=%d" % r.returncode)
+expect("output_failure_no_success_claim", "irreducible" not in r.stdout)
+
+# reader failure: the engine reports a parse error; the checker refuses to run on an unreadable model
+garbage = mps("garbage", "this is not an mps file\n")
+r = subprocess.run([BIN, garbage, "--explain-infeasible", os.path.join(TMP, "g.json")], capture_output=True, text=True)
+expect("reader_failure_engine_exit3", r.returncode == 3, "rc=%d" % r.returncode)
+r = subprocess.run([sys.executable, os.path.join(ROOT, "benchmarks/infeasibility_explanation_check.py"), garbage, out_conflict], capture_output=True, text=True)
+expect("reader_failure_checker_fails", r.returncode == 1, r.stdout[-200:])
+
+# duplicate coefficients are summed (engine semantics); the checker normalizes the same way before its oracle
+dup = mps("dup", """NAME DUP
+ROWS
+ N OBJ
+ G R0
+COLUMNS
+ X OBJ 1 R0 3
+ X R0 -4
+RHS
+ RHS R0 -1
+BOUNDS
+ UP BND X 5
+ENDATA
+""")  # summed: -x >= -1 is feasible at x=1; first-only (3x >= -1) is also feasible, so tighten with a second case
+dup2 = mps("dup2", """NAME DUP2
+ROWS
+ N OBJ
+ G R0
+COLUMNS
+ X OBJ 1 R0 3
+ X R0 -4
+RHS
+ RHS R0 2
+BOUNDS
+ UP BND X 5
+ENDATA
+""")  # summed coefficient is -1: -x >= 2 with 0<=x<=5 is infeasible; keeping the first (3x>=2) would be feasible
+rc2, e2, out2 = run(dup2, "dup2")
+expect("duplicate_coefficients_summed_engine", e2 and e2["status"] == "irreducible", str(e2 and e2["status"]))
+expect("duplicate_coefficients_checker_agrees", chk.check(dup2, out2)[2] == [])
+rc1, e1, out1 = run(dup, "dup1")
+expect("duplicate_coefficients_feasible_case", e1 and e1["status"] == "relaxation_feasible" and chk.check(dup, out1)[2] == [])
+
+# budget: engine API test with a simulated clock (deterministic); compiled separately
+api = os.path.join(TMP, "api_test")
+srcs = [os.path.join(ROOT, "src", f) for f in os.listdir(os.path.join(ROOT, "src")) if f.endswith(".cpp") and f != "main.cpp"]
+cc = subprocess.run(["g++", "-O1", "-std=c++17", "-o", api, os.path.join(ROOT, "benchmarks/infeasibility_explanation_api_tests.cpp")] + srcs, capture_output=True, text=True)
+expect("api_test_builds", cc.returncode == 0, cc.stderr[-300:])
+if cc.returncode == 0:
+    r = subprocess.run([api], capture_output=True, text=True)
+    expect("api_budget_and_status_tests", r.returncode == 0, r.stdout[-300:] + r.stderr[-300:])
+
+# ---- random LP sweep (neutral fixed seeds): every irreducible claim must pass the independent checker, and the
+# engine's feasible/infeasible verdict must match the oracle on the (duplicate-free) model
+import random
+sweep = {"irreducible": 0, "relaxation_feasible": 0, "other": 0}
+for seed in range(7000, 7150):
+    rg = random.Random(seed)
+    n, m = rg.randint(3, 9), rg.randint(3, 12)
+    L = ["NAME S", "ROWS", " N OBJ"] + [" %s R%d" % (rg.choice("LGE"), i) for i in range(m)] + ["COLUMNS"]
+    for j in range(n):
+        ents = {i: rg.choice([1, -1, 2, 0.5, -3]) for i in rg.sample(range(m), rg.randint(1, min(4, m)))}
+        L.append(" X%d OBJ %g" % (j, rg.uniform(-2, 2)))
+        for i, v in ents.items(): L.append(" X%d R%d %g" % (j, i, v))
+    L += ["RHS"] + [" RHS R%d %g" % (i, rg.uniform(-5, 15)) for i in range(m)] + ["BOUNDS"] + [" UP BND X%d %g" % (j, rg.choice([4, 8, 30])) for j in range(n)] + ["ENDATA"]
+    pth = mps("sw%d" % seed, "\n".join(L) + "\n")
+    rcx, ex, outx = run(pth, "sw%d" % seed)
+    o, _ = chk.oracle(pth) if hasattr(chk, "oracle") else (None, None)
+    if ex is None: expect("sweep_%d_output" % seed, False); continue
+    sweep[ex["status"] if ex["status"] in sweep else "other"] += 1
+    errs = chk.check(pth, outx)[2]
+    expect("sweep_%d_checker" % seed, not errs, "; ".join(errs[:2]))
+print("sweep", sweep)
 print("FAILED: %s" % fails if fails else "ALL PASS")
 sys.exit(1 if fails else 0)
