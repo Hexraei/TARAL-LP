@@ -389,6 +389,20 @@ if j["status"] == "infeasible" and "certificate_quality" in j and "presolve" in 
 if j.get("certificate_quality") == "presolve_reduced_model_only":
     expect("reduced_certificate_not_claimed", j.get("certificate_verified") is False and not j.get("farkas_row_lower"), j)
 
+# 7. review 10: float-derived integer bounds must not manufacture false infeasibility
+for nm in ("small", "r1225"):
+    fx = os.path.join(ROOT, "tests/fixtures/presolve_float_derived_%s.mps" % nm); lg = os.path.join(TMP, "fd_%s_log.json" % nm)
+    r = run_raw(fx, ["--presolve-log", lg]); r0 = subprocess.run([BIN, fx], capture_output=True, text=True)
+    expect("float_derived_presolve_optimal_" + nm, status_of(r) == "optimal" and status_of(r0) == "optimal", (status_of(r), status_of(r0)))
+    expect("float_derived_objective_matches_" + nm, abs(float([l for l in r.stdout.splitlines() if l.startswith("status ")][-1].split("objective")[1].split()[0]) - float([l for l in r0.stdout.splitlines() if l.startswith("status ")][-1].split("objective")[1].split()[0])) < 1e-6, (r.stdout[-90:], r0.stdout[-90:]))
+    expect("float_derived_replay_" + nm, not rc.replay(rc.load(fx), json.load(open(lg))))
+    old = os.path.join(ROOT, "tests/fixtures/presolve_float_derived_%s_false_infeasible_log.json" % nm)
+    expect("replay_rejects_false_infeasible_claim_" + nm, bool(rc.replay(rc.load(fx), json.load(open(old)))))
+# direct input bounds stay strict next to the outward derived rounding: a singleton row with |a| = 1 and no substitution is exact
+for nm, rhs, want in (("exact_row_empty", 1.0000004, "infeasible"), ("exact_row_ok", 1.0, "optimal")):
+    pth = mps(nm, "NAME E\nROWS\n N OBJ\n G R0\nCOLUMNS\n MARK 'MARKER' 'INTORG'\n X OBJ 1 R0 1\n MARK 'MARKER' 'INTEND'\nRHS\n RHS R0 %r\nBOUNDS\n UP BND X 1.0000008\nENDATA\n" % rhs)
+    expect("derived_exact_row_" + nm, status_of(run_raw(pth, ["--presolve"])) == want, status_of(run_raw(pth, ["--presolve"])))
+
 api = os.path.join(TMP, "presolve_api")
 srcs = [os.path.join(ROOT, "src", f) for f in os.listdir(os.path.join(ROOT, "src")) if f.endswith(".cpp") and f != "main.cpp"]
 cc = subprocess.run(["g++", "-O1", "-std=c++17", "-o", api, os.path.join(ROOT, "benchmarks/presolve_api_tests.cpp")] + srcs, capture_output=True, text=True)
