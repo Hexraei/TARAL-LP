@@ -282,3 +282,12 @@ only the five classification changes. Its ledger is `equality_labels_replay_80.j
 `tests/ipm_gate/check_equality_labels.py` also checks all five returned points and
 rejects injected negative reduced curvature and an unrelated case identity.
 This is not a new 1780-case benchmark; the raw final 1780 ledger remains unchanged.
+
+### Post-merge Kaggle confirmation
+
+The [second-host evidence](../results/qp_postmerge_gate_20261003/kaggle_second_host/)
+replays source `a240203` after integration: Netlib 93/93 both modes with pilots
+counted, strict 92/93 (`greenbea` only nonstrict). Independent comparison against
+the `58f77af` CSVs finds zero per-case verdict, pass, strict, engine-status or
+printed-objective changes. This confirms the Netlib gate on that Kaggle host;
+it is not a post-merge 1780-case QP run or a universal cross-host claim.

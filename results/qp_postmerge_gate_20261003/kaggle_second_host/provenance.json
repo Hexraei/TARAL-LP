@@ -1,0 +1,58 @@
+{
+  "source_commit": "a240203205ff3a8d4b7f86f8469d2854f84913cf",
+  "source_archive_sha256": "a57c657fffdf1ef61ed4a81b2468f14901d9bd2cb8218146bf2af6f005c9aec9",
+  "src_fingerprint": "d026ecca8aaf1dcc393f1ef8db4b0aeb9080962e1453d6e2c56ff042ea1bdb7a",
+  "reported_notebook": "hexraei/notebook5442ad272e",
+  "reported_version": 1,
+  "reported_private": true,
+  "reported_wall_seconds": 408.3,
+  "engine_cap_seconds": 60,
+  "build_flags_reported": "g++ -O2 -std=c++17 -Wall -Wextra -Wpedantic src/*.cpp",
+  "archive_verification": "Executor reported archive SHA verified and packed only src (12 files).",
+  "baseline": "results/netlib_postmerge_58f77af/",
+  "checks": {
+    "primal": {
+      "rows": 93,
+      "passed": 93,
+      "strict": 92,
+      "nonstrict": [
+        "greenbea"
+      ],
+      "baseline_differences_on_checked_fields": 0,
+      "checked_fields": [
+        "case",
+        "verdict",
+        "passed",
+        "strict",
+        "engine_status",
+        "objective"
+      ],
+      "objective_comparison": "CSV objective strings identical; original in-memory double bytes not supplied."
+    },
+    "dual": {
+      "rows": 93,
+      "passed": 93,
+      "strict": 92,
+      "nonstrict": [
+        "greenbea"
+      ],
+      "baseline_differences_on_checked_fields": 0,
+      "checked_fields": [
+        "case",
+        "verdict",
+        "passed",
+        "strict",
+        "engine_status",
+        "objective"
+      ],
+      "objective_comparison": "CSV objective strings identical; original in-memory double bytes not supplied."
+    }
+  },
+  "artifact_sha256": {
+    "dual.log": "579f012b3457eca25cc4ed41a3ddd9dc8a8dc7f46283740d1d4a162b2b735acb",
+    "dual_ledger.csv": "0c7cf800b7158a95657e854d6bc3c5260637ce681684bfd360a7b3b0964717e7",
+    "primal.log": "4fcd5277b8d4e15bb40c714094766e2d69028a0475be7e44172a4d2974afaea0",
+    "primal_ledger.csv": "2e34bf5af12927b0cefc6af67300d3c22c301f69e4ed625311e725bef845d132",
+    "summary.txt": "0a652cb9aa947a2cf44e9cd6dcd2ce85bb8b23400851c6fe9e15ee74d066edf2"
+  }
+}

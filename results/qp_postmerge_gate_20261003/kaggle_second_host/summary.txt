@@ -1,0 +1,2 @@
+primal: pilots EXCLUDED (the two never count; headline convention) pass 91/93 strict 90/91; pilots COUNTED pass 93/93 strict 92/93; fails []; nonstrict ['greenbea']
+dual: pilots EXCLUDED (the two never count; headline convention) pass 91/93 strict 90/91; pilots COUNTED pass 93/93 strict 92/93; fails []; nonstrict ['greenbea']
