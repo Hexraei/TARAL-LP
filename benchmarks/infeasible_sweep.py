@@ -79,9 +79,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--engine", required=True); ap.add_argument("--corpus"); ap.add_argument("--generated", type=int, default=0)
     ap.add_argument("--seed", type=int, default=7); ap.add_argument("--time-limit", type=float, default=60.0)
-    ap.add_argument("--highs-iis", action="store_true"); ap.add_argument("--out")
+    ap.add_argument("--highs-iis", action="store_true"); ap.add_argument("--out"); ap.add_argument("--keep", help="directory to keep per-model engine stdout and explanation JSON")
     a = ap.parse_args()
-    tmp = tempfile.mkdtemp(); items = []
+    tmp = a.keep or tempfile.mkdtemp(); os.makedirs(tmp, exist_ok=True); items = []
     if a.corpus:
         for f in sorted(os.listdir(a.corpus)):
             if f.endswith(".mps"): items.append((f[:-4], os.path.join(a.corpus, f), None))
@@ -93,11 +93,13 @@ def main():
         r = {"model": name, "planted_k_upper_bound": planted}
         p, w = run([a.engine, path, "--time-limit", str(a.time_limit)], a.time_limit + 30)
         r["engine_status"] = status_line(p); r["engine_wall_s"] = round(w, 3)
+        if a.keep and p is not None: open(os.path.join(tmp, name + ".plain.stdout.txt"), "w").write(p.stdout)
         try: r.update(highs_info(path, a.highs_iis))
         except Exception as ex: r["highs_error"] = "%s: %s" % (type(ex).__name__, ex)
         if r["engine_status"] == "infeasible":
             ej = os.path.join(tmp, name + ".explain.json")
             p, w = run([a.engine, path, "--explain-infeasible", ej, "--time-limit", str(a.time_limit)], a.time_limit + 30)
+            if a.keep and p is not None: open(os.path.join(tmp, name + ".explain.stdout.txt"), "w").write(p.stdout)
             r["explain_exit"] = None if p is None else p.returncode; r["explain_wall_s"] = round(w, 3)
             if os.path.exists(ej):
                 e = json.load(open(ej)); r["explain_status"] = e.get("status"); r["rows"] = len(e.get("rows") or []); up = e.get("unproven_rows"); r["unproven_rows"] = len(up) if isinstance(up, list) else up
