@@ -1,0 +1,7 @@
+id,contracted_main_status,contracted_main_verdict,pinned_main_status,pinned_main_verdict
+bounds_huge-82002,optimal,PASS,numerical_failure,NOANS
+bounds_huge-82052,optimal,PASS,numerical_failure,NOANS
+bounds_huge-82056,numerical_failure,NOANS,optimal,PASS
+bounds_huge-82057,numerical_failure,NOANS,optimal,PASS
+bounds_huge-82068,numerical_failure,NOANS,optimal,PASS
+ill_cond-87054,optimal,PASS,numerical_failure,NOANS

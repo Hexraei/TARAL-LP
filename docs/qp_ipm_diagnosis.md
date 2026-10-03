@@ -175,6 +175,52 @@ Safety test (`tools/diag_qp_ipm/nonconvex_nullspace_negative_test.py`, 300 rando
 all 74 with `lam_min` positive (1e-3, 1) are solved, except 1 `numerical_failure`; the 112 borderline models (delta -1e-6, -1e-8, +1e-8) end as `nonconvex` (38, all at -1e-6), `numerical_failure` (70) or, with the gate,
 `dual_infeasible` (4); before C1 they were all `nonconvex`. Without the gate, 4 of them were reported `unbounded`, one of them a strictly convex model. QP `qp_repro`: `qp_dual_infeasible_on_unbounded.mps` and `qp_refuses_indefinite_q_convex_on_feasible_set.mps` FIXED, the other four unchanged.
 
+## Regression found by the program agent's gate: FP contraction (separate fix commit)
+
+**Report.** On the program agent's build, `bounds_huge-82056`, `-82057` and `-82068` (`--method ipm`, also in the QP suite) go from `optimal` (main: 92 iterations, objective -26.658203125
+for 82056) to `numerical_failure` ("no progress in 30 iterations", stop at iteration 50) on the tree with the status gate (`db82de0`); the convexification (`af9df1b`) was cleared by them.
+Models: `tests/ipm_numerics/bounds_huge-*.mps`.
+
+**What I can and cannot reproduce.** On this host (gcc 13.3 and clang 18) main and `db82de0` give identical iterates on all three models under every configuration I tried (gcc `-O3`/`-O2`, with and
+without `-march=native`, inline-limit parameters, clang), so the patch-induced flip itself does not appear here. What does reproduce is the cause it points at: the three models are sensitive to
+how the compiler fuses `a*b+c`. Every FMA-contracted build of main *already* fails them here (gcc `-O3 -march=native`: 50, 27, 63 iterations, the same stop at iteration 50 the program agent reports for the gated tree),
+and every uncontracted build solves them: optimal at 92, 17 and 25 iterations, objective -26.658203125 for 82056, exactly main's figures in the report
+(`results/qp_ipm_diagnosis/fp_contraction_three_models.txt`). So the program agent's main behaves like an uncontracted build on these models and the gated tree like a contracted one.
+
+**Mechanism (shown on this host).** `run_ipm` is a separate function whose floating-point code is decided by GCC's inlining of its lambdas, and which products get fused follows from that. The shape of
+`run_ipm` (`tools/diag_qp_ipm/fp_shape_check.py`, FP opcode sequence per function from `objdump`) moves with *any* edit to `ipm.cpp`, at gcc `-O3 -march=native`:
+
+| tree | `run_ipm` FP ops | fused (FMA) ops |
+| --- | --- | --- |
+| main | 195 | 51 |
+| gate alone (`db82de0`): about 40 FP ops (the divisions of the recession test's normalisation among them) leave the loop body and an outlined function with FP ops appears | 151 | 43 |
+| convexification alone (`af9df1b` without the gate; nothing near the loop changed) | 201 | 53 |
+| both, before this fix | 173 | 47 |
+
+Even moving the ray store out of the loop (only `out.dz = dz;` in the exit branch) does not keep the shape in the full tree: the shape of the loop depends on the rest of the translation unit.
+So the gate did not alter the algorithm (the new code runs only after a recession direction ends the run, and these three models do not end that way); it altered which products the compiler fuses, and
+these models sit on a contraction knife-edge. That also explains why the convexification can pass the program agent's gate on one build and would not on another: it moves the shape too (51 -> 53).
+
+**Fix.** `#pragma clang fp contract(off)` / `#pragma GCC optimize("fp-contract=off")` at the top of `src/ipm.cpp` (11 lines with the comment, no other change). No edit to `run_ipm`, to the gate or to its rules:
+verified point and verified ray on the original model, status path only, nothing else. With the pragma the iterates are a function of the source alone: the three models give identical status, objective and iteration count
+(optimal, 92 / 17 / 25) with gcc `-O3 -march=native`, `-O2 -march=native`, `-O3`, and clang `-O3 -march=native` (`tests/ipm_numerics/build_invariance.sh`), and main-with-the-pragma and the fixed tree are the same on every row
+of the ipm and QP suites except the intended ones (below). The matrix by tree and toolchain is in `fp_contraction_three_models.txt`; `tests/ipm_numerics/check.sh ENGINE` replays the three models.
+
+**Before / after, same host, `-O3 -march=native`** (pinned main = main source plus the pragma, built identically):
+
+| suite | pinned main | fixed tree | rows that differ |
+| --- | --- | --- | --- |
+| 3 models | optimal 92 / 17 / 25 | optimal 92 / 17 / 25 | 0 (the unpinned head fails all three) |
+| ipm LP+big LP (2952) | PASS 2826, NOANS 125, FAIL_OBJ 1 | PASS 2897, NOANS 54, FAIL_OBJ 1 | 71, all `dual_infeasible` -> `unbounded`; 0 others; no `unbounded` row moved; the 69 original ids all `unbounded` |
+| QP (1780) | 1636 pass, 25 partial | 1696 pass, 0 partial | 70: 25 `partial` -> `pass`, 40 `indef_convex_feasible` `nonconvex` -> `optimal`, 5 `indefinite` `nonconvex` -> `optimal` (harness relabel issue above); 0 others |
+| Netlib 93, primal and dual, engine run | same as before | status, objective, iterations identical on all 93 in both modes, except the wall-clock-limited dfl001 iteration count (41464 vs 41181, `time_limit` in both) |
+
+**Cost, stated plainly.** Pinning changes the numerics of every contracted build relative to an unpinned FMA build of main on this host: QP 6 rows (`bounds_huge-82056`, `-82057`, `-82068` `numerical_failure` -> `optimal`;
+`bounds_huge-82002`, `-82052`, `ill_cond-87054` `optimal` -> `numerical_failure`), ipm 14 rows (`dual_infeasible` <-> `unbounded`, the knife-edge of gap 2; the gate resolves all of them)
+(`pinning_effect_*.csv`). These are the same knife-edge models the committed ledger already flips between hosts (5 QP rows against the committed ledger on an unpinned build here, 7 on the pinned build), not new failure modes.
+If the program agent's main is contracted on `82002`, `82052` or `87054` and passes them, the pinned tree will not; I could not check that build. The alternative, keeping FMA and accepting that any edit to `ipm.cpp` can move these models,
+is the status quo that produced this report.
+
 ## Reproduce
 
 ```
@@ -184,6 +230,8 @@ tests/ipm_gate/check.sh $PWD/out/taral                                          
 python3 tools/diag_qp_ipm/indef_convex_highs.py --engine out/taral                              # gap 1 table
 python3 tools/diag_qp_ipm/feasible_check.py DIR_WITH_MPS                                        # gap 2 feasibility
 python3 tools/diag_qp_ipm/nonconvex_nullspace_negative_test.py out/taral                        # C1 safety test
+tests/ipm_numerics/check.sh $PWD/out/taral                                                      # the three FP-sensitive models
+tests/ipm_numerics/build_invariance.sh                                                          # same result on every toolchain
 # IPM-method LP suite: tools from branch cloud/adversarial-tests2
 python3 tools/adv/harness.py --engine out/taral --out out/ipm --kind lp+biglp --method ipm --jobs 4 --time-limit 60
 ```

@@ -1,0 +1,15 @@
+id,contracted_main_status,contracted_main_verdict,pinned_main_status,pinned_main_verdict
+unbounded-36015,dual_infeasible,NOANS,unbounded,PASS
+unbounded-36021,unbounded,PASS,dual_infeasible,NOANS
+unbounded-36058,unbounded,PASS,dual_infeasible,NOANS
+unbounded-36073,dual_infeasible,NOANS,unbounded,PASS
+unbounded-36075,dual_infeasible,NOANS,unbounded,PASS
+unbounded-36082,dual_infeasible,NOANS,unbounded,PASS
+unbounded-36085,unbounded,PASS,dual_infeasible,NOANS
+unbounded-36109,unbounded,PASS,dual_infeasible,NOANS
+unbounded-36114,unbounded,PASS,dual_infeasible,NOANS
+unbounded-36121,unbounded,PASS,dual_infeasible,NOANS
+unbounded-36130,unbounded,PASS,dual_infeasible,NOANS
+unbounded-36138,dual_infeasible,NOANS,unbounded,PASS
+unbounded-36139,unbounded,PASS,dual_infeasible,NOANS
+unbounded-36147,dual_infeasible,NOANS,unbounded,PASS
