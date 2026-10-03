@@ -166,6 +166,13 @@ int Dual::repair_dual(bool shift) {
         if (where_[j] == kBasic) continue;
         bool fl = std::isfinite(lo_[j]), fu = std::isfinite(up_[j]);
         if (fl && fu) {
+            // Keep a boxed nonbasic at its current bound unless its reduced cost is wrong-signed by more than the
+            // dual tolerance. A sign flip from rounding noise would otherwise move it to the other bound (a full-range
+            // move), so the next pivot undoes it and the loop refactorizes every iteration.
+            if (lo_[j] != up_[j] && ((where_[j] == kLower && d_[j] >= -kDualTol) || (where_[j] == kUpper && d_[j] <= kDualTol))) {
+                x_[j] = where_[j] == kLower ? lo_[j] : up_[j];
+                continue;
+            }
             place(j);
             continue;
         }
