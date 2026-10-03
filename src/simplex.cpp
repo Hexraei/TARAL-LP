@@ -317,6 +317,11 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             res.status = Status::IterationLimit;
             return res;
         }
+        if (work_budget().cap && ++work_budget().used > work_budget().cap) {  // --work-limit: deterministic stop
+            res.status = Status::IterationLimit;
+            res.message = "work limit";
+            return res;
+        }
         bool phase1 = false;
         for (int p = 0; p < m_; ++p) {
             int j = head_[p];

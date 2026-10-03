@@ -94,8 +94,25 @@ namespace {
 // which solves DFL001 where the primal stalls) gets everything that is left.
 constexpr double kPrimalShare = 0.2;
 
+// Work-based routing: the primal simplex may use kPrimalShare of the cumulative work budget.
+Result run_one_work(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
+                    const std::vector<char>* warm, bool use_dual, bool fallback) {
+    WorkBudget& w = work_budget();
+    if (use_dual) return solve_lp_dual(md, lo, up, warm, 1e9);
+    const long total_cap = w.cap;
+    if (fallback) w.cap = w.used + std::max(1L, long(kPrimalShare * double(total_cap - w.used)));  // cap 0 means off, so at least 1
+    Result r = solve_lp(md, lo, up, warm, 1e9);
+    w.cap = total_cap;
+    if (!fallback || r.status != Status::IterationLimit || r.message != "work limit" || w.used >= total_cap) return r;
+    Result d = solve_lp_dual(md, lo, up, warm, 1e9);
+    d.iterations += r.iterations;
+    d.message = "route=primal-work-budget-then-dual primal_iters=" + std::to_string(r.iterations) + "; dual simplex fallback: " + d.message;
+    return d;
+}
+
 Result run_one(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
                const std::vector<char>* warm, double limit, bool use_dual, bool fallback) {
+    if (work_budget().cap) return run_one_work(md, lo, up, warm, use_dual, fallback);
     if (use_dual) return solve_lp_dual(md, lo, up, warm, limit);
     const auto t0 = std::chrono::steady_clock::now();
     Result r = solve_lp(md, lo, up, warm, fallback ? kPrimalShare * limit : limit);
@@ -109,6 +126,11 @@ Result run_one(const Model& md, const std::vector<double>& lo, const std::vector
     return d;
 }
 }  // namespace
+
+WorkBudget& work_budget() {
+    static WorkBudget w;
+    return w;
+}
 
 Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
                       const std::vector<char>* warm, double time_limit_s, bool use_dual, bool primal_fallback) {
@@ -124,7 +146,7 @@ Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std:
     } else {
         why = "first solve: " + r.message;
     }
-    if (left() < 0.5) {
+    if (!work_budget().cap && left() < 0.5) {
         r.status = Status::NumericalFailure;
         r.message = why + "; no time left for the equilibrated retry";
         return r;

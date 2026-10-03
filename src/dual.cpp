@@ -318,6 +318,11 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             keep_basis();
             return Outcome::TimeLimit;
         }
+        if (work_budget().cap && ++work_budget().used > work_budget().cap) {  // --work-limit: deterministic stop
+            message = "work limit";
+            keep_basis();
+            return Outcome::Fallback;
+        }
         if (iterations >= kMaxIterations || iterations - progress_at > kStallIterations) {
             message = iterations >= kMaxIterations ? "dual iteration limit" : "dual stalled";
             keep_basis();
