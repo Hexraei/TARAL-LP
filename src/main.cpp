@@ -244,7 +244,7 @@ bool write_explanation_json(const char* path, const Model& md, const Infeasibili
 // FNV-1a 64 over a canonical text of (status, iterations, objective, x) with %.17g. Excludes wall time and the
 // message (which carries timings). Bit-exact: equal only when the arithmetic result is identical.
 unsigned long long result_hash(const char* status, const Result& r) {
-    unsigned long long h = 1469598103934665603ULL;
+    unsigned long long h = 14695981039346656037ULL;
     auto feed = [&](const std::string& t) {
         for (unsigned char c : t) h = (h ^ c) * 1099511628211ULL;
         h = (h ^ 0xff) * 1099511628211ULL;
@@ -500,7 +500,7 @@ int main(int argc, char** argv) {
     if (work_limit) {  // deterministic report: hash covers status, iterations, objective and x bits only
         char hx[32];
         std::snprintf(hx, sizeof hx, "%016llx", (unsigned long long)result_hash(status_name(r.status), r));
-        g_json_extra = std::string(", \"work_limit\": ") + std::to_string(work_limit) + ", \"work_used\": " +
+        g_json_extra = std::string(", \"work_limit\": ") + std::to_string(work_limit) + ", \"wall_limit_active\": " + (time_limit_given ? "true" : "false") + ", \"work_used\": " +
                        std::to_string(std::min(work_budget().used, work_limit)) + ", \"result_hash\": \"" + hx + "\"";
         std::printf("work_used %ld of %ld result_hash %s\n", std::min(work_budget().used, work_limit), work_limit, hx);
     }
