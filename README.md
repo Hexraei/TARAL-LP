@@ -44,6 +44,7 @@ Checked means **measured in the linked scope**, not complete industrial coverage
 | CPU Netlib, primal + dual | **93/93 each**, 92/93 strict, no wrong answers; source `58f77af` | [Primal](results/netlib_postmerge_58f77af/primal_ledger.csv), [dual](results/netlib_postmerge_58f77af/dual_ledger.csv) |
 | T4 PDHG, rail2586 / rail4284 | 1e-4 `near_optimal`: **110.4s / 143.4s**; both hit the 300s cap at 1e-6 | [CSV and protocol](results/gpu_pdhg/t4_industrial_20261003/) |
 | T4 PDHG, PDS-100 | 1e-4 `near_optimal` in **8.7s**, but objective error **7.72e-4** and original-row residual **1.02** | [CSV](results/gpu_pdhg/t4_industrial_20261003/ledger.csv) |
+| MIPLIB, 40 measured cases | **6 objective + 7 infeasibility matches**; 26 time limits, 1 no-JSON anomaly, zero rows labeled wrong | [CSV and limits](results/miplib_widening_20261003/) |
 | QPLIB, 19 measured candidates | **5 objective matches + 1 locally verified better point; 6 feasible engine-reported optima** where HiGHS had no optimal reference; [investigated discrepancies/limits](docs/limitations.md#qplib-measurements) | [CSV and protocol](results/qplib_widening_20261003/) |
 | Historical adversarial LP, dual | **2903/2952 accepted**, including 29 reference-corrected passes; 15 objective failures, 34 no-answer cases; source `4517277` | [CSV](results/adversarial_4517277/tests2_methods_dual_full.csv) |
 

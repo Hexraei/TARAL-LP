@@ -179,3 +179,13 @@ Proprietary. Only official competition judges and organizers may read this submi
 ## Synthetic refinery warm starts
 
 [39 what-if LP rows](../results/refinery_warmstart_58f77af/warmstart_table.csv), using source `58f77af`, record oracle validation of both cold and warm solves at 1e-6, with zero recorded wrong answers. Median warm/cold iteration ratio is 0.302, recomputed from the CSV. This is synthetic-data iteration evidence only: warm route use is inferred from stderr, and millisecond wall times do not support a stable speedup claim. [Protocol, summary and provenance](../results/refinery_warmstart_58f77af/).
+
+## MIPLIB widening, October 3, 2026
+
+[40-case CSV and provenance](../results/miplib_widening_20261003/): six objective
+matches, seven infeasibility matches, 26 engine time limits and one no-JSON
+anomaly, with zero rows labeled wrong under the protocol. Source `58f77af`;
+requested soft caps were engine 120 seconds and HiGHS 300 seconds. The current
+implementation times out on the 26 cases. HiGHS also hit its separate cap on
+11 of those. The `neos-1425699` no-JSON cause is unconfirmed. Do not add this
+selection to older MIPLIB counts without checking overlap.

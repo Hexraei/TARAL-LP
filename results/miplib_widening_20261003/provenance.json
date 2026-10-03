@@ -1,0 +1,25 @@
+{
+  "source_commit": "58f77afbb8e85e51ad2cb9971be9e12d8e2bd96b",
+  "compiler_flags": "g++ -O2 -std=c++17 src/*.cpp -o taral",
+  "host": "Kaggle CPU, Intel Xeon 2.20GHz,4 logical cores,31GB RAM (run report)",
+  "compiler_version": "g++ 13.3.0",
+  "reference_version": "HiGHS 1.15.1",
+  "reported_src_fingerprint": "e38148f79fbf2fce169a73017e3258ab05ec8d2abf71ef0a19a80ac884412ee4",
+  "source_archive_sha256": "c6ee678901e317dca9a9603c0fec8b9d480baf988f6259859320a2c2f847685c",
+  "origin_notebook": "hexraei/notebook89d59928c7",
+  "reported_version": 1,
+  "environment_provenance": "Reported same environment/build/source as QPLIB widening; source was independently fingerprint-verified for that run. This CSV does not itself establish the runtime environment.",
+  "engine_requested_cap_seconds": 120,
+  "reference_requested_cap_seconds": 300,
+  "verdict_counts": {
+    "time_limit": 26,
+    "infeasible_match": 7,
+    "match": 6,
+    "other:no_json": 1
+  },
+  "ledger_sha256": "02520c7f0c50a278c0f8256a5da0b24631a90021757b4238943e71e66e4bf8bd",
+  "reference_time_limits_among_engine_time_limits": 11,
+  "engine_wall_max_seconds": 120.53,
+  "reference_wall_max_seconds": 300.04,
+  "no_json_cause": "Unknown; crash hypothesis not confirmed by this ledger."
+}

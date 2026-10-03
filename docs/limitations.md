@@ -46,3 +46,13 @@ The [19-case widening CSV](../results/qplib_widening_20261003/ledger.csv) record
 - **9008, time-cap overrun under investigation:** no JSON after 480.17s under a requested 120s engine cap. The engine investigation identifies a missing deadline check during IPM symbolic factorization setup; a fix is in progress, not verified on main. Other time-limit rows also overrun the requested cap, including 10038 at 140.68s.
 
 Source `58f77af` was verified by matching source-file fingerprints; build and soft caps are recorded with the [provenance](../results/qplib_widening_20261003/provenance.json). Do not extrapolate into a general speed or correctness claim.
+
+## MIPLIB widening measurements
+
+[40 measured cases](../results/miplib_widening_20261003/) on source `58f77af`
+record six objective matches, seven infeasibility matches, 26 engine time limits
+and one no-JSON anomaly. No row is labeled wrong under this protocol. The
+current implementation times out on those 26 cases; HiGHS also reached its
+separate 300-second cap on 11 of them. The engine cap was 120 seconds, not an
+equal-budget comparison. `neos-1425699` produced no JSON; a crash hypothesis is
+under investigation, not confirmed. These are measurements, not 40 solves.
