@@ -1,0 +1,33 @@
+instance,limit,commit,build,status,objective,nodes,note
+dcmulti,none,aeec670 (before),native,optimal,188182,2962,
+dcmulti,none,aeec670 (before),fp-contract=off,optimal,188182,3422,
+dcmulti,none,aeec670 (before),O2 generic,optimal,188182,3422,
+dcmulti,none,d979350 (propagation),native,optimal,188182,3566,
+dcmulti,none,d979350 (propagation),fp-contract=off,optimal,188182,3390,
+dcmulti,none,d979350 (propagation),O2 generic,optimal,188182,3390,
+dcmulti,none,c3acc2f (+reduced-cost fixing),native,optimal,188182,3227,
+dcmulti,none,c3acc2f (+reduced-cost fixing),fp-contract=off,optimal,188182,3517,
+dcmulti,none,c3acc2f (+reduced-cost fixing),O2 generic,optimal,188182,3517,
+dcmulti,none,f2fcfaf (final),native,optimal,188182,3088,
+dcmulti,none,f2fcfaf (final),fp-contract=off,optimal,188182,3398,
+stein27,none,aeec670 (before),native,optimal,18,9847,
+stein27,none,aeec670 (before),fp-contract=off,optimal,18,9532,
+stein27,none,d979350 (propagation),native,optimal,18,9515,
+stein27,none,d979350 (propagation),fp-contract=off,optimal,18,9602,
+stein27,none,c3acc2f (+reduced-cost fixing),native,optimal,18,9551,
+stein27,none,c3acc2f (+reduced-cost fixing),fp-contract=off,optimal,18,9606,
+stein27,none,f2fcfaf (final),native,optimal,18,9515,
+stein27,none,f2fcfaf (final),fp-contract=off,optimal,18,9602,
+khb05250,none,aeec670 (before),native,optimal,106940226,2336,
+khb05250,none,d979350 (propagation),native,optimal,106940226,2336,
+khb05250,none,c3acc2f (+reduced-cost fixing),native,optimal,106940226,2300,
+khb05250,none,f2fcfaf (final),native,optimal,106940226,2354,
+khb05250,none,all four commits,fp-contract=off,optimal,106940226,"2336 / 2336 / 2300 / 2354",same as native
+misc07,12000 nodes,aeec670 (before),native,node_limit,2810 at node 6703,12000,bound 2161.2
+misc07,12000 nodes,aeec670 (before),fp-contract=off,node_limit,2810 at node 1743,12000,bound 2350.1
+misc07,12000 nodes,d979350 (propagation),native,node_limit,2810 at node 11243,12000,bound 2179.6
+misc07,12000 nodes,d979350 (propagation),fp-contract=off,node_limit,2810 at node 5778,12000,bound 2246.3
+misc07,12000 nodes,c3acc2f (+reduced-cost fixing),native,node_limit,2810 at node 3878,12000,bound 2240.3
+misc07,12000 nodes,c3acc2f (+reduced-cost fixing),fp-contract=off,node_limit,2810 at node 9134,12000,bound 2345.4
+misc07,12000 nodes,f2fcfaf (final),native,node_limit,2810 at node 3764,12000,bound 2349.2
+misc07,12000 nodes,f2fcfaf (final),fp-contract=off,node_limit,2810 at node 9851,12000,bound 2154.5

@@ -1,0 +1,1 @@
+STRESS cases=1000 wrong=0 unsolved=0 total_nodes=161353 prop_crossed=4024 audit[nodes,lp_inf,lp_feas,lp_other,int_empty,int_feasible,undecided,cutoff_only,rc_checked,rc_bad]=[4024, 3421, 603, 0, 603, 0, 0, 0, 117287, 0] statuses={'optimal': 839, 'infeasible': 161}

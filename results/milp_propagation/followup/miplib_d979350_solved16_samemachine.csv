@@ -1,0 +1,17 @@
+family,seed,instance,rows,cols,ints,status,objective,best_bound,nodes,lp_iterations,wall_s,prop_tightened,prop_crossed,prop_crossed_lp_infeasible,prop_pruned,rc_fixed,rc_skipped,audit,ref_status,ref_objective,verdict,detail
+miplib,,p0033,16,33,33,optimal,3089,3089,537,1201,0.023,590,66,0,66,,,,Optimal,3088.999999999999,match,
+miplib,,p0201,133,201,201,optimal,7615,7614.999999999999,1029,18460,1.398,6501,0,0,0,,,,Optimal,7614.999999997075,match,
+miplib,,p0282,241,282,282,optimal,258411,258411,3376,11037,1.809,4910,44,0,44,,,,Optimal,258411.0,match,
+miplib,,egout,98,141,55,optimal,568.1007000000001,568.1002872180451,68482,52668,14.035,0,0,0,0,,,,Optimal,568.1007000000001,match,
+miplib,,flugpl,18,18,11,optimal,1201500,1201500,2356,2060,0.07,5469,500,0,500,,,,Optimal,1201500.0,match,
+miplib,,lseu,28,89,89,optimal,1120,1120,18524,50635,1.574,20920,61,0,61,,,,Optimal,1120.0000000000002,match,
+miplib,,mod008,6,319,319,optimal,307,306.9997366090321,18725,87276,1.458,0,0,0,0,,,,Optimal,306.99999999999767,match,
+miplib,,stein27,118,27,27,optimal,18,17.999999999999996,9515,50803,5.068,10023,0,0,0,,,,Optimal,17.999999999999982,match,
+miplib,,bell3a,123,133,71,time_limit,878430.3159999999,877949.204177778,99837,480149,60.018,117620,0,0,0,,,,Optimal,878430.3159999981,unsolved,not solved within 60s (incumbent)
+miplib,,misc03,96,160,159,optimal,3360,3360,1053,16566,0.944,9611,53,0,53,,,,Optimal,3359.9999999999955,match,
+miplib,,enigma,21,100,100,optimal,0,0,24,489,0.004,171,3,0,3,,,,Optimal,0.0,match,
+miplib,,gt2,29,188,188,time_limit,23697,21166,312472,1539663,60.161,838125,499,0,499,,,,Optimal,21166.0,unsolved,not solved within 60s (incumbent)
+miplib,,khb05250,101,1350,24,optimal,106940226,106940226,2336,18510,1.316,0,0,0,0,,,,Optimal,106940226.0,match,
+miplib,,dcmulti,290,548,75,optimal,188182,188182,3566,25547,5.379,401,1,0,1,,,,Optimal,188182.0,match,
+miplib,,rgn,24,180,100,optimal,82.19999923999998,82.19999903999997,5205,38202,0.683,46053,0,0,0,,,,Optimal,82.19999923999991,match,
+miplib,,blend2,274,353,264,optimal,7.598985,7.598985,19257,333496,34.517,9,0,0,0,,,,Optimal,7.598985,match,

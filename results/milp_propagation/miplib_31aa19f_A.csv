@@ -1,0 +1,27 @@
+family,seed,instance,rows,cols,ints,status,objective,best_bound,nodes,lp_iterations,wall_s,prop_tightened,prop_crossed,prop_crossed_lp_infeasible,prop_pruned,rc_fixed,rc_skipped,audit,ref_status,ref_objective,verdict,detail
+miplib,,p0033,16,33,33,optimal,3089,3089,551,1145,0.031,442,95,0,95,,,,Optimal,3088.999999999999,match,
+miplib,,p0201,133,201,201,optimal,7615,7614.999999999999,1158,17663,1.975,7115,0,0,0,,,,Optimal,7614.999999997075,match,
+miplib,,p0282,241,282,282,optimal,258411,258411,3947,13787,3.675,9321,26,0,26,,,,Optimal,258411.0,match,
+miplib,,p0548,176,548,548,time_limit,,4719.373295372673,32138,514863,60.02,48472,5321,0,5321,,,,Optimal,8691.0,unsolved,not solved within 60s (no incumbent)
+miplib,,egout,98,141,55,optimal,568.1007000000001,568.1002872180451,68482,52668,21.095,0,0,0,0,,,,Optimal,568.1007000000001,match,
+miplib,,flugpl,18,18,11,optimal,1201500,1201500,2356,2060,0.102,5469,500,0,500,,,,Optimal,1201500.0,match,
+miplib,,lseu,28,89,89,optimal,1120,1120,19260,52056,2.723,23069,55,0,55,,,,Optimal,1120.0000000000002,match,
+miplib,,mod008,6,319,319,optimal,307,306.9997366090321,18735,87312,2.379,0,0,0,0,,,,Optimal,306.99999999999767,match,
+miplib,,stein27,118,27,27,optimal,18,17.999999999999996,9458,50973,7.037,9886,0,0,0,,,,Optimal,17.999999999999982,match,
+miplib,,stein45,331,45,45,time_limit,30,26.923076923076916,19514,256233,60.019,10718,0,0,0,,,,Optimal,29.999999999999996,unsolved,not solved within 60s (incumbent)
+miplib,,bell5,91,104,58,time_limit,8966406.491519999,8962553.646232802,105915,117005,60.057,1791,0,0,0,,,,Optimal,8966406.491520004,unsolved,not solved within 60s (incumbent)
+miplib,,bell3a,123,133,71,time_limit,878430.3159999999,877131.9793834828,60845,224681,60.04,40941,0,0,0,,,,Optimal,878430.3159999981,unsolved,not solved within 60s (incumbent)
+miplib,,misc03,96,160,159,optimal,3359.9999999999995,3359.9999999999995,1423,23858,1.756,14031,47,0,47,,,,Optimal,3359.9999999999955,match,
+miplib,,misc07,212,260,259,time_limit,2810,2133.5714285714284,14000,302525,60.007,174794,398,0,398,,,,Optimal,2809.999999999964,unsolved,not solved within 60s (incumbent)
+miplib,,enigma,21,100,100,optimal,0,0,486,3641,0.067,1715,120,0,120,,,,Optimal,0.0,match,
+miplib,,gt2,29,188,188,optimal,21166,21166,8387,83275,2.033,28046,18,0,18,,,,Optimal,21166.0,match,
+miplib,,khb05250,101,1350,24,optimal,106940226,106940226,2336,18583,1.942,0,0,0,0,,,,Optimal,106940226.0,match,
+miplib,,vpm1,234,378,168,time_limit,22,17.066666666666666,30300,512505,60.02,0,0,0,0,,,,Optimal,20.0,unsolved,not solved within 60s (incumbent)
+miplib,,vpm2,234,378,168,time_limit,,11.948020712349981,24531,296886,60.017,0,0,0,0,,,,Optimal,13.75,unsolved,not solved within 60s (no incumbent)
+miplib,,dcmulti,290,548,75,optimal,188182,188181.91052631586,3682,30460,8.459,613,1,0,1,,,,Optimal,188182.0,match,
+miplib,,rgn,24,180,100,optimal,82.19999923999998,82.19999903999997,5405,37790,1.008,48725,0,0,0,,,,Optimal,82.19999923999991,match,
+miplib,,pk1,45,86,55,time_limit,11,5.5814498875611,74597,1043273,60.049,0,0,0,0,,,,Optimal,10.999999999999973,unsolved,not solved within 60s (incumbent)
+miplib,,pp08a,136,240,64,time_limit,8730,4767.857142857142,46737,428843,60.042,0,0,0,0,,,,Optimal,7350.000000000002,unsolved,not solved within 60s (incumbent)
+miplib,,noswot,182,128,100,time_limit,,-43,32672,940050,60.022,16675,0,0,0,,,,Optimal,-41.0,unsolved,HiGHS -41.0 differs from published -43; not solved within 60s (no incumbent)
+miplib,,fixnet6,478,878,378,time_limit,,2010.592,19915,135833,60.034,0,0,0,0,,,,Optimal,3982.999999999776,unsolved,not solved within 60s (no incumbent)
+miplib,,blend2,274,353,264,optimal,7.598985,7.598985,11878,226006,34.789,9,0,0,0,,,,Optimal,7.598985,match,
