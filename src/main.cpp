@@ -157,9 +157,9 @@ void write_ipm_json(const char* path, const IpmResult& r, double wall) {
 }
 
 
-void write_explanation_json(const char* path, const Model& md, const InfeasibilityExplanation& e) {
+bool write_explanation_json(const char* path, const Model& md, const InfeasibilityExplanation& e) {
     std::FILE* f = std::fopen(path, "w");
-    if (!f) return;
+    if (!f) return false;
     auto arr = [&](const std::vector<double>& v) {
         std::fprintf(f, "[");
         for (size_t k = 0; k < v.size(); ++k) { if (k) std::fprintf(f, ", "); num_or_null(f, v[k]); }
@@ -234,7 +234,9 @@ void write_explanation_json(const char* path, const Model& md, const Infeasibili
     }
     std::fprintf(f, "], \"x\": "); arr(e.relaxation_x);
     std::fprintf(f, "}, \"lp_solves\": %ld, \"wall_s\": %.6f}\n", e.lp_solves, e.wall_s);
-    std::fclose(f);
+    bool ok = !std::ferror(f);
+    if (std::fclose(f) != 0) ok = false;
+    return ok;
 }
 
 void write_sol(const char* path, const Model& md, const std::vector<double>& x) {
@@ -388,7 +390,11 @@ int main(int argc, char** argv) {
     }
     if (explain_path) {  // LP-relaxation infeasibility explanation; ignores integrality and the objective
         InfeasibilityExplanation ex = explain_infeasibility(md, limit - wall());
-        write_explanation_json(explain_path, md, ex);
+        if (!write_explanation_json(explain_path, md, ex)) {
+            std::fprintf(stderr, "error: cannot write explanation to '%s'\n", explain_path);
+            std::printf("status output_error: cannot write '%s'\n", explain_path);
+            return 5;
+        }
         std::printf("explain %s rows %zu unproven %zu solves %ld wall %.3fs %s\n", ex.status.c_str(), ex.rows.size(),
                     ex.unproven_rows.size(), ex.lp_solves, wall(), ex.message.c_str());
         if (ex.status == "no_verified_proof") return 5;
