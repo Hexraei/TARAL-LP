@@ -4,6 +4,7 @@ project(TARAL_LP LANGUAGES CXX)
 add_executable(taral
     src/crossover.cpp
     src/dual.cpp
+    src/explain.cpp
     src/ipm.cpp
     src/kkt_gate.cpp
     src/lu.cpp

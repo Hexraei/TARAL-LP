@@ -154,3 +154,29 @@ KktReport kkt_check(const Model& model, const std::vector<double>& col_lo, const
                     const Result& r);
 Result solve_lp_gated(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
                       const std::vector<char>* warm_basis, double time_limit_s, bool use_dual, bool primal_fallback = true);
+
+// Verified LP infeasibility explanation (src/explain.cpp, docs/infeasibility_explanation.md). Integrality is
+// ignored: the explanation is for the LP relaxation. "Irreducible" means row-irreducible with ALL column
+// bounds retained and tolerance-feasible witnesses; it is not a minimum-cardinality set.
+struct InfeasibilityExplanation {
+    // relaxation_feasible | irreducible | reduced_unproven | bounds_only | no_verified_proof
+    std::string status, message;
+    std::vector<int> rows;                       // original row indices of the explained subsystem
+    std::vector<std::vector<double>> witness;    // per explained row: point feasible for the others (empty if unproven)
+    std::vector<double> witness_violation;       // worst relative violation of that witness
+    std::vector<int> unproven_rows;
+    std::vector<int> bound_columns;              // columns whose bounds carry a nonzero multiplier in the proof
+    std::vector<int> inconsistent_bound_columns; // col_lo > col_up
+    std::vector<double> farkas_row_lower, farkas_row_upper, farkas_col_lower, farkas_col_upper;  // full model
+    bool certificate_verified = false;
+    double certificate_margin = 0, certificate_residual = 0;
+    // Minimum weighted L1 side relaxation of ALL rows, column bounds retained.
+    std::string relaxation_status = "not_run", relaxation_quality;
+    double relaxation_objective = 0, relaxation_gap = 0, relaxation_violation = 0;
+    std::vector<double> relaxation_x, relax_lower, relax_upper, relax_weight;
+    long lp_solves = 0;
+    double wall_s = 0;
+};
+// The budget covers every phase (root test, deletion filter, elastic solve). The last argument is a test hook
+// that adds simulated elapsed time after the deletion phase; production callers leave it at 0.
+InfeasibilityExplanation explain_infeasibility(const Model& model, double time_limit_s, double test_elapsed_after_deletion_s = 0);
