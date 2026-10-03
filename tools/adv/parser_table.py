@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """MPS parser strictness table: the same input fed to the engine and to HiGHS, with a spec verdict per input.
 
-Each case states what the MPS format (IBM/CPLEX description as implemented by the common readers) requires:
+Each case states what the MPS format (the usual description as implemented by the common readers) requires:
   accept  -> a conforming reader must read it and produce `expect` (status, objective)
   reject  -> a conforming reader must report an error (the input is malformed)
   either  -> the format is silent or readers legitimately differ; any behaviour is defensible, differences are listed
@@ -157,14 +157,14 @@ for tag, num_, spec, why in [("fortran_D_exponent", "1D0", "either", "Fortran ex
 # --------------------------------------------------------------------------------------------- bounds
 case("bound_undeclared_column", "bounds", "BOUNDS line for a column that is not in COLUMNS (known case)",
      BASE.replace("ENDATA", "BOUNDS\n UP bnd ghost 5\nENDATA"), "reject", None,
-     "a bound refers to a column; none was declared (CPLEX and Gurobi report an error; HiGHS ignores the line). Judgement call, not a hard format rule")
+     "a bound refers to a column; none was declared (other readers report an error; HiGHS ignores the line). Judgement call, not a hard format rule")
 case("bound_unknown_type", "bounds", "bound type XX", BASE.replace("ENDATA", "BOUNDS\n XX bnd x 5\nENDATA"), "reject", None, "unknown type")
 case("bound_lower_case_type", "bounds", "bound type 'up'", BASE.replace("ENDATA", "BOUNDS\n up bnd x 5\nENDATA"), "either", OPT3, "case rules differ")
 case("bound_up_negative_default_lo", "bounds", "UP -1 on a column with default lower bound 0",
      BASE.replace("ENDATA", "BOUNDS\n UP bnd x -1\nENDATA"), "either", None,
-     "the format is ambiguous: lower bound -inf with a warning (CPLEX) vs infeasible (lower stays 0) vs error")
+     "the format is ambiguous: lower bound -inf with a warning (some readers) vs infeasible (lower stays 0) vs error")
 case("bound_mi_default_upper", "bounds", "MI on a column (upper bound afterwards?)", BASE.replace("ENDATA", "BOUNDS\n MI bnd x\nENDATA"), "either", None,
-     "original IBM reading: upper bound becomes 0; modern readers keep it +inf")
+     "original reading: upper bound becomes 0; modern readers keep it +inf")
 case("bound_bv_with_value", "bounds", "BV with an (ignored) value", BASE.replace("ENDATA", "BOUNDS\n BV bnd x 1\nENDATA"), "accept", ("optimal", 5.0),
      "x binary, y continuous: x=1, y=2 -> obj 5")
 case("bound_lo_gt_up", "bounds", "LO 5 and UP 3 on one column", BASE.replace("ENDATA", "BOUNDS\n LO bnd x 5\n UP bnd x 3\nENDATA"), "accept", ("infeasible", None),
@@ -202,7 +202,7 @@ case("range_on_N_row", "rhs_ranges", "RANGES entry for the objective row (ignore
 case("range_zero", "rhs_ranges", "R = 0 on an L row (becomes equality)",
      "NAME T\nROWS\n N obj\n L r1\nCOLUMNS\n x obj -1 r1 1\nRHS\n rhs r1 5\nRANGES\n rng r1 0\nENDATA\n", "accept", ("optimal", -5.0), "x in [5,5]")
 case("rhs_on_objective_row", "rhs_ranges", "RHS on the objective row (constant term, sign: obj = c'x - rhs)", mutate(" rhs r1 3", " rhs r1 3\n rhs obj 10"), "accept", ("optimal", -7.0),
-     "objective constant is minus the RHS entry (standard; HiGHS, CPLEX, Gurobi agree)")
+     "objective constant is minus the RHS entry (standard; the common readers agree)")
 case("objsense_max_section", "rhs_ranges", "OBJSENSE section with MAX on its own line",
      "NAME T\nOBJSENSE\n    MAX\nROWS\n N obj\n L r1\nCOLUMNS\n x obj 1 r1 1\nRHS\n rhs r1 4\nENDATA\n", "accept", ("optimal", 4.0), "maximise x s.t. x<=4")
 case("objsense_inline", "rhs_ranges", "'OBJSENSE MAX' on one line",

@@ -41,8 +41,10 @@ class Core:
 
 
 def rand_core(rng, m, n, dens=0.4, coef="int", colkinds=("nonneg", "box"), rowkinds=("eq", "le", "ge", "rng"),
-              slack0=0.4, cost="dual", integer=None, xrange=5):
-    """Random core with a known feasible point x0. cost='dual' builds c = d + A'y so that the LP is bounded."""
+              slack0=0.4, cost="dual", integer=None, xrange=5, nnz=None):
+    """Random core with a known feasible point x0. cost='dual' builds c = d + A'y so that the LP is bounded.
+    nnz=k draws k distinct columns per row (O(k) per row) instead of testing every column with probability dens, which
+    would be O(m*n) random draws on the big models; the default path and its random stream are unchanged."""
     c = Core(m, n)
     for j in range(n):
         k = rng.choice(colkinds)
@@ -82,7 +84,10 @@ def rand_core(rng, m, n, dens=0.4, coef="int", colkinds=("nonneg", "box"), rowki
         return float(v if v else rng.choice([-1, 1]))
 
     for i in range(m):
-        cols = [j for j in range(n) if rng.random() < dens]
+        if nnz is not None:
+            cols = rng.sample(range(n), min(n, nnz))
+        else:
+            cols = [j for j in range(n) if rng.random() < dens]
         if not cols:
             cols = [rng.randrange(n)]
         for j in cols:

@@ -6,7 +6,7 @@ or 'objective' when both are optimal but the objectives differ by more than 1e-6
 re-written as clean free-format MPS (R<i>/C<i> names) from the oracle's parsed model, so the reproducer does not
 depend on any parser quirk of the original file.
 
-Usage: shrink.py --engine ./taral --case cat-seed --out tests/repro/NAME.mps [--time-limit 3]
+Usage: shrink.py --engine ./taral --case cat-seed --out tests/repro/NAME.mps [--time-limit 3] [--method simplex|dual|ipm]
 """
 import argparse
 import copy
@@ -121,8 +121,8 @@ def drop_col(m, j):
 
 
 class Shrinker:
-    def __init__(self, engine, tl, mip, sentinel=0.0):
-        self.engine, self.tl, self.mip, self.sentinel = engine, tl, mip, sentinel
+    def __init__(self, engine, tl, mip, sentinel=0.0, method="simplex"):
+        self.engine, self.tl, self.mip, self.sentinel, self.method = engine, tl, mip, sentinel, method
         self.tmp = tempfile.mkdtemp(prefix="shrink")
         self.calls = 0
 
@@ -134,8 +134,10 @@ class Shrinker:
         if os.path.exists(js):
             os.remove(js)
         try:
-            subprocess.run([self.engine, p, "--time-limit", str(self.tl), "--json", js, "--sol", p + ".sol"],
-                           capture_output=True, timeout=self.tl + 20)
+            cmd = [self.engine, p, "--time-limit", str(self.tl), "--json", js, "--sol", p + ".sol"]
+            if self.method != "simplex":
+                cmd += ["--method", self.method]
+            subprocess.run(cmd, capture_output=True, timeout=self.tl + 20)
             j = json.load(open(js))
         except Exception:
             return None
@@ -208,6 +210,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--time-limit", type=float, default=3.0)
     ap.add_argument("--sentinel", type=float, default=0.0, help="write infinite column bounds as +-S (1e20 or 1e30)")
+    ap.add_argument("--method", default="simplex", choices=["simplex", "dual", "ipm"], help="engine path to reproduce on")
     a = ap.parse_args()
     cat, seed = a.case.rsplit("-", 1)
     case = gen.gen(cat, int(seed) - gen.BASE[cat])
@@ -215,7 +218,7 @@ def main():
     p = os.path.join(tmp, "orig.mps")
     open(p, "w").write(case.text)
     m = parse_mps(p)
-    sh = Shrinker(os.path.abspath(a.engine), a.time_limit, case.mip, a.sentinel)
+    sh = Shrinker(os.path.abspath(a.engine), a.time_limit, case.mip, a.sentinel, a.method)
     sig = sh.signature(m)
     if sig is None:
         print("case does not reproduce with --time-limit %s" % a.time_limit)

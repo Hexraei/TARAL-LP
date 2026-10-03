@@ -59,6 +59,8 @@ def main():
     ap.add_argument("--expected-objective", type=float)
     ap.add_argument("--why-expected", default="")
     ap.add_argument("--dir", default="tests/repro")
+    ap.add_argument("--method", default="", help="engine --method the failure belongs to (dual|ipm); empty = default path")
+    ap.add_argument("--time-limit", type=float, default=0, help="per-reproducer engine time limit for the replay (0 = replay default)")
     a = ap.parse_args()
     os.makedirs(a.dir, exist_ok=True)
     dst = os.path.join(a.dir, a.name + ".mps")
@@ -75,6 +77,10 @@ def main():
     exp = json.load(open(path)) if os.path.exists(path) else {}
     exp[a.name + ".mps"] = dict(category=a.category, source=a.source, expected_status=st, expected_objective=obj,
                                 expected_basis=why, known_failing=a.known, observed_bad=a.observed, report=a.report)
+    if a.method:
+        exp[a.name + ".mps"]["method"] = a.method
+    if a.time_limit:
+        exp[a.name + ".mps"]["time_limit"] = a.time_limit
     json.dump(dict(sorted(exp.items())), open(path, "w"), indent=1)
     print("installed %s: expected %s %s (%s)" % (dst, st, obj, why))
 

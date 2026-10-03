@@ -4,7 +4,9 @@
 expected.json: { "file.mps": {"expected_status": "optimal|infeasible|unbounded|parse_error|...",
                               "expected_objective": number|null, "known_failing": bool, "category": "...",
                               "source": "case id or hand-written", "observed_bad": "what the engine does",
-                              "report": "one paragraph"} }
+                              "report": "one paragraph",
+                              "method": "simplex|dual|ipm" (optional, engine --method; default simplex),
+                              "time_limit": seconds (optional, default --time-limit)} }
 Outcome per file: OK (engine gives the expected result), KNOWN-FAIL (known_failing and still wrong),
 FIXED (known_failing but now correct: remove the flag), REGRESSION (not known_failing and wrong).
 Exit code 1 on REGRESSION. The expected status comes from the reference solver (presolve off) and/or from the
@@ -20,13 +22,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mpsio import parse_mps, exact_check, read_sol, OracleError
 
 
-def run(engine, path, tl):
+def run(engine, path, tl, method="simplex"):
     js, sol = path + ".json.tmp", path + ".sol.tmp"
     for p in (js, sol):
         if os.path.exists(p):
             os.remove(p)
     try:
-        pr = subprocess.run([engine, path, "--time-limit", str(tl), "--json", js, "--sol", sol], capture_output=True, timeout=tl + 30)
+        cmd = [engine, path, "--time-limit", str(tl), "--json", js, "--sol", sol]
+        if method != "simplex":
+            cmd += ["--method", method]
+        pr = subprocess.run(cmd, capture_output=True, timeout=tl + 30)
     except subprocess.TimeoutExpired:
         return dict(status="harness_timeout", objective=None), None
     try:
@@ -59,7 +64,7 @@ def main():
             regress += 1
             continue
         p = os.path.join(a.dir, f)
-        j, sol = run(os.path.abspath(a.engine), p, a.time_limit)
+        j, sol = run(os.path.abspath(a.engine), p, e.get("time_limit", a.time_limit), e.get("method", "simplex"))
         ok = j.get("status") == e["expected_status"]
         why = ""
         if ok and e["expected_status"] == "optimal":
@@ -80,7 +85,7 @@ def main():
         res = "OK" if ok and not known else "FIXED" if ok and known else "KNOWN-FAIL" if known else "REGRESSION"
         if res == "REGRESSION":
             regress += 1
-        rows.append((f, e.get("category", ""), e["expected_status"], j.get("status"), res, why))
+        rows.append((f, (e.get("category", "") + ("/" + e["method"] if e.get("method") else ""))[:16], e["expected_status"], j.get("status"), res, why))
         for q in (p + ".json.tmp", p + ".sol.tmp"):
             if os.path.exists(q):
                 os.remove(q)

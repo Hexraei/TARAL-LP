@@ -1,7 +1,7 @@
 """MPS writer, independent MPS oracle parser and exact original-model checker for the adversarial suite.
 
 Nothing here shares code with src/mps.cpp. The oracle parser implements the MPS conventions that are
-common to the IBM/CPLEX/Gurobi/HiGHS readers and documents the points where the format is ambiguous
+common to the common MPS readers and documents the points where the format is ambiguous
 (see docs/adversarial.md). Row activities and objectives are recomputed in exact rational arithmetic
 from the original file and the solution printed by the engine, so the checker itself adds no rounding.
 """
@@ -9,7 +9,7 @@ import math
 from fractions import Fraction
 
 INF = float("inf")
-BIG = 1e20  # |value| >= BIG on a bound is infinity (CPLEX/Gurobi/HiGHS convention; the format itself is silent)
+BIG = 1e20  # |value| >= BIG on a bound is infinity (common reader convention; the format itself is silent)
 
 
 # ----------------------------------------------------------------------------------------------- writer
@@ -266,7 +266,7 @@ def parse_mps(path):
             elif typ in ("UP", "UI"):
                 up = v
                 if v < 0 and lo == 0.0:
-                    lo = -INF  # CPLEX convention; ambiguous in the format, avoided by generators
+                    lo = -INF  # common reader convention; ambiguous in the format, avoided by generators
             elif typ == "FX":
                 lo = up = v
             elif typ == "FR":
