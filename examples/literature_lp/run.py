@@ -44,7 +44,7 @@ def main():
                   and verified['row_violation_rel'] <= 1e-8 and verified['bound_violation'] <= 1e-8
                   and error <= 1e-8 and abs(result['objective'] - verified['objective']) <= 1e-8 * max(1.0, abs(ref)))
         rows.append(dict(case=name, model_sha256=sha(model), status=result['status'], objective=result['objective'],
-                         process_wall_seconds=wall, engine_wall_seconds=result.get('wall'), iterations=result.get('iterations'),
+                         process_wall_seconds=wall, engine_wall_seconds=result.get('wall_s'), iterations=result.get('iterations'),
                          point=values, independent_original_model_check=verified, reference_status=h.modelStatusToString(h.getModelStatus()),
                          reference_objective=ref, relative_objective_error=error, passed=passed))
         print(name, result['status'], result['objective'], 'verified', passed)

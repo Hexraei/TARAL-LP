@@ -25,7 +25,7 @@
       "status": "optimal",
       "objective": 192000,
       "process_wall_seconds": 0.0026972070008923765,
-      "engine_wall_seconds": null,
+      "engine_wall_seconds": 0.000183,
       "iterations": 3,
       "point": {
         "BANDS": 6000.0,
@@ -48,7 +48,7 @@
       "status": "optimal",
       "objective": 153.675,
       "process_wall_seconds": 0.0023599000014655758,
-      "engine_wall_seconds": null,
+      "engine_wall_seconds": 0.000184,
       "iterations": 7,
       "point": {
         "SEA_NY": 50.0,

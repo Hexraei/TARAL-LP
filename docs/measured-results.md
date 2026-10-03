@@ -196,3 +196,15 @@ requested soft caps were engine 120 seconds and HiGHS 300 seconds. The current
 implementation times out on the 26 cases. HiGHS also hit its separate cap on
 11 of those. The `neos-1425699` cause of the missing machine-readable result is unconfirmed. Do not add this
 selection to older MIPLIB counts without checking overlap.
+
+
+## Published production and logistics applications
+
+Two additional textbook LP cases complement the existing refinery example:
+[steel production planning and Dantzig transportation](../examples/literature_lp/).
+The evaluated source snapshot `34ea8b4` returns optimal 192000 illustrative
+dollars/week (3 iterations) and 153.675 thousand dollars (7 iterations).
+Original-model row/bound violations and reference objective discrepancies are
+zero in the recorded checks. Complete points, hashes, citations and numerical
+limits are retained. These small LPs do not establish industrial savings,
+MILP scheduling, power dispatch or complete application coverage.
