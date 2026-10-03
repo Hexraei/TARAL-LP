@@ -10,7 +10,7 @@ route can differ.
 - One counter, `work_used`, counts iterations of the primal and dual simplex engines cumulatively: the primal
   attempt, the dual, the dual's primal clean-up and the equilibrated retry all draw from the same budget.
 - Routing uses work, not time: the primal gets `max(1, 20% of N)` iterations; if it stops on that cap and budget
-  remains, the dual gets the rest. The wall-clock check for the equilibrated retry is skipped.
+  remains, the dual gets the rest. The retry's wall-clock check applies only when you pass `--time-limit`.
 - With no `--time-limit` the wall limit is effectively off (1e9 s). If you pass `--time-limit` and it fires, the
   outcome depends on the clock and the determinism claim below does not apply.
 - Stopping at the cap returns `iteration_limit` (exit 4) with no objective claim. Status `optimal` still requires
@@ -42,8 +42,9 @@ not a tolerance comparison and not cryptographic.
 ## What "deterministic" means here (environment and serialization limits)
 
 Claimed: for the same binary, the same input bytes (the MPS text), the same `--work-limit` and the same
-method/fallback flags, runs give the same status, iteration count, `work_used` and `result_hash`, regardless of
-`--time-limit` and of concurrent machine load. All random perturbations in the engines use fixed seeds and the
+method/fallback flags, runs give the same status, iteration count, `work_used` and `result_hash`, and are unaffected by
+concurrent machine load, PROVIDED no wall-clock stop intervenes: if a `--time-limit` is given and fires, the status is
+`time_limit` and the result is clock-dependent (a `--time-limit` that does not fire does not change the result). All random perturbations in the engines use fixed seeds and the
 engines are single threaded.
 
 Not claimed: identical results across different builds, compilers, optimization flags, CPUs or libm versions.
