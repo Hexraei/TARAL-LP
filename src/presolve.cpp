@@ -17,11 +17,10 @@
 namespace {
 constexpr double kRel = 1e-9;
 double sc(double b) { return 1 + (std::isfinite(b) ? std::abs(b) : 0); }
-// Sound integer rounding: a value within kIntSnap (absolute) of an integer snaps to it, otherwise ceil/floor.
-// The slack is absolute, never relative: a relative slack exceeds a whole integer once |bound| > ~1e9.
-constexpr double kIntSnap = 1e-6;
-double int_up(double l) { double r = std::round(l); return std::abs(l - r) <= kIntSnap ? r : std::ceil(l); }
-double int_dn(double u) { double r = std::round(u); return std::abs(u - r) <= kIntSnap ? r : std::floor(u); }
+// Strict inward integer rounding, no outward snap: ceil(lb), floor(ub). An interval that contains no integer
+// ([4e-7,8e-7], [1.0000004,1.0000008]) is infeasible exactly; nothing is approximated.
+double int_up(double l) { return std::ceil(l); }
+double int_dn(double u) { return std::floor(u); }
 // Audit scale for column bounds: relative up to 1e3, absolute (1e-6 * 1e3) beyond, so large bounds stay strict.
 double scb(double b) { return 1 + (std::isfinite(b) ? std::min(std::abs(b), 1e3) : 0); }
 }  // namespace
