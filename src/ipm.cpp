@@ -743,8 +743,9 @@ Measures measure(const Model& md, const Vec& c, const std::vector<QEntry>& Q, co
     return r;
 }
 
-// Inertia test: Q + tau I with tau = 1e-7 max|Q| must have only positive pivots.
-bool q_convex(int n, const std::vector<QEntry>& q) {
+// Inertia test: Q + tau I with tau = 1e-7 max|Q| must have only positive pivots. qref > 0 replaces max|Q| in tau
+// (the equality-convexified test below must not let its large penalty widen the tolerance).
+bool q_convex(int n, const std::vector<QEntry>& q, double qref = 0) {
     if (q.empty()) return true;
     std::vector<int> id(n, -1);
     int k = 0;
@@ -754,6 +755,7 @@ bool q_convex(int n, const std::vector<QEntry>& q) {
             if (id[v] < 0) id[v] = k++;
         qmax = std::max(qmax, std::abs(e.value));
     }
+    if (qref > 0) qmax = qref;
     std::vector<int> ei, ej, es;
     Vec V(k + q.size(), 0);
     for (int i = 0; i < k; ++i) ei.push_back(i), ej.push_back(i), es.push_back(i), V[i] = 1e-7 * qmax;
@@ -769,6 +771,76 @@ bool q_convex(int n, const std::vector<QEntry>& q) {
     f.analyze(k, ei, ej, es, std::vector<signed char>(k, 1));
     f.factor(V, Clock::time_point::max(), false);
     return f.nwrong == 0;
+}
+
+// Q need not be PSD for the model to be convex: on {A_E x = b_E} (the equality rows) the objective equals
+//   (c - rho A_E'b_E)'x + 0.5 x'(Q + rho A_E'A_E)x - rho/2 |b_E|^2,
+// because rho/2 (|A_E x - b_E|^2 - |b_E|^2) is a constant there, and gradient and multipliers of the
+// equality rows are unchanged at feasible points. If Q + rho A_E'A_E passes the inertia test for some rho, Q is positive
+// definite on the null space of A_E and the penalised problem is an ordinary convex QP with the same solutions.
+// rho climbs a decade ladder starting at max|Q| / max_i |a_i|^2; the tolerance of the test stays tied to the original
+// max|Q|. On success Q is replaced by the penalised matrix and dc receives the cost shift per kept column.
+// Gives up (false) when A_E'A_E would be too large to form.
+bool convexify_on_equalities(int nk, const std::vector<int>& Kp, const std::vector<int>& Ki, const Vec& Kx,
+                             const std::vector<char>& is_eq, const Vec& beq, std::vector<QEntry>& Qk, Vec& dc) {
+    const int mk = static_cast<int>(is_eq.size());
+    std::vector<std::vector<std::pair<int, double>>> rowl(mk);
+    for (int k = 0; k < nk; ++k)
+        for (int p = Kp[k]; p < Kp[k + 1]; ++p)
+            if (is_eq[Ki[p]]) rowl[Ki[p]].push_back({k, Kx[p]});
+    double pairs = 0, amax2 = 0, qmax = 0;
+    for (int i = 0; i < mk; ++i) {
+        double s2 = 0;
+        for (const auto& e : rowl[i]) s2 += e.second * e.second;
+        amax2 = std::max(amax2, s2);
+        pairs += 0.5 * rowl[i].size() * (rowl[i].size() + 1.0);
+    }
+    for (const QEntry& q : Qk) qmax = std::max(qmax, std::abs(q.value));
+    if (amax2 == 0 || qmax == 0 || pairs > 2e6) return false;
+    struct Tri { int r, c; double v; };
+    auto before = [](const Tri& x, const Tri& y) { return x.r != y.r ? x.r < y.r : x.c < y.c; };
+    std::vector<Tri> ata;
+    ata.reserve(static_cast<size_t>(pairs));
+    for (int i = 0; i < mk; ++i)
+        for (size_t a = 0; a < rowl[i].size(); ++a)
+            for (size_t b = 0; b <= a; ++b) {
+                int r = rowl[i][a].first, c = rowl[i][b].first;
+                double v = rowl[i][a].second * rowl[i][b].second;
+                if (r < c) std::swap(r, c);
+                ata.push_back({r, c, v});
+            }
+    std::sort(ata.begin(), ata.end(), before);
+    std::vector<Tri> aa;
+    for (const Tri& t : ata) {
+        if (!aa.empty() && aa.back().r == t.r && aa.back().c == t.c) aa.back().v += t.v;
+        else aa.push_back(t);
+    }
+    std::vector<Tri> base;
+    for (const QEntry& q : Qk) base.push_back({q.row, q.col, q.value});
+    std::sort(base.begin(), base.end(), before);
+    auto build = [&](double rho) {  // merge of Q and rho A_E'A_E, one entry per (row, col)
+        std::vector<QEntry> out;
+        size_t i = 0, j = 0;
+        while (i < base.size() || j < aa.size()) {
+            bool from_base = j >= aa.size() || (i < base.size() && !before(aa[j], base[i]));
+            const Tri& t = from_base ? base[i] : aa[j];
+            double v = from_base ? t.v : rho * t.v;
+            if (!out.empty() && out.back().row == t.r && out.back().col == t.c) out.back().value += v;
+            else out.push_back({t.r, t.c, v});
+            (from_base ? i : j)++;
+        }
+        return out;
+    };
+    double rho = qmax / amax2;
+    for (int step = 0; step < 9; ++step, rho *= 10) {
+        if (!q_convex(nk, build(rho), qmax)) continue;
+        rho *= 4;  // margin over the first passing rung (a larger rho only helps: A_E'A_E is PSD)
+        Qk = build(rho);
+        for (int i = 0; i < mk; ++i)
+            for (const auto& e : rowl[i]) dc[e.first] -= rho * e.second * beq[i];
+        return true;
+    }
+    return false;
 }
 
 }  // namespace
@@ -892,11 +964,6 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     std::vector<QEntry> Qk;
     for (const QEntry& q : Q)
         if (cmap[q.row] >= 0 && cmap[q.col] >= 0) Qk.push_back({cmap[q.row], cmap[q.col], q.value});
-    if (!q_convex(nk, Qk)) {
-        res.status = IpmStatus::Nonconvex;
-        res.message = "Q is not positive semidefinite in the minimisation sense";
-        return res;
-    }
     // structural CSC (kept rows x kept cols)
     std::vector<int> Kp(nk + 1, 0), Ki;
     Vec Kx;
@@ -904,6 +971,21 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
         for (const Entry& e : md.cols[cols[k]])
             if (rmap[e.index] >= 0) Ki.push_back(rmap[e.index]), Kx.push_back(e.value);
         Kp[k + 1] = static_cast<int>(Ki.size());
+    }
+    if (!q_convex(nk, Qk)) {
+        bool ok = false;
+        std::vector<char> is_eq(mk, 0);
+        Vec beq(mk, 0), dc(nk, 0);
+        for (int i = 0; i < mk; ++i)
+            if (rlo[rows[i]] == rup[rows[i]]) is_eq[i] = 1, beq[i] = rlo[rows[i]] - off[rows[i]];
+        ok = convexify_on_equalities(nk, Kp, Ki, Kx, is_eq, beq, Qk, dc);
+        if (ok)
+            for (int k = 0; k < nk; ++k) cadj[cols[k]] += dc[k];
+        if (!ok) {
+            res.status = IpmStatus::Nonconvex;
+            res.message = "Q is not positive semidefinite in the minimisation sense";
+            return res;
+        }
     }
     // ---- scaling: geometric passes on A, then Ruiz equilibration of [Q A'; A 0], powers of two ----
     Vec R(mk, 1), D(nk, 1);
