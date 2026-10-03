@@ -22,10 +22,14 @@
 // cover the box and each gets its own LP, so nothing is pruned on the failed solve.
 #include <algorithm>
 #include <chrono>
+#include <functional>
+#include <memory>
 #include <cmath>
 #include <cstdio>
 #include <memory>
+#include <chrono>
 #include <queue>
+#include <random>
 
 #include "taral.hpp"
 
@@ -150,6 +154,11 @@ private:
     void audit_fixing(std::vector<double> lo, std::vector<double> up, int j, double cut_lo, double cut_up);
     void audit_pruned(const std::vector<double>& lo, const std::vector<double>& up);
 
+public:
+    // Feasibility Jump hook: called once, when no incumbent exists after a short while; returns a candidate
+    // point (verified by offer()) or false. The argument is the time budget in seconds.
+    std::function<bool(double, std::vector<double>&)> fj_hook;
+    bool fj_tried = false;
     // Offer an LP point: integer columns rounded first, then as is. Returns true if accepted.
     bool offer(const std::vector<double>& x) {
         std::vector<double> r = x;
@@ -433,6 +442,15 @@ End Search::run() {
             pruned = std::min(pruned, cur.bound);
             continue;
         }
+        if (fj_hook && !fj_tried && !has_inc && elapsed() >= std::min(0.5, 0.02 * limit_)) {
+            fj_tried = true;  // pays only when the search has found nothing after 0.5 s; costs at most the time so far
+            std::vector<double> px;
+            if (fj_hook(std::min(2.0, 0.05 * limit_), px)) offer(px);
+            if (has_inc && cur.bound >= z - tol_at(z)) {
+                pruned = std::min(pruned, cur.bound);
+                continue;
+            }
+        }
         if (elapsed() > limit_ || nodes >= node_limit_) {
             end = elapsed() > limit_ ? End::TimeLimit : End::NodeLimit;
             open.push(std::move(cur));
@@ -587,6 +605,128 @@ End Search::run() {
     return end;
 }
 
+
+// Feasibility Jump (Luteberget and Sartor), used only to seed an incumbent. Ignores the objective: it
+// looks for a point that satisfies every row, bound and integrality requirement, by moving one column at
+// a time to the value that minimises the weighted row violation, and raising the weights of violated rows
+// at a local minimum. Deterministic given the seed. The caller verifies the point before using it.
+class FeasJump {
+public:
+    FeasJump(const Model& md, const std::vector<double>& lo, const std::vector<double>& up)
+        : M(md), lo_(lo), up_(up), n_(int(md.cols.size())), m_(int(md.row_lo.size())), rows_(m_) {
+        for (int j = 0; j < n_; ++j)
+            for (const Entry& e : md.cols[j])
+                if (e.value != 0) rows_[e.index].push_back({j, e.value});
+    }
+    // Returns true with x set when a point with no violation above 1e-9 was reached before `deadline`.
+    bool run(unsigned seed, std::chrono::steady_clock::time_point deadline, std::vector<double>& x_out) {
+        std::mt19937_64 rng(seed);
+        x_.assign(n_, 0.0), w_.assign(m_, 1.0), act_.assign(m_, 0.0), vpos_.assign(m_, -1), viol_.clear();
+        for (int j = 0; j < n_; ++j) {
+            double v = 0;
+            if (std::isfinite(lo_[j])) v = std::max(v, lo_[j]);
+            if (std::isfinite(up_[j])) v = std::min(v, up_[j]);
+            x_[j] = M.is_int[j] ? std::round(v) : v;
+        }
+        for (int i = 0; i < m_; ++i) {
+            double a = 0;
+            for (const Entry& e : rows_[i]) a += e.value * x_[e.index];
+            act_[i] = a;
+            setviol(i, rv(i, a) > 0);
+        }
+        long steps = 0;
+        while (!viol_.empty()) {
+            if ((++steps & 63) == 0 && std::chrono::steady_clock::now() > deadline) return false;
+            int bj = -1;
+            double bv = 0, bg = 1e-12;
+            int nr = std::min<int>(25, int(viol_.size()));
+            for (int s = 0; s < nr; ++s) {
+                const auto& r = rows_[viol_[rng() % viol_.size()]];
+                int k = std::min<int>(8, int(r.size()));
+                for (int t = 0; t < k; ++t) {
+                    int j = r[rng() % r.size()].index;
+                    double v, g;
+                    jump(j, v, g);
+                    if (g > bg && v != x_[j]) bg = g, bj = j, bv = v;
+                }
+            }
+            if (bj >= 0) {
+                move(bj, bv);
+                continue;
+            }
+            for (int i : viol_) w_[i] += 1;
+            const auto& r = rows_[viol_[rng() % viol_.size()]];
+            if (r.empty()) return false;
+            int j = r[rng() % r.size()].index;
+            double v, g;
+            jump(j, v, g);
+            if (v != x_[j]) move(j, v);
+        }
+        x_out = x_;
+        return true;
+    }
+
+private:
+    const Model& M;
+    const std::vector<double>& lo_;
+    const std::vector<double>& up_;
+    int n_, m_;
+    std::vector<std::vector<Entry>> rows_;  // row-wise copy: (column, value)
+    std::vector<double> x_, act_, w_;
+    std::vector<int> viol_, vpos_;
+    double rv(int i, double a) const {
+        double lo = M.row_lo[i], up = M.row_up[i];
+        return a < lo - 1e-9 ? lo - a : (a > up + 1e-9 ? a - up : 0.0);
+    }
+    void setviol(int i, bool v) {
+        if (v && vpos_[i] < 0) vpos_[i] = int(viol_.size()), viol_.push_back(i);
+        else if (!v && vpos_[i] >= 0) {
+            int p = vpos_[i];
+            viol_[p] = viol_.back();
+            vpos_[viol_[p]] = p;
+            viol_.pop_back();
+            vpos_[i] = -1;
+        }
+    }
+    double weighted(int j, double r) const {
+        double f = 0, d = r - x_[j];
+        for (const Entry& e : M.cols[j]) f += w_[e.index] * rv(e.index, act_[e.index] + e.value * d);
+        return f;
+    }
+    void jump(int j, double& best, double& gain) const {
+        double lo = lo_[j], up = up_[j], cur = x_[j];
+        std::vector<double> cand{cur};
+        if (std::isfinite(lo)) cand.push_back(lo);
+        if (std::isfinite(up)) cand.push_back(up);
+        for (const Entry& e : M.cols[j]) {
+            if (e.value == 0) continue;
+            double rest = act_[e.index] - e.value * cur;
+            for (double t : {M.row_lo[e.index], M.row_up[e.index]})
+                if (std::isfinite(t)) cand.push_back((t - rest) / e.value);
+        }
+        double bestv = cur, bestf = 1e300;
+        auto consider = [&](double r) {
+            r = std::min(std::max(r, lo), up);
+            double f = weighted(j, r);
+            if (f < bestf - 1e-12) bestf = f, bestv = r;
+        };
+        for (double c : cand) {
+            if (M.is_int[j]) consider(std::floor(c + 1e-9)), consider(std::ceil(c - 1e-9));
+            else consider(c);
+        }
+        best = bestv;
+        gain = weighted(j, cur) - bestf;
+    }
+    void move(int j, double v) {
+        double d = v - x_[j];
+        x_[j] = v;
+        for (const Entry& e : M.cols[j]) {
+            act_[e.index] += e.value * d;
+            setviol(e.index, rv(e.index, act_[e.index]) > 0);
+        }
+    }
+};
+
 }  // namespace
 
 MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, MilpOptions opt) {
@@ -611,6 +751,20 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     }
 
     Search s(md, lo, up, time_limit_s, node_limit);
+    // Incumbent seed: if the search still has no incumbent after a short while, up to four Feasibility Jump
+    // restarts are tried (see Search::fj_hook). Only a point that passes violation() on the model being
+    // solved becomes the incumbent; the search is otherwise unchanged. TARAL_NO_FJ=1 disables the hook.
+    std::unique_ptr<FeasJump> fjp;
+    if (md.has_integers() && std::getenv("TARAL_NO_FJ") == nullptr) {
+        fjp = std::make_unique<FeasJump>(md, lo, up);
+        s.fj_hook = [&](double budget, std::vector<double>& x) {
+            for (unsigned seed = 1; seed <= 4; ++seed) {
+                auto dl = std::chrono::steady_clock::now() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(budget / 4));
+                if (fjp->run(seed, dl, x)) return true;
+            }
+            return false;
+        };
+    }
     s.audit_prop = opt.audit_prop, s.prop_prune = !opt.no_prop_prune;
     End end = s.run();
     res.nodes = s.nodes, res.lp_iterations = s.iters, res.unresolved_nodes = s.unresolved;
