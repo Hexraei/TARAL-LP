@@ -3,6 +3,7 @@
 // matvec (A and A^T resident on the device), projections, averages and reductions; no cuSPARSE/cuBLAS/Thrust/CUB.
 // The same algorithm runs on the CPU (--device cpu, std::thread pool) so iterations and times compare like for like.
 //
+// Inputs with quadratic objective terms or integer variables are rejected, on either backend.
 // LP: min c'x + obj_const  s.t.  row_lo <= A x <= row_up,  col_lo <= x <= col_up   (src/taral.hpp Model semantics).
 // Algorithm: Ruiz (10 passes, inf-norm) + Pock-Chambolle (alpha 1) scaling; constant step eta = 0.95/||A||_2 from
 // power iteration; tau = eta/w, sigma = eta*w with primal weight w updated at restarts (smoothing 0.5); uniform
@@ -29,6 +30,7 @@
 #include <vector>
 
 #include "../src/taral.hpp"
+#include "pdhg_input.hpp"
 
 #define CHECK(call)                                                                                     \
     do {                                                                                                \
@@ -962,6 +964,7 @@ int main(int argc, char** argv) {
         std::printf("status parse_error: %s\n", e.what());
         return 1;
     }
+    if (pdhg_reject_unsupported_input(md)) return 2;
     tm.parse = since(t_start);
     auto t = Clock::now();
     Scaled P = build_scaled(md, md.maximize ? -1.0 : 1.0);
