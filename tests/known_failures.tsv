@@ -1,0 +1,107 @@
+# id	class	reproducer	verdict: detail   (known failures of the engine under test; regenerate with tools/adv/knownfail.py)
+huge_bounds-31000	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31008	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31016	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31019	huge_bounds_sentinel_numfail	huge_bounds_sentinel_numfail.mps	NOANS: engine numerical_failure (final point violates constraints by 211106232532981.406250) vs reference optimal (presolve-off optimal)
+huge_bounds-31024	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31032	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31040	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31048	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31056	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31064	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31068	huge_bounds_sentinel_numfail	huge_bounds_sentinel_numfail.mps	NOANS: engine numerical_failure (final point violates constraints by 430.210526) vs reference optimal (presolve-off optimal)
+huge_bounds-31072	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31080	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31088	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31089	huge_bounds_sentinel_numfail	huge_bounds_sentinel_numfail.mps	NOANS: engine numerical_failure (final point violates constraints by 0.222222) vs reference optimal (presolve-off optimal)
+huge_bounds-31095	huge_bounds_sentinel_numfail	huge_bounds_sentinel_numfail.mps	NOANS: engine numerical_failure (final point violates constraints by 11469.600000) vs reference optimal (presolve-off optimal)
+huge_bounds-31096	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31104	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31112	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31120	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31128	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31136	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+huge_bounds-31144	huge_bounds_sentinel_unbounded	huge_bounds_sentinel_unbounded.mps	FAIL_STATUS: engine optimal () vs reference unbounded (presolve-off unbounded)
+near_singular-37003	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 46.79808285048105 vs reference 46.7506289644656 (rel 0.00102); exact optimum 51.00000024337897 (engine off by 0.0824, reference off b
+near_singular-37005	near_singular_false_infeasible	near_singular_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal 4.204146748613168 with a point that is feasible on the original model (exact check)
+near_singular-37027	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 95.90268156387545 vs reference 88.97184074891472 (rel 0.0779); exact optimum 97.99997135357869 (engine off by 0.0214, reference off b
+near_singular-37045	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 65.31517530490262 vs reference 65.05706531599685 (rel 0.00397); exact optimum 66.99999919427032 (engine off by 0.0251, reference off 
+near_singular-37056	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 34.83997707436293 vs reference 32.230991231606794 (rel 0.0809); exact optimum 49.99999909401223 (engine off by 0.303, reference off b
+near_singular-37057	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 56.002630060342064 vs reference 55.99741001417441 (rel 9.32e-05); exact optimum 59.99999741632594 (engine off by 0.0666, reference of
+near_singular-37062	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 50.60538241769959 vs reference 43.9302061033062 (rel 0.152); exact optimum 54.00000178463698 (engine off by 0.0629, reference off by 
+near_singular-37063	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 47.4305725132009 vs reference 47.409960406717765 (rel 0.000435); exact optimum 56.000001295477645 (engine off by 0.153, reference off
+near_singular-37068	near_singular_stall	near_singular_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+near_singular-37074	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 31.52952871314408 vs reference 30.901246908104866 (rel 0.0203); exact optimum 37.000000434705065 (engine off by 0.148, reference off 
+near_singular-37083	near_singular_false_infeasible	near_singular_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal -0.006413694400003389 with a point that is feasible on the original model (exact check)
+near_singular-37092	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 24.63380810565488 vs reference 15.108108000236474 (rel 0.631); exact optimum 51.0 (engine off by 0.517, reference off by 0.704)
+near_singular-37097	near_singular_false_infeasible	near_singular_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal 9.999999982513735 with a point that is feasible on the original model (exact check)
+near_singular-37098	near_singular_stall	near_singular_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+near_singular-37099	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 62.42174491342429 vs reference 62.3831763675918 (rel 0.000618); exact optimum 65.000000681962 (engine off by 0.0397, reference off by
+near_singular-37103	near_singular_false_infeasible	near_singular_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal 237.0000000036604 with a point that is feasible on the original model (exact check)
+near_singular-37104	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 17.88113641134032 vs reference 15.951796889312348 (rel 0.121); exact optimum 28.999999504273333 (engine off by 0.383, reference off b
+near_singular-37105	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 63.874671551957846 vs reference 55.47627162845726 (rel 0.151); exact optimum 66.00002828519496 (engine off by 0.0322, reference off b
+near_singular-37110	near_singular_false_infeasible	near_singular_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal 30.715304979980438 with a point that is feasible on the original model (exact check)
+near_singular-37111	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 57.21630663059155 vs reference 57.14941558635095 (rel 0.00117); exact optimum 58.99999973356253 (engine off by 0.0302, reference off 
+near_singular-37119	near_singular_false_infeasible	near_singular_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal -3.2847825323430593 with a point that is feasible on the original model (exact check)
+near_singular-37122	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 25.85748539589595 vs reference 25.70446811843821 (rel 0.00595); exact optimum 46.99999291483206 (engine off by 0.45, reference off by
+near_singular-37129	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 47.33613146094669 vs reference 47.33286158205954 (rel 6.91e-05); exact optimum 51.00000110773069 (engine off by 0.0718, reference off
+near_singular-37134	near_singular_objective	near_singular_objective.mps	FAIL_OBJ: engine 48.931081135431256 vs reference 33.67552826352639 (rel 0.453); exact optimum 64.99999760003709 (engine off by 0.247, reference off by
+near_singular-37139	near_singular_stall	near_singular_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38007	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal 401.330777401241 with a point that is feasible on the original model (exact check)
+coef_range-38013	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38019	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38039	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal -64.0 with a point that is feasible on the original model (exact check)
+coef_range-38040	coef_range_false_unbounded	coef_range_false_unbounded.mps	FAIL_STATUS: engine unbounded () vs reference optimal (presolve-off optimal)
+coef_range-38049	coef_range_false_unbounded	coef_range_false_unbounded.mps	FAIL_STATUS: engine unbounded () vs reference optimal (presolve-off optimal)
+coef_range-38057	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal 432.9870801869149 with a point that is feasible on the original model (exact check)
+coef_range-38069	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal -407.66993159082085 with a point that is feasible on the original model (exact check)
+coef_range-38071	coef_range_false_unbounded	coef_range_false_unbounded.mps	FAIL_STATUS: engine unbounded () vs reference optimal (presolve-off optimal)
+coef_range-38078	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38079	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal -72.64691461804108 with a point that is feasible on the original model (exact check)
+coef_range-38084	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38090	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38095	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal -19.027054632916887 with a point that is feasible on the original model (exact check)
+coef_range-38097	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal 107.22556390977445 with a point that is feasible on the original model (exact check)
+coef_range-38098	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38105	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38111	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38113	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38114	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38121	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38126	coef_range_stall	coef_range_stall.mps	NOANS: engine iteration_limit () vs reference optimal (presolve-off optimal)
+coef_range-38127	coef_range_numfail	coef_range_numfail.mps	NOANS: engine numerical_failure (phase 1 direction without a blocking variable) vs reference optimal (presolve-off optimal)
+coef_range-38128	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38143	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal -86.49200348752188 with a point that is feasible on the original model (exact check)
+coef_range-38149	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38151	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38153	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal -49.75000000000003 with a point that is feasible on the original model (exact check)
+coef_range-38155	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38164	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38165	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38177	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38179	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal 380.8082071047318 with a point that is feasible on the original model (exact check)
+coef_range-38181	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38185	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38191	coef_range_false_infeasible	coef_range_false_infeasible.mps	FAIL_STATUS: engine infeasible; reference optimal -199.30163384834043 with a point that is feasible on the original model (exact check)
+coef_range-38193	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38195	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38196	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+coef_range-38197	coef_range_stall	coef_range_stall.mps	NOANS: engine time_limit () vs reference optimal (presolve-off optimal)
+general_int-47018	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+general_int-47031	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+general_int-47057	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+int_free_neg-51021	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+equality_int-55006	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+equality_int-55029	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+equality_int-55039	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+equality_int-55055	both_time_limit	-	REF_UNRESOLVED: reference status time_limit, engine time_limit
+big_values-57025	big_values_numfail	big_values_numfail.mps	NOANS: engine numerical_failure (root LP failed: final point violates constraints by 0.000000) vs reference optimal (presolve-off optimal)
+big_values-57027	big_values_numfail	big_values_numfail.mps	NOANS: engine time_limit (node LP numerical_failure: final point violates constraints by 0.000001) vs reference optimal (presolve-off optimal)
+parser:missing_endata	parser_strictness	parser_missing_endata.mps	FAIL: see tests/repro/expected.json
+parser:dup_row_name	parser_strictness	parser_dup_row_name.mps	FAIL: see tests/repro/expected.json
+parser:dup_column_noncontiguous	parser_strictness	parser_dup_column_noncontiguous.mps	FAIL: see tests/repro/expected.json
+parser:dup_section_columns	parser_strictness	parser_dup_section_columns.mps	FAIL: see tests/repro/expected.json
+parser:num_nan_value	parser_strictness	parser_num_nan_value.mps	FAIL: see tests/repro/expected.json
+parser:num_hex_value	parser_strictness	parser_num_hex_value.mps	FAIL: see tests/repro/expected.json
+parser:num_inf_value	parser_strictness	parser_num_inf_value.mps	FAIL: see tests/repro/expected.json
+parser:num_overflow_1e400	parser_strictness	parser_num_overflow_1e400.mps	FAIL: see tests/repro/expected.json
