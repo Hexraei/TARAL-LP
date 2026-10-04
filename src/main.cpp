@@ -154,6 +154,7 @@ void write_milp_json(const char* path, const MilpResult& r, double wall) {
     std::fprintf(f, ", \"audit\": [");
     for (size_t k = 0; k < r.audit.size(); ++k) std::fprintf(f, "%s%ld", k ? ", " : "", r.audit[k]);
     std::fprintf(f, "]");
+    if (r.compact_nodes_used) std::fprintf(f, ", \"peak_open_nodes\": %ld, \"peak_open_changes\": %ld, \"max_depth\": %ld", r.peak_open_nodes,r.peak_open_changes,r.max_depth);
     if (!r.structural_certificate.empty()) {
         std::fprintf(f, ", \"structural_certificate\": %s", r.structural_certificate.c_str());
         if (r.has_solution) {
@@ -332,6 +333,7 @@ void print_help() {
                 "  --work-limit N    LP (simplex/dual): deterministic iteration budget; routing never uses the wall clock (an explicit --time-limit that fires still stops the run, non-deterministically)\n"
                 "  --presolve        verified presolve (linear LP/MILP): replayable log, original-space audit of the result\n"
                 "  --presolve-log F  write the presolve log and audit to F (implies --presolve)\n"
+                "  --compact-nodes   MILP: canonical interval storage and bounded dives (opt-in)\n"
                 "  --integer-structure  MILP: opt-in exact structural parity proof\n"
                 "  --audit-prop      MILP: re-check propagation prunes (diagnostic)\n"
                 "  --no-prop-prune   MILP: disable propagation pruning\n"
@@ -429,6 +431,8 @@ int main(int argc, char** argv) {
                 do_presolve = true;
             } else if (!std::strcmp(a, "--no-fallback")) {
                 fallback = false;
+            } else if (!std::strcmp(a, "--compact-nodes")) {
+                mopt.compact_nodes = true;
             } else if (!std::strcmp(a, "--integer-structure")) {
                 mopt.integer_structure = true;
             } else if (!std::strcmp(a, "--audit-prop")) {

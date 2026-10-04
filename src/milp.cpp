@@ -83,6 +83,19 @@ struct Change {
     double lo, up;
 };
 
+// Canonical root-relative interval map: latest change for each column wins.
+// Stable ordering is essential because earlier entries can be superseded by
+// both propagation and branch bounds. No constraints or nodes are discarded.
+void canonical_changes(std::vector<Change>& changes) {
+    std::stable_sort(changes.begin(),changes.end(),[](const Change&a,const Change&b){return a.j<b.j;});
+    size_t out=0;
+    for(size_t i=0;i<changes.size();) {
+        size_t e=i+1;while(e<changes.size() && changes[e].j==changes[i].j)++e;
+        changes[out++]=changes[e-1];i=e;
+    }
+    changes.resize(out);
+}
+
 struct Node {
     double bound;  // valid lower bound on every solution in this node (min form)
     std::vector<Change> changes;  // bound tightenings relative to the root: branchings and propagation
@@ -161,6 +174,8 @@ public:
     // point (verified by offer()) or false. The argument is the time budget in seconds.
     std::function<bool(double, std::vector<double>&)> fj_hook;
     bool fj_tried = false;
+    bool compact_nodes = false;
+    long peak_open_nodes=0,peak_open_changes=0,max_depth=0;
     structural_integer::Grid grid;
     // Offer an LP point: integer columns rounded first, then as is. Returns true if accepted.
     bool offer(const std::vector<double>& x) {
@@ -432,17 +447,24 @@ End Search::run() {
         return all_cnt[d] ? all_sum[d] / double(all_cnt[d]) : 1.0;
     };
     bool have_cur = true;
+    int dive_steps=0;
     size_t open_changes = 0;  // bound-change records stored in open nodes (each node keeps its full path)
     End end = End::Complete;
     std::vector<double> lo, up;
     for (;;) {
+        if (compact_nodes) {
+            peak_open_nodes=std::max(peak_open_nodes,long(open.size()));
+            peak_open_changes=std::max(peak_open_changes,long(open_changes));
+        }
         if (!have_cur) {
             if (open.empty()) break;
+            dive_steps=0;
             cur = open.top();
             open.pop();
             open_changes -= std::min(open_changes, cur.changes.size());
         }
         have_cur = false;
+        if (compact_nodes) max_depth=std::max(max_depth,long(cur.depth));
         if (has_inc && cur.bound >= z - tol_at(z)) {
             pruned = std::min(pruned, cur.bound);
             continue;
@@ -466,11 +488,19 @@ End Search::run() {
         if (open_changes > kMaxOpenChanges) {  // a deep dive keeps every sibling's whole path: memory grows with depth squared
             end = End::NodeLimit;
             note = "open-node memory cap reached (" + std::to_string(open.size()) + " open nodes, depth " + std::to_string(cur.depth) + "); search stopped, bound and incumbent are valid";
+            if(compact_nodes) {
+                peak_open_nodes=std::max(peak_open_nodes,long(open.size()+1));
+                peak_open_changes=std::max(peak_open_changes,long(open_changes+cur.changes.size()));
+            }
             open.push(std::move(cur));
             break;
         }
         if (elapsed() > limit_ || nodes >= node_limit_) {
             end = elapsed() > limit_ ? End::TimeLimit : End::NodeLimit;
+            if(compact_nodes) {
+                peak_open_nodes=std::max(peak_open_nodes,long(open.size()+1));
+                peak_open_changes=std::max(peak_open_changes,long(open_changes+cur.changes.size()));
+            }
             open.push(std::move(cur));
             break;
         }
@@ -526,6 +556,10 @@ End Search::run() {
         }
         if (r.status == Status::TimeLimit) {
             end = End::TimeLimit;
+            if(compact_nodes) {
+                peak_open_nodes=std::max(peak_open_nodes,long(open.size()+1));
+                peak_open_changes=std::max(peak_open_changes,long(open_changes+cur.changes.size()));
+            }
             open.push(std::move(cur));
             break;
         }
@@ -551,6 +585,7 @@ End Search::run() {
                 Node a{cur.bound, cur.changes, cur.basis, 0, 0, -1, cur.depth + 1, {sj}, cur.splits + 1}, b = a;
                 a.changes.push_back({sj, lo[sj], mid});
                 b.changes.push_back({sj, mid + 1, up[sj]});
+                if(compact_nodes){canonical_changes(a.changes);canonical_changes(b.changes);}
                 open_changes += a.changes.size() + b.changes.size();
                 open.push(std::move(a));
                 open.push(std::move(b));
@@ -604,13 +639,23 @@ End Search::run() {
                 rc_skip_left_ = (1L << rc_idle_) - 1;
             }
         }
+        if(compact_nodes) canonical_changes(cur.changes);
         auto basis = std::make_shared<const std::vector<char>>(std::move(r.basis));
         double v = r.x[bj], fl = std::floor(v);
         Node down{b, cur.changes, basis, -1, v - fl, bj, cur.depth + 1, seeds},
             upn{b, std::move(cur.changes), basis, 1, fl + 1 - v, bj, cur.depth + 1, seeds};
         down.changes.push_back({bj, lo[bj], fl});
         upn.changes.push_back({bj, fl + 1, up[bj]});
+        if(compact_nodes){canonical_changes(down.changes);canonical_changes(upn.changes);}
         bool dive_up = v - fl >= 0.5;
+        if(compact_nodes && ++dive_steps>=64) {
+            // Return to global best bound every 64 successful branch steps.
+            // Queue BOTH children with their valid inherited bounds, preserving
+            // every subtree. Changing node order alone cannot justify pruning.
+            open_changes += down.changes.size()+upn.changes.size();
+            open.push(std::move(down));open.push(std::move(upn));
+            continue;
+        }
         open_changes += (dive_up ? down : upn).changes.size();
         open.push(dive_up ? std::move(down) : std::move(upn));
         cur = dive_up ? std::move(upn) : std::move(down);
@@ -788,6 +833,7 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     }
 
     Search s(md, lo, up, time_limit_s, node_limit);
+    s.compact_nodes=opt.compact_nodes;
     if (opt.integer_structure) s.grid=structural_integer::objective_grid(md);
     // Incumbent seed: if the search still has no incumbent after a short while, up to four Feasibility Jump
     // restarts are tried (see Search::fj_hook). Only a point that passes violation() on the model being
@@ -812,6 +858,8 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     res.audit = {s.audit_nodes, s.audit_lp_infeasible, s.audit_lp_feasible, s.audit_lp_other,
                  s.audit_int_empty, s.audit_int_feasible, s.audit_int_undecided, s.audit_cutoff,
                  s.audit_rc_checked, s.audit_rc_bad};
+    res.compact_nodes_used=opt.compact_nodes;
+    res.peak_open_nodes=s.peak_open_nodes;res.peak_open_changes=s.peak_open_changes;res.max_depth=s.max_depth;
     res.message = s.note;
     if (s.grid.step>0) res.structural_certificate=s.grid.json;
     if (end == End::RootUnbounded) {
