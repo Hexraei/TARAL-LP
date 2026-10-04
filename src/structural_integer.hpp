@@ -122,6 +122,43 @@ inline Proof parity(const Model& m, std::chrono::steady_clock::time_point deadli
     out.kind=Proof::Optimal;out.x=std::move(x);out.json=cert.str();return out;
 }
 
+
+inline int64_t gcd_inverse(int64_t a,int64_t mod) {
+    int64_t oldr=a,r=mod,oldt=1,t=0;
+    while(r){int64_t q=oldr/r,nr=oldr-q*r;oldr=r;r=nr;int64_t nt=oldt-q*t;oldt=t;t=nt;}
+    if(oldr!=1)return -1;
+    oldt%=mod;if(oldt<0)oldt+=mod;return oldt;
+}
+// Restricted exact three-integer equality. Enumeration is capped and deadline
+// checked; unsupported structures or exhausted enumeration fall back unchanged.
+inline Proof three_integer(const Model& m,std::chrono::steady_clock::time_point deadline) {
+    Proof out;if(m.maximize || m.cols.size()!=3 || m.row_lo.size()!=1 || !m.qobj.empty())return out;
+    if(m.row_lo[0]!=0 || m.row_up[0]!=0 || m.is_int.size()!=3)return out;
+    int v=-1;for(int j=0;j<3;++j)if(m.cost[j]!=0){if(v>=0 || m.cost[j]!=1)return out;v=j;}
+    if(v<0 || !exact_int(m.col_lo[v]) || m.col_lo[v]<1 || m.col_lo[v]>1000000)return out;
+    int vars[2],k=0;int64_t a[3];
+    for(int j=0;j<3;++j){
+        if(!m.is_int[j] || m.cols[j].size()!=1 || m.cols[j][0].index!=0)return out;
+        double c=m.cols[j][0].value;if(!exact_int(c) || std::abs(c)>1000000 || c==0)return out;a[j]=int64_t(c);
+        if(j!=v){if(m.col_lo[j]!=0 || m.col_up[j]!=kInf)return out;vars[k++]=j;}
+    }
+    if(a[v]<0 || a[vars[0]]>0 || a[vars[1]]>0)return out;
+    int64_t A=a[v],B=-a[vars[0]],C=-a[vars[1]],inv=gcd_inverse(B,C);
+    if(inv<0 || C<=1)return out;
+    int64_t start=int64_t(m.col_lo[v]), cap=1000000;
+    if(std::isfinite(m.col_up[v])) {if(!exact_int(m.col_up[v]))return out;cap=std::min(cap,int64_t(m.col_up[v]));}
+    if(std::chrono::steady_clock::now()>=deadline){out.kind=Proof::Timeout;return out;}
+    for(int64_t x=start;x<=cap;++x) {
+        if((x&255)==0 && std::chrono::steady_clock::now()>=deadline){out.kind=Proof::Timeout;return out;}
+        int64_t target=A*x,y=((target%C)*inv)%C;
+        if(B*y>target)continue;
+        int64_t z=(target-B*y)/C;
+        if(A*x-B*y-C*z!=0)return out;
+        out.kind=Proof::Optimal;out.x.assign(3,0);out.x[v]=double(x);out.x[vars[0]]=double(y);out.x[vars[1]]=double(z);
+        std::ostringstream js;js<<"{\"type\":\"three_integer_congruence\",\"objective_col\":"<<v<<",\"other_cols\":["<<vars[0]<<','<<vars[1]<<"],\"inverse\":"<<inv<<",\"start\":"<<start<<",\"end\":"<<x<<'}';out.json=js.str();return out;
+    }
+    return out;
+}
 struct Grid { double step=0,offset=0;std::string json; };
 // Objective-only epigraph: minimize negative cost*t; t <= y_i and
 // q*y_i = integral affine combination of integer columns. At an optimum,

@@ -25,6 +25,25 @@ def check(M,j):
             b+=rhs
             for k,v in rows[i].items():assert v.denominator==1;a[k]+=v
         return a,b
+    if c['type']=='three_integer_congruence':
+        assert M['n']==3 and M['m']==1 and not M['maximize'] and all(M['isint'])
+        assert M['rlo'][0]==M['rup'][0]==0
+        v=c['objective_col'];u,w=c['other_cols'];assert len({v,u,w})==3
+        assert M['cost'][v]==1 and M['cost'][u]==M['cost'][w]==0
+        assert M['lo'][v]==c['start']>=1 and M['lo'][u]==M['lo'][w]==0
+        assert M['up'][u]==M['up'][w]==math.inf
+        A=rows[0][v];B=-rows[0][u];C=-rows[0][w]
+        assert all(a>0 and a.denominator==1 for a in (A,B,C))
+        A,B,C=map(int,(A,B,C));inv=c['inverse'];assert B*inv%C==1
+        end=c['end'];assert isinstance(end,int) and c['start']<=end<=1000000
+        for z in range(c['start'],end):
+            y=(A*z*inv)%C;assert B*y>A*z,'smaller feasible objective'
+        x=list(map(F,j['x']));assert all(t.denominator==1 for t in x)
+        assert x[v]==end and A*x[v]-B*x[u]-C*x[w]==0
+        assert all(M['lo'][k]<=x[k]<=M['up'][k] for k in range(3))
+        assert j['status']=='optimal' and j['has_solution']
+        assert j['objective']==end+M['offset'] and j['best_bound']==j['objective'] and j['gap']==0
+        return True
     if c['type']=='objective_lattice':
         t=c['objective_col'];q=c['denominator'];assert isinstance(q,int) and q>0
         cost=F(M['cost'][t]);sense=-1 if M['maximize'] else 1
