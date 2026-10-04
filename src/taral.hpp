@@ -170,13 +170,22 @@ struct InfeasibilityExplanation {
     std::vector<double> farkas_row_lower, farkas_row_upper, farkas_col_lower, farkas_col_upper;  // full model
     bool certificate_verified = false;
     double certificate_margin = 0, certificate_residual = 0;
-    // Minimum weighted L1 side relaxation of ALL rows, column bounds retained.
+    // Weighted L1 side relaxation of ALL rows, column bounds retained (reporting-only, not claimed minimal).
     std::string relaxation_status = "not_run", relaxation_quality;
     double relaxation_objective = 0, relaxation_gap = 0, relaxation_violation = 0;
+    double relaxation_scale = 0, relaxation_gap_abs_unscaled = 0;  // elastic costs were multiplied by relaxation_scale (a power of two)
     std::vector<double> relaxation_x, relax_lower, relax_upper, relax_weight;
     long lp_solves = 0;
     double wall_s = 0;
 };
+// Label exported as relaxation.certificate_quality (of the SCALED elastic LP): the solver's own label when one was produced
+// (unverified_point keeps it, with a null objective); "not_run" when the elastic LP was not attempted; "not_available" when it was
+// attempted but produced no label (a non-optimal solve).
+inline const char* relaxation_quality_label(const InfeasibilityExplanation& e) {
+    if (!e.relaxation_quality.empty()) return e.relaxation_quality.c_str();
+    if (e.relaxation_status.rfind("not_run", 0) == 0 || e.relaxation_status == "not_applicable_column_bounds_inconsistent") return "not_run";
+    return "not_available";
+}
 // The budget covers every phase (root test, deletion filter, elastic solve). The last argument is a test hook
 // that adds simulated elapsed time after the deletion phase; production callers leave it at 0.
 InfeasibilityExplanation explain_infeasibility(const Model& model, double time_limit_s, double test_elapsed_after_deletion_s = 0);

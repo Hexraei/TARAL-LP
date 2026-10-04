@@ -12,6 +12,7 @@ column bounds; it is not claimed globally minimum.
 Usage: infeasibility_explanation_check.py MODEL.mps EXPLANATION.json   (exit 0 pass, 1 fail)
 """
 import json, math, os, sys, tempfile
+from fractions import Fraction as F
 import numpy as np, highspy, scipy.sparse as sp
 from scipy.optimize import linprog
 
@@ -132,7 +133,27 @@ def viol(A, rl, ru, cl, cu, x, rows):
         v = max(v, (cl[j] - x[j]) / s, (x[j] - cu[j]) / s)
     return v
 
-def check(mps, jpath):
+def exact_relaxation(A, rl, ru, cl, cu, wt, x):
+    """Exact objective of the relaxation at the point x, from the parsed binary doubles: x, matrix, bounds and the double weights are
+    converted with Fraction(float(.)), rows are evaluated exactly and the weighted distance to [rl, ru] is summed in Fractions. x is NOT
+    clipped to the column bounds; the exact maximum column-bound violation is returned separately (as a float)."""
+    # The engine's definition: an independent slack per finite row side, so the distances below (lower side and upper side) are SUMMED.
+    # With lo > up both can be positive and both count; a max of the two would be wrong.
+    xs = [F(float(v)) for v in x]
+    cbv = F(0)
+    for j, v in enumerate(xs):
+        if np.isfinite(cl[j]): cbv = max(cbv, (F(float(cl[j])) - v) / (1 + abs(F(float(cl[j])))))
+        if np.isfinite(cu[j]): cbv = max(cbv, (v - F(float(cu[j]))) / (1 + abs(F(float(cu[j])))))
+    tot = F(0)
+    for i in range(A.shape[0]):
+        a, b = A.indptr[i], A.indptr[i + 1]
+        act = sum(F(float(A.data[k])) * xs[A.indices[k]] for k in range(a, b))
+        wi = F(float(wt[i]))
+        if np.isfinite(rl[i]) and act < F(float(rl[i])): tot += wi * (F(float(rl[i])) - act)
+        if np.isfinite(ru[i]) and act > F(float(ru[i])): tot += wi * (act - F(float(ru[i])))
+    return tot, float(cbv)
+
+def check(mps, jpath, oracle=True):
     A, rl, ru, cl, cu, names = load(mps)
     def bad_const(c): raise ValueError("non-standard JSON constant " + c)
     e = json.load(open(jpath), parse_constant=bad_const)
@@ -208,18 +229,28 @@ def check(mps, jpath):
         pl = np.maximum(0, rl - ax); pu = np.maximum(0, ax - ru)
         pobj = float(wt @ (pl + pu))
         if abs(pobj - rx["objective"]) > 1e-6 * (1 + abs(pobj)): errs.append("objective %.9g != recomputed %.9g" % (rx["objective"], pobj))
-        # oracle optimum: min sum w (s_lo + s_up)
-        c = np.concatenate([np.zeros(n), wt, wt])
-        I = sp.identity(m, format="csr")
-        rows_ub, b_ub = [], []
-        fl = np.isfinite(rl); fu = np.isfinite(ru)
-        Aub = sp.vstack([sp.hstack([-A[fl], -I[fl], sp.csr_matrix((fl.sum(), m))]),
-                         sp.hstack([A[fu], sp.csr_matrix((fu.sum(), m)), -I[fu]])])
-        b = np.concatenate([-rl[fl], ru[fu]])
-        bnds = [(cl[j] if np.isfinite(cl[j]) else None, cu[j] if np.isfinite(cu[j]) else None) for j in range(n)] + [(0, None)] * (2 * m)
-        r = linprog(c, A_ub=Aub, b_ub=b, bounds=bnds, method="highs")
-        if r.status != 0: errs.append("oracle relaxation LP status %d" % r.status)
-        elif abs(r.fun - pobj) > 1e-6 * (1 + abs(r.fun)): errs.append("relaxation objective %.9g != oracle optimum %.9g" % (pobj, r.fun))
+        # exact recomputation from the parsed binary doubles (no clipping of x); the float recomputation above and the oracle below stay as extra checks
+        Acsr = A.tocsr()
+        eobj, ecb = exact_relaxation(Acsr, rl, ru, cl, cu, wt, x)
+        eo = float(eobj)
+        if abs(eo - rx["objective"]) > 1e-6 * (1 + abs(eo)): errs.append("objective %.12g != exact recomputation %.12g" % (rx["objective"], eo))
+        if ecb > TOL: errs.append("exact column-bound violation %.3g > %.3g" % (ecb, TOL))
+        if oracle:
+            # oracle optimum: min sum w (s_lo + s_up)
+            # the oracle objective is multiplied by an exact power of two and divided back: the smallest weights are ~1e-8 and HiGHS' absolute
+            # dual tolerance otherwise stops its simplex early (qual: 0.00542051 instead of 0.00541016)
+            ORACLE_SCALE = 2.0 ** 20
+            c = ORACLE_SCALE * np.concatenate([np.zeros(n), wt, wt])
+            I = sp.identity(m, format="csr")
+            rows_ub, b_ub = [], []
+            fl = np.isfinite(rl); fu = np.isfinite(ru)
+            Aub = sp.vstack([sp.hstack([-A[fl], -I[fl], sp.csr_matrix((fl.sum(), m))]),
+                             sp.hstack([A[fu], sp.csr_matrix((fu.sum(), m)), -I[fu]])])
+            b = np.concatenate([-rl[fl], ru[fu]])
+            bnds = [(cl[j] if np.isfinite(cl[j]) else None, cu[j] if np.isfinite(cu[j]) else None) for j in range(n)] + [(0, None)] * (2 * m)
+            r = linprog(c, A_ub=Aub, b_ub=b, bounds=bnds, method="highs")
+            if r.status != 0: errs.append("oracle relaxation LP status %d" % r.status)
+            elif abs(r.fun / ORACLE_SCALE - pobj) > 1e-6 * (1 + abs(r.fun / ORACLE_SCALE)): errs.append("relaxation objective %.9g != oracle optimum %.9g" % (pobj, r.fun / ORACLE_SCALE))
     return st, len(rows), errs
 
 if __name__ == "__main__":
