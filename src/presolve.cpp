@@ -30,6 +30,28 @@ constexpr double kEps = 2.220446049250313e-16;
 constexpr double kSafety = 4.0;  // hedge factor on the first-order error model; see docs for what this does NOT guarantee
 // Audit scale for column bounds: relative up to 1e3, absolute (1e-6 * 1e3) beyond, so large bounds stay strict.
 double scb(double b) { return 1 + (std::isfinite(b) ? std::min(std::abs(b), 1e3) : 0); }
+
+// Working copy of the matrix and objective that every presolve rule reads through. Step 1 only moves the
+// reads behind these accessors: the content is an exact copy of the input (explicit zero entries kept, entry order kept), nothing
+// is ever modified, so behaviour, op order and log bytes are unchanged. Later reductions that change coefficients will modify this
+// object instead of the input model.
+class WorkMatrix {
+public:
+    explicit WorkMatrix(const Model& m) : cols_(m.cols), cost_(m.cost), nrows_((int)m.row_lo.size()) {
+        rows_.assign(nrows_, {});
+        for (int j = 0; j < (int)cols_.size(); ++j)
+            for (const Entry& e : cols_[j])
+                if (e.value != 0) rows_[e.index].push_back({j, e.value});  // (col, value), ascending column order as before
+    }
+    const std::vector<Entry>& col(int j) const { return cols_[j]; }    // (row, value), includes explicit zeros, as in the input
+    const std::vector<Entry>& row(int i) const { return rows_[i]; }    // (col, value), nonzeros only
+    double cost(int j) const { return cost_[j]; }
+private:
+    std::vector<std::vector<Entry>> cols_, rows_;
+    std::vector<double> cost_;
+    int nrows_;
+};
+
 }  // namespace
 
 PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time_point deadline, long test_timeout_after_ops) {
@@ -45,10 +67,7 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
     const int n = (int)orig.cols.size(), m = (int)orig.row_lo.size();
     std::vector<double> lo = orig.col_lo, up = orig.col_up, rlo = orig.row_lo, rup = orig.row_up;
     double objc = orig.obj_const;
-    std::vector<std::vector<Entry>> rows(m);  // (col, value)
-    for (int j = 0; j < n; ++j)
-        for (const Entry& e : orig.cols[j])
-            if (e.value != 0) rows[e.index].push_back({j, e.value});
+    const WorkMatrix W(orig);
     std::vector<char> rrem(m, 0), crem(n, 0);
     std::vector<double> rerr(m, 0.0), cerr(n, 0.0);  // absolute error bounds of derived row bounds / continuous column bounds
     P.fixed_value.assign(n, 0.0);
@@ -80,21 +99,21 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
             P.log.push_back({"fix_col", -1, j, 0, v, 0, 0, 0});
             crem[j] = 1, P.fixed_value[j] = v, changed = true;
             const double verr = cerr[j];
-            for (const Entry& e : orig.cols[j]) {
+            for (const Entry& e : W.col(j)) {
                 if (rrem[e.index]) continue;
                 double av = e.value * v, mag = 0;
                 if (std::isfinite(rlo[e.index])) rlo[e.index] -= av, mag = std::max(mag, std::abs(rlo[e.index]));
                 if (std::isfinite(rup[e.index])) rup[e.index] -= av, mag = std::max(mag, std::abs(rup[e.index]));
                 rerr[e.index] += kEps * (std::abs(av) + mag) + std::abs(e.value) * verr;
             }
-            objc += orig.cost[j] * v;
+            objc += W.cost(j) * v;
         }
         for (int i = 0; i < m && !P.infeasible && !P.timed_out; ++i) {
             if (tick()) break;
             if (rrem[i]) continue;
             int cnt = 0, last = -1;
             double lastv = 0;
-            for (const Entry& e : rows[i])
+            for (const Entry& e : W.row(i))
                 if (!crem[e.index]) ++cnt, last = e.index, lastv = e.value;
             if (cnt == 0) {
                 const double ru = kSafety * rerr[i];
@@ -128,7 +147,7 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
                 continue;
             }
             double mn = 0, mx = 0;
-            for (const Entry& e : rows[i]) {
+            for (const Entry& e : W.row(i)) {
                 if (crem[e.index]) continue;
                 double a = e.value, l = lo[e.index], u = up[e.index];
                 mn += a > 0 ? a * l : a * u;
@@ -136,7 +155,7 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
             }
             double unc = kSafety * rerr[i], mag = 0;  // tracked uncertainty of the activity range
             int cntc = 0;
-            for (const Entry& e : rows[i]) {
+            for (const Entry& e : W.row(i)) {
                 if (crem[e.index]) continue;
                 unc += kSafety * std::abs(e.value) * cerr[e.index];
                 double b = e.value > 0 ? lo[e.index] : up[e.index], b2 = e.value > 0 ? up[e.index] : lo[e.index];
@@ -169,10 +188,10 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
             if (tick()) break;
             if (crem[j]) continue;
             bool any = false;
-            for (const Entry& e : orig.cols[j])
+            for (const Entry& e : W.col(j))
                 if (!rrem[e.index] && e.value != 0) { any = true; break; }
             if (any) continue;
-            double c = orig.maximize ? -orig.cost[j] : orig.cost[j];
+            double c = orig.maximize ? -W.cost(j) : W.cost(j);
             double v;
             if (c > 0) v = lo[j]; else if (c < 0) v = up[j];
             else v = std::isfinite(lo[j]) ? lo[j] : (std::isfinite(up[j]) ? up[j] : 0.0);
@@ -196,12 +215,12 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
         cmap[j] = (int)P.kept_cols.size();
         P.kept_cols.push_back(j);
         R.col_names.push_back(orig.col_names[j]);
-        R.cost.push_back(orig.cost[j]);
+        R.cost.push_back(W.cost(j));
         R.col_lo.push_back(lo[j]);
         R.col_up.push_back(up[j]);
         R.is_int.push_back(orig.is_int.empty() ? 0 : orig.is_int[j]);
         std::vector<Entry> col;
-        for (const Entry& e : orig.cols[j])
+        for (const Entry& e : W.col(j))
             if (rmap[e.index] >= 0) col.push_back({rmap[e.index], e.value});
         R.cols.push_back(col);
     }
