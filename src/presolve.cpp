@@ -6,6 +6,10 @@
 //   singleton_row     row, col, a = coefficient, v1/v2 = current row bounds, v3/v4 = column bounds afterwards
 //   redundant_row     row, v1/v2 = row bounds, v3/v4 = min/max activity over current column bounds (finite)
 //   fix_empty_col     col, v1 = value; the column is in no remaining row and the cost sign picks the bound
+//   dominated_col     col, v1 = value, v2 = direction (-1: fixed at the lower bound, +1: at the upper bound); dual fixing: every remaining
+//                     row of the column is one-sided in the benign direction (infinite bound where a move in the fixing direction
+//                     could violate it) and the cost sign does not prefer the other direction; the bound is finite and carries no
+//                     tracked uncertainty (exact input or integer bound). Exact sign and infinity tests only. fix_col applies it next pass.
 // Infeasibility is only reported with the reason that the replayer re-derives (same tolerances).
 #include <algorithm>
 #include <cmath>
@@ -178,6 +182,27 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
             else v = std::isfinite(lo[j]) ? lo[j] : (std::isfinite(up[j]) ? up[j] : 0.0);
             if (!std::isfinite(v)) continue;  // unbounded direction: leave to the solver
             P.log.push_back({"fix_empty_col", -1, j, 0, v, 0, 0, 0});
+            lo[j] = up[j] = v;  // fix_col applies it next pass
+            changed = true;
+        }
+        for (int j = 0; j < n && !P.infeasible && !P.timed_out; ++j) {  // dominated columns (dual fixing)
+            if (tick()) break;
+            if (crem[j] || lo[j] == up[j] || cerr[j] != 0.0) continue;  // a column bound with tracked uncertainty is never fixed on
+            int cnt = 0;
+            bool down_ok = true, up_ok = true;  // exact sign/infinity tests only; no tolerance is involved
+            for (const Entry& e : orig.cols[j]) {
+                if (rrem[e.index] || e.value == 0) continue;
+                ++cnt;
+                if (e.value > 0) down_ok = down_ok && rlo[e.index] == -kInf, up_ok = up_ok && rup[e.index] == kInf;
+                else down_ok = down_ok && rup[e.index] == kInf, up_ok = up_ok && rlo[e.index] == -kInf;
+            }
+            if (cnt == 0) continue;  // no active row: fix_empty_col
+            const double c = orig.maximize ? -orig.cost[j] : orig.cost[j];  // minimisation sense
+            double v, dir;
+            if (down_ok && c >= 0 && std::isfinite(lo[j])) v = lo[j], dir = -1;
+            else if (up_ok && c <= 0 && std::isfinite(up[j])) v = up[j], dir = 1;
+            else continue;  // a dominated column with an infinite improving bound is left to the solver
+            P.log.push_back({"dominated_col", -1, j, 0, v, dir, 0, 0});
             lo[j] = up[j] = v;  // fix_col applies it next pass
             changed = true;
         }
