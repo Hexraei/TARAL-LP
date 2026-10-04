@@ -124,6 +124,7 @@ struct MilpResult {
     // {nodes, LP infeasible, LP feasible, LP other, integer-empty by plain B&B, integer-feasible (a bug),
     //  undecided, justified by the incumbent cutoff only, reduced-cost fixings checked, fixings found wrong}
     std::array<long, 10> audit{};
+    std::string structural_certificate; // JSON proof, independently replayable from original model
     long rc_fixed = 0, rc_skipped = 0;  // reduced-cost fixing: bounds tightened, bases not trusted
     std::string message;
 };
@@ -131,6 +132,7 @@ struct MilpResult {
 std::vector<char> basis_from_point(const Model& model, const std::vector<double>& x,
                                 const std::vector<double>& row_duals, double tol, int* interior);
 struct MilpOptions {
+    bool integer_structure = false; // opt-in exact structural proofs; unsupported inputs unchanged
     bool audit_prop = false;  // --audit-prop: re-check every node whose propagated integer domain came out empty
     bool no_prop_prune = false;  // --no-prop-prune: do not prune such a node directly; the LP decides
 };

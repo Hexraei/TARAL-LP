@@ -32,6 +32,7 @@
 #include <random>
 
 #include "taral.hpp"
+#include "structural_integer.hpp"
 
 namespace {
 constexpr double kIntTol = 1e-6;   // |x - round(x)| for an integral value
@@ -751,6 +752,22 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     auto t0 = std::chrono::steady_clock::now();
     auto elapsed = [&] { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(); };
     MilpResult res;
+    if (opt.integer_structure) {
+        auto deadline = t0 + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+            std::chrono::duration<double>(std::max(0.0,std::min(time_limit_s,1e8))));
+        auto p = structural_integer::parity(model, deadline);
+        if (p.kind == structural_integer::Proof::Timeout) { res.status="time_limit";res.best_bound=-kInf;return res; }
+        if (p.kind == structural_integer::Proof::Infeasible) {
+            res.status="infeasible";res.best_bound=model.maximize ? -kInf : kInf;
+            res.structural_certificate=p.json;res.message="verified exact integer parity contradiction";return res;
+        }
+        if (p.kind == structural_integer::Proof::Optimal && violation(model,p.x)<=kFeasTol) {
+            res.status="optimal";res.has_solution=true;res.x=std::move(p.x);
+            res.objective=objective_of(model,res.x);res.best_bound=res.objective;res.gap=0;
+            res.structural_certificate=p.json;res.message="verified unique integer point from parity";return res;
+        }
+    }
+    if (opt.integer_structure) time_limit_s = std::max(0.0, time_limit_s - elapsed());
     double sign = model.maximize ? -1 : 1;
     Model md = model;  // minimisation form
     md.maximize = false;

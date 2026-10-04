@@ -154,6 +154,14 @@ void write_milp_json(const char* path, const MilpResult& r, double wall) {
     std::fprintf(f, ", \"audit\": [");
     for (size_t k = 0; k < r.audit.size(); ++k) std::fprintf(f, "%s%ld", k ? ", " : "", r.audit[k]);
     std::fprintf(f, "]");
+    if (!r.structural_certificate.empty()) {
+        std::fprintf(f, ", \"structural_certificate\": %s", r.structural_certificate.c_str());
+        if (r.has_solution) {
+            std::fprintf(f, ", \"x\": [");
+            for (size_t j=0;j<r.x.size();++j) { if(j)std::fprintf(f, ",");num_or_null(f,r.x[j]); }
+            std::fprintf(f, "]");
+        }
+    }
     std::fprintf(f, ", \"iterations\": %ld, \"wall_s\": %.6f, \"message\": \"%s\"}\n", r.lp_iterations, wall,
                  json_escape(r.message).c_str());
     std::fclose(f);
@@ -324,6 +332,7 @@ void print_help() {
                 "  --work-limit N    LP (simplex/dual): deterministic iteration budget; routing never uses the wall clock (an explicit --time-limit that fires still stops the run, non-deterministically)\n"
                 "  --presolve        verified presolve (linear LP/MILP): replayable log, original-space audit of the result\n"
                 "  --presolve-log F  write the presolve log and audit to F (implies --presolve)\n"
+                "  --integer-structure  MILP: opt-in exact structural parity proof\n"
                 "  --audit-prop      MILP: re-check propagation prunes (diagnostic)\n"
                 "  --no-prop-prune   MILP: disable propagation pruning\n"
                 "  --explain-infeasible FILE  write a verified LP-relaxation infeasibility explanation (irreducible rows + minimum relaxation) and exit\n"
@@ -420,6 +429,8 @@ int main(int argc, char** argv) {
                 do_presolve = true;
             } else if (!std::strcmp(a, "--no-fallback")) {
                 fallback = false;
+            } else if (!std::strcmp(a, "--integer-structure")) {
+                mopt.integer_structure = true;
             } else if (!std::strcmp(a, "--audit-prop")) {
                 mopt.audit_prop = true;
             } else if (!std::strcmp(a, "--no-prop-prune")) {
@@ -440,6 +451,8 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "usage: taral MODEL.mps [--time-limit S] [--node-limit N] [--sol OUT.sol] [--json OUT.json]\n");
         return 2;
     }
+    if (mopt.integer_structure && do_presolve)
+        return usage_error("--integer-structure and --presolve cannot be combined until certificate postsolve is supported");
     if (work_limit) {
         if (do_presolve) return usage_error("--work-limit and --presolve cannot be combined (presolve work accounting is not supported)");
         if (method == "ipm") return usage_error("--work-limit supports --method simplex or dual only");
