@@ -14,7 +14,7 @@ BIN = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "build", "taral")
 NRAND = int(sys.argv[2]) if len(sys.argv) > 2 else 300
 TMP = tempfile.mkdtemp()
 fails = []
-stats = {"hand": 0, "random": 0, "dominated_ops": 0, "random_with_dominated": 0, "audited_points": 0, "down": 0, "up": 0, "int_cols": 0, "presolve_infeasible": 0, "presolve_unbounded": 0}
+stats = {"engine_undecided": 0, "oracle_wrong_exact_witness": 0, "oracle_compared": 0, "hand": 0, "random": 0, "dominated_ops": 0, "random_with_dominated": 0, "audited_points": 0, "down": 0, "up": 0, "int_cols": 0, "presolve_infeasible": 0, "presolve_unbounded": 0}
 def expect(name, cond, msg=""):
     print(("PASS " if cond else "FAIL ") + name + ("" if cond else " " + str(msg)))
     if not cond: fails.append(name)
@@ -38,27 +38,97 @@ def run(path, tag, extra):
     obj = float(sl[-1].split("objective ")[1].split()[0]) if sl and "objective " in sl[-1] else None
     return st, obj, so, lg
 
+# Explicit per-case outcomes (no generic waiver). Neither class counts as an oracle comparison pass; both are counted separately in stats.
+KNOWN = {"rand_202": "engine_undecided", "rand_265": "engine_undecided", "rand_250": "oracle_wrong_exact_witness"}
+undecided, oracle_wrong = [], []
+
+from fractions import Fraction as Fr
+def parse_mps_exact(path):
+    """Tiny independent exact reader for the generated models (free format, MIN/MAX default MIN, RHS/BOUNDS MI LO UP, INTORG markers)."""
+    rows, order, cols, cost, rhs, lo, up, ints = {}, [], {}, {}, {}, {}, {}, set()
+    sec, inint, maxim, objrow = None, False, False, None
+    for ln in open(path).read().splitlines():
+        t = ln.split()
+        if not t: continue
+        if not ln.startswith(" "):
+            sec = t[0]
+            if sec == "OBJSENSE": pass
+            continue
+        if sec == "OBJSENSE": maxim = t[0].upper().startswith("MAX"); continue
+        if sec == "ROWS":
+            if t[0] == "N": objrow = t[1]
+            else: rows[t[1]] = t[0]; order.append(t[1])
+        elif sec == "COLUMNS":
+            if t[1] == "'MARKER'": inint = t[2] == "'INTORG'"; continue
+            c = t[0]; cols.setdefault(c, {}); lo.setdefault(c, Fr(0)); up.setdefault(c, None)
+            if inint: ints.add(c)
+            for k in range(1, len(t), 2):
+                if t[k] == objrow: cost[c] = Fr(t[k + 1])
+                else: cols[c][t[k]] = Fr(t[k + 1])
+        elif sec == "RHS":
+            for k in range(1, len(t), 2): rhs[t[k]] = Fr(t[k + 1])
+        elif sec == "BOUNDS":
+            ty, c = t[0], t[2]
+            if ty == "MI": lo[c] = None
+            elif ty == "LO": lo[c] = Fr(t[3])
+            elif ty == "UP": up[c] = Fr(t[3])
+            else: raise ValueError("bound type %s not handled by the exact reader" % ty)
+    return dict(rows=rows, order=order, cols=cols, cost=cost, rhs=rhs, lo=lo, up=up, ints=ints, maximize=maxim)
+
+def prove_unbounded(path, x, d):
+    """Exact (Fractions) proof that the model is unbounded: x is feasible (rows, bounds, integrality) and for every t >= 0 so is x + t*d
+    with an objective that strictly improves, so no optimum exists. Returns a list of problems (empty = proven)."""
+    M = parse_mps_exact(path); pr = []
+    names = list(M["cols"])
+    if set(x) != set(names) or set(d) != set(names): return ["witness names do not match the model columns"]
+    def act(v, r): return sum(M["cols"][c].get(r, 0) * v[c] for c in names)
+    for r in M["order"]:
+        a, b, ty = act(x, r), M["rhs"].get(r, Fr(0)), M["rows"][r]
+        if ty == "L" and a > b or ty == "G" and a < b or ty == "E" and a != b: pr.append("point violates row %s: %s vs %s" % (r, a, b))
+        da = act(d, r)
+        if ty == "L" and da > 0 or ty == "G" and da < 0 or ty == "E" and da != 0: pr.append("ray leaves row %s: slope %s" % (r, da))
+    for c in names:
+        if M["lo"][c] is not None and x[c] < M["lo"][c] or M["up"][c] is not None and x[c] > M["up"][c]: pr.append("point violates bounds of %s" % c)
+        if d[c] > 0 and M["up"][c] is not None: pr.append("ray increases %s which has an upper bound" % c)
+        if d[c] < 0 and M["lo"][c] is not None: pr.append("ray decreases %s which has a lower bound" % c)
+        if c in M["ints"] and (x[c].denominator != 1 or d[c].denominator != 1): pr.append("integer column %s not integral in point or ray" % c)
+    slope = sum(M["cost"].get(c, 0) * d[c] for c in names)
+    if not (slope > 0 if M["maximize"] else slope < 0): pr.append("ray does not improve the objective (slope %s)" % slope)
+    return pr
+
 def check(path, tag, want_dom=None, want_dir=None, not_cols=()):
     """want_dom: True = at least one dominated_col op expected, False = none expected, None = no expectation."""
     o, oobj = oracle(path)
     s0, o0, _, _ = run(path, tag + "_off", lambda lg: [])
     s1, o1, so, lg = run(path, tag + "_on", lambda lg: ["--presolve-log", lg])
     M = rc.load(path); problems = []
-    plain_ok = (s0 == o) or (o == "unbounded" and s0 in ("unbounded", "unbounded_relaxation", "dual_infeasible"))
-    if not plain_ok and o in ("optimal", "infeasible", "unbounded"):
-        # the plain engine itself disagrees with the oracle (existing behaviour, e.g. unbounded relaxations of mixed-integer models or
-        # numerical_failure): presolve must then give the same status class as the plain engine, no more is claimed
-        stats["engine_oracle_divergence"] = stats.get("engine_oracle_divergence", 0) + 1
-        if s1 != s0: problems.append("presolve status %s vs plain %s (plain also differs from oracle %s)" % (s1, s0, o))
-    elif o == "optimal":
-        if s1 != "optimal": problems.append("presolve status %s vs oracle optimal" % s1)
-        elif abs(o1 - oobj) > 1e-6 * (1 + abs(oobj)): problems.append("presolve objective %.9g vs oracle %.9g" % (o1, oobj))
-    elif o == "infeasible":
-        if s1 != "infeasible": problems.append("presolve status %s vs oracle infeasible" % s1)
-    elif o == "unbounded":
-        if s1 not in ("unbounded", "unbounded_relaxation", "dual_infeasible"): problems.append("presolve status %s vs oracle unbounded" % s1)
-    else:  # infeasible_or_unbounded from the oracle: presolve must not claim optimal
-        if s1 == "optimal": problems.append("presolve optimal where the oracle says infeasible/unbounded")
+    UNB = ("unbounded", "unbounded_relaxation", "dual_infeasible")
+    kind = KNOWN.get(tag)
+    if kind == "engine_undecided":
+        # existing engine behaviour, NOT an oracle pass: HiGHS (presolve on and off) says infeasible; the engine's root LP ends
+        # numerical_failure (nonoptimal certificate guard) with and without --presolve, and presolve logs zero ops here
+        if not (s0 == "numerical_failure" and s1 == "numerical_failure"): problems.append("known undecided case: plain %s presolve %s, expected numerical_failure both" % (s0, s1))
+        stats["engine_undecided"] += 1; undecided.append(tag)
+    elif kind == "oracle_wrong_exact_witness":
+        # the HiGHS answers (presolve on: infeasible, presolve off: bounded optimal) are contradicted by an exact point + ray proof,
+        # see prove_unbounded below; the engine's unbounded is the supported answer
+        if not (s0 in UNB and s1 in UNB): problems.append("known oracle-wrong case: plain %s presolve %s, expected unbounded class both" % (s0, s1))
+        stats["oracle_wrong_exact_witness"] += 1; oracle_wrong.append(tag)
+    else:
+        stats["oracle_compared"] += 1
+        if o == "optimal":
+            for nm, st_, ob in (("plain", s0, o0), ("presolve", s1, o1)):
+                if st_ != "optimal": problems.append("%s status %s vs oracle optimal" % (nm, st_))
+                elif abs(ob - oobj) > 1e-6 * (1 + abs(oobj)): problems.append("%s objective %.9g vs oracle %.9g" % (nm, ob, oobj))
+        elif o == "infeasible":
+            for nm, st_ in (("plain", s0), ("presolve", s1)):
+                if st_ != "infeasible": problems.append("%s status %s vs oracle infeasible" % (nm, st_))
+        elif o == "unbounded":
+            for nm, st_ in (("plain", s0), ("presolve", s1)):
+                if st_ not in UNB: problems.append("%s status %s vs oracle unbounded" % (nm, st_))
+        else:  # oracle says infeasible or unbounded: neither engine run may claim optimal
+            for nm, st_ in (("plain", s0), ("presolve", s1)):
+                if st_ == "optimal": problems.append("%s optimal where the oracle says infeasible/unbounded" % nm)
     ops = []
     if os.path.exists(lg):
         L = json.load(open(lg)); errs = rc.replay(M, L)
@@ -180,6 +250,35 @@ for k in range(NRAND):
     p = mps("r%d" % k, rand_model(k)); stats["random"] += 1
     before = stats["dominated_ops"]; check(p, "rand_%d" % k)
     stats["random_with_dominated"] += stats["dominated_ops"] > before
+# ---- explicit per-case outcomes for the three random cases where the engine and the HiGHS oracle disagree or the engine is undecided
+def highs_run(path, presolve):
+    h = highspy.Highs(); h.setOptionValue("output_flag", False); h.setOptionValue("presolve", presolve); h.readModel(rc.ic.normalize_mps(path)); h.run()
+    return h.modelStatusToString(h.getModelStatus()), h.getInfo().objective_function_value
+if NRAND > 265:
+    for tag in ("rand_202", "rand_265"):  # engine UNDECIDED (not oracle passes): HiGHS says infeasible both ways, engine numerical_failure, zero presolve ops
+        pth = os.path.join(TMP, tag.replace("rand_", "r") + ".mps")
+        expect(tag + "_highs_presolve_on_off_infeasible", highs_run(pth, "on")[0] == "Infeasible" and highs_run(pth, "off")[0] == "Infeasible", str((highs_run(pth, "on"), highs_run(pth, "off"))))
+        lgp = os.path.join(TMP, tag + "_on_log.json")
+        expect(tag + "_zero_presolve_ops", os.path.exists(lgp) and not json.load(open(lgp))["ops"])
+    pth = os.path.join(TMP, "r250.mps")
+    on, off = highs_run(pth, "on"), highs_run(pth, "off")
+    expect("rand_250_highs_answers_recorded", on[0] == "Infeasible" and off[0] == "Optimal" and abs(off[1] - (-19 / 3)) < 1e-6, str((on, off)))  # recorded as observed
+    F = Fr
+    x = {"X0": F(3), "X1": F(-2), "X2": F(5), "X3": F(-2), "X4": F(0), "X5": F(0)}
+    d = {"X0": F(0), "X1": F(0), "X2": F(0), "X3": F(-2), "X4": F(0), "X5": F(1)}
+    expect("rand_250_exact_point_and_ray_prove_unbounded", prove_unbounded(pth, x, d) == [], str(prove_unbounded(pth, x, d)))
+    M250 = parse_mps_exact(pth)
+    expect("rand_250_point_values_R0_R1_R2_obj", [sum(M250["cols"][c].get(r, 0) * x[c] for c in x) for r in ("R0", "R1", "R2")] == [5, -1, 11]
+           and sum(M250["cost"].get(c, 0) * x[c] for c in x) == -11, "point row activities / objective differ from R0=5, R1=-1, R2=11, obj=-11")
+    expect("rand_250_ray_slopes_R0_obj", sum(M250["cols"][c].get("R0", 0) * d[c] for c in d) == -1 and sum(M250["cost"].get(c, 0) * d[c] for c in d) == -6, "ray slope")
+    # the exact prover must reject a wrong witness
+    bad = dict(d); bad["X0"] = F(1)
+    expect("rand_250_prover_rejects_ray_through_bounded_integer_direction", prove_unbounded(pth, x, bad) != [])
+    bad = dict(d); bad["X5"] = F(-1)
+    expect("rand_250_prover_rejects_ray_with_wrong_sign", prove_unbounded(pth, x, bad) != [])
+    xb = dict(x); xb["X2"] = F(6)
+    expect("rand_250_prover_rejects_infeasible_point", prove_unbounded(pth, xb, d) != [])
+print("known outcomes (NOT counted as oracle comparisons): engine_undecided %s; oracle_wrong_exact_witness %s" % (undecided, oracle_wrong))
 expect("random_sweep_exercises_dominated_col", stats["random_with_dominated"] >= max(5, NRAND // 20), stats)
 print("stats", json.dumps(stats))
 print("FAILED %d" % len(fails) if fails else "ALL PASS")
