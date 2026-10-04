@@ -246,6 +246,11 @@ bool write_explanation_json(const char* path, const Model& md, const Infeasibili
     std::fprintf(f, ", \"relaxation\": {\"status\": \"%s\", \"objective\": ", e.relaxation_status.c_str());
     num_or_null(f, e.relaxation_status == "optimal" ? e.relaxation_objective : kInf);
     std::fprintf(f, ", \"objective_definition\": \"sum_i w_i*(lower_relax_i+upper_relax_i), w_i=1/(1+max finite |row bound|), all rows, column bounds retained\"");
+    std::fprintf(f, ", \"scale_factor\": "); num_or_null(f, e.relaxation_scale > 0 ? e.relaxation_scale : kInf);  // null when the scaled LP was never attempted
+    std::fprintf(f, ", \"objective_note\": \"reporting-only, not claimed minimal; objective is the solver value on the scaled LP divided by scale_factor\"");
+    std::fprintf(f, ", \"certificate_quality\": \"%s\", \"certificate_quality_model\": \"scaled_lp\"", relaxation_quality_label(e));
+    std::fprintf(f, ", \"kkt_gap_scaled_model\": "); num_or_null(f, e.relaxation_gap);
+    std::fprintf(f, ", \"kkt_gap_abs_unscaled\": "); num_or_null(f, e.relaxation_gap_abs_unscaled);
     std::fprintf(f, ", \"kkt_gap\": "); num_or_null(f, e.relaxation_gap);
     std::fprintf(f, ", \"max_violation\": "); num_or_null(f, e.relaxation_violation);
     std::fprintf(f, ", \"rows\": [");

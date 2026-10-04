@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Tests for --explain-infeasible. Usage: infeasibility_explanation_tests.py [path/to/taral]"""
-import glob, json, os, subprocess, sys, tempfile
+import glob, json, math, os, subprocess, sys, tempfile
 sys.path.insert(0, os.path.dirname(__file__))
 import infeasibility_explanation_check as chk
 
@@ -57,6 +57,46 @@ expect("corrupt_witness_rejected", chk.check(conflict, badp)[2] != [])
 bad = json.load(open(out)); bad["relaxation"]["objective"] *= 2
 json.dump(bad, open(badp, "w"))
 expect("corrupt_objective_rejected", chk.check(conflict, badp)[2] != [])
+
+# elastic objective scale: exact power of two in [2^20, 2^30], reporting-only wording, certificate label of the SCALED model
+rx = e["relaxation"]
+sf = rx.get("scale_factor")
+expect("scale_factor_power_of_two_in_range", isinstance(sf, (int, float)) and 2 ** 20 <= sf <= 2 ** 30 and math.frexp(sf)[0] == 0.5, str(sf))
+expect("scale_keys_present", rx.get("certificate_quality_model") == "scaled_lp" and rx.get("certificate_quality") in ("pass", "fail", "unknown")
+       and rx.get("kkt_gap_scaled_model") == rx.get("kkt_gap") and isinstance(rx.get("kkt_gap_abs_unscaled"), (int, float))
+       and "not claimed minimal" in rx.get("objective_note", ""), json.dumps({k: v for k, v in rx.items() if k not in ("rows", "x")}))
+
+# a very large finite row bound (the MPS reader treats |bound| >= 1e20 as infinite, so 1e19 is the largest reachable here) gives a tiny weight; the exponent must clamp to 30.
+# The overflow case (weight denormal, 1/wmin = inf) is only reachable through the C++ API and is tested in infeasibility_explanation_api_tests.cpp
+huge = mps("huge_rhs", """NAME HUGE
+ROWS
+ N OBJ
+ G LOW
+ L HIGH
+ L BIG
+COLUMNS
+ X OBJ 1 LOW 1
+ X HIGH 1 BIG 1
+ Y OBJ 1 LOW 1
+ Y HIGH 1
+RHS
+ RHS LOW 10 HIGH 4
+ RHS BIG 1e19
+BOUNDS
+ UP BND X 100
+ UP BND Y 100
+ENDATA
+""")
+rc, eh, outh = run(huge, "huge_rhs")
+expect("huge_rhs_scale_clamped_1e19", eh and eh["relaxation"].get("scale_factor") == 2 ** 30, str(eh and eh["relaxation"].get("scale_factor")))
+expect("huge_rhs_ran", rc == 0, str(rc))
+expect("huge_rhs_status", bool(eh) and eh["status"] == "irreducible" and (eh["relaxation"]["status"] in ("optimal", "unverified_point") or eh["relaxation"]["status"].startswith("not_solved_")), str(eh and eh["relaxation"]["status"]))
+# exact recomputation alone (oracle skipped) must reject a perturbed point: x moved by 1e-3 changes the exact objective of the point
+pert = json.load(open(out)); pert["relaxation"]["x"] = [v + 1e-3 for v in pert["relaxation"]["x"]]
+pertp = os.path.join(TMP, "pert.json"); json.dump(pert, open(pertp, "w"))
+errs_p = chk.check(conflict, pertp, oracle=False)[2]
+expect("exact_recompute_rejects_perturbed_x_without_oracle", any("exact recomputation" in x for x in errs_p), str(errs_p))
+expect("exact_path_accepts_good_output_without_oracle", chk.check(conflict, out, oracle=False)[2] == [])
 
 # bounds-only conflict: lower > upper on a column
 bo = mps("bounds_only", """NAME BO
