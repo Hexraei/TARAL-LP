@@ -161,6 +161,7 @@ public:
     // point (verified by offer()) or false. The argument is the time budget in seconds.
     std::function<bool(double, std::vector<double>&)> fj_hook;
     bool fj_tried = false;
+    structural_integer::Grid grid;
     // Offer an LP point: integer columns rounded first, then as is. Returns true if accepted.
     bool offer(const std::vector<double>& x) {
         std::vector<double> r = x;
@@ -560,7 +561,7 @@ End Search::run() {
             note = std::string("node LP ") + status_name(r.status) + (r.message.empty() ? "" : ": " + r.message);
             continue;
         }
-        double b = std::max(cur.bound, r.objective);
+        double b = structural_integer::lattice_bound(std::max(cur.bound, r.objective), grid);
         if (cur.dir) {  // learn from the parent -> child objective change
             int d = cur.dir > 0, j = cur.bj;
             double g = std::max(0.0, r.objective - cur.bound) / cur.dist;
@@ -786,6 +787,7 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     }
 
     Search s(md, lo, up, time_limit_s, node_limit);
+    if (opt.integer_structure) s.grid=structural_integer::objective_grid(md);
     // Incumbent seed: if the search still has no incumbent after a short while, up to four Feasibility Jump
     // restarts are tried (see Search::fj_hook). Only a point that passes violation() on the model being
     // solved becomes the incumbent; the search is otherwise unchanged. TARAL_NO_FJ=1 disables the hook.
@@ -810,6 +812,7 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
                  s.audit_int_empty, s.audit_int_feasible, s.audit_int_undecided, s.audit_cutoff,
                  s.audit_rc_checked, s.audit_rc_bad};
     res.message = s.note;
+    if (s.grid.step>0) res.structural_certificate=s.grid.json;
     if (end == End::RootUnbounded) {
         // For rational data an unbounded relaxation plus one integer-feasible point means the MILP
         // is unbounded (the integer hull has the relaxation's recession cone, Meyer 1974). Look for

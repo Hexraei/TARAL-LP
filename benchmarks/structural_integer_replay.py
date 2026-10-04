@@ -11,7 +11,7 @@ from presolve_replay_check import load
 
 def check(M,j):
     c=j['structural_certificate'];n=M['n'];m=M['m']
-    assert all(M['isint']), 'noninteger column'
+    if c['type']!='objective_lattice': assert all(M['isint']), 'noninteger column'
     rows=[{} for _ in range(m)]
     for k,col in enumerate(M['cols']):
         for i,v in col:rows[i][k]=F(v)
@@ -25,6 +25,32 @@ def check(M,j):
             b+=rhs
             for k,v in rows[i].items():assert v.denominator==1;a[k]+=v
         return a,b
+    if c['type']=='objective_lattice':
+        t=c['objective_col'];q=c['denominator'];assert isinstance(q,int) and q>0
+        cost=F(M['cost'][t]);sense=-1 if M['maximize'] else 1
+        assert cost*sense<0 and not M['isint'][t] and M['lo'][t]==0
+        assert all(v==0 for k,v in enumerate(M['cost']) if k!=t)
+        found=set()
+        for link in c['links']:
+            r=link['row'];y=link['grid_col'];er=link['equality']
+            assert r not in found;found.add(r)
+            assert M['rlo'][r]==-math.inf and M['rup'][r]==0 and rows[r]=={t:F(1),y:F(-1)}
+            assert not M['isint'][y] and M['lo'][y]==0 and M['up'][y]==math.inf
+            assert M['rlo'][er]==M['rup'][er] and F(M['rlo'][er]).denominator==1
+            assert rows[er][y]==q and all(M['isint'][k] and v.denominator==1 for k,v in rows[er].items() if k!=y)
+            assert {i for i,v in M['cols'][y]}=={r,er}
+        assert found=={i for i,v in M['cols'][t]} and found
+        if math.isfinite(M['up'][t]):assert F(M['up'][t])*q==int(F(M['up'][t])*q)
+        if j.get('has_solution'):
+            x=list(map(F,j['x']));assert len(x)==n
+            for k,v in enumerate(x):
+                assert M['lo'][k]<=v<=M['up'][k]
+                if M['isint'][k]:assert v.denominator==1
+            for i in range(m):
+                a=sum(v*x[k] for k,v in rows[i].items());assert M['rlo'][i]<=a<=M['rup'][i]
+            obj=F(M['offset'])+sum(F(v)*x[k] for k,v in enumerate(M['cost']))
+            assert abs(float(obj)-j['objective'])<1e-10
+        return True
     if c['type']=='integer_parity_contradiction':
         assert j['status']=='infeasible' and not j.get('has_solution')
         a,b=combination(c['rows']);assert all(v%2==0 for v in a) and b%2==1

@@ -121,4 +121,51 @@ inline Proof parity(const Model& m, std::chrono::steady_clock::time_point deadli
     // All variables are unique: objective coefficients need not be integral.
     out.kind=Proof::Optimal;out.x=std::move(x);out.json=cert.str();return out;
 }
+
+struct Grid { double step=0,offset=0;std::string json; };
+// Objective-only epigraph: minimize negative cost*t; t <= y_i and
+// q*y_i = integral affine combination of integer columns. At an optimum,
+// t equals min(y_i, finite upper bound), hence lies on 1/q grid. Merely
+// having an integral-looking continuous cost is NOT enough.
+inline Grid objective_grid(const Model& m) {
+    Grid g;int n=int(m.cols.size()), nr=int(m.row_lo.size());
+    if(n>2048 || nr>4096 || !m.qobj.empty() || !std::isfinite(m.obj_const))return g;
+    int t=-1;
+    for(int j=0;j<n;++j)if(m.cost[j]!=0) {if(t>=0)return g;t=j;}
+    if(t<0 || m.is_int[t] || !(m.cost[t]<0) || m.col_lo[t]!=0)return g;
+    std::vector<std::vector<Entry>> rows(nr);
+    for(int j=0;j<n;++j)for(auto e:m.cols[j])rows[e.index].push_back({j,e.value});
+    if(m.cols[t].empty())return g;
+    int q=0;std::ostringstream js;js<<"{\"type\":\"objective_lattice\",\"objective_col\":"<<t<<",\"links\":[";bool comma=false;
+    for(auto e:m.cols[t]) {
+        int i=e.index;
+        if(m.row_lo[i]!=-kInf || m.row_up[i]!=0 || e.value!=1 || rows[i].size()!=2)return g;
+        int y=-1;for(auto a:rows[i])if(a.index!=t){if(a.value!=-1)return g;y=a.index;}
+        if(y<0 || m.is_int[y] || m.col_lo[y]!=0 || std::isfinite(m.col_up[y]))return g;
+        int er=-1, den=0;
+        for(auto a:m.cols[y]) {
+            int r=a.index;if(r==i)continue;
+            if(m.row_lo[r]!=m.row_up[r] || !exact_int(m.row_lo[r]) || !exact_int(a.value) || a.value<=0 || a.value>1048576)return g;
+            if(er>=0)return g;
+            er=r;den=int(a.value);
+            for(auto v:rows[r])if(v.index!=y && (!m.is_int[v.index] || !exact_int(v.value)))return g;
+        }
+        if(er<0 || (q && den!=q))return g;
+        q=den;
+        if(comma)js<<',';
+        comma=true;js<<"{\"row\":"<<i<<",\"grid_col\":"<<y<<",\"equality\":"<<er<<'}';
+    }
+    if(std::isfinite(m.col_up[t]) && (!exact_int(m.col_up[t]*q) || m.col_up[t]<0))return g;
+    g.step=-m.cost[t]/q;g.offset=m.obj_const;
+    if(!std::isfinite(g.step) || g.step<=0)return Grid{};
+    js<<"],\"denominator\":"<<q<<"}";g.json=js.str();return g;
+}
+inline double lattice_bound(double b,const Grid& g) {
+    if(g.step==0 || !std::isfinite(b))return b;
+    double units=(b-g.offset)/g.step;
+    if(!std::isfinite(units) || std::abs(units)>1099511627776.0)return b;
+    // Conservative outward margin, never nearest rounding.
+    double v=g.offset+std::ceil(units-1e-7*(1+std::abs(units)))*g.step;
+    return std::max(b,v);
+}
 } // namespace structural_integer
