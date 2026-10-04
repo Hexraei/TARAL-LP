@@ -4,8 +4,10 @@ No solver parser, presolved model, reported residual, or verified flag is truste
 Farkas inequalities: -A'x row_lower + A'x row_upper - col_lower + col_upper = 0;
 weighted bound contradiction strictly positive. All multipliers nonnegative, L1=1.
 Unbounded: feasible original anchor plus normalized recession ray and improving slope.
-Finite precision certificates, not exact rational proofs. Stationarity <=1e-12,
-primal/recession residual <=1e-8, normalized strict margin >1e-8.
+Finite precision certificates, not exact rational proofs. Stationarity <=1e-12
+only when each nonzero residual is compensated at a finite direct or original
+singleton-implied minimizing column bound; otherwise any nonzero residual is
+rejected. Primal/recession residual <=1e-8, normalized strict margin >1e-8.
 Integer and quadratic models are rejected. Original first-appearance array order.
 """
 import argparse
