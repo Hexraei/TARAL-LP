@@ -19,19 +19,72 @@ TOL = 1e-7
 
 def normalize_mps(path):
     """Sum duplicate (column,row) coefficients in COLUMNS (the engine's semantics; highspy keeps the first).
-    Free-format token lines only; MARKER lines, other sections, ranges and bounds are copied unchanged."""
-    out, sec, seen, cur = [], None, {}, None
+    Also uses only the first BOUNDS set and drops an earlier entry only when a later entry of the same column sets every side it sets (the engine overwrites; HiGHS keeps the first and warns); entries are never rewritten, and a kept overlap raises. Free-format token lines only; MARKER lines and other sections are copied unchanged."""
+    out, sec, seen, cur, bent, bset = [], None, {}, None, [], None
     for raw in open(path).read().splitlines():
         if not raw.strip() or raw.startswith("*"): out.append(raw); continue
         if not raw[0].isspace():
             if sec == "COLUMNS": out.extend(flush(seen))
             sec = raw.split()[0]; seen = {}; out.append(raw); continue
+        if sec == "BOUNDS":  # engine semantics: only the first bound set is used; entries are kept IN ORDER (order-dependent rules such as a negative UP stay with HiGHS/engine)
+            t = raw.split(); ty = t[0].upper()
+            noval = ty in ("MI", "PL", "FR")
+            if ty in ("LO", "UP", "FX", "MI", "PL", "FR") and len(t) in ((2, 3) if noval else (3, 4)):
+                has_set = len(t) == (3 if noval else 4)
+                if has_set:
+                    if bset is None: bset = t[1]
+                    if t[1] != bset: continue
+                bent.append((len(out), t[2] if has_set else t[1], ty)); out.append(raw)
+                continue
+            out.append(raw); continue
         if sec != "COLUMNS": out.append(raw); continue
         t = raw.split()
         if "'MARKER'" in t or "MARKER" in t: out.extend(flush(seen)); seen = {}; out.append(raw); continue
         if len(t) not in (3, 5): raise ValueError("unsupported COLUMNS line (need free format): " + raw)
         for k in range(1, len(t), 2):
             seen.setdefault(t[0], {}); seen[t[0]][t[k]] = seen[t[0]].get(t[k], 0.0) + float(t[k + 1].replace("D", "E").replace("d", "e"))
+    # Drop an entry only when every side it sets (lower/upper) is set again by a LATER entry of the same column; entries are
+    # never rewritten, so order-dependent rules (negative UP with an implicit lower, ...) are left to the readers.
+    sides = {"LO": {"lo"}, "MI": {"lo"}, "UP": {"up"}, "PL": {"up"}, "FX": {"lo", "up"}, "FR": {"lo", "up"}}
+    later, drop, kept_sides = {}, set(), {}
+    for pos, col, ty in reversed(bent):
+        cov = later.setdefault(col, set())
+        if sides[ty] <= cov: drop.add(pos); continue
+        cov |= sides[ty]; kept_sides.setdefault(col, []).append(ty)
+    for col, tys in kept_sides.items():
+        flat = [x for ty in tys for x in sides[ty]]
+        if len(flat) != len(set(flat)): raise ValueError("unsupported BOUNDS combination for column %s (%s): kept entries overlap" % (col, tys))
+    # Engine rule for a negative UP bound: if the lower bound is still 0 at that point (default or an explicit 0), the lower becomes -inf
+    # (the MPS convention); highspy keeps lower 0 and reports infeasible, so the equivalent MI entry is inserted before such an UP.
+    lower, pre, lastlow = {}, {}, {}
+    # An earlier negative UP can be dropped because a later UP sets the same (upper) side, but its engine effect on the LOWER bound
+    # (lower -> -inf when the lower is still 0) survives that overwrite: the engine's UP -1 then UP 7 gives [-inf, 7], not [0, 7].
+    # So the pass runs over ALL entries in file order; a dropped negative UP that triggers the rule is replaced by the equivalent MI.
+    later_low = {}  # does a later entry of the column set the lower bound? then the engine's lower is overwritten anyway
+    for pos, col, ty in reversed(bent):
+        later_low[pos] = later_low.get(("c", col), False)
+        if ty in ("LO", "FX", "MI", "FR"): later_low[("c", col)] = True
+    for pos, col, ty in bent:
+        was_dropped = pos in drop
+        t = out[pos].split()
+        val = float(t[-1].replace("D", "E").replace("d", "e")) if ty in ("LO", "UP", "FX") else None
+        lo = lower.get(col, 0.0)
+        if was_dropped:
+            # a dropped entry never reaches the readers; only a triggering negative UP leaves a lower-side effect to preserve
+            if not (ty == "UP" and val < 0 and lo == 0.0 and not later_low[pos]): continue
+        if ty in ("LO", "FX"): lower[col] = val; lastlow[col] = (pos, ty)
+        elif ty in ("MI", "FR"): lower[col] = -math.inf; lastlow[col] = (pos, ty)
+        elif ty == "UP" and val < 0 and lo == 0.0 and not later_low[pos]:
+            if col in lastlow:
+                if lastlow[col][1] != "LO": raise ValueError("unsupported BOUNDS combination for column %s (FX 0 before a negative UP)" % col)
+                drop.add(lastlow[col][0])  # explicit LO 0 is overwritten by the engine's -inf; a duplicate lower entry would be ignored by highspy
+            pre[pos] = " MI %s %s" % (bset or "BND", col); lower[col] = -math.inf
+    out2 = []
+    for k, l in enumerate(out):
+        if k in pre: out2.append(pre[k])  # before the drop test: a dropped negative UP still leaves its MI behind
+        if k in drop: continue
+        out2.append(l)
+    out = out2
     fd, tmp = tempfile.mkstemp(suffix=".mps"); os.close(fd)
     open(tmp, "w").write("\n".join(out) + "\n")
     return tmp
