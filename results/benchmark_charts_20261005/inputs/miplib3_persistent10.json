@@ -1,0 +1,152 @@
+[
+ {
+  "case": "cap6000",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 131.67839789390564,
+  "taral_line": "status optimal objective -2451377 best_bound -2451379.44532 gap 9.98e-07 nodes 8564 iterations 25098 prop_crossed 0 wall 131.667s",
+  "taral": {
+   "status": "optimal",
+   "objective": -2451377,
+   "best_bound": -2451379.44531784,
+   "gap": 9.97528262769718e-07,
+   "nodes": 8564,
+   "message": ""
+  }
+ },
+ {
+  "case": "nw04",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 133.49774813652039,
+  "taral_line": "status optimal objective 16862 best_bound 16862 gap 0 nodes 1821 iterations 10599 prop_crossed 471 wall 133.445s",
+  "taral": {
+   "status": "optimal",
+   "objective": 16862,
+   "best_bound": 16862,
+   "gap": 0,
+   "nodes": 1821,
+   "message": ""
+  }
+ },
+ {
+  "case": "swath",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.07082772254944,
+  "taral_line": "status time_limit objective nan best_bound 343.900843 gap inf nodes 24780 iterations 477766 prop_crossed 0 wall 300.046s",
+  "taral": {
+   "status": "time_limit",
+   "objective": null,
+   "best_bound": 343.900843,
+   "gap": null,
+   "nodes": 24780,
+   "message": ""
+  }
+ },
+ {
+  "case": "mkc",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.02685928344727,
+  "taral_line": "status time_limit objective 0 best_bound -611.85 gap 612 nodes 6683 iterations 891783 prop_crossed 0 wall 300.014s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 0,
+   "best_bound": -611.8499999999997,
+   "gap": 611.8499999999997,
+   "nodes": 6683,
+   "message": ""
+  }
+ },
+ {
+  "case": "p2756",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0696704387665,
+  "taral_line": "status time_limit objective 17010 best_bound 2701.75 gap 0.841 nodes 36268 iterations 4990951 prop_crossed 1026 wall 300.055s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 17010,
+   "best_bound": 2701.75,
+   "gap": 0.8411669606114051,
+   "nodes": 36268,
+   "message": ""
+  }
+ },
+ {
+  "case": "harp2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.3305251598358,
+  "taral_line": "status time_limit objective -73855671 best_bound -74000277.5057 gap 0.00196 nodes 167395 iterations 951726 prop_crossed 6678 wall 300.282s",
+  "taral": {
+   "status": "time_limit",
+   "objective": -73855671,
+   "best_bound": -74000277.50566356,
+   "gap": 0.001957960759215888,
+   "nodes": 167395,
+   "message": ""
+  }
+ },
+ {
+  "case": "fiber",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.20103001594543,
+  "taral_line": "status time_limit objective 437303.67 best_bound 236800.261979 gap 0.458 nodes 88133 iterations 1013879 prop_crossed 799 wall 300.178s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 437303.67000000004,
+   "best_bound": 236800.2619791667,
+   "gap": 0.4584992575544434,
+   "nodes": 88133,
+   "message": ""
+  }
+ },
+ {
+  "case": "mas74",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 301.3704595565796,
+  "taral_line": "status time_limit objective 11801.185729 best_bound 11274.2996844 gap 0.0446 nodes 737955 iterations 4806588 prop_crossed 0 wall 301.340s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 11801.185728999995,
+   "best_bound": 11274.299684439033,
+   "gap": 0.044646873344786314,
+   "nodes": 737955,
+   "message": ""
+  }
+ },
+ {
+  "case": "markshare2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 301.53091049194336,
+  "taral_line": "status time_limit objective 18 best_bound 0 gap 1 nodes 2433228 iterations 13309076 prop_crossed 7177 wall 300.636s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 18,
+   "best_bound": 0,
+   "gap": 1,
+   "nodes": 2433228,
+   "message": ""
+  }
+ },
+ {
+  "case": "markshare1",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 301.4156701564789,
+  "taral_line": "status time_limit objective 8 best_bound 0 gap 1 nodes 3208461 iterations 14931679 prop_crossed 4184 wall 300.573s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 7.999999999999979,
+   "best_bound": 0,
+   "gap": 1,
+   "nodes": 3208461,
+   "message": ""
+  }
+ }
+]

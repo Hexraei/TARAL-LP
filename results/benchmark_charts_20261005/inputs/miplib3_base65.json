@@ -1,0 +1,1432 @@
+{
+ "air03": {
+  "case": "air03",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 0.8043224811553955,
+  "taral_line": "status optimal objective 340160 best_bound 340160 gap 0 nodes 10 iterations 958 prop_crossed 0 wall 0.795s",
+  "taral": {
+   "status": "optimal",
+   "objective": 340160,
+   "best_bound": 340160,
+   "gap": 0,
+   "nodes": 10,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 340160.0,
+   "bound": 340160.0,
+   "gap": 0.0,
+   "wall": 5.04156756401062
+  }
+ },
+ "nw04": {
+  "case": "nw04",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 34.46681070327759,
+  "taral_line": "status node_limit objective 16862 best_bound 16532.6666667 gap 0.0195 nodes 434 iterations 4036 prop_crossed 47 wall 34.398s open-node memory cap reached (142 open nodes, depth 60); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 16862,
+   "best_bound": 16532.666666666664,
+   "gap": 0.01953109556003652,
+   "nodes": 434,
+   "message": "open-node memory cap reached (142 open nodes, depth 60); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 16862.000000000004,
+   "bound": 16862.000000000004,
+   "gap": 0.0,
+   "wall": 99.16638493537903
+  }
+ },
+ "mitre": {
+  "case": "mitre",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0154936313629,
+  "taral_line": "status time_limit objective nan best_bound 114800.983598 gap inf nodes 4859 iterations 1239448 prop_crossed 798 wall 300.007s",
+  "taral": {
+   "status": "time_limit",
+   "objective": null,
+   "best_bound": 114800.98359774091,
+   "gap": null,
+   "nodes": 4859,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 115155.0,
+   "bound": 115155.0,
+   "gap": 0.0,
+   "wall": 2.675671339035034
+  }
+ },
+ "dano3mip": {
+  "case": "dano3mip",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.01989459991455,
+  "taral_line": "status time_limit objective 747.333333333 best_bound 576.270874289 gap 0.229 nodes 89 iterations 168049 prop_crossed 0 wall 300.009s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 747.3333333333345,
+   "best_bound": 576.2708742890959,
+   "gap": 0.22889713520638494,
+   "nodes": 89,
+   "message": ""
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 737.3333333333336,
+   "bound": 577.1261763081909,
+   "gap": 0.21727914605579923,
+   "wall": 300.1224594116211
+  }
+ },
+ "swath": {
+  "case": "swath",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 48.15855669975281,
+  "taral_line": "status node_limit objective nan best_bound 338.20450455 gap inf nodes 3740 iterations 75084 prop_crossed 0 wall 48.133s open-node memory cap reached (3414 open nodes, depth 23); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": null,
+   "best_bound": 338.2045045500001,
+   "gap": null,
+   "nodes": 3740,
+   "message": "open-node memory cap reached (3414 open nodes, depth 23); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 495.40865100000633,
+   "bound": 382.4514269416667,
+   "gap": 0.22800817836008722,
+   "wall": 300.12457370758057
+  }
+ },
+ "mod011": {
+  "case": "mod011",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0215289592743,
+  "taral_line": "status time_limit objective -54009605.9752 best_bound -57958058.871 gap 0.0731 nodes 3392 iterations 498090 prop_crossed 0 wall 300.008s",
+  "taral": {
+   "status": "time_limit",
+   "objective": -54009605.97524958,
+   "best_bound": -57958058.87103146,
+   "gap": 0.07310649327068408,
+   "nodes": 3392,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": -54558535.01422734,
+   "bound": -54558535.01422734,
+   "gap": 0.0,
+   "wall": 104.59912276268005
+  }
+ },
+ "mod010": {
+  "case": "mod010",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 4.687873363494873,
+  "taral_line": "status optimal objective 6548 best_bound 6548 gap 0 nodes 959 iterations 26179 prop_crossed 35 wall 4.681s",
+  "taral": {
+   "status": "optimal",
+   "objective": 6548,
+   "best_bound": 6548,
+   "gap": 0,
+   "nodes": 959,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 6548.0,
+   "bound": 6548.0,
+   "gap": 0.0,
+   "wall": 0.924863338470459
+  }
+ },
+ "p2756": {
+  "case": "p2756",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 231.575670003891,
+  "taral_line": "status node_limit objective 17010 best_bound 2701.75 gap 0.841 nodes 27156 iterations 3296900 prop_crossed 873 wall 231.531s open-node memory cap reached (24220 open nodes, depth 82); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 17010,
+   "best_bound": 2701.75,
+   "gap": 0.8411669606114051,
+   "nodes": 27156,
+   "message": "open-node memory cap reached (24220 open nodes, depth 82); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 3124.0,
+   "bound": 3124.0,
+   "gap": 0.0,
+   "wall": 0.7420797348022461
+  }
+ },
+ "harp2": {
+  "case": "harp2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 8.361388683319092,
+  "taral_line": "status node_limit objective -73633970 best_bound -74192153.8598 gap 0.00758 nodes 5306 iterations 25999 prop_crossed 39 wall 8.338s open-node memory cap reached (5086 open nodes, depth 48); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": -73633970,
+   "best_bound": -74192153.85979745,
+   "gap": 0.007580521052952162,
+   "nodes": 5306,
+   "message": "open-node memory cap reached (5086 open nodes, depth 48); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": -73899747.0,
+   "bound": -73899806.0,
+   "gap": 7.983789173188915e-07,
+   "wall": 46.96156644821167
+  }
+ },
+ "mkc": {
+  "case": "mkc",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 230.81573796272278,
+  "taral_line": "status node_limit objective -470.124 best_bound -611.85 gap 0.301 nodes 5659 iterations 570730 prop_crossed 0 wall 230.772s open-node memory cap reached (5529 open nodes, depth 115); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": -470.1239999999997,
+   "best_bound": -611.8499999999997,
+   "gap": 0.3014651453659037,
+   "nodes": 5659,
+   "message": "open-node memory cap reached (5529 open nodes, depth 115); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": -557.7520000000006,
+   "bound": -570.44,
+   "gap": 0.022748461681893397,
+   "wall": 300.0534248352051
+  }
+ },
+ "misc07": {
+  "case": "misc07",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 152.36500644683838,
+  "taral_line": "status optimal objective 2810 best_bound 2810 gap 3.24e-16 nodes 36160 iterations 530395 prop_crossed 3809 wall 152.357s",
+  "taral": {
+   "status": "optimal",
+   "objective": 2810,
+   "best_bound": 2809.999999999999,
+   "gap": 3.2366359493698516e-16,
+   "nodes": 36160,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 2809.999999999964,
+   "bound": 2809.999999999964,
+   "gap": 0.0,
+   "wall": 44.84923052787781
+  }
+ },
+ "qnet1": {
+  "case": "qnet1",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 56.986103534698486,
+  "taral_line": "status optimal objective 16029.692681 best_bound 16029.692681 gap 0 nodes 4940 iterations 442979 prop_crossed 61 wall 56.979s",
+  "taral": {
+   "status": "optimal",
+   "objective": 16029.692681000002,
+   "best_bound": 16029.692681000002,
+   "gap": 0,
+   "nodes": 4940,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 16029.692681,
+   "bound": 16029.692681,
+   "gap": 0.0,
+   "wall": 1.2054812908172607
+  }
+ },
+ "qnet1_o": {
+  "case": "qnet1_o",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 22.066436290740967,
+  "taral_line": "status optimal objective 16029.692681 best_bound 16029.692681 gap 0 nodes 2938 iterations 231444 prop_crossed 56 wall 22.062s",
+  "taral": {
+   "status": "optimal",
+   "objective": 16029.692681000004,
+   "best_bound": 16029.692681000004,
+   "gap": 0,
+   "nodes": 2938,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 16029.692680999662,
+   "bound": 16029.692680999662,
+   "gap": 0.0,
+   "wall": 1.2092983722686768
+  }
+ },
+ "gesa3": {
+  "case": "gesa3",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0364508628845,
+  "taral_line": "status time_limit objective 28699332.4067 best_bound 27938758.6413 gap 0.0265 nodes 21554 iterations 66555 prop_crossed 0 wall 300.024s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 28699332.406692065,
+   "best_bound": 27938758.6412994,
+   "gap": 0.026501444514971207,
+   "nodes": 21554,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 27991042.648381937,
+   "bound": 27991042.648381937,
+   "gap": 0.0,
+   "wall": 2.9900617599487305
+  }
+ },
+ "gesa3_o": {
+  "case": "gesa3_o",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0397353172302,
+  "taral_line": "status time_limit objective nan best_bound 27978667.043 gap inf nodes 29896 iterations 117238 prop_crossed 0 wall 300.028s",
+  "taral": {
+   "status": "time_limit",
+   "objective": null,
+   "best_bound": 27978667.04297939,
+   "gap": null,
+   "nodes": 29896,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 27991042.64838267,
+   "bound": 27991042.64838267,
+   "gap": 0.0,
+   "wall": 3.119126081466675
+  }
+ },
+ "qiu": {
+  "case": "qiu",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0080280303955,
+  "taral_line": "status time_limit objective -132.873136947 best_bound -146.239244854 gap 0.101 nodes 9134 iterations 938072 prop_crossed 0 wall 300.004s",
+  "taral": {
+   "status": "time_limit",
+   "objective": -132.87313694699972,
+   "best_bound": -146.23924485446545,
+   "gap": 0.10059300333066713,
+   "nodes": 9134,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": -132.87313694700893,
+   "bound": -132.87313694700893,
+   "gap": 0.0,
+   "wall": 117.66123104095459
+  }
+ },
+ "rout": {
+  "case": "rout",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.1142203807831,
+  "taral_line": "status time_limit objective 1121.4 best_bound 1029.54490073 gap 0.0819 nodes 69924 iterations 3462084 prop_crossed 441 wall 300.080s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 1121.3999999999999,
+   "best_bound": 1029.5449007320763,
+   "gap": 0.08191109262343822,
+   "nodes": 69924,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 1077.5599999999943,
+   "bound": 1077.5599999999943,
+   "gap": 0.0,
+   "wall": 47.57160782814026
+  }
+ },
+ "p0282": {
+  "case": "p0282",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 1.6280887126922607,
+  "taral_line": "status optimal objective 258411 best_bound 258411 gap 0 nodes 1642 iterations 7483 prop_crossed 231 wall 1.625s",
+  "taral": {
+   "status": "optimal",
+   "objective": 258411,
+   "best_bound": 258411,
+   "gap": 0,
+   "nodes": 1642,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 258411.0,
+   "bound": 258411.0,
+   "gap": 0.0,
+   "wall": 0.3307771682739258
+  }
+ },
+ "p0201": {
+  "case": "p0201",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 2.7884790897369385,
+  "taral_line": "status optimal objective 7615 best_bound 7615 gap 0 nodes 1323 iterations 23774 prop_crossed 23 wall 2.785s",
+  "taral": {
+   "status": "optimal",
+   "objective": 7615,
+   "best_bound": 7615,
+   "gap": 0,
+   "nodes": 1323,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 7614.999999997075,
+   "bound": 7614.999999997075,
+   "gap": 0.0,
+   "wall": 1.3245375156402588
+  }
+ },
+ "misc03": {
+  "case": "misc03",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 1.6288447380065918,
+  "taral_line": "status optimal objective 3360 best_bound 3360 gap 0 nodes 1052 iterations 14953 prop_crossed 133 wall 1.626s",
+  "taral": {
+   "status": "optimal",
+   "objective": 3360,
+   "best_bound": 3360,
+   "gap": 0,
+   "nodes": 1052,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 3359.9999999999955,
+   "bound": 3359.9999999999955,
+   "gap": 0.0,
+   "wall": 0.7952618598937988
+  }
+ },
+ "blend2": {
+  "case": "blend2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 28.317991733551025,
+  "taral_line": "status optimal objective 7.598985 best_bound 7.598985 gap 0 nodes 8568 iterations 179294 prop_crossed 0 wall 28.313s",
+  "taral": {
+   "status": "optimal",
+   "objective": 7.598985,
+   "best_bound": 7.598985,
+   "gap": 0,
+   "nodes": 8568,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 7.598985,
+   "bound": 7.598985,
+   "gap": 0.0,
+   "wall": 3.6444284915924072
+  }
+ },
+ "mod008": {
+  "case": "mod008",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 0.7146716117858887,
+  "taral_line": "status optimal objective 307 best_bound 307 gap 0 nodes 4931 iterations 17260 prop_crossed 62 wall 0.711s",
+  "taral": {
+   "status": "optimal",
+   "objective": 307,
+   "best_bound": 307,
+   "gap": 0,
+   "nodes": 4931,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 306.99999999999767,
+   "bound": 306.99999999999767,
+   "gap": 0.0,
+   "wall": 1.4226999282836914
+  }
+ },
+ "modglob": {
+  "case": "modglob",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.2566559314728,
+  "taral_line": "status time_limit objective 22347640.8217 best_bound 20643026.8108 gap 0.0763 nodes 176220 iterations 1709751 prop_crossed 0 wall 300.229s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 22347640.821675103,
+   "best_bound": 20643026.81075706,
+   "gap": 0.07627713477767768,
+   "nodes": 176220,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 20740508.08630824,
+   "bound": 20740490.889446802,
+   "gap": 8.291436915089671e-07,
+   "wall": 1.0995259284973145
+  }
+ },
+ "danoint": {
+  "case": "danoint",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.01172494888306,
+  "taral_line": "status time_limit objective 66.5 best_bound 62.890766295 gap 0.0543 nodes 8396 iterations 1365390 prop_crossed 0 wall 300.007s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 66.49999999999999,
+   "best_bound": 62.890766294950566,
+   "gap": 0.05427419105337474,
+   "nodes": 8396,
+   "message": ""
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 65.6666666666652,
+   "bound": 62.875113625453025,
+   "gap": 0.04251096001846037,
+   "wall": 300.04148411750793
+  }
+ },
+ "vpm1": {
+  "case": "vpm1",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.1704216003418,
+  "taral_line": "status time_limit objective 20 best_bound 17.9833333333 gap 0.101 nodes 154764 iterations 2491573 prop_crossed 0 wall 300.147s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 20,
+   "best_bound": 17.983333333333334,
+   "gap": 0.10083333333333329,
+   "nodes": 154764,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 20.0,
+   "bound": 20.0,
+   "gap": 0.0,
+   "wall": 0.04968118667602539
+  }
+ },
+ "noswot": {
+  "case": "noswot",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.09965896606445,
+  "taral_line": "status time_limit objective -5 best_bound -43 gap 7.6 nodes 159042 iterations 4222611 prop_crossed 0 wall 300.072s",
+  "taral": {
+   "status": "time_limit",
+   "objective": -5,
+   "best_bound": -43,
+   "gap": 7.6,
+   "nodes": 159042,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": -41.0,
+   "bound": -41.0,
+   "gap": 0.0,
+   "wall": 143.790274143219
+  }
+ },
+ "gt2": {
+  "case": "gt2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 10.031872987747192,
+  "taral_line": "status optimal objective 21166 best_bound 21166 gap 0 nodes 46367 iterations 251226 prop_crossed 4415 wall 10.016s",
+  "taral": {
+   "status": "optimal",
+   "objective": 21166,
+   "best_bound": 21166,
+   "gap": 0,
+   "nodes": 46367,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 21166.0,
+   "bound": 21166.0,
+   "gap": 0.0,
+   "wall": 0.07604551315307617
+  }
+ },
+ "stein27": {
+  "case": "stein27",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 8.565934181213379,
+  "taral_line": "status optimal objective 18 best_bound 18 gap 1.97e-16 nodes 9602 iterations 51509 prop_crossed 0 wall 8.563s",
+  "taral": {
+   "status": "optimal",
+   "objective": 18,
+   "best_bound": 17.999999999999996,
+   "gap": 1.9737298215558337e-16,
+   "nodes": 9602,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 17.999999999999982,
+   "bound": 17.999999999999982,
+   "gap": 0.0,
+   "wall": 1.17348051071167
+  }
+ },
+ "egout": {
+  "case": "egout",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 33.64727473258972,
+  "taral_line": "status optimal objective 568.1007 best_bound 568.100287218 gap 7.27e-07 nodes 68482 iterations 55523 prop_crossed 0 wall 33.643s",
+  "taral": {
+   "status": "optimal",
+   "objective": 568.1007000000001,
+   "best_bound": 568.1002872180451,
+   "gap": 7.265999760115936e-07,
+   "nodes": 68482,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 568.1007000000001,
+   "bound": 568.1007,
+   "gap": 0.0,
+   "wall": 0.0410771369934082
+  }
+ },
+ "pp08a": {
+  "case": "pp08a",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.348845243454,
+  "taral_line": "status time_limit objective 8290 best_bound 5231.72619048 gap 0.369 nodes 286229 iterations 2369210 prop_crossed 0 wall 300.315s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 8290,
+   "best_bound": 5231.726190476191,
+   "gap": 0.36891119535872247,
+   "nodes": 286229,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 7350.000000000002,
+   "bound": 7350.000000000002,
+   "gap": 0.0,
+   "wall": 2.4241561889648438
+  }
+ },
+ "bell5": {
+  "case": "bell5",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0694959163666,
+  "taral_line": "status time_limit objective 8966406.49152 best_bound 8965948.93801 gap 5.1e-05 nodes 396830 iterations 477730 prop_crossed 4 wall 300.038s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 8966406.491519999,
+   "best_bound": 8965948.938013336,
+   "gap": 5.102975278845561e-05,
+   "nodes": 396830,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 8966406.49152,
+   "bound": 8966406.491519999,
+   "gap": 0.0,
+   "wall": 0.6432750225067139
+  }
+ },
+ "flugpl": {
+  "case": "flugpl",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 0.15784859657287598,
+  "taral_line": "status optimal objective 1201500 best_bound 1201500 gap 0 nodes 2333 iterations 2153 prop_crossed 505 wall 0.155s",
+  "taral": {
+   "status": "optimal",
+   "objective": 1201500,
+   "best_bound": 1201500,
+   "gap": 0,
+   "nodes": 2333,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 1201500.0,
+   "bound": 1201500.0,
+   "gap": 0.0,
+   "wall": 0.17229914665222168
+  }
+ },
+ "markshare1": {
+  "case": "markshare1",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 103.49653267860413,
+  "taral_line": "status node_limit objective 11 best_bound 0 gap 1 nodes 1123209 iterations 4978527 prop_crossed 1828 wall 103.458s open-node memory cap reached (309315 open nodes, depth 37); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 11,
+   "best_bound": 0,
+   "gap": 1,
+   "nodes": 1123209,
+   "message": "open-node memory cap reached (309315 open nodes, depth 37); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 20.999999999999982,
+   "bound": 0.0,
+   "gap": 1.0,
+   "wall": 300.01446199417114
+  }
+ },
+ "air04": {
+  "case": "air04",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0236258506775,
+  "taral_line": "status time_limit objective 56137 best_bound 55965.6038095 gap 0.00305 nodes 566 iterations 190395 prop_crossed 0 wall 300.008s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 56137,
+   "best_bound": 55965.60380945189,
+   "gap": 0.003053176880633306,
+   "nodes": 566,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 56137.0,
+   "bound": 56137.0,
+   "gap": 0.0,
+   "wall": 102.30405950546265
+  }
+ },
+ "fast0507": {
+  "case": "fast0507",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.1858994960785,
+  "taral_line": "status time_limit objective 178 best_bound 172.145566677 gap 0.0329 nodes 172 iterations 116100 prop_crossed 0 wall 300.027s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 178,
+   "best_bound": 172.145566676549,
+   "gap": 0.032890074850848265,
+   "nodes": 172,
+   "message": ""
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 176.0,
+   "bound": 173.0,
+   "gap": 0.017045454545454544,
+   "wall": 300.67843675613403
+  }
+ },
+ "air05": {
+  "case": "air05",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 179.46489429473877,
+  "taral_line": "status optimal objective 26374 best_bound 26374 gap 1.38e-16 nodes 1585 iterations 273391 prop_crossed 15 wall 179.455s",
+  "taral": {
+   "status": "optimal",
+   "objective": 26374,
+   "best_bound": 26373.999999999996,
+   "gap": 1.379380756461558e-16,
+   "nodes": 1585,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 26374.00000000001,
+   "bound": 26374.00000000001,
+   "gap": 0.0,
+   "wall": 63.88217306137085
+  }
+ },
+ "cap6000": {
+  "case": "cap6000",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 43.69476270675659,
+  "taral_line": "status node_limit objective -2451371 best_bound -2451414.4063 gap 1.77e-05 nodes 2674 iterations 7256 prop_crossed 0 wall 43.670s open-node memory cap reached (2034 open nodes, depth 37); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": -2451371,
+   "best_bound": -2451414.4063048935,
+   "gap": 1.7706950475284862e-05,
+   "nodes": 2674,
+   "message": "open-node memory cap reached (2034 open nodes, depth 37); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": -2451377.0,
+   "bound": -2451379.0,
+   "gap": 8.158679795070281e-07,
+   "wall": 6.084742069244385
+  }
+ },
+ "rentacar": {
+  "case": "rentacar",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 200.15041208267212,
+  "taral_line": "status optimal objective 30356760.9841 best_bound 30356760.9841 gap 0 nodes 926 iterations 173039 prop_crossed 0 wall 200.140s",
+  "taral": {
+   "status": "optimal",
+   "objective": 30356760.984148618,
+   "best_bound": 30356760.984148618,
+   "gap": 0,
+   "nodes": 926,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 30356760.984145913,
+   "bound": 30356760.984145913,
+   "gap": 0.0,
+   "wall": 11.977591037750244
+  }
+ },
+ "seymour": {
+  "case": "seymour",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0124695301056,
+  "taral_line": "status time_limit objective 430 best_bound 404.070904649 gap 0.0603 nodes 866 iterations 247830 prop_crossed 0 wall 300.007s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 430,
+   "best_bound": 404.0709046489205,
+   "gap": 0.06030022174669657,
+   "nodes": 866,
+   "message": ""
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 425.99999999999665,
+   "bound": 410.0,
+   "gap": 0.03755868544600194,
+   "wall": 300.04977536201477
+  }
+ },
+ "arki001": {
+  "case": "arki001",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0125222206116,
+  "taral_line": "status time_limit objective nan best_bound 7580041.91178 gap inf nodes 6372 iterations 903417 prop_crossed 0 wall 300.005s",
+  "taral": {
+   "status": "time_limit",
+   "objective": null,
+   "best_bound": 7580041.911777077,
+   "gap": null,
+   "nodes": 6372,
+   "message": ""
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 7581269.68513871,
+   "bound": 7580524.614333912,
+   "gap": 9.82778394308515e-05,
+   "wall": 300.06167101860046
+  }
+ },
+ "l152lav": {
+  "case": "l152lav",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 11.68164610862732,
+  "taral_line": "status optimal objective 4722 best_bound 4722 gap 0 nodes 2434 iterations 68994 prop_crossed 24 wall 11.675s",
+  "taral": {
+   "status": "optimal",
+   "objective": 4722,
+   "best_bound": 4722,
+   "gap": 0,
+   "nodes": 2434,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 4722.0,
+   "bound": 4722.0,
+   "gap": 0.0,
+   "wall": 5.604881525039673
+  }
+ },
+ "dsbmip": {
+  "case": "dsbmip",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 24.490711450576782,
+  "taral_line": "status optimal objective -305.198175009 best_bound -305.198175009 gap 0 nodes 352 iterations 115416 prop_crossed 0 wall 24.487s",
+  "taral": {
+   "status": "optimal",
+   "objective": -305.19817500948244,
+   "best_bound": -305.19817500948244,
+   "gap": 0,
+   "nodes": 352,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": -305.1981750094818,
+   "bound": -305.1981750094818,
+   "gap": 0.0,
+   "wall": 0.9081230163574219
+  }
+ },
+ "10teams": {
+  "case": "10teams",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0325677394867,
+  "taral_line": "status time_limit objective 924 best_bound 917 gap 0.00758 nodes 7416 iterations 1905412 prop_crossed 7 wall 300.007s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 924,
+   "best_bound": 917.0000000000003,
+   "gap": 0.0075757575757572065,
+   "nodes": 7416,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 924.0000000000005,
+   "bound": 924.0000000000005,
+   "gap": 0.0,
+   "wall": 3.43916392326355
+  }
+ },
+ "misc06": {
+  "case": "misc06",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 3.0353221893310547,
+  "taral_line": "status optimal objective 12850.8607374 best_bound 12850.8607374 gap 0 nodes 181 iterations 14219 prop_crossed 0 wall 3.031s",
+  "taral": {
+   "status": "optimal",
+   "objective": 12850.860737382538,
+   "best_bound": 12850.860737382538,
+   "gap": 0,
+   "nodes": 181,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 12850.860737382538,
+   "bound": 12850.860737382538,
+   "gap": 0.0,
+   "wall": 1.1057803630828857
+  }
+ },
+ "gesa2": {
+  "case": "gesa2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0280773639679,
+  "taral_line": "status time_limit objective 26848488.1899 best_bound 25653031.0879 gap 0.0445 nodes 20557 iterations 84967 prop_crossed 0 wall 300.014s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 26848488.189935945,
+   "best_bound": 25653031.087861262,
+   "gap": 0.044526049050418987,
+   "nodes": 20557,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 25779856.371697918,
+   "bound": 25779839.488881566,
+   "gap": 6.548840345939533e-07,
+   "wall": 1.1023657321929932
+  }
+ },
+ "gesa2_o": {
+  "case": "gesa2_o",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.02558732032776,
+  "taral_line": "status time_limit objective 97624053.775 best_bound 25691425.4671 gap 0.737 nodes 28249 iterations 120311 prop_crossed 0 wall 300.015s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 97624053.77503918,
+   "best_bound": 25691425.467107818,
+   "gap": 0.7368330398744752,
+   "nodes": 28249,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 25779856.37169791,
+   "bound": 25779856.336601328,
+   "gap": 1.3613955609085501e-09,
+   "wall": 2.38749623298645
+  }
+ },
+ "fiber": {
+  "case": "fiber",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 187.1134479045868,
+  "taral_line": "status node_limit objective 420106.7 best_bound 215703.874583 gap 0.487 nodes 45247 iterations 545049 prop_crossed 498 wall 187.070s open-node memory cap reached (41447 open nodes, depth 49); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 420106.69999999995,
+   "best_bound": 215703.87458333335,
+   "gap": 0.48654978703426205,
+   "nodes": 45247,
+   "message": "open-node memory cap reached (41447 open nodes, depth 49); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 405935.17999999196,
+   "bound": 405935.1799999919,
+   "gap": 0.0,
+   "wall": 1.8374812602996826
+  }
+ },
+ "khb05250": {
+  "case": "khb05250",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 2.9890639781951904,
+  "taral_line": "status optimal objective 106940226 best_bound 106940226 gap 0 nodes 2354 iterations 19476 prop_crossed 0 wall 2.985s",
+  "taral": {
+   "status": "optimal",
+   "objective": 106940226,
+   "best_bound": 106940226,
+   "gap": 0,
+   "nodes": 2354,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 106940226.0,
+   "bound": 106940226.0,
+   "gap": 0.0,
+   "wall": 0.5487399101257324
+  }
+ },
+ "gen": {
+  "case": "gen",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 6.135589838027954,
+  "taral_line": "status optimal objective 112313.362718 best_bound 112313.362718 gap 1.3e-16 nodes 722 iterations 25742 prop_crossed 0 wall 6.132s",
+  "taral": {
+   "status": "optimal",
+   "objective": 112313.36271799979,
+   "best_bound": 112313.36271799977,
+   "gap": 1.2956530617736286e-16,
+   "nodes": 722,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 112313.362718,
+   "bound": 112313.362718,
+   "gap": 0.0,
+   "wall": 0.047205209732055664
+  }
+ },
+ "fixnet6": {
+  "case": "fixnet6",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.081743478775,
+  "taral_line": "status time_limit objective 12470 best_bound 2236.614 gap 0.821 nodes 93442 iterations 605304 prop_crossed 0 wall 300.064s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 12470,
+   "best_bound": 2236.6139999999996,
+   "gap": 0.8206404170008019,
+   "nodes": 93442,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 3982.999999999776,
+   "bound": 3982.999999999776,
+   "gap": 0.0,
+   "wall": 6.3198082447052
+  }
+ },
+ "p0548": {
+  "case": "p0548",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0564124584198,
+  "taral_line": "status time_limit objective 43944 best_bound 7909.78494567 gap 0.82 nodes 157453 iterations 2846966 prop_crossed 27094 wall 300.037s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 43944,
+   "best_bound": 7909.784945669059,
+   "gap": 0.8200030733281208,
+   "nodes": 157453,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 8691.0,
+   "bound": 8691.0,
+   "gap": 0.0,
+   "wall": 0.14176535606384277
+  }
+ },
+ "dcmulti": {
+  "case": "dcmulti",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 11.159205913543701,
+  "taral_line": "status optimal objective 188182 best_bound 188181.931579 gap 3.64e-07 nodes 3398 iterations 29430 prop_crossed 0 wall 11.156s",
+  "taral": {
+   "status": "optimal",
+   "objective": 188182,
+   "best_bound": 188181.93157894735,
+   "gap": 3.6358978357340853e-07,
+   "nodes": 3398,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 188182.0,
+   "bound": 188182.0,
+   "gap": 0.0,
+   "wall": 2.4491381645202637
+  }
+ },
+ "set1ch": {
+  "case": "set1ch",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.08291506767273,
+  "taral_line": "status time_limit objective 139289.25 best_bound 35320.4761259 gap 0.746 nodes 95650 iterations 242238 prop_crossed 0 wall 300.064s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 139289.25,
+   "best_bound": 35320.47612591343,
+   "gap": 0.7464235314217469,
+   "nodes": 95650,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 54537.75,
+   "bound": 54537.75,
+   "gap": 0.0,
+   "wall": 0.8330931663513184
+  }
+ },
+ "mas74": {
+  "case": "mas74",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 60.3968665599823,
+  "taral_line": "status node_limit objective 11960.0812811 best_bound 11018.513348 gap 0.0787 nodes 136734 iterations 820419 prop_crossed 0 wall 60.360s open-node memory cap reached (116708 open nodes, depth 22); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 11960.081281099998,
+   "best_bound": 11018.513347987788,
+   "gap": 0.07872588078478442,
+   "nodes": 136734,
+   "message": "open-node memory cap reached (116708 open nodes, depth 22); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 11874.763050801475,
+   "bound": 10961.969548214583,
+   "gap": 0.07686835507216995,
+   "wall": 300.02222776412964
+  }
+ },
+ "mas76": {
+  "case": "mas76",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 138.4360156059265,
+  "taral_line": "status optimal objective 40005.054142 best_bound 40005.0150856 gap 9.76e-07 nodes 354825 iterations 2271378 prop_crossed 0 wall 138.396s",
+  "taral": {
+   "status": "optimal",
+   "objective": 40005.054142,
+   "best_bound": 40005.01508563819,
+   "gap": 9.762856881620309e-07,
+   "nodes": 354825,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 40005.054141,
+   "bound": 40005.02338515839,
+   "gap": 7.687988997937214e-07,
+   "wall": 155.56866478919983
+  }
+ },
+ "vpm2": {
+  "case": "vpm2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.1137173175812,
+  "taral_line": "status time_limit objective 15 best_bound 12.3632113821 gap 0.176 nodes 138755 iterations 1488707 prop_crossed 0 wall 300.094s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 15,
+   "best_bound": 12.363211382113823,
+   "gap": 0.17578590785907847,
+   "nodes": 138755,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 13.75,
+   "bound": 13.75,
+   "gap": 0.0,
+   "wall": 2.2699201107025146
+  }
+ },
+ "stein45": {
+  "case": "stein45",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0165731906891,
+  "taral_line": "status time_limit objective 30 best_bound 29.5 gap 0.0167 nodes 85194 iterations 1090850 prop_crossed 0 wall 300.010s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 30,
+   "best_bound": 29.5,
+   "gap": 0.016666666666666666,
+   "nodes": 85194,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 29.999999999999996,
+   "bound": 29.999999999999996,
+   "gap": 0.0,
+   "wall": 46.63544678688049
+  }
+ },
+ "pp08aCUTS": {
+  "case": "pp08aCUTS",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0997190475464,
+  "taral_line": "status time_limit objective 7870 best_bound 6598.87308055 gap 0.162 nodes 118453 iterations 887962 prop_crossed 0 wall 300.084s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 7870,
+   "best_bound": 6598.873080552829,
+   "gap": 0.16151549167054263,
+   "nodes": 118453,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 7349.999999999997,
+   "bound": 7349.999999999997,
+   "gap": 0.0,
+   "wall": 4.050734758377075
+  }
+ },
+ "rgn": {
+  "case": "rgn",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 0.8386967182159424,
+  "taral_line": "status optimal objective 82.19999924 best_bound 82.19999924 gap 1.73e-16 nodes 3211 iterations 21749 prop_crossed 0 wall 0.836s",
+  "taral": {
+   "status": "optimal",
+   "objective": 82.19999923999998,
+   "best_bound": 82.19999923999997,
+   "gap": 1.7288144582228595e-16,
+   "nodes": 3211,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 82.19999923999991,
+   "bound": 82.19999923999991,
+   "gap": 0.0,
+   "wall": 0.5010886192321777
+  }
+ },
+ "bell3a": {
+  "case": "bell3a",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 54.00495004653931,
+  "taral_line": "status optimal objective 878430.316 best_bound 878429.602578 gap 8.12e-07 nodes 48860 iterations 196019 prop_crossed 0 wall 53.996s",
+  "taral": {
+   "status": "optimal",
+   "objective": 878430.3159999999,
+   "best_bound": 878429.6025777782,
+   "gap": 8.121557381606801e-07,
+   "nodes": 48860,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 878430.3159999981,
+   "bound": 878430.3159999981,
+   "gap": 0.0,
+   "wall": 0.7921164035797119
+  }
+ },
+ "lseu": {
+  "case": "lseu",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 3.4508397579193115,
+  "taral_line": "status optimal objective 1120 best_bound 1120 gap 0 nodes 19078 iterations 53806 prop_crossed 3037 wall 3.447s",
+  "taral": {
+   "status": "optimal",
+   "objective": 1120,
+   "best_bound": 1120,
+   "gap": 0,
+   "nodes": 19078,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 1120.0000000000002,
+   "bound": 1120.0000000000002,
+   "gap": 0.0,
+   "wall": 0.44727349281311035
+  }
+ },
+ "pk1": {
+  "case": "pk1",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0471704006195,
+  "taral_line": "status time_limit objective 11 best_bound 10.7018570478 gap 0.0271 nodes 329674 iterations 5700185 prop_crossed 0 wall 300.034s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 11,
+   "best_bound": 10.701857047826838,
+   "gap": 0.027103904743014728,
+   "nodes": 329674,
+   "message": ""
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 14.000000000000094,
+   "bound": 3.4102406130182388,
+   "gap": 0.7564113847844132,
+   "wall": 300.0148642063141
+  }
+ },
+ "enigma": {
+  "case": "enigma",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 0.17450690269470215,
+  "taral_line": "status optimal objective 0 best_bound 0 gap 0 nodes 773 iterations 6276 prop_crossed 195 wall 0.171s",
+  "taral": {
+   "status": "optimal",
+   "objective": 0,
+   "best_bound": 0,
+   "gap": 0,
+   "nodes": 773,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 0.0,
+   "bound": 0.0,
+   "gap": 0.0,
+   "wall": 0.3333592414855957
+  }
+ },
+ "p0033": {
+  "case": "p0033",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 0.05703425407409668,
+  "taral_line": "status optimal objective 3089 best_bound 3089 gap 0 nodes 624 iterations 1462 prop_crossed 106 wall 0.054s",
+  "taral": {
+   "status": "optimal",
+   "objective": 3089,
+   "best_bound": 3089,
+   "gap": 0,
+   "nodes": 624,
+   "message": ""
+  },
+  "highs": {
+   "status": "Optimal",
+   "obj": 3088.999999999999,
+   "bound": 3088.999999999999,
+   "gap": 0.0,
+   "wall": 0.04371762275695801
+  }
+ },
+ "markshare2": {
+  "case": "markshare2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 84.05665302276611,
+  "taral_line": "status node_limit objective 28 best_bound 0 gap 1 nodes 658457 iterations 3581933 prop_crossed 2249 wall 84.017s open-node memory cap reached (251729 open nodes, depth 42); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 28,
+   "best_bound": 0,
+   "gap": 1,
+   "nodes": 658457,
+   "message": "open-node memory cap reached (251729 open nodes, depth 42); search stopped, bound and incumbent are valid"
+  },
+  "highs": {
+   "status": "Time limit reached",
+   "obj": 40.999999999999766,
+   "bound": 0.0,
+   "gap": 1.0,
+   "wall": 300.011346578598
+  }
+ }
+}

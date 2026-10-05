@@ -1,0 +1,152 @@
+[
+ {
+  "case": "nw04",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 43.123066425323486,
+  "taral_line": "status node_limit objective 16862 best_bound 16539 gap 0.0192 nodes 466 iterations 4379 prop_crossed 50 wall 43.056s open-node memory cap reached (142 open nodes, depth 98); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 16862,
+   "best_bound": 16539,
+   "gap": 0.01915549756849721,
+   "nodes": 466,
+   "message": "open-node memory cap reached (142 open nodes, depth 98); search stopped, bound and incumbent are valid"
+  }
+ },
+ {
+  "case": "cap6000",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 43.80553078651428,
+  "taral_line": "status node_limit objective -2451371 best_bound -2451415.50852 gap 1.82e-05 nodes 2492 iterations 6910 prop_crossed 0 wall 43.782s open-node memory cap reached (2034 open nodes, depth 18); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": -2451371,
+   "best_bound": -2451415.5085154977,
+   "gap": 1.8156580745089005e-05,
+   "nodes": 2492,
+   "message": "open-node memory cap reached (2034 open nodes, depth 18); search stopped, bound and incumbent are valid"
+  }
+ },
+ {
+  "case": "swath",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 52.1219367980957,
+  "taral_line": "status node_limit objective nan best_bound 339.010467833 gap inf nodes 3729 iterations 76622 prop_crossed 0 wall 52.093s open-node memory cap reached (3389 open nodes, depth 21); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": null,
+   "best_bound": 339.01046783333334,
+   "gap": null,
+   "nodes": 3729,
+   "message": "open-node memory cap reached (3389 open nodes, depth 21); search stopped, bound and incumbent are valid"
+  }
+ },
+ {
+  "case": "mkc",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 300.0697937011719,
+  "taral_line": "status time_limit objective 0 best_bound -611.85 gap 612 nodes 6297 iterations 840309 prop_crossed 0 wall 300.025s",
+  "taral": {
+   "status": "time_limit",
+   "objective": 0,
+   "best_bound": -611.8499999999997,
+   "gap": 611.8499999999997,
+   "nodes": 6297,
+   "message": ""
+  }
+ },
+ {
+  "case": "harp2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 8.812735319137573,
+  "taral_line": "status node_limit objective -73402201 best_bound -74178957.9974 gap 0.0106 nodes 5524 iterations 25027 prop_crossed 21 wall 8.787s open-node memory cap reached (5442 open nodes, depth 53); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": -73402201,
+   "best_bound": -74178957.99741644,
+   "gap": 0.01058220307884823,
+   "nodes": 5524,
+   "message": "open-node memory cap reached (5442 open nodes, depth 53); search stopped, bound and incumbent are valid"
+  }
+ },
+ {
+  "case": "p2756",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 258.33499217033386,
+  "taral_line": "status node_limit objective 17010 best_bound 2701.75 gap 0.841 nodes 28143 iterations 4025179 prop_crossed 548 wall 258.287s open-node memory cap reached (25523 open nodes, depth 146); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 17010,
+   "best_bound": 2701.75,
+   "gap": 0.8411669606114051,
+   "nodes": 28143,
+   "message": "open-node memory cap reached (25523 open nodes, depth 146); search stopped, bound and incumbent are valid"
+  }
+ },
+ {
+  "case": "mas74",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 54.27508878707886,
+  "taral_line": "status node_limit objective 11801.185729 best_bound 11036.8888548 gap 0.0648 nodes 136065 iterations 834861 prop_crossed 0 wall 54.228s open-node memory cap reached (112195 open nodes, depth 17); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 11801.185728999995,
+   "best_bound": 11036.888854753224,
+   "gap": 0.06476441366129874,
+   "nodes": 136065,
+   "message": "open-node memory cap reached (112195 open nodes, depth 17); search stopped, bound and incumbent are valid"
+  }
+ },
+ {
+  "case": "markshare2",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 76.35662269592285,
+  "taral_line": "status node_limit objective 28 best_bound 0 gap 1 nodes 658457 iterations 3581933 prop_crossed 2249 wall 76.316s open-node memory cap reached (251729 open nodes, depth 42); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 28,
+   "best_bound": 0,
+   "gap": 1,
+   "nodes": 658457,
+   "message": "open-node memory cap reached (251729 open nodes, depth 42); search stopped, bound and incumbent are valid"
+  }
+ },
+ {
+  "case": "fiber",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 176.68896913528442,
+  "taral_line": "status node_limit objective 451606.31 best_bound 212978.588796 gap 0.528 nodes 47540 iterations 572347 prop_crossed 333 wall 176.643s open-node memory cap reached (44196 open nodes, depth 30); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 451606.31000000006,
+   "best_bound": 212978.5887962963,
+   "gap": 0.528397668322446,
+   "nodes": 47540,
+   "message": "open-node memory cap reached (44196 open nodes, depth 30); search stopped, bound and incumbent are valid"
+  }
+ },
+ {
+  "case": "markshare1",
+  "tl": 300,
+  "sha_ok": true,
+  "taral_wall": 96.9269528388977,
+  "taral_line": "status node_limit objective 11 best_bound 0 gap 1 nodes 1123209 iterations 4978527 prop_crossed 1828 wall 96.880s open-node memory cap reached (309315 open nodes, depth 37); search stopped, bound and incumbent are valid",
+  "taral": {
+   "status": "node_limit",
+   "objective": 11,
+   "best_bound": 0,
+   "gap": 1,
+   "nodes": 1123209,
+   "message": "open-node memory cap reached (309315 open nodes, depth 37); search stopped, bound and incumbent are valid"
+  }
+ }
+]
