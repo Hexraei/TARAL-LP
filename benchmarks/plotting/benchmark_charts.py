@@ -17,7 +17,9 @@ plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 11, 'text.color'
 def save(fig, name):
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / (name + '.png'), dpi=180)
-    fig.savefig(OUT / (name + '.svg'))
+    svg = OUT / (name + '.svg')
+    fig.savefig(svg)
+    svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines()) + '\n')
     plt.close(fig)
 
 def netlib():
