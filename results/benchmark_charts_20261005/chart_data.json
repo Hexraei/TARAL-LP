@@ -1,0 +1,59 @@
+{
+  "netlib_dual93": {
+    "s0": 90,
+    "s5": 91,
+    "denominator": 93,
+    "reference_exclusions": [
+      "pilot.we",
+      "pilot4"
+    ]
+  },
+  "qp138": {
+    "pass_vs_highs": 87,
+    "reader_artifact_on_reference_side": 1,
+    "matched_clarabel_second_reference": 32,
+    "unresolved": 3,
+    "out_of_class_nonconvex": 1,
+    "numerical_failure": 11,
+    "time_limit_current_implementation_times_out": 3
+  },
+  "miplib3_65": {
+    "baseline": 28,
+    "opt_in_gains": [
+      "cap6000",
+      "nw04"
+    ],
+    "accepted": 30,
+    "unproven_matches": [
+      "10teams",
+      "air04",
+      "bell5",
+      "qiu",
+      "stein45",
+      "vpm1"
+    ],
+    "denominator": 65
+  },
+  "r2_miqp1032": {
+    "accepted": 1032,
+    "denominator": 1032,
+    "stages": {
+      "A": 700,
+      "B": 200,
+      "C": 100,
+      "D": 32
+    },
+    "prototype_only": true
+  },
+  "input_sha256": {
+    "clarabel_second_reference_raw.jsonl": "245ae6ef29224cba06db8dd37478f36eac434a52c11f31ccb3363aa31bb34c6e",
+    "miplib3_base65.json": "da59540354d4ac4324f17a7fe1a528858f25c881955fc5786efa477ad6c0687b",
+    "miplib3_compact10.json": "6fc58a179d20796a12f5faefdc1172f8932b30b254ce0b8dad7db7b0b52bc446",
+    "miplib3_persistent10.json": "cfd8f37fa3f05f422125a04887e480c1194813804585341545ede23118edc22b",
+    "miplib3_persistent27.json": "8cec0632c18fee14b899acd8c0a095464c4730a76520b0515d49a50b7a0eb306",
+    "netlib93_dual_s0_ledger.csv": "c3d0769e6884039f3f7c3fa4d82ef0255eabdc9bde9411a5a4076d6ff15fe376",
+    "netlib93_dual_s5_ledger.csv": "c9812af7ddc7344bdeb0733e7df2223f67a4065c9a5c81d1fb0498c48cf359b2",
+    "qp_138_verified_ledger.csv": "213a37280a04835cc78a4226d8ce1817b5835bea9016dea94f0356cb0abb926a",
+    "r2_convex_miqp_1032_ledger.csv": "8b634e8ba140b49c957ec3e421f49b6364ad7d0d1ecf1e5e510b6875aa8327f4"
+  }
+}
