@@ -77,7 +77,6 @@ bash reproduction/reproduce.sh
 This builds the CPU engine, verifies the fixed benchmark files and runs the default 60s validation plus the additional TRUSS case, not the headline protocol that includes PILOT.WE and PILOT4. Counts can vary with host speed. [Reproduction details](reproduction/README_REPRO.md) · [Build and smoke checks](benchmarks/SMOKE.md) · [API](src/taral.hpp)
 
 ## Team
-
 **Team IRIZ_**
 
 <p>
