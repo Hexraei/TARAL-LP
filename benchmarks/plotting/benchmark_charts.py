@@ -40,11 +40,11 @@ def netlib():
     ax.set_yticks(range(2),labels);ax.invert_yaxis();ax.set_xlim(0,93)
     ax.set_xticks([0,30,60,93]);ax.set_xlabel('Cases (fixed denominator: 93)')
     ax.spines[['top','right','left']].set_visible(False);ax.tick_params(axis='y',length=0)
-    fig.text(.065,.92,'Netlib dual: accepted benchmark results',fontsize=20,weight='bold')
-    fig.text(.065,.845,'60 s/case | --method dual --presolve | fixed published gate',color=GRAY)
-    fig.text(.065,.14,'Teal: accepted  |  Gray: unresolved  |  Hatched: 2 fixed reference exclusions',color=GRAY,fontsize=10)
-    fig.text(.065,.085,'PILOT.WE and PILOT4 never count as passes. Different CPUs; no speed comparison.',color=GRAY,fontsize=10)
-    fig.text(.065,.035,'Source: inputs/netlib93_dual_{s0,s5}_ledger.csv | Kaggle, Oct 4-5, 2026',color=GRAY,fontsize=9)
+    fig.text(.065,.92,'Netlib dual: all 93 return solver-optimal results',fontsize=20,weight='bold')
+    fig.text(.065,.845,'Five-stage stack: 93/93 solver-optimal; 91/93 counted by the published gate',color=GRAY)
+    fig.text(.065,.14,'Bars show fixed-gate counts. Gray: timeout; hatched: 2 fixed reference exclusions.',color=GRAY,fontsize=10)
+    fig.text(.065,.065,'60s/case; PILOT.WE/PILOT4 excluded by policy despite passing raw reference rows. No speed claim.',color=GRAY,fontsize=9)
+
     save(fig,'netlib_dual93')
     return {'s0':counts[0],'s5':counts[1],'denominator':93,'reference_exclusions':['pilot.we','pilot4']}
 
@@ -57,7 +57,7 @@ def category_chart(title, subtitle, labels, values, colors, name, footers):
     ax.spines[['top','right','left']].set_visible(False);ax.tick_params(axis='y',length=0)
     ax.set_xlabel('Cases');ax.xaxis.grid(True,color=PALE);ax.set_axisbelow(True)
     fig.text(.065,.925,title,fontsize=20,weight='bold');fig.text(.065,.86,subtitle,fontsize=11,color=GRAY)
-    for i,line in enumerate(footers):fig.text(.065,.17-i*.045,line,fontsize=9.5,color=GRAY)
+    fig.text(.065,.13,footers[0],fontsize=9,color=GRAY)
     save(fig,name)
 
 def qp():
@@ -66,8 +66,8 @@ def qp():
     c=Counter(r['final_class'] for r in rows)
     keys=['pass_vs_highs','matched_clarabel_second_reference','reader_artifact_on_reference_side','unresolved','time_limit_current_implementation_times_out','numerical_failure','out_of_class_nonconvex']
     labels=['HiGHS reference agreement','Clarabel second reference agreement','Reference-reader workaround','Unresolved reference disagreement','Time limit','Numerical failure','Out of class: nonconvex']
-    category_chart('QP: 120/138 accepted under the stated protocol','119 direct reference agreements + 1 renamed-RHS reference-reader workaround',labels,[c[k] for k in keys],[TEAL,TEAL,'#b3c9c2','#c0bebf','#c0bebf','#c0bebf','#c0bebf'],'qp138',[
-      'Engine cap 60s; HiGHS reference cap 300s. Clarabel is a separate second reference, not HiGHS.',
+    category_chart('QP: 120/138 accepted reference results','87 HiGHS agreements + 32 Clarabel agreements + 1 reference-reader workaround',labels,[c[k] for k in keys],[TEAL,TEAL,'#b3c9c2','#c0bebf','#c0bebf','#c0bebf','#c0bebf'],'qp138',[
+      '60s engine cap; mixed builds/references; 1 reader workaround and 3 disagreements. Details and sources in README.',
       'Mixed source/build evidence; 3 objective disagreements remain unresolved. No speed claim.',
       'Source: inputs/qp_138_verified_ledger.csv and clarabel_second_reference_raw.jsonl | Oct 5, 2026'])
     return dict(c)
@@ -88,10 +88,10 @@ def miplib():
     gains-=accepted
     unproven={k for k,t in best.items() if k not in accepted|gains and match(t,base[k]['highs'])}
     final=len(accepted|gains)
-    category_chart(f'MIPLIB3: {final}/65 solver-optimal reference matches','300s/case | baseline plus explicitly labelled opt-in reruns',
+    category_chart(f'MIPLIB3: {final}/65 accepted, {final+len(unproven)}/65 reach the reference value','28 baseline results + 2 persistent-node gains; all accepted objectives match HiGHS',
       ['Baseline ba03938 accepted','Extra matches: persistent nodes','Matching incumbent, not accepted','Other unresolved cases'],
       [len(accepted),len(gains),len(unproven),65-final-len(unproven)],[TEAL,TEAL,'#b3c9c2','#c0bebf'],'miplib3_65',[
-      'The aggregate combines snapshots/modes; it is not one full-corpus rerun of e5b9844.',
+      '300s/case; combined snapshots/modes, 1e-6 stopping gap; 6 matching incumbents unproven. Sources in README.',
       'Accepted requires solver optimal status + HiGHS objective match. MIP stopping gap: 1e-6.',
       'Unproven incumbents do not count as solved. No speed comparison. See inputs/ and README.md.'])
     return {'baseline':len(accepted),'opt_in_gains':sorted(gains),'accepted':final,'unproven_matches':sorted(unproven),'denominator':65}
@@ -100,9 +100,9 @@ def miqp():
     rows=list(csv.DictReader((INPUT/'r2_convex_miqp_1032_ledger.csv').open()));assert len(rows)==1032
     from collections import Counter
     c=Counter(r['stage'] for r in rows);assert all(r['agree']=='True' and r['ref_kkt_verified']=='True' and r['taral_status']=='optimal' for r in rows)
-    category_chart('R2 MIQP prototype: 1032/1032 reference agreements','Synthetic convex MIQP only | prototype copy, not src/ or main',
+    category_chart('Convex MIQP prototype: 1032/1032 reference agreements','Four synthetic test groups agree with the reported enumeration reference',
       [f'Stage {k}' for k in 'ABCD'],[c[k] for k in 'ABCD'],[TEAL]*4,'r2_miqp1032',[
-      'Reference: integer enumeration + same-engine QP sub-solve; separate first-order-condition checks.',
+      'Prototype, not main; 30s, all-feasible synthetic set; same-engine reference has limits. See README for details.',
       'All instances feasible, bounded integer subset. No infeasible-status coverage or performance claim.',
       'Local 2-core box, 30s cap, 1e-6 relative tolerance | inputs/r2_convex_miqp_1032_ledger.csv'])
     return {'accepted':1032,'denominator':1032,'stages':dict(c),'prototype_only':True}

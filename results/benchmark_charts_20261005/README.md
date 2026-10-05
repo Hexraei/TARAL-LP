@@ -1,12 +1,21 @@
 # Benchmark charts, October 5, 2026
 
+## Measured highlights
+
+- Netlib dual: **93/93 solver-optimal results** on the five-stage stack; **91/93 counted** by the fixed published gate.
+- QP: **120/138 accepted reference results**, including separate HiGHS and Clarabel checks.
+- MIPLIB3: **30/65 solver-optimal reference matches; 36/65 reach the reference value**, including six unproven incumbents.
+- Convex MIQP prototype: **1032/1032 reported reference agreements** across four synthetic test groups. Prototype only, not main.
+
+*These are separate protocols/snapshots, not one combined score. The detailed limits and sources below remain part of every claim.*
+
 These charts are derived from the pinned ledgers in `inputs/`. They are measurements of the named snapshots, not claims about the latest main source. Different sets, reference rules, CPUs and caps must not be pooled into one score. No speed comparison is made.
 
 ## Netlib dual, 93 cases
 
 ![Netlib dual](netlib_dual93.png)
 
-Published fixed gate: s0 90/93, s5 91/93. PILOT.WE and PILOT4 remain in denominator 93 but never count as passes under the fixed reference-exclusion rule, even though their raw CSV rows say pass. PILOT.JA is capped at 60s.
+The five-stage stack returns optimal on all 93 rows; all 93 raw reference rows also show Optimal/pass. Published fixed gate: s0 90/93, s5 91/93. PILOT.WE and PILOT4 remain in denominator 93 but never count as passes under the fixed historical reference-exclusion rule, even though their raw CSV rows say pass. Their exclusion does not mean HiGHS failed on these saved runs and is not a universal rule for other teams. PILOT.JA is capped at 60s.
 
 - s0: pristine 692dac0d2efc2fa4db5ccdadb3baba01e85c207e, src tree 5ea2d36d5a2fdd6742388c742b5f9f1a31971cd8, notebook0bb4ac385a, Intel Xeon 2.20GHz.
 - s5: five stages (parity, grid, ej, compact nodes, persistent nodes), src tree b33a90782b9068e76df770eb3f88adbe07ef8753, notebooka70e789986, AMD EPYC 7B12. Tree identity binds the result, not an inferred commit ancestry.
