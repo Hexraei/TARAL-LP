@@ -159,6 +159,8 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
     // Final certificate must verify on the FULL model with the original column bounds.
     Result check = cert;
     check.status = Status::Infeasible;
+    // No deadline is passed here: this verification (and any repair LP in it) is bounded only by the repair's own caps
+    // (20 s per call, 60 s per thread), not by the explanation budget.
     bool ok = verify_nonoptimal_certificate(m, m.col_lo, m.col_up, check);
     e.certificate_verified = ok;
     e.certificate_margin = check.certificate_margin;

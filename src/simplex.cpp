@@ -229,7 +229,9 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             res.farkas_col_lower.assign(n_, 0); res.farkas_col_upper.assign(n_, 0);
             if (j < n_) res.farkas_col_lower[j] = res.farkas_col_upper[j] = 0.5;
             else res.farkas_row_lower[j-n_] = res.farkas_row_upper[j-n_] = 0.5;
-            verify_nonoptimal_certificate(md_, clo_, cup_, res);
+            // deadline_ is not yet initialized on this early inconsistent-bounds path, so this call effectively has no solver deadline;
+            // only the repair's own caps (20 s per call, 60 s per thread) apply.
+            verify_nonoptimal_certificate(md_, clo_, cup_, res, deadline_);
             return res;
         }
     const auto start = SparseLU::Clock::now();
@@ -391,7 +393,7 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
                                     &res.farkas_col_lower, &res.farkas_col_upper})
                         for (double& a : *v) a /= norm;
                 }
-                verify_nonoptimal_certificate(md_, clo_, cup_, res);
+                verify_nonoptimal_certificate(md_, clo_, cup_, res, deadline_);
                 return res;
             }
             res.status = Status::Optimal;
@@ -448,7 +450,7 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             double norm = 0;
             for (double v : res.ray) norm = std::max(norm, std::abs(v));
             if (norm > 0) for (double& v : res.ray) v /= norm;
-            verify_nonoptimal_certificate(md_, clo_, cup_, res);
+            verify_nonoptimal_certificate(md_, clo_, cup_, res, deadline_);
             return res;
         }
         ++res.iterations;

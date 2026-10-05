@@ -147,8 +147,12 @@ const char* status_name(Status s);
 
 // Recomputes proof validity from model coefficients, not solver basis/pricing state.
 // Invalid/missing/nonfinite proofs become NumericalFailure, never a proved status.
+// `deadline` caps the time limit of the optional repair LP only (auxiliary solve_lp). StrictCtx construction, the local
+// repair pass (work-counter bounded), auxiliary model construction and the column-count skip are NOT clock-bounded.
+// Default: no solver deadline; the repair then uses only its own caps (20 s per call, 60 s per thread).
 bool verify_nonoptimal_certificate(const Model&, const std::vector<double>&,
-                                  const std::vector<double>&, Result&);
+                                  const std::vector<double>&, Result&,
+                                  std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max());
 const char* status_name(Status s);
 
 // KKT-gated LP solve (src/kkt_gate.cpp): Optimal only when an independent check on the original model agrees,
