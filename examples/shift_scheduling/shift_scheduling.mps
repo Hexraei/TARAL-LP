@@ -1,0 +1,136 @@
+NAME          SHIFT_SCHED
+OBJSENSE
+ MINIMIZE
+ROWS
+ N  COST
+ G  DEM0
+ G  DEM1
+ G  DEM2
+ G  DEM3
+ G  DEM4
+ G  DEM5
+ G  DEM6
+ G  DEM7
+ G  DEM8
+ G  DEM9
+ G  DEM10
+ G  DEM11
+ G  DEM12
+ G  DEM13
+ G  DEM14
+ G  DEM15
+ G  DEM16
+ G  DEM17
+ G  DEM18
+ G  DEM19
+ G  DEM20
+ G  DEM21
+ G  DEM22
+ G  DEM23
+COLUMNS
+    MARKER                 'MARKER'                 'INTORG'
+    x0 DEM0 1.0
+    x0 DEM1 1.0
+    x0 DEM2 1.0
+    x0 DEM3 1.0
+    x0 DEM4 1.0
+    x0 DEM5 1.0
+    x0 DEM6 1.0
+    x0 DEM7 1.0
+    x0 COST 60.0
+    x4 DEM4 1.0
+    x4 DEM5 1.0
+    x4 DEM6 1.0
+    x4 DEM7 1.0
+    x4 DEM8 1.0
+    x4 DEM9 1.0
+    x4 DEM10 1.0
+    x4 DEM11 1.0
+    x4 COST 60.0
+    x6 DEM6 1.0
+    x6 DEM7 1.0
+    x6 DEM8 1.0
+    x6 DEM9 1.0
+    x6 DEM10 1.0
+    x6 DEM11 1.0
+    x6 DEM12 1.0
+    x6 DEM13 1.0
+    x6 COST 60.0
+    x8 DEM8 1.0
+    x8 DEM9 1.0
+    x8 DEM10 1.0
+    x8 DEM11 1.0
+    x8 DEM12 1.0
+    x8 DEM13 1.0
+    x8 DEM14 1.0
+    x8 DEM15 1.0
+    x8 COST 70.0
+    x10 DEM10 1.0
+    x10 DEM11 1.0
+    x10 DEM12 1.0
+    x10 DEM13 1.0
+    x10 DEM14 1.0
+    x10 DEM15 1.0
+    x10 DEM16 1.0
+    x10 DEM17 1.0
+    x10 COST 70.0
+    x14 DEM14 1.0
+    x14 DEM15 1.0
+    x14 DEM16 1.0
+    x14 DEM17 1.0
+    x14 DEM18 1.0
+    x14 DEM19 1.0
+    x14 DEM20 1.0
+    x14 DEM21 1.0
+    x14 COST 80.0
+    x16 DEM16 1.0
+    x16 DEM17 1.0
+    x16 DEM18 1.0
+    x16 DEM19 1.0
+    x16 DEM20 1.0
+    x16 DEM21 1.0
+    x16 DEM22 1.0
+    x16 DEM23 1.0
+    x16 COST 60.0
+    MARKER                 'MARKER'                 'INTEND'
+RHS
+    RHS DEM0 4
+    RHS DEM1 3
+    RHS DEM2 2
+    RHS DEM3 2
+    RHS DEM4 2
+    RHS DEM5 3
+    RHS DEM6 4
+    RHS DEM7 6
+    RHS DEM8 8
+    RHS DEM9 9
+    RHS DEM10 9
+    RHS DEM11 8
+    RHS DEM12 8
+    RHS DEM13 7
+    RHS DEM14 6
+    RHS DEM15 6
+    RHS DEM16 7
+    RHS DEM17 8
+    RHS DEM18 9
+    RHS DEM19 8
+    RHS DEM20 7
+    RHS DEM21 6
+    RHS DEM22 5
+    RHS DEM23 4
+BOUNDS
+ UI BND x0 20
+ LI BND x0 0
+ UI BND x4 20
+ LI BND x4 0
+ UI BND x6 20
+ LI BND x6 0
+ UI BND x8 20
+ LI BND x8 0
+ UI BND x10 20
+ LI BND x10 0
+ UI BND x14 20
+ LI BND x14 0
+ UI BND x16 20
+ LI BND x16 0
+ENDATA

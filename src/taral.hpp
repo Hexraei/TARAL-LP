@@ -28,6 +28,7 @@ struct Model {
     std::vector<double> cost, col_lo, col_up, row_lo, row_up;
     double obj_const = 0;   // minus the RHS given on the objective row
     bool maximize = false;  // OBJSENSE MAX
+    size_t sentinel_bounds = 0;  // finite |bound| >= 1e20 read as infinity by the parser (row or column)
     std::vector<char> is_int;   // MARKER INTORG..INTEND columns and BV/LI/UI bounds
     std::vector<QEntry> qobj;   // QUADOBJ / QMATRIX / QSECTION on the objective row
     bool has_integers() const;
@@ -124,6 +125,11 @@ struct MilpResult {
     // {nodes, LP infeasible, LP feasible, LP other, integer-empty by plain B&B, integer-feasible (a bug),
     //  undecided, justified by the incumbent cutoff only, reduced-cost fixings checked, fixings found wrong}
     std::array<long, 10> audit{};
+    bool persistent_nodes_used = false;
+    long peak_trail_records=0,peak_trail_nodes=0;
+    bool compact_nodes_used = false;
+    long peak_open_nodes = 0, peak_open_changes = 0, max_depth = 0;
+    std::string structural_certificate; // JSON proof, independently replayable from original model
     long rc_fixed = 0, rc_skipped = 0;  // reduced-cost fixing: bounds tightened, bases not trusted
     std::string message;
 };
@@ -131,6 +137,9 @@ struct MilpResult {
 std::vector<char> basis_from_point(const Model& model, const std::vector<double>& x,
                                 const std::vector<double>& row_duals, double tol, int* interior);
 struct MilpOptions {
+    bool persistent_nodes = false; // opt-in shared domain trails (implies compact scheduling)
+    bool compact_nodes = false; // opt-in canonical intervals and bounded dive scheduling
+    bool integer_structure = false; // opt-in exact structural proofs; unsupported inputs unchanged
     bool audit_prop = false;  // --audit-prop: re-check every node whose propagated integer domain came out empty
     bool no_prop_prune = false;  // --no-prop-prune: do not prune such a node directly; the LP decides
 };
@@ -139,8 +148,12 @@ const char* status_name(Status s);
 
 // Recomputes proof validity from model coefficients, not solver basis/pricing state.
 // Invalid/missing/nonfinite proofs become NumericalFailure, never a proved status.
+// `deadline` caps the time limit of the optional repair LP only (auxiliary solve_lp). StrictCtx construction, the local
+// repair pass (work-counter bounded), auxiliary model construction and the column-count skip are NOT clock-bounded.
+// Default: no solver deadline; the repair then uses only its own caps (20 s per call, 60 s per thread).
 bool verify_nonoptimal_certificate(const Model&, const std::vector<double>&,
-                                  const std::vector<double>&, Result&);
+                                  const std::vector<double>&, Result&,
+                                  std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max());
 const char* status_name(Status s);
 
 // KKT-gated LP solve (src/kkt_gate.cpp): Optimal only when an independent check on the original model agrees,
@@ -170,13 +183,22 @@ struct InfeasibilityExplanation {
     std::vector<double> farkas_row_lower, farkas_row_upper, farkas_col_lower, farkas_col_upper;  // full model
     bool certificate_verified = false;
     double certificate_margin = 0, certificate_residual = 0;
-    // Minimum weighted L1 side relaxation of ALL rows, column bounds retained.
+    // Weighted L1 side relaxation of ALL rows, column bounds retained (reporting-only, not claimed minimal).
     std::string relaxation_status = "not_run", relaxation_quality;
     double relaxation_objective = 0, relaxation_gap = 0, relaxation_violation = 0;
+    double relaxation_scale = 0, relaxation_gap_abs_unscaled = 0;  // elastic costs were multiplied by relaxation_scale (a power of two)
     std::vector<double> relaxation_x, relax_lower, relax_upper, relax_weight;
     long lp_solves = 0;
     double wall_s = 0;
 };
+// Label exported as relaxation.certificate_quality (of the SCALED elastic LP): the solver's own label when one was produced
+// (unverified_point keeps it, with a null objective); "not_run" when the elastic LP was not attempted; "not_available" when it was
+// attempted but produced no label (a non-optimal solve).
+inline const char* relaxation_quality_label(const InfeasibilityExplanation& e) {
+    if (!e.relaxation_quality.empty()) return e.relaxation_quality.c_str();
+    if (e.relaxation_status.rfind("not_run", 0) == 0 || e.relaxation_status == "not_applicable_column_bounds_inconsistent") return "not_run";
+    return "not_available";
+}
 // The budget covers every phase (root test, deletion filter, elastic solve). The last argument is a test hook
 // that adds simulated elapsed time after the deletion phase; production callers leave it at 0.
 InfeasibilityExplanation explain_infeasibility(const Model& model, double time_limit_s, double test_elapsed_after_deletion_s = 0);

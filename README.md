@@ -2,7 +2,7 @@
 
 [Official website](https://taral-lp.vercel.app/) · [Canonical Kaggle notebook](https://www.kaggle.com/code/hexraei/taral-lp-prototype-and-measured-benchmarks)
 
-[![C++17 core](docs/assets/badge-cpp.svg)](src/) [![Netlib measured 93/93](docs/assets/badge-netlib.svg)](results/netlib_postmerge_58f77af/) [![MIPLIB 40 measured](docs/assets/badge-miplib.svg)](results/miplib_widening_20261003/) [![QPLIB 19 measured](docs/assets/badge-qplib.svg)](results/qplib_widening_20261003/) [![Website](docs/assets/badge-website.svg)](https://taral-lp.vercel.app/) [![Kaggle notebook](docs/assets/badge-kaggle.svg)](https://www.kaggle.com/code/hexraei/taral-lp-prototype-and-measured-benchmarks) [![Proprietary license](docs/assets/badge-license.svg)](LICENSE)
+[![C++17 core](docs/assets/badge-cpp.svg)](src/) [![Netlib measured 93/93](docs/assets/badge-netlib.svg)](results/netlib_postmerge_58f77af/) [![MIPLIB 40 measured](docs/assets/badge-miplib.svg)](results/miplib_widening_20261003/) [![QPLIB 19 measured](docs/assets/badge-qplib.svg)](results/qplib_widening_20261003/) [![Website](docs/assets/badge-website.svg)](https://taral-lp.vercel.app/) [![Kaggle notebook](docs/assets/badge-kaggle.svg)](https://www.kaggle.com/code/hexraei/taral-lp-prototype-and-measured-benchmarks) [![Proprietary license](docs/assets/badge-license.svg)](LICENSE) 
 
 TARAL-LP is a from-scratch C++17 solver core for sparse industrial optimization: CPU linear programming (LP), mixed-integer linear programming (MILP) and convex quadratic programming (QP), with an approximate CUDA primal-dual hybrid gradient (PDHG) method for large continuous LPs. The evaluated CPU engine uses only the C++ standard library; HiGHS, SciPy and NumPy belong to benchmark tools, not the optimization engine. Experimental, not a production replacement for established solvers.
 
@@ -29,14 +29,14 @@ Checked means **measured in the linked scope**, not complete industrial coverage
 - [x] **R14 - Established-solver comparison:** measured [HiGHS objective and feasibility checks](results/netlib_postmerge_58f77af/); no general speed claim.
 - [x] **R15 - Challenging large models:** measured [historical large-model stress](results/adversarial_4517277/tests2_methods_dual_full.csv); weak-relaxation industrial coverage remains incomplete.
 - [x] **R16 - Inspectable, extensible foundation:** [documented module layout, independent checks and measured API use](docs/foundation.md); proprietary evaluation access only, broader extension validation remains.
-- [ ] **R17 - Representative applications:** measured [published production and transportation LPs](examples/literature_lp/) alongside [refinery examples](examples/); mixed-integer scheduling, dispatch and broader application evidence remain planned.
+- [x] **R17 - Representative applications:** measured published production and transportation LPs, refinery examples, and mixed-integer unit-commitment dispatch and shift scheduling solved to proven optimality with reference agreement; broader application evidence remains.
 
 </details>
 
 ## What the evidence shows
 
 - **CPU solution validation:** [93/93 Netlib passes](results/netlib_postmerge_58f77af/) using both primal and dual simplex; 92/93 meet the tighter check, with GREENBEA the only case outside the tighter tolerance.
-- **Large approximate LPs:** [rail4284](results/gpu_pdhg/t4_industrial_20261003/ledger.csv), with 1,092,610 decision variables, reports an approximate answer (`near_optimal`) at 1e-4 in 143.4s on a shared T4. Not an exact optimum certificate.
+- **Large approximate LPs, not verified optimal solves:** [rail4284](results/gpu_pdhg/t4_industrial_20261003/ledger.csv), with 1,092,610 decision variables, stopped as `near_optimal` at tolerance 1e-4 in 143 s on a T4, with original-row violation **1.2e-3**. A later K=1 row-feasible run (violation under 1e-6) stopped as `near_optimal` in 2677 s on a T4. These figures come from the archived run-log transcript; the raw logs are no longer available. Objective about 1054.06 is PDHG's own value, not an independently verified optimum. No independent reference objective exists: HiGHS hit its 600 s cap, and the CPU simplex engine timed out at 300 s.
 - **Failures stay visible:** [historical per-case stress results](results/adversarial_4517277/) retain objective failures, cases with no verified answer and reference disagreements alongside passes.
 
 ## Benchmarks
@@ -44,7 +44,7 @@ Checked means **measured in the linked scope**, not complete industrial coverage
 | Measurement | Result | Evidence |
 | --- | --- | --- |
 | CPU Netlib, primal + dual | **93/93 each**, 92/93 at the tighter 1e-8 check, no wrong answers; evaluated source snapshot `58f77af` | [Primal](results/netlib_postmerge_58f77af/primal_ledger.csv), [dual](results/netlib_postmerge_58f77af/dual_ledger.csv) |
-| T4 PDHG, rail2586 / rail4284 | Approximate answer (`near_optimal`) at stopping tolerance 1e-4: **110.4s / 143.4s**; both hit the 300s cap at 1e-6 | [Per-case results and test conditions](results/gpu_pdhg/t4_industrial_20261003/) |
+| T4 PDHG, rail2586 / rail4284 | **Approximate, not verified optimal solves.** At stopping tolerance 1e-4: rail2586 110.4 s (original-row violation 9.7e-4); rail4284 143 s (original-row violation **1.2e-3**). Both original 1e-6 runs hit the 300 s cap. A later rail4284 K=1 row-feasible `near_optimal` run (violation under 1e-6) took 2677 s on a T4. Later-run figures are from the archived run-log transcript, not retained raw logs; no independent reference objective for rail4284. | [Per-case results and test conditions for the original runs](results/gpu_pdhg/t4_industrial_20261003/) |
 | T4 PDHG, PDS-100 | Approximate answer (`near_optimal`) at stopping tolerance 1e-4 in **8.7s**, but objective error **7.72e-4** and violation of the original constraints **1.02** | [CSV](results/gpu_pdhg/t4_industrial_20261003/ledger.csv) |
 | MIPLIB, 40 measured cases | **6 objective + 7 infeasibility matches**; 26 time limits, 1 run without a machine-readable result, zero rows labeled wrong | [CSV and limits](results/miplib_widening_20261003/) |
 | QPLIB, 19 measured candidates | **5 objective matches + 1 locally verified better point; 6 feasible engine-reported optima** where HiGHS had no optimal reference; [investigated discrepancies/limits](docs/limitations.md#qplib-measurements) | [Per-case results and test conditions](results/qplib_widening_20261003/) |
@@ -77,7 +77,6 @@ bash reproduction/reproduce.sh
 This builds the CPU engine, verifies the fixed benchmark files and runs the default 60s validation plus the additional TRUSS case, not the headline protocol that includes PILOT.WE and PILOT4. Counts can vary with host speed. [Reproduction details](reproduction/README_REPRO.md) · [Build and smoke checks](benchmarks/SMOKE.md) · [API](src/taral.hpp)
 
 ## Team
-
 **Team IRIZ_**
 
 <p>
@@ -93,4 +92,4 @@ This builds the CPU engine, verifies the fixed benchmark files and runs the defa
 
 [Limitations, unsupported models and numerical caveats](docs/limitations.md) · [Detailed results](docs/measured-results.md) · [License](LICENSE)
 
-Proprietary submission. Access is restricted to official competition judges and organizers for evaluation. This README does not change repository visibility or grant reuse rights.
+Proprietary submission. Access is restricted to official competition judges and organizers for evaluation. This README does not change repository visibility or grant reuse rights. 

@@ -308,7 +308,9 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
     int shifts = 0;
     double best_obj = -kInf;  // dual objective (c'x of the current basic solution) at refactorizations
     long progress_at = 0;
+    long refreshes = 0;  // refactorizations so far (a storm of them means the row/column computations disagree every iteration)
     auto refresh = [&]() {
+        ++refreshes;
         if (!factor()) return false;
         compute_dual();
         repair_dual(true);
@@ -327,6 +329,11 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
         }
         if (work_budget().cap && work_budget().used >= work_budget().cap) {  // --work-limit: deterministic stop (denied entries are not counted)
             message = "work limit";
+            keep_basis();
+            return Outcome::Fallback;
+        }
+        if (refreshes > 200 + iterations / 30) {  // refactor storm: hand over to the primal long before the stall bound
+            message = "dual refactorization storm";
             keep_basis();
             return Outcome::Fallback;
         }

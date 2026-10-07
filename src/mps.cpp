@@ -345,10 +345,10 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
     // The solvers branch on isinf(), so a sentinel left finite would be pivoted to as a real bound.
     for (std::vector<double>* lo : {&md.col_lo, &md.row_lo})
         for (double& v : *lo)
-            if (v <= -kHugeBound) v = -kInf;
+            if (v <= -kHugeBound) { if (std::isfinite(v)) ++md.sentinel_bounds; v = -kInf; }
     for (std::vector<double>* up : {&md.col_up, &md.row_up})
         for (double& v : *up)
-            if (v >= kHugeBound) v = kInf;
+            if (v >= kHugeBound) { if (std::isfinite(v)) ++md.sentinel_bounds; v = kInf; }
     return md;
 }
 

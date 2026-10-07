@@ -1,0 +1,20 @@
+{
+ "model": {
+  "hours": 24,
+  "shift_starts": 7,
+  "rows": 25,
+  "cols": 7
+ },
+ "taral": {
+  "status": "optimal",
+  "objective": 1380,
+  "nodes": 1,
+  "wall_s": 0.000396
+ },
+ "highs": {
+  "status": "kOptimal",
+  "objective": 1380.0
+ },
+ "rel_diff": 0.0,
+ "agree_1e-6": true
+}

@@ -1,0 +1,20 @@
+{
+ "model": {
+  "generators": 4,
+  "periods": 12,
+  "rows": 108,
+  "cols": 144
+ },
+ "taral": {
+  "status": "optimal",
+  "objective": 34420,
+  "nodes": 64,
+  "wall_s": 0.02917
+ },
+ "highs": {
+  "status": "kOptimal",
+  "objective": 34420.0
+ },
+ "rel_diff": 0.0,
+ "agree_1e-6": true
+}

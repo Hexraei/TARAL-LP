@@ -159,6 +159,8 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
     // Final certificate must verify on the FULL model with the original column bounds.
     Result check = cert;
     check.status = Status::Infeasible;
+    // No deadline is passed here: this verification (and any repair LP in it) is bounded only by the repair's own caps
+    // (20 s per call, 60 s per thread), not by the explanation budget.
     bool ok = verify_nonoptimal_certificate(m, m.col_lo, m.col_up, check);
     e.certificate_verified = ok;
     e.certificate_margin = check.certificate_margin;
@@ -218,13 +220,27 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
             }
         }
         r.is_int.assign(r.cols.size(), 0);
+        // Objective scale: every elastic cost is multiplied by the same exact power of two s, so relative weights and the
+        // set of optimal points are unchanged and the division below is exact. Without it the smallest weights (about
+        // 3e-8) sit within a factor of ~30 of the solvers' absolute 1e-9 reduced-cost tolerance and the simplex can stop
+        // early. k = max(ceil(log2(1/min positive weight)), 20), capped at 30.
+        double wmin = kInf;
+        for (size_t i = 0; i < nrows; ++i)
+            if (lower_col[i] >= 0 || upper_col[i] >= 0) wmin = std::min(wmin, weight[i]);
+        // 1/wmin can overflow (a huge finite row bound gives a denormal weight); the double result is clamped before the int cast
+        const double lg = std::isfinite(wmin) ? std::log2(1.0 / wmin) : 20.0;
+        const int kexp = std::isfinite(lg) ? int(std::min(30.0, std::max(20.0, std::ceil(lg)))) : 30;  // inf -> 30; NaN -> 30
+        const double scale = std::ldexp(1.0, kexp);
+        for (size_t j = ncols; j < r.cols.size(); ++j) r.cost[j] *= scale;
+        e.relaxation_scale = scale;  // set whenever the scaled LP is attempted (0 = never attempted)
         ++solves;
         Result rr = solve_lp_gated(r, r.col_lo, r.col_up, nullptr, left(), false, true);
         if (rr.status == Status::Optimal && rr.x.size() == r.cols.size()) {
             e.relaxation_status = "optimal";
-            e.relaxation_objective = rr.objective;
-            e.relaxation_gap = rr.gap;
-            e.relaxation_quality = rr.certificate_quality;
+            e.relaxation_objective = rr.objective / scale;  // exact: scale is a power of two; reporting-only, not claimed minimal
+            e.relaxation_gap = rr.gap;                      // relative gap of the SCALED model, as the solver computed it
+            e.relaxation_gap_abs_unscaled = std::abs(rr.objective - rr.dual_objective) / scale;
+            e.relaxation_quality = rr.certificate_quality;  // label of the SCALED model's strict 1e-8 KKT check
             e.relaxation_x.assign(rr.x.begin(), rr.x.begin() + ncols);
             e.relax_lower.assign(nrows, 0.0);
             e.relax_upper.assign(nrows, 0.0);
