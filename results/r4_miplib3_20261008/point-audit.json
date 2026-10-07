@@ -1,0 +1,961 @@
+[
+  {
+    "case": "10teams",
+    "status": "time_limit",
+    "objective": 924,
+    "best_bound": 917.0000000000003,
+    "check": [
+      0.0,
+      924.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 924.0000000000005,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "air03",
+    "status": "optimal",
+    "objective": 340160,
+    "best_bound": 340160,
+    "check": [
+      0.0,
+      340160.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 340160.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "air04",
+    "status": "time_limit",
+    "objective": 56137,
+    "best_bound": 55999.245131086165,
+    "check": [
+      0.0,
+      56137.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 56137.00000000005,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "air05",
+    "status": "optimal",
+    "objective": 26374,
+    "best_bound": 26373.999999999996,
+    "check": [
+      0.0,
+      26374.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 26374.00000000001,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "arki001",
+    "status": "time_limit",
+    "objective": null,
+    "best_bound": 7580020.939064365,
+    "check": null,
+    "reference_status": "kTimeLimit",
+    "reference_objective": 7581469.604844547,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "bell3a",
+    "status": "optimal",
+    "objective": 878430.3159999999,
+    "best_bound": 878429.6025777782,
+    "check": [
+      0.0,
+      878430.3160000001,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 878430.3159999857,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "bell5",
+    "status": "optimal",
+    "objective": 8966406.491519999,
+    "best_bound": 8966397.547406135,
+    "check": [
+      0.0,
+      8966406.49152,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 8966406.49152,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "blend2",
+    "status": "optimal",
+    "objective": 7.598985,
+    "best_bound": 7.598985,
+    "check": [
+      0.0,
+      7.598984999999999,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 7.598985,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "cap6000",
+    "status": "node_limit",
+    "objective": -2451371,
+    "best_bound": -2451414.4063048935,
+    "check": [
+      0.0,
+      -2451371.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": -2451279.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "dano3mip",
+    "status": "time_limit",
+    "objective": 747.3333333333345,
+    "best_bound": 576.2708742890959,
+    "check": [
+      3.954855947295907e-11,
+      747.3333333333345,
+      1
+    ],
+    "reference_status": "kTimeLimit",
+    "reference_objective": 737.3333333333336,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "danoint",
+    "status": "time_limit",
+    "objective": 66.49999999999999,
+    "best_bound": 62.860346660107574,
+    "check": [
+      4.014566457044566e-13,
+      66.49999999999999,
+      1
+    ],
+    "reference_status": "kTimeLimit",
+    "reference_objective": 65.66666666666629,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "dcmulti",
+    "status": "optimal",
+    "objective": 188182,
+    "best_bound": 188181.93157894735,
+    "check": [
+      0.0,
+      188182.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 188182.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "dsbmip",
+    "status": "optimal",
+    "objective": -305.19817500948244,
+    "best_bound": -305.19817500948244,
+    "check": [
+      8.681420482117104e-10,
+      -305.19817500948244,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": -305.1981750094818,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "egout",
+    "status": "optimal",
+    "objective": 568.1007000000001,
+    "best_bound": 568.1002872180451,
+    "check": [
+      7.105427357601002e-15,
+      568.1006999999998,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 568.1007000000001,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "enigma",
+    "status": "optimal",
+    "objective": 0,
+    "best_bound": 0,
+    "check": [
+      0.0,
+      0.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 0.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "fast0507",
+    "status": "time_limit",
+    "objective": 178,
+    "best_bound": 172.145566676549,
+    "check": [
+      0.0,
+      178.0,
+      1
+    ],
+    "reference_status": "kTimeLimit",
+    "reference_objective": 175.00000000000003,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "fiber",
+    "status": "node_limit",
+    "objective": 420106.69999999995,
+    "best_bound": 215703.87458333335,
+    "check": [
+      0.0,
+      420106.69999999995,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 405935.17999999196,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "fixnet6",
+    "status": "time_limit",
+    "objective": 12470,
+    "best_bound": 2265.554,
+    "check": [
+      0.0,
+      12470.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 3983.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "flugpl",
+    "status": "optimal",
+    "objective": 1201500,
+    "best_bound": 1201500,
+    "check": [
+      0.0,
+      1201500.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 1201500.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "gen",
+    "status": "optimal",
+    "objective": 112313.36271799979,
+    "best_bound": 112313.36271799977,
+    "check": [
+      1.1102230246251565e-16,
+      112313.362718,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 112313.362718,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "gesa2",
+    "status": "time_limit",
+    "objective": 26848488.189935945,
+    "best_bound": 25669746.66621796,
+    "check": [
+      1.874782943958048e-16,
+      26848488.189935975,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 25779856.371697918,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "gesa2_o",
+    "status": "time_limit",
+    "objective": 97624053.77503918,
+    "best_bound": 25689390.396204997,
+    "check": [
+      2.842170943040401e-14,
+      97624053.77503905,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 25779856.371697918,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "gesa3",
+    "status": "time_limit",
+    "objective": 28341553.252439726,
+    "best_bound": 27944581.774037965,
+    "check": [
+      7.105427357601002e-15,
+      28341553.252439737,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 27991042.648381937,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "gesa3_o",
+    "status": "time_limit",
+    "objective": null,
+    "best_bound": 27975796.7699038,
+    "check": null,
+    "reference_status": "kOptimal",
+    "reference_objective": 27991042.64838267,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "gt2",
+    "status": "optimal",
+    "objective": 21166,
+    "best_bound": 21166,
+    "check": [
+      0.0,
+      21166.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 21166.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "harp2",
+    "status": "node_limit",
+    "objective": -73633970,
+    "best_bound": -74192153.85979745,
+    "check": [
+      0.0,
+      -73633970.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": -73899553.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "khb05250",
+    "status": "optimal",
+    "objective": 106940226,
+    "best_bound": 106940226,
+    "check": [
+      0.0,
+      106940226.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 106940226.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "l152lav",
+    "status": "optimal",
+    "objective": 4722,
+    "best_bound": 4722,
+    "check": [
+      0.0,
+      4722.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 4722.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "lseu",
+    "status": "optimal",
+    "objective": 1120,
+    "best_bound": 1120,
+    "check": [
+      0.0,
+      1120.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 1120.0000000000002,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "markshare1",
+    "status": "node_limit",
+    "objective": 11,
+    "best_bound": 0,
+    "check": [
+      0.0,
+      11.0,
+      1
+    ],
+    "reference_status": "kTimeLimit",
+    "reference_objective": 20.999999999999982,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "markshare2",
+    "status": "node_limit",
+    "objective": 28,
+    "best_bound": 0,
+    "check": [
+      0.0,
+      28.0,
+      1
+    ],
+    "reference_status": "kTimeLimit",
+    "reference_objective": 39.99999999999992,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "mas74",
+    "status": "node_limit",
+    "objective": 11960.081281099998,
+    "best_bound": 11018.513347987788,
+    "check": [
+      0.0,
+      11960.081281099998,
+      1
+    ],
+    "reference_status": "kTimeLimit",
+    "reference_objective": 12014.892379099589,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "mas76",
+    "status": "optimal",
+    "objective": 40005.054142,
+    "best_bound": 40005.01508563819,
+    "check": [
+      0.0,
+      40005.054142,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 40005.054141,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "misc03",
+    "status": "optimal",
+    "objective": 3360,
+    "best_bound": 3360,
+    "check": [
+      0.0,
+      3360.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 3359.9999999999955,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "misc06",
+    "status": "optimal",
+    "objective": 12850.860737382538,
+    "best_bound": 12850.860737382538,
+    "check": [
+      6.394884621840902e-13,
+      12850.860737382538,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 12851.076291564139,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "misc07",
+    "status": "optimal",
+    "objective": 2810,
+    "best_bound": 2809.999999999999,
+    "check": [
+      0.0,
+      2810.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 2809.999999999964,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "mitre",
+    "status": "time_limit",
+    "objective": null,
+    "best_bound": 114818.26539325215,
+    "check": null,
+    "reference_status": "kOptimal",
+    "reference_objective": 115155.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "mkc",
+    "status": "node_limit",
+    "objective": -470.1239999999997,
+    "best_bound": -611.8499999999997,
+    "check": [
+      1.1368683772161603e-13,
+      -470.12399999999997,
+      1
+    ],
+    "reference_status": "kTimeLimit",
+    "reference_objective": -557.4060000000026,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "mod008",
+    "status": "optimal",
+    "objective": 307,
+    "best_bound": 307,
+    "check": [
+      0.0,
+      307.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 306.99999999999767,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "mod010",
+    "status": "optimal",
+    "objective": 6548,
+    "best_bound": 6548,
+    "check": [
+      0.0,
+      6548.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 6548.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "mod011",
+    "status": "time_limit",
+    "objective": -54009605.97524958,
+    "best_bound": -57884222.547310226,
+    "check": [
+      2.1827872842550278e-11,
+      -54009605.97524944,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": -54558535.01422733,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "modglob",
+    "status": "time_limit",
+    "objective": 22347640.821675103,
+    "best_bound": 20640967.68297484,
+    "check": [
+      1.0231815394945443e-12,
+      22347640.8216751,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 20740508.08630824,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "noswot",
+    "status": "time_limit",
+    "objective": -5,
+    "best_bound": -43,
+    "check": [
+      0.0,
+      -5.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": -41.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "nw04",
+    "status": "node_limit",
+    "objective": 16862,
+    "best_bound": 16532.666666666664,
+    "check": [
+      0.0,
+      16862.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 16862.000000000004,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "p0033",
+    "status": "optimal",
+    "objective": 3089,
+    "best_bound": 3089,
+    "check": [
+      0.0,
+      3089.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 3088.999999999999,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "p0201",
+    "status": "optimal",
+    "objective": 7615,
+    "best_bound": 7615,
+    "check": [
+      0.0,
+      7615.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 7614.999999997075,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "p0282",
+    "status": "optimal",
+    "objective": 258411,
+    "best_bound": 258411,
+    "check": [
+      0.0,
+      258411.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 258411.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "p0548",
+    "status": "time_limit",
+    "objective": 43944,
+    "best_bound": 8234.773599714987,
+    "check": [
+      0.0,
+      43944.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 8691.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "p2756",
+    "status": "node_limit",
+    "objective": 16996,
+    "best_bound": 2701.75,
+    "check": [
+      0.0,
+      16996.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 3124.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "pk1",
+    "status": "optimal",
+    "objective": 11,
+    "best_bound": 10.999995713347687,
+    "check": [
+      0.0,
+      11.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 10.999998999999997,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "pp08a",
+    "status": "time_limit",
+    "objective": 8290,
+    "best_bound": 5204.226190476191,
+    "check": [
+      0.0,
+      8290.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 7350.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "pp08aCUTS",
+    "status": "time_limit",
+    "objective": 7870,
+    "best_bound": 6566.94674108814,
+    "check": [
+      0.0,
+      7870.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 7349.999999999994,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "qiu",
+    "status": "time_limit",
+    "objective": -132.87313694699972,
+    "best_bound": -148.71408095590164,
+    "check": [
+      1.0150610510858574e-15,
+      -132.87313694699984,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": -132.87313694702365,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "qnet1",
+    "status": "optimal",
+    "objective": 16029.692681000004,
+    "best_bound": 16029.692681000004,
+    "check": [
+      3.410605131648481e-13,
+      16029.692681,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 16029.692681,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "qnet1_o",
+    "status": "optimal",
+    "objective": 16029.692681000004,
+    "best_bound": 16029.692681000004,
+    "check": [
+      3.511825750836449e-14,
+      16029.692681,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 16029.692680999662,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "rentacar",
+    "status": "optimal",
+    "objective": 30356760.984148618,
+    "best_bound": 30356760.984148618,
+    "check": [
+      1.4901161193847656e-08,
+      30356760.98414863,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 30356760.984145913,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "rgn",
+    "status": "optimal",
+    "objective": 82.19999923999998,
+    "best_bound": 82.19999923999997,
+    "check": [
+      0.0,
+      82.19999923999998,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 82.19999923999991,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "rout",
+    "status": "time_limit",
+    "objective": 1121.3999999999999,
+    "best_bound": 1027.225150020551,
+    "check": [
+      0.0,
+      1121.3999999999999,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 1077.56,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "set1ch",
+    "status": "time_limit",
+    "objective": 139289.25,
+    "best_bound": 35263.57431665009,
+    "check": [
+      0.0,
+      139289.25,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 54537.75,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "seymour",
+    "status": "time_limit",
+    "objective": 430,
+    "best_bound": 404.0709046489206,
+    "check": [
+      0.0,
+      430.0,
+      1
+    ],
+    "reference_status": "kTimeLimit",
+    "reference_objective": 425.99999999999665,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "stein27",
+    "status": "optimal",
+    "objective": 18,
+    "best_bound": 17.999999999999996,
+    "check": [
+      0.0,
+      18.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 17.999999999999982,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "stein45",
+    "status": "optimal",
+    "objective": 30,
+    "best_bound": 29.999999999999986,
+    "check": [
+      0.0,
+      30.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 29.999999999999996,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "swath",
+    "status": "node_limit",
+    "objective": null,
+    "best_bound": 338.2045045500001,
+    "check": null,
+    "reference_status": "kTimeLimit",
+    "reference_objective": 496.002356,
+    "point_pass": true,
+    "bound_pass": null
+  },
+  {
+    "case": "vpm1",
+    "status": "time_limit",
+    "objective": 20,
+    "best_bound": 18.055555555555554,
+    "check": [
+      0.0,
+      20.0,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 20.0,
+    "point_pass": true,
+    "bound_pass": true
+  },
+  {
+    "case": "vpm2",
+    "status": "time_limit",
+    "objective": 14.5,
+    "best_bound": 12.374925118637009,
+    "check": [
+      0.0,
+      14.5,
+      1
+    ],
+    "reference_status": "kOptimal",
+    "reference_objective": 13.75,
+    "point_pass": true,
+    "bound_pass": true
+  }
+]

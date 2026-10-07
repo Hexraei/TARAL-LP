@@ -1,0 +1,20 @@
+[
+  {
+    "gap_option": null,
+    "status": "Optimal",
+    "objective": 12851.076291564139,
+    "dual_bound": 12850.130241708353,
+    "mip_gap": 7.361639090155813e-05,
+    "highs_version": "1.15.1",
+    "sha": "4787c15a414b4d07d14400a52be6f1fd3789b87488c645657fa934d8781be454"
+  },
+  {
+    "gap_option": 0.0,
+    "status": "Optimal",
+    "objective": 12850.860737382538,
+    "dual_bound": 12850.860737382538,
+    "mip_gap": 0.0,
+    "highs_version": "1.15.1",
+    "sha": "4787c15a414b4d07d14400a52be6f1fd3789b87488c645657fa934d8781be454"
+  }
+]
