@@ -14,10 +14,10 @@ Checked means **measured in the linked scope**, not complete industrial coverage
 <summary>17 requirements, each mapped to evidence or implementation</summary>
 
 - [x] **R1 - LP, MILP and QP:** measured [Netlib](results/netlib_postmerge_58f77af/), [selected MIPLIB](benchmarks/results/miplib_ledger.csv) and [QP measurements](results/qplib_widening_20261003/); limits remain.
-- [ ] **R2 - Future solver classes:** prototype [module boundaries](src/taral.hpp); mixed-integer quadratic, nonlinear and mixed-integer nonlinear programming not started.
+- [x] **R2 - Future solver classes:** non-shipping [convex MIQP experiment](experiments/r2_miqp/) (diagonal convex Q, minimization); [original measured package](results/r2_miqp_20261008/SUMMARY.md): 1000/1000 seeded random and 32/32 structured cases agree with exhaustive-enumeration/SLSQP reference within 1e-6 relative (max 5.4e-07). Separate review fix prevents false optimal claims on unresolved subtrees; those paths were not covered by the original corpus. No presolve, warm starts or cuts; nonlinear/MINLP not started.
 - [x] **R3 - Continuous methods:** measured [simplex, dual and interior-point paths](results/adversarial_4517277/); historical source snapshot, not a universal pass.
 - [ ] **R4 - Mixed-integer search:** prototype [branch and bound with propagation](src/milp.cpp); full cutting-plane, presolve and heuristic coverage planned.
-- [ ] **R5 - Sparse algebra:** prototype [own sparse factorization](src/); [34-instance scaling profile](results/r5_factorization_20261003/r5_summary.md) measured, broader scalability work remains.
+- [x] **R5 - Sparse algebra:** prototype [own sparse factorization](src/); [34-instance scaling profile](results/r5_factorization_20261003/r5_summary.md) measured: fill ratio ~1.0 on network/PDS structure, mean refactorization about 1 microsecond per row, 21/34 solved optimal all matching HiGHS within 1e-6 relative, 13/34 timed out at the 300 s cap (HiGHS finished all of them); broader scalability work remains.
 - [ ] **R6 - Multi-core solve:** planned; evaluated CPU engine is single-threaded.
 - [x] **R7 - GPU method:** measured [approximate PDHG on T4](results/gpu_pdhg/t4_industrial_20261003/); no exact-solver speed advantage claimed.
 - [x] **R8 - Numerical checks:** measured [Netlib checks against the original constraints](results/netlib_postmerge_58f77af/); broader reliable convergence remains unverified.
