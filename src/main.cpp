@@ -630,6 +630,12 @@ int main(int argc, char** argv) {
     }
     const std::vector<char>* wp = warm.empty() ? nullptr : &warm;
     Result r = solve_lp_gated(md, md.col_lo, md.col_up, wp, limit - wall(), method == "dual", fallback);
+    if (md.sentinel_bounds > 0 && (r.status == Status::Infeasible || r.status == Status::Unbounded)) {
+        // The parser reads |bound| >= 1e20 as infinity; a literal-bounds checker does not. The certificate
+        // is a proof only for the infinity reading, so it is not claimed verified against the file as written.
+        r.certificate_verified = false;
+        r.message += (r.message.empty() ? "" : "; ") + std::string("[sentinel_bounds_read_as_infinite=") + std::to_string(md.sentinel_bounds) + "] certificate holds only for the 1e20-is-infinity reading";
+    }
     if (r.status == Status::Optimal && !std::isfinite(r.objective))
         r.status = Status::NumericalFailure, r.message = "non-finite objective";
     if (work_limit) {  // deterministic report: hash covers status, iterations, objective and x bits only

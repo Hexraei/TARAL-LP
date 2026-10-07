@@ -2,7 +2,25 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <vector>
 #include "taral.hpp"
+
+
+// Exact (Shewchuk) summation of doubles, mirroring the strict checker's math.fsum.
+struct ExactSum {
+    std::vector<double> p;
+    void add(double x) {
+        size_t i = 0;
+        for (double y : p) {
+            if (std::abs(x) < std::abs(y)) std::swap(x, y);
+            double hi = x + y, lo = y - (hi - x);
+            if (lo != 0) p[i++] = lo;
+            x = hi;
+        }
+        p.resize(i); p.push_back(x);
+    }
+    double value() const { double s = 0; for (size_t i = p.size(); i-- > 0;) s += p[i]; return s; }
+};
 
 static bool verify_impl(const Model& md, const std::vector<double>& lo,
                         const std::vector<double>& up, Result& r) {
@@ -158,29 +176,30 @@ static bool verify_impl(const Model& md, const std::vector<double>& lo,
     } else if (r.status == Status::Unbounded && ok) {
         ok = vector_ok(r.x, n, false) && vector_ok(r.ray, n, false);
         if (ok) {
-            std::vector<long double> act(m, 0), direction(m, 0);
-            long double slope = 0, cnorm = 0;
+            std::vector<ExactSum> act(m), direction(m);
+            ExactSum slope_s, cnorm_s;
             double norm = 0;
-            auto check = [&](long double x, long double d, double l, double u) {
+            auto check = [&](double x, double d, double l, double u) {
                 if (std::isfinite(l)) {
-                    residual = std::max(residual, (double)std::max((long double)0, (l-x)/(1+std::abs(l))));
-                    residual = std::max(residual, (double)std::max((long double)0, -d));
+                    residual = std::max(residual, std::max(0.0, (l-x)/(1+std::abs(l))));
+                    residual = std::max(residual, std::max(0.0, -d));
                 }
                 if (std::isfinite(u)) {
-                    residual = std::max(residual, (double)std::max((long double)0, (x-u)/(1+std::abs(u))));
-                    residual = std::max(residual, (double)std::max((long double)0, d));
+                    residual = std::max(residual, std::max(0.0, (x-u)/(1+std::abs(u))));
+                    residual = std::max(residual, std::max(0.0, d));
                 }
             };
             for (size_t j = 0; j < n; ++j) {
                 norm = std::max(norm, std::abs(r.ray[j]));
-                slope += (long double)md.cost[j]*r.ray[j]; cnorm += std::abs(md.cost[j]);
+                slope_s.add(md.cost[j]*r.ray[j]); cnorm_s.add(std::abs(md.cost[j]));
                 check(r.x[j], r.ray[j], lo[j], up[j]);
                 for (const Entry& e : md.cols[j]) {
-                    act[e.index] += (long double)e.value*r.x[j];
-                    direction[e.index] += (long double)e.value*r.ray[j];
+                    act[e.index].add(e.value*r.x[j]);
+                    direction[e.index].add(e.value*r.ray[j]);
                 }
             }
-            for (size_t i = 0; i < m; ++i) check(act[i], direction[i], md.row_lo[i], md.row_up[i]);
+            for (size_t i = 0; i < m; ++i) check(act[i].value(), direction[i].value(), md.row_lo[i], md.row_up[i]);
+            long double slope = slope_s.value(), cnorm = cnorm_s.value();
             margin = (double)((md.maximize ? slope : -slope)/(1+cnorm));
             ok = residual <= tol && std::abs(norm-1) <= tol && margin > tol;
         }
@@ -398,7 +417,7 @@ struct ResolveScope {
 // lies in a small window whose sign matches a finite needed bound, free columns are exactly 0, sum v = 1 and
 // the bound contradiction keeps at least half of the original. Strict acceptance is decided afterwards by the
 // strict port and the internal verifier, never by this routine.
-static bool lp_resolve_farkas(StrictCtx& C, Result& r, bool relax, double time_s) {
+static bool lp_resolve_farkas(StrictCtx& C, Result& r, bool /*relax*/, double time_s) {
     const size_t n = C.n, m = C.m; const double INF = std::numeric_limits<double>::infinity();
     const size_t N = 2 * m + 2 * n;
     if (N == 0 || 3 * N + n > kResolveMaxCols || !(time_s > 0)) return false;

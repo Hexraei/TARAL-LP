@@ -28,6 +28,7 @@ struct Model {
     std::vector<double> cost, col_lo, col_up, row_lo, row_up;
     double obj_const = 0;   // minus the RHS given on the objective row
     bool maximize = false;  // OBJSENSE MAX
+    size_t sentinel_bounds = 0;  // finite |bound| >= 1e20 read as infinity by the parser (row or column)
     std::vector<char> is_int;   // MARKER INTORG..INTEND columns and BV/LI/UI bounds
     std::vector<QEntry> qobj;   // QUADOBJ / QMATRIX / QSECTION on the objective row
     bool has_integers() const;

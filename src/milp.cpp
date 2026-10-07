@@ -151,7 +151,7 @@ struct Node {
     int depth = 0;    // number of branchings from the root
     std::vector<int> seeds;  // columns whose bounds changed since the parent was propagated
     int splits = 0;  // bisections in a row on this path (the node's LP failed, so its integer box was halved)
-    std::shared_ptr<const DomainTrail> trail;
+    std::shared_ptr<const DomainTrail> trail = nullptr;
 };
 
 struct Worse {  // priority_queue keeps the smallest bound on top; deeper first on ties
