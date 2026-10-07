@@ -29,7 +29,7 @@ Checked means **measured in the linked scope**, not complete industrial coverage
 - [x] **R14 - Established-solver comparison:** measured [HiGHS objective and feasibility checks](results/netlib_postmerge_58f77af/); no general speed claim.
 - [x] **R15 - Challenging large models:** measured [historical large-model stress](results/adversarial_4517277/tests2_methods_dual_full.csv); weak-relaxation industrial coverage remains incomplete.
 - [x] **R16 - Inspectable, extensible foundation:** [documented module layout, independent checks and measured API use](docs/foundation.md); proprietary evaluation access only, broader extension validation remains.
-- [ ] **R17 - Representative applications:** measured [published production and transportation LPs](examples/literature_lp/) alongside [refinery examples](examples/); mixed-integer scheduling, dispatch and broader application evidence remain planned.
+- [x] **R17 - Representative applications:** measured published production and transportation LPs, refinery examples, and mixed-integer unit-commitment dispatch and shift scheduling solved to proven optimality with reference agreement; broader application evidence remains.
 
 </details>
 
