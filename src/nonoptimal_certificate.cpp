@@ -9,11 +9,14 @@
 // Exact (Shewchuk) summation of doubles, mirroring the strict checker's math.fsum.
 struct ExactSum {
     std::vector<double> p;
+    bool finite = true;  // false once any addend or partial sum overflows (Inf/NaN)
     void add(double x) {
+        if (!std::isfinite(x)) { finite = false; return; }
         size_t i = 0;
         for (double y : p) {
             if (std::abs(x) < std::abs(y)) std::swap(x, y);
             double hi = x + y, lo = y - (hi - x);
+            if (!std::isfinite(hi) || !std::isfinite(lo)) finite = false;
             if (lo != 0) p[i++] = lo;
             x = hi;
         }
@@ -198,10 +201,20 @@ static bool verify_impl(const Model& md, const std::vector<double>& lo,
                     direction[e.index].add(e.value*r.ray[j]);
                 }
             }
-            for (size_t i = 0; i < m; ++i) check(act[i].value(), direction[i].value(), md.row_lo[i], md.row_up[i]);
+            // Non-finite accumulation (overflowed products/sums) can turn a row activity or
+            // direction into NaN, which std::max would silently drop from the residual: reject.
+            bool sums_finite = slope_s.finite && cnorm_s.finite;
+            for (size_t i = 0; i < m; ++i) {
+                double av = act[i].value(), dv = direction[i].value();
+                if (!act[i].finite || !direction[i].finite || !std::isfinite(av) || !std::isfinite(dv)) {
+                    sums_finite = false;
+                    continue;
+                }
+                check(av, dv, md.row_lo[i], md.row_up[i]);
+            }
             long double slope = slope_s.value(), cnorm = cnorm_s.value();
             margin = (double)((md.maximize ? slope : -slope)/(1+cnorm));
-            ok = residual <= tol && std::abs(norm-1) <= tol && margin > tol;
+            ok = sums_finite && residual <= tol && std::abs(norm-1) <= tol && margin > tol;
         }
     } else ok = false;
     ok = ok && std::isfinite(residual) && std::isfinite(margin);
