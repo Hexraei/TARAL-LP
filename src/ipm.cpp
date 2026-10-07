@@ -1104,6 +1104,24 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     RunOut ro;
     if (P.N > 0) {
         ro = run_ipm(P, opt, deadline, accept);
+        // A stalled iterate may be limited by the retained dual regularization. Retry in a
+        // different row scale, with the same deadline and original-model acceptance test.
+        if (ro.status == IpmStatus::NumericalFailure && Clock::now() < deadline) {
+            constexpr double row_scale = 16384;
+            for (double& r : R) r *= row_scale;
+            for (double& a : P.Ax) a *= row_scale;
+            for (double& b : P.b) b *= row_scale;
+            for (size_t ss = 0; ss < slack_row.size(); ++ss) {
+                int j = nk + static_cast<int>(ss);
+                P.l[j] *= row_scale;
+                P.u[j] *= row_scale;
+                // The new slack variable is scaled with the row, so its coefficient stays -1.
+                for (int pp = P.Ap[j]; pp < P.Ap[j + 1]; ++pp) P.Ax[pp] /= row_scale;
+            }
+            RunOut retry = run_ipm(P, opt, deadline, accept);
+            if (retry.status == IpmStatus::Optimal) ro = std::move(retry);
+            else for (double& r : R) r /= row_scale;
+        }
     } else {
         ro.status = IpmStatus::Optimal;
     }
