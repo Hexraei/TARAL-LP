@@ -19,8 +19,8 @@ pass; the other ten have no proven reference.
 
 "Optimal" here uses TARAL's numerical gap tolerance, not gap exactly zero:
 bell3a, bell5, dcmulti, egout, mas76 and pk1 have nonzero gaps below 1e-6.
-The supplied final-classification memo's phrase "gap 0" is therefore not accurate
-for every solver-optimal row. Raw outputs are preserved to make this visible.
+The final supplied classification memo records these nonzero gaps too. Raw outputs
+are preserved alongside the numerical-gate interpretation.
 
 ## Reference correction and provenance
 

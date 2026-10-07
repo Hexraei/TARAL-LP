@@ -9,9 +9,12 @@ Audit scope note: 61 of 65 cases returned points; 4 have check=null (no incumben
 statement is 'all REPORTED points pass', never 'all 65 raw points'.
 
 Final ledger (65/65, corrected):
-- 31 proven_agree: taral proved optimal (gap 0) and matches the HiGHS reference within 1e-6
-  relative (misc06's reference rechecked at zero gap; the rest as-run default gap, agreement
-  within 1e-6 in all cases). misc06 included (published-optimum match, reference artifact resolved).
+- 31 proven_agree: taral reached solver-optimal at the 1e-6 numerical gate and matches the HiGHS
+  reference within 1e-6 relative (misc06's reference rechecked at zero gap; the rest as-run
+  default gap, agreement within 1e-6 in all cases). Gap detail: 6 rows (bell3a, bell5, dcmulti,
+  egout, mas76, pk1) close with a POSITIVE gap below 1e-6 (3.6e-7 to 9.98e-7); misc06 closes at
+  exactly 0. "Solver-optimal at the 1e-6 gate", never "exact proof". misc06 included
+  (published-optimum match, reference artifact resolved).
 - 5 value_reached_unproven: 10teams, air04, nw04, qiu, vpm1 - incumbent equals the reference
   optimum within 1e-6 (worst 9.1e-16) but the 300 s cap hit before the proof closed. "Unproven",
   never agreement.
@@ -43,12 +46,15 @@ Runner v4: mip_rel_gap=0 pinned on the reference (fixed in my master m3run_vm.py
 Current: - [ ] **R4 - Mixed-integer search:** prototype [branch and bound with propagation](src/milp.cpp); full cutting-plane, presolve and heuristic coverage planned.
 
 Proposed (assuming results land at results/r4_miplib3_20261008/):
-- [x] **R4 - Mixed-integer search:** prototype [branch and bound with propagation](src/milp.cpp); [measured on all 65 MIPLIB 3 instances](results/r4_miplib3_20261008/) (300 s cap, HiGHS 1.15.1 reference with misc06 rechecked at zero gap, every reported point independently feasibility-audited at 1e-6): 31/65 proven optimal matching the reference, 5 more reached the reference optimum value without completing the proof, 29 unproven at the cap, 0 wrong answers on the tested corpus; a near-integrality correctness defect found after this run is being repaired separately, and these results predate that fix; full cutting-plane, presolve and heuristic coverage planned.
+- [x] **R4 - Mixed-integer search:** prototype [branch and bound with propagation](src/milp.cpp); [measured on all 65 MIPLIB 3 instances](results/r4_miplib3_20261008/) (300 s cap, HiGHS 1.15.1 reference with misc06 rechecked at zero gap, every reported point independently feasibility-audited at 1e-6): 31/65 solver-optimal at the 1e-6 numerical gate matching the reference, 5 more reached the reference optimum value without completing the proof, 29 unproven at the cap, 0 wrong answers on the tested corpus; a near-integrality correctness defect found after this run is being repaired separately, and these results predate that fix; full cutting-plane, presolve and heuristic coverage planned.
 
 Honesty notes on the line: the 29 unproven (17+12) are in the line itself; "0 wrong answers" is
 scoped to the tested corpus at the 1e-6 gate; the defect caveat is in the sentence, not buried.
 
-## Repo-lane wording corrections adopted (Oct 8 03:25)
+## Repo-lane wording corrections adopted (Oct 8 03:25, 03:26)
+0. "Optimal" means solver-optimal at the 1e-6 numerical gate, NOT exact proof: bell3a, bell5,
+   dcmulti, egout, mas76, pk1 close with positive gaps below 1e-6 (verified against the merged
+   ledger: 3.6e-7 to 9.98e-7). misc06 is exactly 0. All 31 reference matches stand.
 1. Audit says "all reported points pass" (61/65 returned points; 4 have check=null/no incumbent).
 2. Reference is as-run HiGHS default gap; ONLY misc06 was rechecked at mip_rel_gap=0. Never call
    the whole reference exact-gap. Repo preserves the original 30+1-false-WRONG ledger plus a
