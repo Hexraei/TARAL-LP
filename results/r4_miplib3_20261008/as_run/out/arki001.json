@@ -1,0 +1,1 @@
+{"status": "time_limit", "objective": null, "best_bound": 7580020.9390643649, "gap": null, "nodes": 5336, "unresolved_nodes": 0, "has_solution": false, "prop_tightened": 12602, "prop_crossed": 0, "prop_crossed_lp_infeasible": 0, "prop_pruned": 0, "rc_fixed": 0, "rc_skipped": 0, "audit": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "iterations": 752463, "wall_s": 300.005370, "message": ""}

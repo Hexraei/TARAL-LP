@@ -1,0 +1,13 @@
+{
+ "rows": 65,
+ "verdicts": {
+  "value_reached_unproven": 5,
+  "proven_agree": 30,
+  "other": 12,
+  "incumbent_below_ref": 17,
+  "WRONG_DISAGREE": 1
+ },
+ "wrong": [
+  "misc06"
+ ]
+}

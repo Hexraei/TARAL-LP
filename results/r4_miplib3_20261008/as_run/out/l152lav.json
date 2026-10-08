@@ -1,0 +1,1 @@
+{"status": "optimal", "objective": 4722, "best_bound": 4722, "gap": 0, "nodes": 2434, "unresolved_nodes": 0, "has_solution": true, "prop_tightened": 72718, "prop_crossed": 24, "prop_crossed_lp_infeasible": 0, "prop_pruned": 24, "rc_fixed": 133593, "rc_skipped": 0, "audit": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "iterations": 68994, "wall_s": 13.012526, "message": ""}
