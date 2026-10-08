@@ -170,6 +170,8 @@ The historical six-variable refinery example retains a hypothetical objective of
 
 ## Repository guide
 
+Full directory map, build commands and which check to run: [repository-map.md](repository-map.md).
+
 - [`src/`](../src/): current C++ solver, parser and CLI.
 - [`benchmarks/`](../benchmarks/): reference checks and benchmark drivers; [`benchmarks/results/`](../benchmarks/results/) holds the completed CPU wave CSVs.
 - [`results/`](../results/): retained C++ and historical ledgers. Historical files are not current-engine claims.
