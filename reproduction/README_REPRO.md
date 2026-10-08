@@ -14,7 +14,7 @@ python3 -m pip install -r reproduction/requirements.txt
 bash reproduction/reproduce.sh
 ```
 
-The script fetches the pinned Netlib corpus, verifies all file hashes, builds a fresh copy of the evaluated `src/` engine (`g++ -O3 -march=native -std=c++17`, the flags used for the committed ledgers), and runs the 93-case gate plus TRUSS at 60 seconds per case. Compile time is reported separately from solver time. It does not build the separate single-file `cpp-engine/` fallback. Historical result for the evaluated source snapshot recorded in that folder: 90/93 passes at 60 s (see `results/cpp_a9e8218_60s/`); this is not a current-source expected count; counts can vary by machine speed on slow cases.
+The script fetches the pinned Netlib corpus, verifies all file hashes, builds a fresh copy of the evaluated `src/` engine (`g++ -O3 -march=native -std=c++17`, the flags used for the committed ledgers), and runs the 93-case gate plus TRUSS at 60 seconds per case. Compile time is reported separately from solver time. It does not build the retired single-file fallback engine (kept on the `archive/legacy-engines-2026-10-08` branch). Historical result for the evaluated source snapshot recorded in that folder: 90/93 passes at 60 s (see `results/cpp_a9e8218_60s/`); this is not a current-source expected count; counts can vary by machine speed on slow cases.
 
 Offline/subset check (the directory must contain the full corpus for manifest verification):
 

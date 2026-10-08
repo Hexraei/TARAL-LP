@@ -1,6 +1,0 @@
-cpp_M10_gate_60s_local.log is output of an earlier local harness for the single-file fallback engine.
-Its per-case seconds are NOT a measure of the 60 s cap: it lists PILOT at 786.8 s and DFL001 at 895.9 s,
-which exceed the cap, so the timer in that run did not enforce or measure the cap the way the current
-benchmark does. "GATE GREEN" in that log means only that its pass/lost/wrong checks were met.
-Do not cite this log as evidence of 60 s runtimes. The current evidence is benchmarks/netlib_gate.py with
-the ledgers under results/ (per-case wall time, enforced cap, independent recheck).
