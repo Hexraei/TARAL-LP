@@ -33,9 +33,13 @@ Scope and divergence notes:
 
 Counted constructs and the reader behavior noted for each (all citations
 src/mps.cpp at dd217e607caef1e56b3a681cbceafd9a0d81c589):
-- duplicate (column, row) entries inside one consecutive block: summed in
+- duplicate (column, row) entries inside one consecutive block, counted in
+  three distinguishable categories: duplicate_matrix_entries are summed in
   file order by flush_column, zero sums dropped (flush_column, lines 111-123;
-  sum at line 118, zero-drop at line 121).
+  sum at line 118, zero-drop at line 121); duplicate_objective_row_entries
+  accumulate into md.cost (line 240, += per occurrence); repeated entries on
+  extra free N rows are dropped like any free-N entry, so
+  duplicate_free_n_row_entries are counted for visibility only.
 - entries naming extra free N rows (every N row after the first): dropped;
   row_of returns -2 for them and the entry is neither cost nor matrix
   (row_of, lines 139-144; use at lines 237-241). First N row is the objective
@@ -45,12 +49,19 @@ src/mps.cpp at dd217e607caef1e56b3a681cbceafd9a0d81c589):
   line 233 (lookup path lines 219-234).
 - COLUMNS data lines with a token count other than 3 or 5: ParseError at
   line 217.
-- MARKER lines (token[1] == "'MARKER'", line 210): 'INTORG' and 'INTEND' on
-  the same line is a ParseError (lines 211-213); otherwise in_int is set from
-  'INTORG' presence (line 214) and every column declared while in_int holds
-  is flagged integer (md.is_int push, line 229). An 'INTORG' still open at
-  the end of the COLUMNS section is not an error in the reader; the columns
-  it covers are counted here as columns_marked_integer_open_ended.
+- MARKER lines (token[1] == "'MARKER'", line 210): the reader rejects a
+  marker line whose 'INTORG'/'INTEND' presence is ambiguous, and that test
+  (start == end, lines 211-213) covers BOTH a line carrying 'INTORG' and
+  'INTEND' together AND a line carrying neither; the two cases are counted
+  separately here as marker_line_intorg_and_intend and
+  marker_line_no_intorg_intend. Otherwise in_int is set from 'INTORG'
+  presence (line 214) and every column declared while in_int holds is
+  flagged integer (md.is_int push, line 229). An 'INTORG' while a region is
+  already open is not an error in the reader (in_int simply stays true,
+  line 214); it is counted as redundant_intorg_while_open and the open
+  region is preserved, not restarted. An 'INTORG' still open at the end of
+  the COLUMNS section is not an error in the reader; the columns it covers
+  are counted here as columns_marked_integer_open_ended.
 - repeated ROWS or COLUMNS section headers: ParseError at lines 182-183.
 - entries naming rows never declared in ROWS: ParseError from row_of at
   line 144.
@@ -81,8 +92,10 @@ SYMBOL_MAP = {
     "rows_bad_type": "src/mps.cpp:207",
     "repeated_rows_or_columns_section": "src/mps.cpp:182-183 seen_sections",
     "marker_line_detection": "src/mps.cpp:210",
-    "marker_same_line_intorg_intend": "src/mps.cpp:211-213",
+    "marker_line_intorg_and_intend": "src/mps.cpp:211-213 (start == end, both present)",
+    "marker_line_no_intorg_intend": "src/mps.cpp:211-213 (start == end, neither present)",
     "marker_sets_in_int": "src/mps.cpp:214 in_int",
+    "redundant_intorg_while_open": "src/mps.cpp:214 (in_int = start; no nested-open error)",
     "columns_bad_token_count": "src/mps.cpp:217",
     "column_declared_while_in_int": "src/mps.cpp:229 md.is_int",
     "column_two_separate_blocks": "src/mps.cpp:233",
@@ -90,7 +103,9 @@ SYMBOL_MAP = {
     "matrix_entry_collected": "src/mps.cpp:241 col_entries",
     "free_n_row_entry_dropped": "src/mps.cpp:139-144 row_of (-2), 237-241",
     "unknown_row_reference": "src/mps.cpp:144 row_of",
-    "duplicate_entries_summed": "src/mps.cpp:111-123 flush_column (sum line 118, zero-drop line 121)",
+    "duplicate_matrix_entries_summed": "src/mps.cpp:111-123 flush_column (sum line 118, zero-drop line 121)",
+    "duplicate_objective_row_entries_accumulate": "src/mps.cpp:240 md.cost +=",
+    "duplicate_free_n_row_entries_dropped": "src/mps.cpp:139-144 row_of (-2)",
 }
 
 
@@ -109,17 +124,23 @@ def scan(path):
                     "matrix_entries": 0, "objective_row_entries": 0,
                     "free_n_row_entries_dropped": 0,
                     "unknown_row_references": 0,
-                    "duplicate_pair_entries": {"count": 0, "examples": []},
+                    "duplicate_matrix_entries": {"count": 0, "examples": []},
+                    "duplicate_objective_row_entries": {"count": 0, "examples": []},
+                    "duplicate_free_n_row_entries": {"count": 0, "examples": []},
                     "nonconsecutive_column_blocks": {"count": 0, "columns": []},
                     "bad_token_count_lines": {"count": 0, "lines": []},
                     "markers": {"marker_lines": 0, "intorg": 0, "intend": 0,
-                                "same_line_intorg_intend": 0,
+                                "marker_line_intorg_and_intend": 0,
+                                "marker_line_no_intorg_intend": 0,
+                                "redundant_intorg_while_open": 0,
                                 "intend_without_open": 0,
                                 "open_at_columns_section_end": False,
                                 "columns_marked_integer": 0,
                                 "columns_marked_integer_open_ended": 0}},
         "repeated_section_headers": {"ROWS": 0, "COLUMNS": 0},
         "unknown_column1_headers": 0,
+        "not_validated": ["objective (N) row presence", "ROWS order/placement",
+                          "numeric token syntax", "sections other than ROWS/COLUMNS"],
         "tallies_status": "clean",
         "symbol_map": SYMBOL_MAP,
     }
@@ -131,7 +152,7 @@ def scan(path):
     col_order = []         # distinct column names in first-appearance order
     col_blocks = {}        # column name -> number of separate blocks
     cur_col = None
-    cur_block_rows = set()
+    cur_block_rows = {}    # row name -> entry category seen first in this block
     in_int = False
     int_columns = set()
     region_columns = []   # columns declared in the current open marker region
@@ -140,7 +161,7 @@ def scan(path):
 
     def close_block():
         nonlocal cur_col, cur_block_rows
-        cur_col, cur_block_rows = None, set()
+        cur_col, cur_block_rows = None, {}
 
     for line in raw.decode("utf-8", "replace").splitlines():
         lineno += 1
@@ -174,6 +195,7 @@ def scan(path):
                         in_int = False
                 section = None
                 rep["unknown_column1_headers"] += 1
+                noncanonical = True
             continue
         if section == "ROWS":
             t = line.split()
@@ -215,8 +237,11 @@ def scan(path):
                 m["intorg"] += 1
             if end:
                 m["intend"] += 1
-            if start == end:
-                m["same_line_intorg_intend"] += 1
+            if start and end:
+                m["marker_line_intorg_and_intend"] += 1
+                noncanonical = True
+            elif not start and not end:
+                m["marker_line_no_intorg_intend"] += 1
                 noncanonical = True
             elif end:
                 if not in_int:
@@ -224,8 +249,11 @@ def scan(path):
                 in_int = False
                 region_columns = []
             else:
+                if in_int:
+                    m["redundant_intorg_while_open"] += 1  # region preserved, not restarted
+                else:
+                    region_columns = []
                 in_int = True
-                region_columns = []
             continue
         if len(t) not in (3, 5):
             c["bad_token_count_lines"]["count"] += 1
@@ -259,19 +287,21 @@ def scan(path):
                 c["unknown_row_references"] += 1
                 noncanonical = True
                 continue
-            if kind == "N":
-                c["objective_row_entries"] += 1
-                continue
-            if kind == "n":
-                c["free_n_row_entries_dropped"] += 1
-                continue
-            c["matrix_entries"] += 1
+            cat = "matrix" if kind not in ("N", "n") else (
+                "objective_row" if kind == "N" else "free_n_row")
             if row in cur_block_rows:
-                c["duplicate_pair_entries"]["count"] += 1
-                if len(c["duplicate_pair_entries"]["examples"]) < EXAMPLE_CAP:
-                    c["duplicate_pair_entries"]["examples"].append(
-                        {"column": name, "row": row, "line": lineno})
-            cur_block_rows.add(row)
+                d = c["duplicate_" + cat + "_entries"]
+                d["count"] += 1
+                if len(d["examples"]) < EXAMPLE_CAP:
+                    d["examples"].append({"column": name, "row": row, "line": lineno})
+            else:
+                cur_block_rows[row] = cat
+            if cat == "objective_row":
+                c["objective_row_entries"] += 1
+            elif cat == "free_n_row":
+                c["free_n_row_entries_dropped"] += 1
+            else:
+                c["matrix_entries"] += 1
     if section == "COLUMNS" and in_int:
         rep["columns"]["markers"]["open_at_columns_section_end"] = True
         open_ended_int_columns = set(region_columns)

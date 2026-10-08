@@ -40,12 +40,22 @@ expect("free_n_dropped", r["columns"]["free_n_row_entries_dropped"] == 1
        and r["columns"]["objective_row_entries"] == 1
        and r["columns"]["matrix_entries"] == 1, r["columns"])
 
-# 3. duplicate (column, row) entries inside one consecutive block
-r = cr.scan(write("dup", HDR + "COLUMNS\n    X         R1        1.0       R1        2.0\n"
-                  "    X         R1        3.0\n" + END))
-d = r["columns"]["duplicate_pair_entries"]
-expect("duplicates_counted", d["count"] == 2 and d["examples"][0]["column"] == "X"
-       and d["examples"][0]["row"] == "R1", d)
+# 3. duplicate (column, row) entries counted per category: matrix / objective / free-N
+r = cr.scan(write("dup", "ROWS\n N  COST\n N  FREE2\n G  R1\nCOLUMNS\n"
+                  "    X         COST      1.0       R1        1.0\n"
+                  "    X         R1        2.0\n"
+                  "    X         COST      3.0       FREE2     1.0\n"
+                  "    X         FREE2     2.0\n" + END))
+c = r["columns"]
+expect("dup_matrix", c["duplicate_matrix_entries"]["count"] == 1
+       and c["duplicate_matrix_entries"]["examples"][0]["row"] == "R1",
+       c["duplicate_matrix_entries"])
+expect("dup_objective", c["duplicate_objective_row_entries"]["count"] == 1
+       and c["duplicate_objective_row_entries"]["examples"][0]["row"] == "COST",
+       c["duplicate_objective_row_entries"])
+expect("dup_free_n", c["duplicate_free_n_row_entries"]["count"] == 1
+       and c["duplicate_free_n_row_entries"]["examples"][0]["row"] == "FREE2",
+       c["duplicate_free_n_row_entries"])
 
 # 4. same column in two separate blocks
 r = cr.scan(write("twoblocks", HDR + "COLUMNS\n    X         R1        1.0\n"
@@ -99,14 +109,30 @@ expect("open_at_end", m["open_at_columns_section_end"] is True
        and m["columns_marked_integer"] == 3
        and m["columns_marked_integer_open_ended"] == 2, m)
 
-# 9. same-line INTORG+INTEND counted; INTEND without open counted
+# 9. ambiguous marker lines split: both-present vs neither-present; INTEND without open
 r = cr.scan(write("badmarker", HDR + "COLUMNS\n"
                   "    MARKER                 'MARKER'    'INTORG'    'INTEND'\n"
+                  "    MARKER                 'MARKER'                 'INTFLD'\n"
                   "    MARKER                 'MARKER'                 'INTEND'\n"
                   "    X         R1        1.0\n" + END))
 m = r["columns"]["markers"]
-expect("bad_markers", m["same_line_intorg_intend"] == 1 and m["intend_without_open"] == 1
+expect("bad_markers", m["marker_line_intorg_and_intend"] == 1
+       and m["marker_line_no_intorg_intend"] == 1
+       and m["intend_without_open"] == 1
        and m["columns_marked_integer"] == 0, m)
+
+# 9b. redundant INTORG while open: counted, region preserved (not restarted)
+r = cr.scan(write("redintorg", HDR + "COLUMNS\n    X         R1        1.0\n"
+                  "    MARKER                 'MARKER'                 'INTORG'\n"
+                  "    Y         R1        1.0\n"
+                  "    MARKER                 'MARKER'                 'INTORG'\n"
+                  "    Z         R2        1.0\n"
+                  "RHS\n    B         R1        5.0\n" + END))
+m = r["columns"]["markers"]
+expect("redundant_intorg_region_preserved", m["redundant_intorg_while_open"] == 1
+       and m["columns_marked_integer"] == 2
+       and m["columns_marked_integer_open_ended"] == 2
+       and m["open_at_columns_section_end"] is True, m)
 
 # 10. a column literally named MARKER without quotes is data, not a marker line
 r = cr.scan(write("notmarker", HDR + "COLUMNS\n    MARKER     R1        1.0\n" + END))
@@ -129,6 +155,13 @@ r = cr.scan(write("comments", "* comment\n" + HDR + "\nCOLUMNS\n* mid comment\n"
                   "    X         R1        1.0\nFOOBAR\n    Y         R1        1.0\n" + END))
 expect("comments_unknown_header", r["columns"]["distinct"] == 1
        and r["unknown_column1_headers"] == 1, r["unknown_column1_headers"])
+expect("unknown_header_marks_hypothetical", r["tallies_status"].startswith("hypothetical"),
+       r["tallies_status"])
+
+# 13b. not_validated list is reported
+r = cr.scan(write("clean2", HDR + "COLUMNS\n    X         R1        1.0\n" + END))
+expect("not_validated_reported", "numeric token syntax" in r["not_validated"]
+       and r["tallies_status"] == "clean", r.get("not_validated"))
 
 # 14. ROWS anomalies: bad token count, bad type, duplicate name each counted
 r = cr.scan(write("badrows", "ROWS\n N  COST\n N  COST EXTRA\n Q  R1\n E  COST\n G  R2\n"
