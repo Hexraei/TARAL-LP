@@ -225,12 +225,13 @@ public:
     long peak_trail_records=0,peak_trail_nodes=0;
     long peak_open_nodes=0,peak_open_changes=0,max_depth=0;
     structural_integer::Grid grid;
-    // Offer an LP point: integer columns rounded first, then as is. Returns true if accepted.
+    // Offer only an exactly integer candidate. A near-integer relaxation is not an incumbent.
     bool offer(const std::vector<double>& x) {
+        if (x.size() != md_.cols.size()) return false;
         std::vector<double> r = x;
         for (size_t j = 0; j < r.size(); ++j)
             if (md_.is_int[j]) r[j] = std::round(r[j]);
-        for (const std::vector<double>* c : {static_cast<const std::vector<double>*>(&r), &x}) {
+        for (const std::vector<double>* c : {static_cast<const std::vector<double>*>(&r)}) {
             if (violation(md_, *c) > kFeasTol) continue;
             double v = objective_of(md_, *c);
             if (!has_inc || v < z) has_inc = true, z = v, inc = *c, rc_idle_ = 0, rc_skip_left_ = 0;
@@ -660,6 +661,23 @@ End Search::run() {
             pc_sum[d][j] += g, ++pc_cnt[d][j], all_sum[d] += g, ++all_cnt[d];
         }
         offer(r.x);
+        bool near_integer = true;
+        for (int j = 0; j < n; ++j)
+            if (md_.is_int[j] && std::abs(r.x[j] - std::round(r.x[j])) > kIntTol) near_integer = false;
+        if (near_integer && elapsed() < limit_) {
+            auto pl = lo, pu = up;
+            bool in_box = true;
+            for (int j = 0; j < n; ++j) if (md_.is_int[j]) {
+                double v = std::round(r.x[j]);
+                if (v < lo[j] || v > up[j]) in_box = false;
+                pl[j] = pu[j] = v;
+            }
+            if (in_box) {
+                Result polished = solve_lp(md_, pl, pu, nullptr, limit_ - elapsed());
+                iters += polished.iterations;
+                if (polished.status == Status::Optimal) offer(polished.x);
+            }
+        }
         if (has_inc && b >= z - tol_at(z)) {
             pruned = std::min(pruned, b);
             continue;
@@ -668,17 +686,34 @@ End Search::run() {
         // pseudocost exists every score is f(1-f), i.e. most-fractional branching.
         int bj = -1;
         double best = -1;
+        bool blocked_fractional = false;
         for (int j = 0; j < n; ++j) {
             if (!md_.is_int[j]) continue;
             double f = r.x[j] - std::floor(r.x[j]);
-            if (std::min(f, 1 - f) <= kIntTol) continue;
+            if (f == 0.0) continue;  // even a tiny fractional value needs coverage if not gap-pruned
+            // A tolerance-level residual on a fixed/out-of-domain column cannot
+            // make two strictly smaller children. Try another covering split;
+            // if none exists, retain this node as unresolved below.
+            if (std::floor(r.x[j]) >= up[j] || std::ceil(r.x[j]) <= lo[j]) {
+                blocked_fractional = true;
+                continue;
+            }
             double sc = std::max(pseudo(0, j) * f, 1e-6) * std::max(pseudo(1, j) * (1 - f), 1e-6);
             if (sc > best) bj = j, best = sc;
         }
         if (bj < 0) {  // integral LP point that failed the feasibility check
             ++unresolved;
             held.push_back(b);
-            note = "integral node point rejected by the feasibility check";
+            note = blocked_fractional ? "near-integer node LP violates its branching domain"
+                                      : "integral node point rejected by the feasibility check";
+            continue;
+        }
+        // An LP tolerance may return a fractional value outside a fixed integer bound.
+        // Do not create an unchanged child repeatedly; retain the bound as unresolved.
+        if (std::floor(r.x[bj]) >= up[bj] || std::ceil(r.x[bj]) <= lo[bj]) {
+            ++unresolved;
+            held.push_back(b);
+            note = "near-integer node LP violates its branching domain";
             continue;
         }
         std::vector<int> seeds{bj};  // the children propagate from the branching and from any fixing
