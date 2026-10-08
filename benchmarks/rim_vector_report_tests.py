@@ -117,5 +117,33 @@ occ = r["rhs"]["occurrences"][0]
 expect("indented_keyword_token_not_header", occ["selected"] == "B"
        and occ["entries_by_name"] == {"B": 1} and r["rhs"]["repeated"] is False, r["rhs"])
 
+# 12. content after ENDATA is ignored (checker stops at ENDATA)
+r = rr.scan(write("after_endata", BASE + "RHS\n    B         R1        5.0\n" + END +
+                  "RHS\n    C         R2        1.0\n"))
+expect("endata_stops_scan", r["rhs"]["repeated"] is False
+       and len(r["rhs"]["occurrences"]) == 1
+       and r["rhs"]["occurrences"][0]["names"] == ["B"], r["rhs"])
+
+# 13. malformed zero-pair RHS line counted, not interpreted
+r = rr.scan(write("zero_pair", BASE + "RHS\n    B         R1        5.0\n    B\n" + END))
+occ = r["rhs"]["occurrences"][0]
+expect("zero_pair_counted_malformed", occ.get("malformed_lines") == 1
+       and occ["entries_by_name"] == {"B": 1}, occ)
+
+# 14. unknown column-1 header counted and ends section context
+r = rr.scan(write("unknown_header", BASE + "RHS\n    B         R1        5.0\n"
+                  "FOOBAR\n    C         R2        1.0\n" + END))
+occ = r["rhs"]["occurrences"][0]
+expect("unknown_header_counted", r.get("unknown_column1_headers_at_lines") is not None
+       and occ["entries_by_name"] == {"B": 1}
+       and r["rhs"]["repeated"] is False, (r.get("unknown_column1_headers_at_lines"), occ))
+
+# 15. BOUNDS with more than 4 tokens is malformed
+r = rr.scan(write("bounds_5tok", BASE + "RHS\n    B         R1        5.0\n"
+                  "BOUNDS\n UP BND       X         10.       EXTRA\n" + END))
+occ = r["bounds"]["occurrences"][0]
+expect("bounds_five_tokens_malformed", occ.get("malformed_lines") == 1
+       and occ["entries_by_name"] == {}, occ)
+
 print("FAILED %d" % len(fails) if fails else "ALL PASS")
 sys.exit(1 if fails else 0)
