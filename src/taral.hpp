@@ -218,10 +218,10 @@ WorkBudget& work_budget();
 // that an independent replayer (benchmarks/presolve_replay_check.py) re-derives from the ORIGINAL model, and
 // every returned point is audited in original space (rows, bounds, integrality, objective) before it is
 // reported. Reductions: integer bound rounding, fixed-column substitution, empty/singleton rows,
-// activity-redundant rows, empty-column fixing. Floating point throughout, tolerances stated in
+// activity-redundant rows, empty-column fixing, dominated-column fixing (dual fix). Floating point throughout, tolerances stated in
 // docs/verified_presolve.md.
 struct PresolveOp {
-    std::string type;       // round_int_bounds, fix_col, empty_row, singleton_row, redundant_row, fix_empty_col
+    std::string type;       // round_int_bounds, fix_col, empty_row, singleton_row, redundant_row, fix_empty_col, dominated_col
     int row = -1, col = -1;
     double a = 0, v1 = 0, v2 = 0, v3 = 0, v4 = 0;  // type-specific data, see presolve.cpp
 };

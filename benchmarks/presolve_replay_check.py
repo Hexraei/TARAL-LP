@@ -111,7 +111,7 @@ def load(path):
                 rlo=list(lp.row_lower_), rup=list(lp.row_upper_), isint=isint, offset=lp.offset_, maximize=sense < 0)
 
 ROW_OPS = {"empty_row": (True, False), "singleton_row": (True, True), "redundant_row": (True, False)}
-COL_OPS = {"round_int_bounds": (False, True), "fix_col": (False, True), "fix_empty_col": (False, True)}
+COL_OPS = {"round_int_bounds": (False, True), "fix_col": (False, True), "fix_empty_col": (False, True), "dominated_col": (False, True)}
 
 def validate_schema(M, log):
     """Strict structure/finite/index validation before any replay. Returns a list of errors."""
@@ -230,6 +230,23 @@ def replay_ops(M, log):
             want = lo[j] if c > 0 else (up[j] if c < 0 else (lo[j] if math.isfinite(lo[j]) else (up[j] if math.isfinite(up[j]) else 0.0)))
             if not math.isfinite(want) or not close(v[0], want): errs.append(tag + ": value is not the cost-optimal bound")
             lo[j] = up[j] = v[0]
+        elif t == "dominated_col":
+            # dual fixing, re-derived from the replayer's own state with exact sign/infinity tests (no tolerance)
+            act = [(r, a) for r, a in M["cols"][j] if not rrem[r]]
+            if crem[j] or not act: errs.append(tag + ": column removed or in no active row"); continue
+            if lo[j] == up[j]: errs.append(tag + ": column already fixed"); continue
+            if cerr[j] != 0.0: errs.append(tag + ": column bound carries tracked uncertainty"); continue
+            c = -M["cost"][j] if M["maximize"] else M["cost"][j]
+            if v[1] == -1:
+                ok = c >= 0 and math.isfinite(lo[j]) and all((rlo[r] == -INF) if a > 0 else (rup[r] == INF) for r, a in act) and v[0] == lo[j]
+            elif v[1] == 1:
+                ok = c <= 0 and math.isfinite(up[j]) and all((rup[r] == INF) if a > 0 else (rlo[r] == -INF) for r, a in act) and v[0] == up[j]
+            else: ok = False
+            if not ok: errs.append(tag + ": column is not dominated in the logged direction at the logged bound"); continue
+            if M["isint"][j] and v[0] != math.floor(v[0]): errs.append(tag + ": integer column fixed at a non-integral bound"); continue
+            lo[j] = up[j] = v[0]
+            if v[1] == -1: enc.U[j] = enc.L[j]  # exact-rational enclosure: the column is fixed at its lower bound enclosure
+            else: enc.L[j] = enc.U[j]
         else:
             errs.append(tag + ": unknown op")
     if log.get("timed_out"):

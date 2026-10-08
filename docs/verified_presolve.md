@@ -15,6 +15,7 @@ space before reporting. Default behaviour (no flag) is unchanged. Not supported:
 | `singleton_row` | a one-column row becomes a column bound (integer-rounded); conflict means infeasible |
 | `redundant_row` | a row whose min/max activity over the current column bounds lies inside its bounds is dropped |
 | `fix_empty_col` | a column in no remaining row is fixed at the bound its cost prefers (skipped if that bound is infinite) |
+| `dominated_col` | dual fixing, minimisation sense (maximise negates the cost). A column is fixed at its lower bound when every remaining row it is in is open on the side a decrease could violate (a > 0: no row lower bound, a < 0: no row upper bound), its cost is >= 0 and the lower bound is finite; mirrored for the upper bound with cost <= 0. Tests are exact sign and infinity tests, no tolerance. Never applied to a column whose bound carries tracked uncertainty (a bound derived from a float substitution); integer columns are fixed only at their integer bounds. A column whose improving bound is infinite is left to the solver (no unboundedness claim). The log op is `dominated_col` with the value and direction; `fix_col` applies it on the next pass |
 
 Infeasibility found by presolve is reported as `infeasible` with the reason in the log and JSON message.
 It is a floating-point finding re-derivable from the log, not an exact-rational proof.
@@ -75,7 +76,7 @@ explicit upper bound because readers differ on the default.
 - No MIPLIB comparison. The earlier 26-time-limit MIPLIB ledger is historical, not a baseline, and no new
   MIPLIB run was made, so there is no claim about speed or node counts on real MIPLIB instances.
 - No dual postsolve (no duals, reduced costs or bases are mapped back); presolve is for primal answers only.
-- No dominated-column, doubleton, coefficient-tightening or probing reductions; no exact arithmetic.
+- No doubleton, coefficient-tightening or probing reductions; no exact arithmetic. Dominated columns are only the single-column dual fixing described above (no dominated-pair or implied-free reasoning).
 - Reductions are not applied inside branch and bound (root only, `src/milp.cpp` unchanged).
 - Comparisons to SCIP/PaPILO/HiGHS presolve are attributed to their documentation only, not measured.
 
@@ -129,3 +130,8 @@ use the mirrored floating replay plus the original-space audit of the reported p
 Integration with work limits: `--presolve` / `--presolve-log` cannot be combined with `--work-limit`.
 The presolve reductions are not included in the simplex iteration counter, so the combination is rejected
 as a usage error rather than making a work-budget claim about an uncounted phase.
+
+## Dominated columns (dual fixing)
+
+Replay: `benchmarks/presolve_replay_check.py` re-derives the sign and infinity conditions from the original MPS read by highspy, checks that the logged value is the bound, that an integer column's bound is integral, and narrows its own exact-rational enclosure before the next op. A corrupted `dominated_col` log (wrong value, wrong direction, a blocking row) is rejected.
+Tests: `benchmarks/presolve_dominated_tests.py BIN N` (10 hand cases, corrupted-log rejections, N seeded random models against the HiGHS oracle, with integer columns and explicit bounds). Result on this branch with N = 300: all pass, 307 oracle comparisons (10 hand + 297 random) plus the 3 explicit cases below; the op fired 176 times in 102 random models (115 down, 61 up, 59 integer columns). (Static-revision note: these counts are prior branch-run records; the test file's point audit was found to be a silent no-op (undefined rc.sp) and was repaired after they were produced, so every count stands pending reproduction.) Three random models have explicit recorded outcomes and are NOT counted as oracle passes: rand_202 and rand_265 are engine undecided (HiGHS presolve on and off say infeasible; the engine returns numerical_failure from its root-LP certificate guard, with and without --presolve, and presolve logs no ops); rand_250 is engine unbounded, supported by an exact Fraction point and ray proof in the test (point X0..X5 = [3,-2,5,-2,0,0], ray [0,0,0,-2,0,1]), while HiGHS answers infeasible with presolve on and optimal -19/3 with presolve off. No speed-up is claimed.
