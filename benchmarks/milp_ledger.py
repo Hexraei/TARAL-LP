@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Before/after ledger for MILP engine changes (measurement tool; HiGHS is the reference only).
 
-  random  the cpp-engine/tools/milp_check.py generator, N cases per seed, solved by --engine at --time-limit
+  random  the tools/milp_check.py generator, N cases per seed, solved by --engine at --time-limit
           and graded against HiGHS (scipy.optimize.milp on the generator data) plus an independent
           feasibility/objective check of the engine's point. Reference results are cached per (seed, case).
   miplib  the pinned small-MIPLIB list of benchmarks/milp_miplib.py (same checker, same reference cache).
@@ -23,7 +23,7 @@ SEEDS = [26000 + 119, 3, 7, 26000 + 120, 31, 47]
 def label(seed):
     """Seeds in the public 26000+N form, as in the README."""
     return "26000+%d" % (seed - 26000) if seed >= 26000 else str(seed)
-CHECK = os.path.join(ROOT, "cpp-engine", "tools", "milp_check.py")
+CHECK = os.path.join(ROOT, "tools", "milp_check.py")
 FIELDS = ["family", "seed", "instance", "rows", "cols", "ints", "status", "objective", "best_bound", "nodes",
           "lp_iterations", "wall_s", "prop_tightened", "prop_crossed", "prop_crossed_lp_infeasible", "prop_pruned", "rc_fixed", "rc_skipped", "audit", "ref_status",
           "ref_objective", "verdict", "detail"]

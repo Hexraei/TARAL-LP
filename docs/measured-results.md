@@ -176,8 +176,8 @@ The historical six-variable refinery example retains a hypothetical objective of
 - [`gpu/`](../gpu/): CUDA kernels and approximate PDHG prototype.
 - [`reproduction/`](../reproduction/): pinned C++ Netlib reproduction.
 - [`examples/`](../examples/): synthetic refinery examples, without operational-data or savings validation.
-- [`cpp-engine/`](../cpp-engine/): separate bundled reference engine; its results do not apply to `src/`.
-- [`engine/`](../engine/), [`parsers/`](../parsers/), [`milp/`](../milp/), [`qp/`](../qp/): historical Python prototypes, separate from the current C++ engine.
+- [`engine/`](../engine/), [`parsers/`](../parsers/): historical Python reference solver and MPS readers, separate from the current C++ engine; used by `examples/` and a few `benchmarks/` checks.
+- Retired material (single-file fallback engine `cpp-engine/` with its milestone snapshots and logs, and the Python `milp/` and `qp/` prototypes) lives on the `archive/legacy-engines-2026-10-08` branch. Its results do not apply to `src/`. The MILP random-model generator moved to [`tools/milp_check.py`](../tools/milp_check.py) and its edge-case models to [`tests/milp_edge/`](../tests/milp_edge/).
 
 ## License and access
 

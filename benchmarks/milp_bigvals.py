@@ -10,7 +10,7 @@ integer point) and rescales them so that coefficients, right-hand sides, costs o
   all    obj + row together                 range  integer columns with ranges up to 10^6 around +-10^5
 Each model is solved by the engine and by HiGHS (mip gaps 1e-9) on the same MPS. Only the interesting cases are
 printed: status differences, objective differences, and any run that ends numerical_failure or with unresolved
-nodes. Seed 504, case 17 of the `all` family is the model in cpp-engine/tests/milp/big_values_unresolved.mps.
+nodes. Seed 504, case 17 of the `all` family is the model in tests/milp_edge/big_values_unresolved.mps.
 
   python benchmarks/milp_bigvals.py --engine OUT/taral --family all --seeds 504 505 --n 40 [--keep DIR]
 """

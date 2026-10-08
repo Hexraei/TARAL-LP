@@ -10,8 +10,8 @@ import argparse, json, os, random, subprocess, sys, tempfile
 import numpy as np
 from scipy.optimize import milp, LinearConstraint, Bounds
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "cpp-engine", "tools"))
-src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "cpp-engine", "tools", "milp_check.py")).read()
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "milp_check.py")).read()
 ns = {"__name__": "milp_check_helpers"}
 exec(compile(src.rsplit("\nmain()", 1)[0], "milp_check.py", "exec"), ns)
 write_mps = ns["write_mps"]
