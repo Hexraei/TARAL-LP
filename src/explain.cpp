@@ -8,7 +8,7 @@
 
 namespace {
 using Clock = std::chrono::steady_clock;
-constexpr double kWitnessTol = 1e-7;  // relative row/bound violation allowed for a "feasible" witness
+constexpr double kWitnessTol = 1e-7; // relative row/bound violation allowed for a "feasible" witness
 
 // The model restricted to the rows in `keep` (column bounds untouched), all costs zero, row order preserved.
 // map[k] = original row index of sub row k.
@@ -57,8 +57,8 @@ double max_violation(const Model& m, const std::vector<char>& keep, const std::v
 
 struct Outcome {
     enum Kind { Infeasible, Feasible, Unknown } kind = Unknown;
-    Result r;                         // Infeasible: multipliers in original row indexing (full length)
-    std::vector<double> x;            // Feasible: witness
+    Result r;              // Infeasible: multipliers in original row indexing (full length)
+    std::vector<double> x; // Feasible: witness
     double violation = 0;
     std::string why;
 };
@@ -68,8 +68,8 @@ Outcome test_rows(const Model& m, const std::vector<char>& keep, double budget_s
     std::vector<int> map;
     Model s = sub_model(m, keep, map);
     Result r = solve_lp_gated(s, s.col_lo, s.col_up, nullptr, budget_s, false, true);
-    if (r.status == Status::Infeasible && r.certificate_verified &&
-        r.farkas_row_lower.size() == map.size() && r.farkas_row_upper.size() == map.size()) {
+    if (r.status == Status::Infeasible && r.certificate_verified && r.farkas_row_lower.size() == map.size() &&
+        r.farkas_row_upper.size() == map.size()) {
         o.kind = Outcome::Infeasible;
         o.r = r;
         o.r.farkas_row_lower.assign(m.row_names.size(), 0.0);
@@ -94,11 +94,11 @@ Outcome test_rows(const Model& m, const std::vector<char>& keep, double budget_s
     o.why = std::string("subsystem solve ended ") + status_name(r.status) + (r.message.empty() ? "" : ": " + r.message);
     return o;
 }
-}  // namespace
+} // namespace
 
 InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit_s, double test_elapsed_after_deletion_s) {
     const auto t0 = Clock::now();
-    double sim = 0;  // test hook: pretend this much time passed once the deletion phase is over
+    double sim = 0; // test hook: pretend this much time passed once the deletion phase is over
     auto left = [&] { return time_limit_s - sim - std::chrono::duration<double>(Clock::now() - t0).count(); };
     InfeasibilityExplanation e;
     const size_t nrows = m.row_names.size(), ncols = m.cols.size();
@@ -116,8 +116,14 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
     std::vector<char> all(nrows, 1);
     ++solves;
     Outcome root = test_rows(m, all, left());
-    if (root.kind == Outcome::Feasible) { finish("relaxation_feasible", "the LP relaxation is feasible; nothing to explain"); return e; }
-    if (root.kind == Outcome::Unknown) { finish("no_verified_proof", "no verified infeasibility proof for the full model: " + root.why); return e; }
+    if (root.kind == Outcome::Feasible) {
+        finish("relaxation_feasible", "the LP relaxation is feasible; nothing to explain");
+        return e;
+    }
+    if (root.kind == Outcome::Unknown) {
+        finish("no_verified_proof", "no verified infeasibility proof for the full model: " + root.why);
+        return e;
+    }
 
     // Current certificate (multipliers in original row indexing) and its row support.
     Result cert = root.r;
@@ -130,7 +136,8 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
     std::vector<char> S = support(cert, all);
     // Deletion filter, least-weighted rows first.
     std::vector<int> order;
-    for (size_t i = 0; i < nrows; ++i) if (S[i]) order.push_back(int(i));
+    for (size_t i = 0; i < nrows; ++i)
+        if (S[i]) order.push_back(int(i));
     std::stable_sort(order.begin(), order.end(), [&](int a, int b) {
         return cert.farkas_row_lower[a] + cert.farkas_row_upper[a] < cert.farkas_row_lower[b] + cert.farkas_row_upper[b];
     });
@@ -140,14 +147,18 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
     bool out_of_time = false;
     for (int r : order) {
         if (!S[r]) continue;
-        if (left() <= 0) { unproven[r] = 1; out_of_time = true; continue; }
+        if (left() <= 0) {
+            unproven[r] = 1;
+            out_of_time = true;
+            continue;
+        }
         std::vector<char> trial = S;
         trial[r] = 0;
         ++solves;
         Outcome o = test_rows(m, trial, left());
         if (o.kind == Outcome::Infeasible) {
             cert = o.r;
-            S = support(cert, trial);  // rows without multiplier are not needed for this proof
+            S = support(cert, trial); // rows without multiplier are not needed for this proof
         } else if (o.kind == Outcome::Feasible) {
             witness[r] = o.x;
             wviol[r] = o.violation;
@@ -177,10 +188,13 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
             if (unproven[i] || witness[i].empty()) e.unproven_rows.push_back(int(i));
         }
     for (size_t j = 0; j < ncols; ++j)
-        if (j < e.farkas_col_lower.size() && (e.farkas_col_lower[j] != 0 || e.farkas_col_upper[j] != 0))
-            e.bound_columns.push_back(int(j));
+        if (j < e.farkas_col_lower.size() && (e.farkas_col_lower[j] != 0 || e.farkas_col_upper[j] != 0)) e.bound_columns.push_back(int(j));
     if (!ok) {
-        e.rows.clear(); e.witness.clear(); e.witness_violation.clear(); e.unproven_rows.clear(); e.bound_columns.clear();
+        e.rows.clear();
+        e.witness.clear();
+        e.witness_violation.clear();
+        e.unproven_rows.clear();
+        e.bound_columns.clear();
         finish("no_verified_proof", "the reduced multiplier set failed the full-model proof check");
         return e;
     }
@@ -189,83 +203,87 @@ InfeasibilityExplanation explain_infeasibility(const Model& m, double time_limit
     if (!e.inconsistent_bound_columns.empty()) {
         e.relaxation_status = "not_applicable_column_bounds_inconsistent";
     } else {
-      if (left() <= 0) {  // the budget covers every phase: never start the elastic solve after the deadline
-        e.relaxation_status = "not_run_time_limit";
-      } else {
-        Model r = m;
-        r.maximize = false;
-        r.obj_const = 0;
-        std::fill(r.cost.begin(), r.cost.end(), 0.0);
-        r.is_int.assign(ncols, 0);
-        std::vector<int> lower_col(nrows, -1), upper_col(nrows, -1);
-        std::vector<double> weight(nrows, 1.0);
-        for (size_t i = 0; i < nrows; ++i) {
-            double mag = 0;
-            if (std::isfinite(m.row_lo[i])) mag = std::max(mag, std::abs(m.row_lo[i]));
-            if (std::isfinite(m.row_up[i])) mag = std::max(mag, std::abs(m.row_up[i]));
-            weight[i] = 1.0 / (1.0 + mag);
-            if (std::isfinite(m.row_lo[i])) {  // A x + sl >= lo : the lower side relaxed by sl
-                lower_col[i] = int(r.cols.size());
-                r.col_names.push_back("RELAX_LO_" + m.row_names[i]);
-                r.cols.push_back({{int(i), 1.0}});
-                r.cost.push_back(weight[i]);
-                r.col_lo.push_back(0); r.col_up.push_back(kInf);
-            }
-            if (std::isfinite(m.row_up[i])) {  // A x - su <= up : the upper side relaxed by su
-                upper_col[i] = int(r.cols.size());
-                r.col_names.push_back("RELAX_UP_" + m.row_names[i]);
-                r.cols.push_back({{int(i), -1.0}});
-                r.cost.push_back(weight[i]);
-                r.col_lo.push_back(0); r.col_up.push_back(kInf);
-            }
-        }
-        r.is_int.assign(r.cols.size(), 0);
-        // Objective scale: every elastic cost is multiplied by the same exact power of two s, so relative weights and the
-        // set of optimal points are unchanged and the division below is exact. Without it the smallest weights (about
-        // 3e-8) sit within a factor of ~30 of the solvers' absolute 1e-9 reduced-cost tolerance and the simplex can stop
-        // early. k = max(ceil(log2(1/min positive weight)), 20), capped at 30.
-        double wmin = kInf;
-        for (size_t i = 0; i < nrows; ++i)
-            if (lower_col[i] >= 0 || upper_col[i] >= 0) wmin = std::min(wmin, weight[i]);
-        // 1/wmin can overflow (a huge finite row bound gives a denormal weight); the double result is clamped before the int cast
-        const double lg = std::isfinite(wmin) ? std::log2(1.0 / wmin) : 20.0;
-        const int kexp = std::isfinite(lg) ? int(std::min(30.0, std::max(20.0, std::ceil(lg)))) : 30;  // inf -> 30; NaN -> 30
-        const double scale = std::ldexp(1.0, kexp);
-        for (size_t j = ncols; j < r.cols.size(); ++j) r.cost[j] *= scale;
-        e.relaxation_scale = scale;  // set whenever the scaled LP is attempted (0 = never attempted)
-        ++solves;
-        Result rr = solve_lp_gated(r, r.col_lo, r.col_up, nullptr, left(), false, true);
-        if (rr.status == Status::Optimal && rr.x.size() == r.cols.size()) {
-            e.relaxation_status = "optimal";
-            e.relaxation_objective = rr.objective / scale;  // exact: scale is a power of two; reporting-only, not claimed minimal
-            e.relaxation_gap = rr.gap;                      // relative gap of the SCALED model, as the solver computed it
-            e.relaxation_gap_abs_unscaled = std::abs(rr.objective - rr.dual_objective) / scale;
-            e.relaxation_quality = rr.certificate_quality;  // label of the SCALED model's strict 1e-8 KKT check
-            e.relaxation_x.assign(rr.x.begin(), rr.x.begin() + ncols);
-            e.relax_lower.assign(nrows, 0.0);
-            e.relax_upper.assign(nrows, 0.0);
-            e.relax_weight = weight;
-            // Independent recheck on the model with each relaxed side moved by its amount.
-            std::vector<long double> act(nrows, 0);
-            double worst = 0;
-            for (size_t j = 0; j < ncols; ++j) {
-                if (std::isfinite(m.col_lo[j])) worst = std::max(worst, (m.col_lo[j] - e.relaxation_x[j]) / (1 + std::abs(m.col_lo[j])));
-                if (std::isfinite(m.col_up[j])) worst = std::max(worst, (e.relaxation_x[j] - m.col_up[j]) / (1 + std::abs(m.col_up[j])));
-                for (const Entry& en : m.cols[j]) act[en.index] += (long double)en.value * e.relaxation_x[j];
-            }
-            for (size_t i = 0; i < nrows; ++i) {
-                if (lower_col[i] >= 0) e.relax_lower[i] = std::max(0.0, rr.x[lower_col[i]]);
-                if (upper_col[i] >= 0) e.relax_upper[i] = std::max(0.0, rr.x[upper_col[i]]);
-                double lo = m.row_lo[i] - e.relax_lower[i], up = m.row_up[i] + e.relax_upper[i];
-                if (std::isfinite(lo)) worst = std::max(worst, (double)((lo - act[i]) / (1 + std::abs(lo))));
-                if (std::isfinite(up)) worst = std::max(worst, (double)((act[i] - up) / (1 + std::abs(up))));
-            }
-            e.relaxation_violation = worst;
-            if (!(worst <= kWitnessTol)) e.relaxation_status = "unverified_point";
+        if (left() <= 0) { // the budget covers every phase: never start the elastic solve after the deadline
+            e.relaxation_status = "not_run_time_limit";
         } else {
-            e.relaxation_status = std::string("not_solved_") + status_name(rr.status);
+            Model r = m;
+            r.maximize = false;
+            r.obj_const = 0;
+            std::fill(r.cost.begin(), r.cost.end(), 0.0);
+            r.is_int.assign(ncols, 0);
+            std::vector<int> lower_col(nrows, -1), upper_col(nrows, -1);
+            std::vector<double> weight(nrows, 1.0);
+            for (size_t i = 0; i < nrows; ++i) {
+                double mag = 0;
+                if (std::isfinite(m.row_lo[i])) mag = std::max(mag, std::abs(m.row_lo[i]));
+                if (std::isfinite(m.row_up[i])) mag = std::max(mag, std::abs(m.row_up[i]));
+                weight[i] = 1.0 / (1.0 + mag);
+                if (std::isfinite(m.row_lo[i])) { // A x + sl >= lo : the lower side relaxed by sl
+                    lower_col[i] = int(r.cols.size());
+                    r.col_names.push_back("RELAX_LO_" + m.row_names[i]);
+                    r.cols.push_back({{int(i), 1.0}});
+                    r.cost.push_back(weight[i]);
+                    r.col_lo.push_back(0);
+                    r.col_up.push_back(kInf);
+                }
+                if (std::isfinite(m.row_up[i])) { // A x - su <= up : the upper side relaxed by su
+                    upper_col[i] = int(r.cols.size());
+                    r.col_names.push_back("RELAX_UP_" + m.row_names[i]);
+                    r.cols.push_back({{int(i), -1.0}});
+                    r.cost.push_back(weight[i]);
+                    r.col_lo.push_back(0);
+                    r.col_up.push_back(kInf);
+                }
+            }
+            r.is_int.assign(r.cols.size(), 0);
+            // Objective scale: every elastic cost is multiplied by the same exact power of two s, so relative weights and the
+            // set of optimal points are unchanged and the division below is exact. Without it the smallest weights (about
+            // 3e-8) sit within a factor of ~30 of the solvers' absolute 1e-9 reduced-cost tolerance and the simplex can stop
+            // early. k = max(ceil(log2(1/min positive weight)), 20), capped at 30.
+            double wmin = kInf;
+            for (size_t i = 0; i < nrows; ++i)
+                if (lower_col[i] >= 0 || upper_col[i] >= 0) wmin = std::min(wmin, weight[i]);
+            // 1/wmin can overflow (a huge finite row bound gives a denormal weight); the double result is clamped before the int cast
+            const double lg = std::isfinite(wmin) ? std::log2(1.0 / wmin) : 20.0;
+            const int kexp = std::isfinite(lg) ? int(std::min(30.0, std::max(20.0, std::ceil(lg)))) : 30; // inf -> 30; NaN -> 30
+            const double scale = std::ldexp(1.0, kexp);
+            for (size_t j = ncols; j < r.cols.size(); ++j) r.cost[j] *= scale;
+            e.relaxation_scale = scale; // set whenever the scaled LP is attempted (0 = never attempted)
+            ++solves;
+            Result rr = solve_lp_gated(r, r.col_lo, r.col_up, nullptr, left(), false, true);
+            if (rr.status == Status::Optimal && rr.x.size() == r.cols.size()) {
+                e.relaxation_status = "optimal";
+                e.relaxation_objective = rr.objective / scale; // exact: scale is a power of two; reporting-only, not claimed minimal
+                e.relaxation_gap = rr.gap;                     // relative gap of the SCALED model, as the solver computed it
+                e.relaxation_gap_abs_unscaled = std::abs(rr.objective - rr.dual_objective) / scale;
+                e.relaxation_quality = rr.certificate_quality; // label of the SCALED model's strict 1e-8 KKT check
+                e.relaxation_x.assign(rr.x.begin(), rr.x.begin() + ncols);
+                e.relax_lower.assign(nrows, 0.0);
+                e.relax_upper.assign(nrows, 0.0);
+                e.relax_weight = weight;
+                // Independent recheck on the model with each relaxed side moved by its amount.
+                std::vector<long double> act(nrows, 0);
+                double worst = 0;
+                for (size_t j = 0; j < ncols; ++j) {
+                    if (std::isfinite(m.col_lo[j]))
+                        worst = std::max(worst, (m.col_lo[j] - e.relaxation_x[j]) / (1 + std::abs(m.col_lo[j])));
+                    if (std::isfinite(m.col_up[j]))
+                        worst = std::max(worst, (e.relaxation_x[j] - m.col_up[j]) / (1 + std::abs(m.col_up[j])));
+                    for (const Entry& en : m.cols[j]) act[en.index] += (long double)en.value * e.relaxation_x[j];
+                }
+                for (size_t i = 0; i < nrows; ++i) {
+                    if (lower_col[i] >= 0) e.relax_lower[i] = std::max(0.0, rr.x[lower_col[i]]);
+                    if (upper_col[i] >= 0) e.relax_upper[i] = std::max(0.0, rr.x[upper_col[i]]);
+                    double lo = m.row_lo[i] - e.relax_lower[i], up = m.row_up[i] + e.relax_upper[i];
+                    if (std::isfinite(lo)) worst = std::max(worst, (double)((lo - act[i]) / (1 + std::abs(lo))));
+                    if (std::isfinite(up)) worst = std::max(worst, (double)((act[i] - up) / (1 + std::abs(up))));
+                }
+                e.relaxation_violation = worst;
+                if (!(worst <= kWitnessTol)) e.relaxation_status = "unverified_point";
+            } else {
+                e.relaxation_status = std::string("not_solved_") + status_name(rr.status);
+            }
         }
-      }
     }
     if (!e.unproven_rows.empty() || out_of_time)
         finish("reduced_unproven", "the subsystem is infeasible (verified) but " + std::to_string(e.unproven_rows.size()) +

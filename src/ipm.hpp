@@ -7,22 +7,22 @@
 #include "taral.hpp"
 
 enum class IpmStatus {
-    Optimal,           // KKT measures below tol on the original model (re-checked from scratch)
-    Infeasible,        // approximate Farkas certificate verified, or a trivially infeasible row/bound
-    Unbounded,         // recession direction verified and primal residual already small
-    DualInfeasible,    // recession direction verified, primal feasibility not established
+    Optimal,        // KKT measures below tol on the original model (re-checked from scratch)
+    Infeasible,     // approximate Farkas certificate verified, or a trivially infeasible row/bound
+    Unbounded,      // recession direction verified and primal residual already small
+    DualInfeasible, // recession direction verified, primal feasibility not established
     TimeLimit,
     IterationLimit,
-    NumericalFailure,  // stalled, or converged internally but failed the original-model recheck
-    Nonconvex,         // Q (in minimisation sense) has a negative pivot: not positive semidefinite
-    Unsupported,       // integer columns
+    NumericalFailure, // stalled, or converged internally but failed the original-model recheck
+    Nonconvex,        // Q (in minimisation sense) has a negative pivot: not positive semidefinite
+    Unsupported,      // integer columns
 };
 
 struct IpmOptions {
-    double tol = 1e-8;        // relative primal residual, dual residual and gap on the original model
-    double time_limit = 60;   // seconds, wall clock
+    double tol = 1e-8;      // relative primal residual, dual residual and gap on the original model
+    double time_limit = 60; // seconds, wall clock
     int max_iter = 200;
-    bool verbose = false;     // per-iteration log on stderr
+    bool verbose = false; // per-iteration log on stderr
 };
 
 // Sign convention, in the model's own sense (min or max):  reduced_cost = c + Q x - A' row_dual.
@@ -33,10 +33,10 @@ struct IpmOptions {
 struct IpmResult {
     IpmStatus status = IpmStatus::NumericalFailure;
     std::vector<double> x, row_activity, row_dual, reduced_cost;
-    double objective = 0, dual_objective = 0;  // include obj_const, model's sense
+    double objective = 0, dual_objective = 0; // include obj_const, model's sense
     long iterations = 0;
     double primal_res = 0, dual_res = 0, gap = 0;
-    double max_row_viol = 0, max_bound_viol = 0;  // absolute
+    double max_row_viol = 0, max_bound_viol = 0; // absolute
     long long factor_nnz = 0;                    // nonzeros in L of the augmented system
     int kkt_dim = 0;
     std::string message;

@@ -86,7 +86,7 @@ std::vector<std::string> tokens(const std::string& line, const std::string& sect
     } else if (section == "BOUNDS") {
         push(1, 3), push(4, 12), push(14, 22);
         if (!field(line, 24, 36).empty()) push(24, 36);
-    } else {  // COLUMNS, RHS, RANGES
+    } else { // COLUMNS, RHS, RANGES
         push(4, 12), push(14, 22), push(24, 36);
         if (!field(line, 39, 47).empty()) push(39, 47), push(49, 61);
     }
@@ -99,15 +99,15 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
     Model md;
     std::string section, obj_row, line;
     std::unordered_map<std::string, int> row_id, col_id;
-    std::unordered_set<std::string> free_rows;  // extra N rows are dropped
+    std::unordered_set<std::string> free_rows; // extra N rows are dropped
     std::vector<char> row_type;
     std::vector<double> rhs;
     std::vector<double> range;
     std::vector<char> has_range;
     bool in_int = false;
     bool saw_endata = false;
-    int cur_col = -1;                              // column whose entries are being read
-    std::vector<Entry> col_entries;  // entries of the column being read, in file order
+    int cur_col = -1;               // column whose entries are being read
+    std::vector<Entry> col_entries; // entries of the column being read, in file order
     // Turns the pending entries of column cur_col into its sorted row list: duplicate rows are summed in file
     // order (as the former per-column std::map did) and zero sums are dropped.
     auto flush_column = [&] {
@@ -115,18 +115,20 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
         std::stable_sort(col_entries.begin(), col_entries.end(), [](const Entry& x, const Entry& y) { return x.index < y.index; });
         std::vector<Entry>& out = md.cols[cur_col];
         for (const Entry& e : col_entries) {
-            if (!out.empty() && out.back().index == e.index) out.back().value += e.value;
-            else out.push_back(e);
+            if (!out.empty() && out.back().index == e.index)
+                out.back().value += e.value;
+            else
+                out.push_back(e);
         }
         out.erase(std::remove_if(out.begin(), out.end(), [](const Entry& e) { return e.value == 0; }), out.end());
         col_entries.clear();
     };
-    std::unordered_set<std::string> seen_sections;  // ROWS and COLUMNS may each appear once
-    std::string rhs_set, range_set, bound_set;  // first named set of each kind
-    std::map<std::pair<int, int>, double> q;      // (row >= col) -> Q value
-    bool q_full = false;                          // QMATRIX/QSECTION list both triangles
+    std::unordered_set<std::string> seen_sections; // ROWS and COLUMNS may each appear once
+    std::string rhs_set, range_set, bound_set;     // first named set of each kind
+    std::map<std::pair<int, int>, double> q;       // (row >= col) -> Q value
+    bool q_full = false;                           // QMATRIX/QSECTION list both triangles
 
-    auto first_set = [](std::string& keep, const std::string& name) {  // true if name is the set in use
+    auto first_set = [](std::string& keep, const std::string& name) { // true if name is the set in use
         if (keep.empty()) keep = name;
         return keep == name;
     };
@@ -164,8 +166,10 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
                 break;
             } else if (section == "OBJSENSE") {
                 if (!arg.empty()) {
-                    if (arg == "MAX" || arg == "MAXIMIZE") md.maximize = true;
-                    else if (arg != "MIN" && arg != "MINIMIZE") throw ParseError("bad OBJSENSE " + arg);
+                    if (arg == "MAX" || arg == "MAXIMIZE")
+                        md.maximize = true;
+                    else if (arg != "MIN" && arg != "MINIMIZE")
+                        throw ParseError("bad OBJSENSE " + arg);
                 }
             } else if (section == "QUADOBJ" || section == "QMATRIX") {
                 q_full = section == "QMATRIX";
@@ -175,8 +179,7 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
                     throw ParseError("quadratic constraints are not supported (" + section + " " + arg + ")");
                 q_full = true;
                 section = "QUAD";
-            } else if (section != "ROWS" && section != "COLUMNS" && section != "RHS" &&
-                       section != "RANGES" && section != "BOUNDS") {
+            } else if (section != "ROWS" && section != "COLUMNS" && section != "RHS" && section != "RANGES" && section != "BOUNDS") {
                 throw ParseError("unsupported section " + section);
             }
             if ((section == "ROWS" || section == "COLUMNS") && !seen_sections.insert(section).second)
@@ -186,19 +189,22 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
         std::vector<std::string> t = tokens(line, section, fixed);
         if (section == "OBJSENSE") {
             std::string v = t.empty() ? "" : t[0];
-            if (v == "MAX" || v == "MAXIMIZE") md.maximize = true;
-            else if (v != "MIN" && v != "MINIMIZE") throw ParseError("bad OBJSENSE " + v);
+            if (v == "MAX" || v == "MAXIMIZE")
+                md.maximize = true;
+            else if (v != "MIN" && v != "MINIMIZE")
+                throw ParseError("bad OBJSENSE " + v);
             continue;
         }
         if (section == "ROWS") {
             // Exactly two fields; more means a name with spaces, which only the fixed-column reading handles.
             if (t.size() != 2 || t[1].empty()) throw ParseError("bad ROWS line");
             char type = t[0].empty() ? '?' : static_cast<char>(std::toupper(t[0][0]));
-            if (row_id.count(t[1]) || t[1] == obj_row || free_rows.count(t[1]))
-                throw ParseError("duplicate row name '" + t[1] + "'");
+            if (row_id.count(t[1]) || t[1] == obj_row || free_rows.count(t[1])) throw ParseError("duplicate row name '" + t[1] + "'");
             if (type == 'N') {
-                if (obj_row.empty()) obj_row = t[1];
-                else free_rows.insert(t[1]);
+                if (obj_row.empty())
+                    obj_row = t[1];
+                else
+                    free_rows.insert(t[1]);
             } else if (type == 'E' || type == 'L' || type == 'G') {
                 row_id[t[1]] = static_cast<int>(md.row_names.size());
                 md.row_names.push_back(t[1]);
@@ -216,7 +222,7 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
             }
             if (t.size() != 3 && t.size() != 5) throw ParseError("bad COLUMNS line");
             int j;
-            if (cur_col >= 0 && t[0] == md.col_names[cur_col]) {  // entries of one column are consecutive: skip the lookup
+            if (cur_col >= 0 && t[0] == md.col_names[cur_col]) { // entries of one column are consecutive: skip the lookup
                 j = cur_col;
             } else {
                 auto it = col_id.find(t[0]);
@@ -237,11 +243,13 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
             for (size_t k = 1; k + 1 < t.size(); k += 2) {
                 int r = row_of(t[k]);
                 double v = number(t[k + 1]);
-                if (r == -1) md.cost[j] += v;
-                else if (r >= 0) col_entries.push_back({r, v});
+                if (r == -1)
+                    md.cost[j] += v;
+                else if (r >= 0)
+                    col_entries.push_back({r, v});
             }
         } else if (section == "RHS" || section == "RANGES") {
-            size_t start = t.size() % 2 == 1 ? 1 : 0;  // optional set name
+            size_t start = t.size() % 2 == 1 ? 1 : 0; // optional set name
             if (fixed) start = 1;
             if (start == 1 && !t[0].empty() && !first_set(section == "RHS" ? rhs_set : range_set, t[0])) continue;
             if (rhs.empty()) {
@@ -253,8 +261,10 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
                 int r = row_of(t[k]);
                 double v = number(t[k + 1]);
                 if (section == "RHS") {
-                    if (r == -1) md.obj_const = -v;
-                    else if (r >= 0) rhs[r] = v;
+                    if (r == -1)
+                        md.obj_const = -v;
+                    else if (r >= 0)
+                        rhs[r] = v;
                 } else if (r >= 0) {
                     range[r] = v;
                     has_range[r] = 1;
@@ -275,8 +285,10 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
             } else if (t.size() == 4) {
                 set = t[1], col = t[2], val = t[3];
             } else if (t.size() == 3) {
-                if (no_value) set = t[1], col = t[2];
-                else col = t[1], val = t[2];
+                if (no_value)
+                    set = t[1], col = t[2];
+                else
+                    col = t[1], val = t[2];
             } else if (t.size() == 2) {
                 col = t[1];
             } else {
@@ -289,21 +301,28 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
             double v = no_value || val.empty() ? 0 : number(val);
             double &lo = md.col_lo[j], &up = md.col_up[j];
             if (type == "BV" || type == "LI" || type == "UI") md.is_int[j] = 1;
-            if (type == "LO" || type == "LI") lo = v;
+            if (type == "LO" || type == "LI")
+                lo = v;
             else if (type == "UP" || type == "UI") {
                 up = v;
                 if (v < 0 && lo == 0) lo = -kInf;
-            } else if (type == "FX") lo = up = v;
-            else if (type == "FR") lo = -kInf, up = kInf;
-            else if (type == "MI") lo = -kInf;
-            else if (type == "PL") up = kInf;
-            else if (type == "BV") lo = 0, up = 1;
-            else throw ParseError("unsupported bound type " + type);
+            } else if (type == "FX")
+                lo = up = v;
+            else if (type == "FR")
+                lo = -kInf, up = kInf;
+            else if (type == "MI")
+                lo = -kInf;
+            else if (type == "PL")
+                up = kInf;
+            else if (type == "BV")
+                lo = 0, up = 1;
+            else
+                throw ParseError("unsupported bound type " + type);
         } else if (section == "QUAD") {
             if (t.size() != 3) throw ParseError("bad quadratic objective line");
             int a = col_of(t[0]), b = col_of(t[1]);
             double v = number(t[2]);
-            if (q_full && a < b) continue;  // full listing: keep one triangle
+            if (q_full && a < b) continue; // full listing: keep one triangle
             q[{std::max(a, b), std::min(a, b)}] += v;
         }
     }
@@ -345,14 +364,20 @@ Model parse(const std::string& path, bool fixed, std::chrono::steady_clock::time
     // The solvers branch on isinf(), so a sentinel left finite would be pivoted to as a real bound.
     for (std::vector<double>* lo : {&md.col_lo, &md.row_lo})
         for (double& v : *lo)
-            if (v <= -kHugeBound) { if (std::isfinite(v)) ++md.sentinel_bounds; v = -kInf; }
+            if (v <= -kHugeBound) {
+                if (std::isfinite(v)) ++md.sentinel_bounds;
+                v = -kInf;
+            }
     for (std::vector<double>* up : {&md.col_up, &md.row_up})
         for (double& v : *up)
-            if (v >= kHugeBound) { if (std::isfinite(v)) ++md.sentinel_bounds; v = kInf; }
+            if (v >= kHugeBound) {
+                if (std::isfinite(v)) ++md.sentinel_bounds;
+                v = kInf;
+            }
     return md;
 }
 
-}  // namespace
+} // namespace
 
 bool Model::has_integers() const {
     for (char c : is_int)
@@ -366,7 +391,7 @@ Model read_mps(const std::string& path, std::chrono::steady_clock::time_point de
     } catch (const ParseError& free_err) {
         try {
             return parse(path, true, deadline);
-        } catch (const ParseError& fixed_err) {  // report both readings, not just the fallback's
+        } catch (const ParseError& fixed_err) { // report both readings, not just the fallback's
             if (std::string(free_err.what()) == fixed_err.what()) throw;
             throw ParseError(std::string(free_err.what()) + " (free format); " + fixed_err.what() + " (fixed columns)");
         }

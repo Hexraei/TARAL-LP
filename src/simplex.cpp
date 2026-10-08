@@ -15,29 +15,29 @@
 namespace {
 constexpr double kPrimalTol = 1e-9;
 constexpr double kDualTol = 1e-9;
-constexpr double kPivotTol = 1e-9;  // relative to the largest |alpha|
+constexpr double kPivotTol = 1e-9; // relative to the largest |alpha|
 constexpr size_t kRefactorEvery = 100;
-constexpr int kPerturbAfter = 3000;    // iterations without objective progress count as a stall
-constexpr int kMaxPerturbations = 6;   // stall remedies per solve, so perturb/restore cannot loop forever
+constexpr int kPerturbAfter = 3000;  // iterations without objective progress count as a stall
+constexpr int kMaxPerturbations = 6; // stall remedies per solve, so perturb/restore cannot loop forever
 constexpr bool kPerturbAtStart = false;
 constexpr long kMaxIterations = 50'000'000;
 
-enum Where : char { kBasic, kLower, kUpper, kZero };  // kZero: free nonbasic held at 0
+enum Where : char { kBasic, kLower, kUpper, kZero }; // kZero: free nonbasic held at 0
 
 struct Eta {
     int r;
     double pivot;
-    std::vector<Entry> col;  // entering column in the old basis, position r excluded
+    std::vector<Entry> col; // entering column in the old basis, position r excluded
 };
 
 class Simplex {
-public:
+  public:
     // clo/cup replace the model's column bounds (solve() passes the model's own).
     Simplex(const Model& md, const std::vector<double>& clo, const std::vector<double>& cup)
         : md_(md), clo_(clo), cup_(cup), m_(int(md.row_names.size())), n_(int(md.col_names.size())) {}
     Result run(double time_limit_s, const std::vector<char>* warm = nullptr);
 
-private:
+  private:
     const Model& md_;
     const std::vector<double>&clo_, &cup_;
     int m_, n_;
@@ -47,10 +47,9 @@ private:
     SparseLU lu_;
     std::vector<Eta> etas_;
     SparseLU::Clock::time_point deadline_ = SparseLU::Clock::time_point::max();
-    bool timed_out_ = false;  // a factorization hit deadline_
+    bool timed_out_ = false; // a factorization hit deadline_
 
-    template <class F>
-    void for_col(int j, F f) const {
+    template <class F> void for_col(int j, F f) const {
         if (j < n_)
             for (const Entry& e : md_.cols[j]) f(e.index, e.value);
         else
@@ -63,9 +62,12 @@ private:
     }
     void set_nonbasic(int j) {
         bool fl = std::isfinite(lo_[j]), fu = std::isfinite(up_[j]);
-        if (fl && (!fu || std::abs(x_[j] - lo_[j]) <= std::abs(x_[j] - up_[j]))) where_[j] = kLower, x_[j] = lo_[j];
-        else if (fu) where_[j] = kUpper, x_[j] = up_[j];
-        else where_[j] = kZero, x_[j] = 0;
+        if (fl && (!fu || std::abs(x_[j] - lo_[j]) <= std::abs(x_[j] - up_[j])))
+            where_[j] = kLower, x_[j] = lo_[j];
+        else if (fu)
+            where_[j] = kUpper, x_[j] = up_[j];
+        else
+            where_[j] = kZero, x_[j] = 0;
     }
     void ftran(std::vector<double>& rhs, std::vector<double>& out) const {
         lu_.ftran(rhs, out);
@@ -158,7 +160,7 @@ Result Simplex::finish(Result r) {
     };
     for (int i = 0; i < m_; ++i) {
         double activity = r.row_activity[i], lo = md_.row_lo[i], up = md_.row_up[i];
-        double raw = std::max({0.0, lo-activity, activity-up});
+        double raw = std::max({0.0, lo - activity, activity - up});
         // Use the violated finite endpoint as RHS; when feasible use zero.
         // For equality it is the unique RHS; ranged rows use the violated endpoint.
         // Roundoff-continuous: an activity within kEndpointBand (relative to the term
@@ -170,15 +172,16 @@ Result Simplex::finish(Result r) {
         double rhs = activity < lo ? lo : activity > up ? up : (lo == up ? lo : 0.0);
         if (activity >= lo && activity <= up && lo != up) {
             double dlo = std::isfinite(lo) ? activity - lo : kInf, dup = std::isfinite(up) ? up - activity : kInf;
-            if (dlo <= dup && dlo <= kEndpointBand * (terms + std::abs(lo))) rhs = lo;
-            else if (dup < dlo && dup <= kEndpointBand * (terms + std::abs(up))) rhs = up;
+            if (dlo <= dup && dlo <= kEndpointBand * (terms + std::abs(lo)))
+                rhs = lo;
+            else if (dup < dlo && dup <= kEndpointBand * (terms + std::abs(up)))
+                rhs = up;
         }
         double magnitude = terms + std::abs(rhs);
         r.row_term_magnitude[i] = magnitude;
         r.row_violation_abs[i] = raw;
-        r.row_violation_magnitude_scaled[i] = magnitude > 0 ? raw/magnitude : raw;
-        r.max_row_violation_magnitude_scaled = std::max(r.max_row_violation_magnitude_scaled,
-                                                       r.row_violation_magnitude_scaled[i]);
+        r.row_violation_magnitude_scaled[i] = magnitude > 0 ? raw / magnitude : raw;
+        r.max_row_violation_magnitude_scaled = std::max(r.max_row_violation_magnitude_scaled, r.row_violation_magnitude_scaled[i]);
         primal(activity, lo, up, r.max_row_viol);
         dual(r.row_dual[i], r.row_activity[i], md_.row_lo[i], md_.row_up[i]);
     }
@@ -188,20 +191,20 @@ Result Simplex::finish(Result r) {
     }
     r.gap = std::abs(r.objective - r.dual_objective) / (1 + std::abs(r.objective));
     r.complementarity /= 1 + std::abs(r.objective);
-    finite = finite && std::isfinite(r.dual_objective) && std::isfinite(r.gap) &&
-             std::isfinite(r.complementarity) && std::isfinite(r.primal_res) && std::isfinite(r.dual_res);
+    finite = finite && std::isfinite(r.dual_objective) && std::isfinite(r.gap) && std::isfinite(r.complementarity) &&
+             std::isfinite(r.primal_res) && std::isfinite(r.dual_res);
     constexpr double certificate_tol = 1e-8;
-    r.certificate_quality = !finite ? "unknown" :
-        std::max({r.primal_res, r.dual_res, r.gap, r.complementarity}) <= certificate_tol ? "pass" : "fail";
+    r.certificate_quality = !finite                                                                             ? "unknown"
+                            : std::max({r.primal_res, r.dual_res, r.gap, r.complementarity}) <= certificate_tol ? "pass"
+                                                                                                                : "fail";
     // Preserve baseline original-model acceptance. Strict KKT quality is separate.
     double baseline_violation = 0;
     for (int i = 0; i < m_; ++i) {
         double scale = 1 + std::abs(std::isfinite(md_.row_lo[i]) ? md_.row_lo[i] : md_.row_up[i]);
-        baseline_violation = std::max({baseline_violation,
-            (md_.row_lo[i]-r.row_activity[i])/scale, (r.row_activity[i]-md_.row_up[i])/scale});
+        baseline_violation =
+            std::max({baseline_violation, (md_.row_lo[i] - r.row_activity[i]) / scale, (r.row_activity[i] - md_.row_up[i]) / scale});
     }
-    for (int j = 0; j < n_; ++j)
-        baseline_violation = std::max({baseline_violation, clo_[j]-r.x[j], r.x[j]-cup_[j]});
+    for (int j = 0; j < n_; ++j) baseline_violation = std::max({baseline_violation, clo_[j] - r.x[j], r.x[j] - cup_[j]});
     bool primal_finite = std::isfinite(r.objective);
     for (double v : r.x) primal_finite = primal_finite && std::isfinite(v);
     for (double v : r.row_activity) primal_finite = primal_finite && std::isfinite(v);
@@ -225,10 +228,14 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
         if (lo_[j] > up_[j] + kPrimalTol) {
             res.status = Status::Infeasible;
             res.message = "inconsistent bounds";
-            res.farkas_row_lower.assign(m_, 0); res.farkas_row_upper.assign(m_, 0);
-            res.farkas_col_lower.assign(n_, 0); res.farkas_col_upper.assign(n_, 0);
-            if (j < n_) res.farkas_col_lower[j] = res.farkas_col_upper[j] = 0.5;
-            else res.farkas_row_lower[j-n_] = res.farkas_row_upper[j-n_] = 0.5;
+            res.farkas_row_lower.assign(m_, 0);
+            res.farkas_row_upper.assign(m_, 0);
+            res.farkas_col_lower.assign(n_, 0);
+            res.farkas_col_upper.assign(n_, 0);
+            if (j < n_)
+                res.farkas_col_lower[j] = res.farkas_col_upper[j] = 0.5;
+            else
+                res.farkas_row_lower[j - n_] = res.farkas_row_upper[j - n_] = 0.5;
             // deadline_ is not yet initialized on this early inconsistent-bounds path, so this call effectively has no solver deadline;
             // only the repair's own caps (20 s per call, 60 s per thread) apply.
             verify_nonoptimal_certificate(md_, clo_, cup_, res, deadline_);
@@ -245,15 +252,19 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
     };
     bool warmed = warm && int(warm->size()) == N && std::count(warm->begin(), warm->end(), char(kBasic)) == m_;
     if (warmed) {
-        deadline_ = start + limit / 4;  // a warm basis gets a quarter of the limit to factor
+        deadline_ = start + limit / 4; // a warm basis gets a quarter of the limit to factor
         // Warm start: nonbasics go to their (possibly new) bounds; basics violating a tightened
         // bound are repaired by the composite phase 1.
         for (int j = 0, p = 0; j < N; ++j) {
             where_[j] = Where((*warm)[j]);
-            if (where_[j] == kBasic) head_[p++] = j;
-            else if (where_[j] == kLower && std::isfinite(lo_[j])) x_[j] = lo_[j];
-            else if (where_[j] == kUpper && std::isfinite(up_[j])) x_[j] = up_[j];
-            else set_nonbasic(j);
+            if (where_[j] == kBasic)
+                head_[p++] = j;
+            else if (where_[j] == kLower && std::isfinite(lo_[j]))
+                x_[j] = lo_[j];
+            else if (where_[j] == kUpper && std::isfinite(up_[j]))
+                x_[j] = up_[j];
+            else
+                set_nonbasic(j);
         }
     } else {
         for (int j = 0; j < n_; ++j) set_nonbasic(j);
@@ -266,16 +277,19 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
         deadline_ = start + limit;
         timed_out_ = false;
         factored = refactor();
-    } else deadline_ = start + limit;
+    } else
+        deadline_ = start + limit;
     if (!factored) {
-        if (timed_out_) res.status = Status::TimeLimit;
-        else res.message = "initial basis could not be factored";
+        if (timed_out_)
+            res.status = Status::TimeLimit;
+        else
+            res.message = "initial basis could not be factored";
         return res;
     }
 
-    bool fresh = true;  // no eta updates since the last refactor
-    int stalled = 0;              // iterations since either phase objective last improved
-    double best[2] = {kInf, kInf};  // best phase-2 / phase-1 objective seen; flipping phases is no progress
+    bool fresh = true;             // no eta updates since the last refactor
+    int stalled = 0;               // iterations since either phase objective last improved
+    double best[2] = {kInf, kInf}; // best phase-2 / phase-1 objective seen; flipping phases is no progress
     int level = 0, perturbations = 0;
     // Anti-stalling (idea from the M3 reference engine): widen every non-fixed bound by a tiny
     // deterministic random amount so tied ratios separate; a stall while perturbed retries with
@@ -293,23 +307,27 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
                 if (std::isfinite(up)) up += shift * (1 + std::abs(up));
             }
             lo_[j] = lo, up_[j] = up;
-            if (where_[j] == kLower) x_[j] = lo;
-            else if (where_[j] == kUpper) x_[j] = up;
+            if (where_[j] == kLower)
+                x_[j] = lo;
+            else if (where_[j] == kUpper)
+                x_[j] = up;
         }
         level = lvl;
         stalled = 0, best[0] = best[1] = kInf;
-        return refactor();  // also recomputes x_B
+        return refactor(); // also recomputes x_B
     };
     if (kPerturbAtStart) {
         ++perturbations;
         if (!apply_bounds(1)) {
-            if (timed_out_) res.status = Status::TimeLimit;
-            else res.message = "perturbed basis could not be factored";
+            if (timed_out_)
+                res.status = Status::TimeLimit;
+            else
+                res.message = "perturbed basis could not be factored";
             return res;
         }
     }
     std::vector<double> cb(m_), y, alpha, col(m_), unit, rho;
-    std::vector<double> weight(N, 1.0);  // Devex reference weights (approximate edge lengths squared)
+    std::vector<double> weight(N, 1.0); // Devex reference weights (approximate edge lengths squared)
     for (;;) {
         if (elapsed() > time_limit_s) {
             res.status = Status::TimeLimit;
@@ -319,7 +337,8 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             res.status = Status::IterationLimit;
             return res;
         }
-        if (work_budget().cap && work_budget().used >= work_budget().cap) {  // --work-limit: deterministic stop (denied entries are not counted)
+        if (work_budget().cap &&
+            work_budget().used >= work_budget().cap) { // --work-limit: deterministic stop (denied entries are not counted)
             res.status = Status::IterationLimit;
             res.message = "work limit";
             return res;
@@ -332,19 +351,23 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
         }
         if (!phase1)
             for (int p = 0; p < m_; ++p) cb[p] = c_[head_[p]];
-        double obj = 0;  // phase objective: sum of infeasibilities, or the true cost
+        double obj = 0; // phase objective: sum of infeasibilities, or the true cost
         if (phase1) {
             for (int p = 0; p < m_; ++p) {
                 int j = head_[p];
-                if (cb[p] < 0) obj += lo_[j] - x_[j];
-                else if (cb[p] > 0) obj += x_[j] - up_[j];
+                if (cb[p] < 0)
+                    obj += lo_[j] - x_[j];
+                else if (cb[p] > 0)
+                    obj += x_[j] - up_[j];
             }
         } else {
             for (int j = 0; j < N; ++j) obj += c_[j] * x_[j];
         }
         double& b = best[phase1];
-        if (!(b < kInf) || obj < b - 1e-12 * (1 + std::abs(b))) b = obj, stalled = 0;
-        else ++stalled;
+        if (!(b < kInf) || obj < b - 1e-12 * (1 + std::abs(b)))
+            b = obj, stalled = 0;
+        else
+            ++stalled;
         if (stalled > kPerturbAfter && perturbations < kMaxPerturbations) {
             ++perturbations;
             if (!apply_bounds(std::min(level + 1, 3))) break;
@@ -374,8 +397,10 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             }
             if (phase1) {
                 res.status = Status::Infeasible;
-                res.farkas_row_lower.resize(m_); res.farkas_row_upper.resize(m_);
-                res.farkas_col_lower.resize(n_); res.farkas_col_upper.resize(n_);
+                res.farkas_row_lower.resize(m_);
+                res.farkas_row_upper.resize(m_);
+                res.farkas_col_lower.resize(n_);
+                res.farkas_col_upper.resize(n_);
                 double norm = 0;
                 for (int i = 0; i < m_; ++i) {
                     res.farkas_row_lower[i] = std::isfinite(md_.row_lo[i]) ? std::max(y[i], 0.0) : 0.0;
@@ -389,8 +414,7 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
                     norm += res.farkas_col_lower[j] + res.farkas_col_upper[j];
                 }
                 if (norm > 0) {
-                    for (auto* v : {&res.farkas_row_lower, &res.farkas_row_upper,
-                                    &res.farkas_col_lower, &res.farkas_col_upper})
+                    for (auto* v : {&res.farkas_row_lower, &res.farkas_row_upper, &res.farkas_col_lower, &res.farkas_col_upper})
                         for (double& a : *v) a /= norm;
                 }
                 verify_nonoptimal_certificate(md_, clo_, cup_, res, deadline_);
@@ -409,7 +433,7 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
         double amax = 0;
         for (double a : alpha) amax = std::max(amax, std::abs(a));
         double ptol = kPivotTol * std::max(1.0, amax);
-        auto blocking = [&](int p, double& g) {  // bound reached by basic at position p, or ±inf
+        auto blocking = [&](int p, double& g) { // bound reached by basic at position p, or ±inf
             int j = head_[p];
             g = -dir * alpha[p];
             if (g < 0) return x_[j] > up_[j] + kPrimalTol ? up_[j] : x_[j] >= lo_[j] - kPrimalTol ? lo_[j] : -kInf;
@@ -430,7 +454,7 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
             double ratio = std::max(0.0, (bnd - x_[head_[p]]) / g);
             if (ratio <= relaxed && (r < 0 || std::abs(alpha[p]) > std::abs(alpha[r]))) r = p, theta = ratio, rbound = bnd;
         }
-        double range = up_[q] - lo_[q];  // inf unless boxed
+        double range = up_[q] - lo_[q]; // inf unless boxed
         if (r < 0 && !std::isfinite(range)) {
             if (!fresh) {
                 if (!refactor()) break;
@@ -442,27 +466,28 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
                 break;
             }
             res.status = Status::Unbounded;
-            res.x.assign(x_.begin(), x_.begin()+n_);
+            res.x.assign(x_.begin(), x_.begin() + n_);
             res.ray.assign(n_, 0.0);
             if (q < n_) res.ray[q] = dir;
             for (int p = 0; p < m_; ++p)
                 if (head_[p] < n_) res.ray[head_[p]] = -dir * alpha[p];
             double norm = 0;
             for (double v : res.ray) norm = std::max(norm, std::abs(v));
-            if (norm > 0) for (double& v : res.ray) v /= norm;
+            if (norm > 0)
+                for (double& v : res.ray) v /= norm;
             verify_nonoptimal_certificate(md_, clo_, cup_, res, deadline_);
             return res;
         }
         ++res.iterations;
-        ++work_budget().used;  // work_used counts performed iterations
-        if (range <= theta) {  // entering variable reaches its opposite bound first
+        ++work_budget().used; // work_used counts performed iterations
+        if (range <= theta) { // entering variable reaches its opposite bound first
             for (int p = 0; p < m_; ++p) x_[head_[p]] -= dir * range * alpha[p];
             bool to_upper = where_[q] == kLower;
             where_[q] = to_upper ? kUpper : kLower;
             x_[q] = to_upper ? up_[q] : lo_[q];
             continue;
         }
-        {  // Devex weight update from the pivot row of the outgoing basis
+        { // Devex weight update from the pivot row of the outgoing basis
             unit.assign(m_, 0.0);
             unit[r] = 1.0;
             btran(unit, rho);
@@ -473,7 +498,7 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
                 if (a != 0) weight[j] = std::max(weight[j], a * a * wq);
             }
             weight[head_[r]] = std::max(wq / (ar * ar), 1.0);
-            if (weight[head_[r]] > 1e6) std::fill(weight.begin(), weight.end(), 1.0);  // new reference framework
+            if (weight[head_[r]] > 1e6) std::fill(weight.begin(), weight.end(), 1.0); // new reference framework
         }
         for (int p = 0; p < m_; ++p) x_[head_[p]] -= dir * theta * alpha[p];
         x_[q] += dir * theta;
@@ -497,13 +522,13 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
     return res;
 }
 
-}  // namespace
+} // namespace
 
 Result solve_lp(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
                 const std::vector<char>* warm_basis, double time_limit_s) {
     if (!model.maximize) return Simplex(model, col_lo, col_up).run(time_limit_s, warm_basis);
-    Model neg = model;  // maximise f  ==  minimise -f
-    neg.maximize = false;  // proof verifier sees the transformed minimization sense
+    Model neg = model;    // maximise f  ==  minimise -f
+    neg.maximize = false; // proof verifier sees the transformed minimization sense
     for (double& c : neg.cost) c = -c;
     neg.obj_const = -neg.obj_const;
     Result r = Simplex(neg, col_lo, col_up).run(time_limit_s, warm_basis);
@@ -514,18 +539,22 @@ Result solve_lp(const Model& model, const std::vector<double>& col_lo, const std
     return r;
 }
 
-Result solve(const Model& model, double time_limit_s) {
-    return solve_lp(model, model.col_lo, model.col_up, nullptr, time_limit_s);
-}
+Result solve(const Model& model, double time_limit_s) { return solve_lp(model, model.col_lo, model.col_up, nullptr, time_limit_s); }
 
 const char* status_name(Status s) {
     switch (s) {
-        case Status::Optimal: return "optimal";
-        case Status::Infeasible: return "infeasible";
-        case Status::Unbounded: return "unbounded";
-        case Status::TimeLimit: return "time_limit";
-        case Status::IterationLimit: return "iteration_limit";
-        case Status::NumericalFailure: break;
+    case Status::Optimal:
+        return "optimal";
+    case Status::Infeasible:
+        return "infeasible";
+    case Status::Unbounded:
+        return "unbounded";
+    case Status::TimeLimit:
+        return "time_limit";
+    case Status::IterationLimit:
+        return "iteration_limit";
+    case Status::NumericalFailure:
+        break;
     }
     return "numerical_failure";
 }

@@ -14,25 +14,31 @@
 #include "timing.hpp"
 
 namespace {
-constexpr double kPrimalGate = 1e-7;  // same bar as Simplex::finish
-constexpr double kDualGate = 1e-7;    // relative to the column's own cost scale (>= 1)
+constexpr double kPrimalGate = 1e-7; // same bar as Simplex::finish
+constexpr double kDualGate = 1e-7;   // relative to the column's own cost scale (>= 1)
 
 double pow2_round(double f) {
     if (!(f > 0) || !std::isfinite(f)) return 1.0;
     return std::ldexp(1.0, int(std::lround(std::log2(f))));
 }
-}  // namespace
+} // namespace
 
 KktReport kkt_check(const Model& md, const std::vector<double>& clo, const std::vector<double>& cup, const Result& r) {
     KktReport k;
     const int n = int(md.col_names.size()), m = int(md.row_names.size());
-    auto fail = [&](const std::string& why) { k.ok = false; k.msg = why; return k; };
+    auto fail = [&](const std::string& why) {
+        k.ok = false;
+        k.msg = why;
+        return k;
+    };
     if (int(r.x.size()) != n) return fail("no primal point");
     if (int(r.basis.size()) != n + m) return fail("no basis to certify");
-    for (double v : r.x) if (!std::isfinite(v)) return fail("nonfinite primal point");
-    const double sgn = md.maximize ? -1.0 : 1.0;  // work in minimisation form
+    for (double v : r.x)
+        if (!std::isfinite(v)) return fail("nonfinite primal point");
+    const double sgn = md.maximize ? -1.0 : 1.0; // work in minimisation form
     std::vector<double> act(m, 0.0);
-    for (int j = 0; j < n; ++j) for (const Entry& e : md.cols[j]) act[e.index] += e.value * r.x[j];
+    for (int j = 0; j < n; ++j)
+        for (const Entry& e : md.cols[j]) act[e.index] += e.value * r.x[j];
     // primal feasibility on the original model
     for (int i = 0; i < m; ++i) {
         double s = 1 + std::abs(std::isfinite(md.row_lo[i]) ? md.row_lo[i] : md.row_up[i]);
@@ -42,20 +48,25 @@ KktReport kkt_check(const Model& md, const std::vector<double>& clo, const std::
     if (k.primal > kPrimalGate) return fail("primal infeasible by " + std::to_string(k.primal));
     // duals from a fresh factorisation of the returned basis
     std::vector<int> head;
-    for (int j = 0; j < n + m; ++j) if (r.basis[j] == 0) head.push_back(j);
+    for (int j = 0; j < n + m; ++j)
+        if (r.basis[j] == 0) head.push_back(j);
     if (int(head.size()) != m) return fail("basis size " + std::to_string(head.size()) + " != rows " + std::to_string(m));
     std::vector<std::vector<Entry>> cols(m);
     std::vector<double> cb(m, 0.0);
     for (int p = 0; p < m; ++p) {
         int j = head[p];
-        if (j < n) { cols[p] = md.cols[j]; cb[p] = sgn * md.cost[j]; }
-        else cols[p].push_back({j - n, -1.0});
+        if (j < n) {
+            cols[p] = md.cols[j];
+            cb[p] = sgn * md.cost[j];
+        } else
+            cols[p].push_back({j - n, -1.0});
     }
     SparseLU lu;
     if (!lu.factor(m, cols)) return fail("returned basis is singular");
     std::vector<double> y(m, 0.0);
     lu.btran(cb, y);
-    for (double v : y) if (!std::isfinite(v)) return fail("nonfinite duals");
+    for (double v : y)
+        if (!std::isfinite(v)) return fail("nonfinite duals");
     auto value = [&](int j) { return j < n ? r.x[j] : act[j - n]; };
     auto lower = [&](int j) { return j < n ? clo[j] : md.row_lo[j - n]; };
     auto upper = [&](int j) { return j < n ? cup[j] : md.row_up[j - n]; };
@@ -63,7 +74,10 @@ KktReport kkt_check(const Model& md, const std::vector<double>& clo, const std::
         double d, scale;
         if (j < n) {
             double rt = 0, ay = 0;
-            for (const Entry& e : md.cols[j]) { ay += e.value * y[e.index]; rt += std::abs(e.value * y[e.index]); }
+            for (const Entry& e : md.cols[j]) {
+                ay += e.value * y[e.index];
+                rt += std::abs(e.value * y[e.index]);
+            }
             d = sgn * md.cost[j] - ay;
             scale = std::max({1.0, std::abs(md.cost[j]), rt});
         } else {
@@ -73,18 +87,26 @@ KktReport kkt_check(const Model& md, const std::vector<double>& clo, const std::
         double tol = kDualGate * scale;
         double lo = lower(j), up = upper(j), x = value(j);
         double viol;
-        if (r.basis[j] == 0) viol = std::abs(d);  // basic: reduced cost must vanish
+        if (r.basis[j] == 0)
+            viol = std::abs(d); // basic: reduced cost must vanish
         else {
             bool atl = std::isfinite(lo) && std::abs(x - lo) <= kPrimalGate * (1 + std::abs(lo));
             bool atu = std::isfinite(up) && std::abs(x - up) <= kPrimalGate * (1 + std::abs(up));
-            if (atl && atu) viol = 0;                   // fixed: any sign
-            else if (atl) viol = std::max(0.0, -d);     // at lower: d >= 0
-            else if (atu) viol = std::max(0.0, d);      // at upper: d <= 0
-            else if (!std::isfinite(lo) && !std::isfinite(up) && std::abs(x) <= kPrimalGate) viol = std::abs(d);  // free at 0
-            else return fail("nonbasic variable " + std::to_string(j) + " is off its bound (complementarity)");
+            if (atl && atu)
+                viol = 0; // fixed: any sign
+            else if (atl)
+                viol = std::max(0.0, -d); // at lower: d >= 0
+            else if (atu)
+                viol = std::max(0.0, d); // at upper: d <= 0
+            else if (!std::isfinite(lo) && !std::isfinite(up) && std::abs(x) <= kPrimalGate)
+                viol = std::abs(d); // free at 0
+            else
+                return fail("nonbasic variable " + std::to_string(j) + " is off its bound (complementarity)");
         }
         k.dual = std::max(k.dual, viol / scale);
-        if (viol > tol) return fail("dual infeasible by " + std::to_string(viol) + " (scale " + std::to_string(scale) + ") at variable " + std::to_string(j));
+        if (viol > tol)
+            return fail("dual infeasible by " + std::to_string(viol) + " (scale " + std::to_string(scale) + ") at variable " +
+                        std::to_string(j));
     }
     k.ok = true;
     return k;
@@ -99,13 +121,13 @@ constexpr double kPrimalShare = 0.2;
 // `limit` is the remaining wall-clock budget. Without --time-limit the caller passes 1e9 (effectively none), so the
 // work cap alone decides the outcome; with an explicit --time-limit the wall clock is enforced by the engines and a
 // time_limit status means the outcome depended on the clock (documented in docs/deterministic_solve.md).
-Result run_one_work(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
-                    const std::vector<char>* warm, double limit, bool use_dual, bool fallback) {
+Result run_one_work(const Model& md, const std::vector<double>& lo, const std::vector<double>& up, const std::vector<char>* warm,
+                    double limit, bool use_dual, bool fallback) {
     WorkBudget& w = work_budget();
     const Stopwatch sw;
     if (use_dual) return solve_lp_dual(md, lo, up, warm, limit);
     const long total_cap = w.cap;
-    if (fallback) w.cap = w.used + std::max(1L, long(kPrimalShare * double(total_cap - w.used)));  // cap 0 means off, so at least 1
+    if (fallback) w.cap = w.used + std::max(1L, long(kPrimalShare * double(total_cap - w.used))); // cap 0 means off, so at least 1
     Result r = solve_lp(md, lo, up, warm, limit);
     w.cap = total_cap;
     if (!fallback || r.status != Status::IterationLimit || r.message != "work limit" || w.used >= total_cap) return r;
@@ -116,8 +138,8 @@ Result run_one_work(const Model& md, const std::vector<double>& lo, const std::v
     return d;
 }
 
-Result run_one(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
-               const std::vector<char>* warm, double limit, bool use_dual, bool fallback) {
+Result run_one(const Model& md, const std::vector<double>& lo, const std::vector<double>& up, const std::vector<char>* warm, double limit,
+               bool use_dual, bool fallback) {
     if (work_budget().cap) return run_one_work(md, lo, up, warm, limit, use_dual, fallback);
     if (use_dual) return solve_lp_dual(md, lo, up, warm, limit);
     const Stopwatch sw;
@@ -127,19 +149,20 @@ Result run_one(const Model& md, const std::vector<double>& lo, const std::vector
     std::fprintf(stderr, "primal simplex not finished after %.1f s, switching to dual simplex\n", spent);
     Result d = solve_lp_dual(md, lo, up, warm, limit - spent);
     d.iterations += r.iterations;
-    d.message = "route=primal-budget-then-dual budget_s=" + std::to_string(kPrimalShare * limit) + " primal_iters=" +
-                std::to_string(r.iterations) + " primal_stalled_s=" + std::to_string(spent) + "; dual simplex fallback: " + d.message;
+    d.message = "route=primal-budget-then-dual budget_s=" + std::to_string(kPrimalShare * limit) +
+                " primal_iters=" + std::to_string(r.iterations) + " primal_stalled_s=" + std::to_string(spent) +
+                "; dual simplex fallback: " + d.message;
     return d;
 }
-}  // namespace
+} // namespace
 
 WorkBudget& work_budget() {
     static WorkBudget w;
     return w;
 }
 
-Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
-                      const std::vector<char>* warm, double time_limit_s, bool use_dual, bool primal_fallback) {
+Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std::vector<double>& up, const std::vector<char>* warm,
+                      double time_limit_s, bool use_dual, bool primal_fallback) {
     Stopwatch sw;
     auto left = [&] { return time_limit_s - sw(); };
     Result r = run_one(md, lo, up, warm, time_limit_s, use_dual, primal_fallback);
@@ -152,7 +175,7 @@ Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std:
     } else {
         why = "first solve: " + r.message;
     }
-    if ((!work_budget().cap || time_limit_s < 1e8) && left() < 0.5) {  // an unlimited wall budget (work mode) never stops here
+    if ((!work_budget().cap || time_limit_s < 1e8) && left() < 0.5) { // an unlimited wall budget (work mode) never stops here
         r.status = Status::NumericalFailure;
         r.message = why + "; no time left for the equilibrated retry";
         return r;
@@ -168,31 +191,42 @@ Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std:
                 rmax[e.index] = std::max(rmax[e.index], a);
                 cmax[j] = std::max(cmax[j], a);
             }
-        for (int i = 0; i < m; ++i) if (rmax[i] > 0) rs[i] /= std::sqrt(rmax[i]);
-        for (int j = 0; j < n; ++j) if (cmax[j] > 0) cs[j] /= std::sqrt(cmax[j]);
+        for (int i = 0; i < m; ++i)
+            if (rmax[i] > 0) rs[i] /= std::sqrt(rmax[i]);
+        for (int j = 0; j < n; ++j)
+            if (cmax[j] > 0) cs[j] /= std::sqrt(cmax[j]);
     }
     for (double& v : rs) v = pow2_round(v);
     for (double& v : cs) v = pow2_round(v);
     Model sm = md;
     for (int j = 0; j < n; ++j) {
-        for (Entry& e : sm.cols[j]) e.value = e.value * rs[e.index] * cs[j];  // exact: powers of two
+        for (Entry& e : sm.cols[j]) e.value = e.value * rs[e.index] * cs[j]; // exact: powers of two
         sm.cost[j] = md.cost[j] * cs[j];
     }
-    for (int i = 0; i < m; ++i) { sm.row_lo[i] = md.row_lo[i] * rs[i]; sm.row_up[i] = md.row_up[i] * rs[i]; }
+    for (int i = 0; i < m; ++i) {
+        sm.row_lo[i] = md.row_lo[i] * rs[i];
+        sm.row_up[i] = md.row_up[i] * rs[i];
+    }
     std::vector<double> slo(n), sup(n);
-    for (int j = 0; j < n; ++j) { slo[j] = lo[j] / cs[j]; sup[j] = up[j] / cs[j]; sm.col_lo[j] = slo[j]; sm.col_up[j] = sup[j]; }
+    for (int j = 0; j < n; ++j) {
+        slo[j] = lo[j] / cs[j];
+        sup[j] = up[j] / cs[j];
+        sm.col_lo[j] = slo[j];
+        sm.col_up[j] = sup[j];
+    }
     Result s = run_one(sm, slo, sup, nullptr, left(), use_dual, false);
     if (s.status != Status::Optimal) {
         // a retry that proves infeasible/unbounded is not trusted over the first answer: report the failure
         Result f;
         // a retry stopped by a limit keeps that limit status (work cap or clock); anything else is a failure
-        f.status = (s.status == Status::TimeLimit) ? Status::TimeLimit
-                   : (s.status == Status::IterationLimit && work_budget().cap) ? Status::IterationLimit : Status::NumericalFailure;
+        f.status = (s.status == Status::TimeLimit)                             ? Status::TimeLimit
+                   : (s.status == Status::IterationLimit && work_budget().cap) ? Status::IterationLimit
+                                                                               : Status::NumericalFailure;
         f.iterations = r.iterations + s.iterations;
         f.message = why + "; equilibrated retry ended " + status_name(s.status) + (s.message.empty() ? "" : " (" + s.message + ")");
         return f;
     }
-    Result o = s;  // map back exactly
+    Result o = s; // map back exactly
     o.x.assign(n, 0.0);
     for (int j = 0; j < n; ++j) o.x[j] = s.x[j] * cs[j];
     o.objective = md.obj_const;
