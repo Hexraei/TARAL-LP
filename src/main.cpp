@@ -12,6 +12,7 @@
 
 #include "ipm.hpp"
 #include "taral.hpp"
+#include "timing.hpp"
 
 namespace {
 // Escapes for a JSON string. Bytes that are not part of well-formed UTF-8 (model names are arbitrary bytes)
@@ -473,11 +474,10 @@ int main(int argc, char** argv) {
         work_budget().cap = work_limit;
         if (!time_limit_given) limit = 1e9;  // the work limit, not the wall clock, ends the solve
     }
-    auto t0 = std::chrono::steady_clock::now();
-    auto wall = [&] { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(); };
+    Stopwatch wall;
     Model md;
     try {
-        md = read_mps(model, limit < 1e8 ? t0 + std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(limit))
+        md = read_mps(model, limit < 1e8 ? wall.start + std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(limit))
                               : std::chrono::steady_clock::time_point::max());
     } catch (const ParseTimeLimit& e) {
         if (json) write_json(json, "time_limit", nullptr, wall(), e.what());

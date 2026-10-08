@@ -11,6 +11,7 @@
 #include <cmath>
 
 #include "taral.hpp"
+#include "timing.hpp"
 
 namespace {
 constexpr double kPrimalGate = 1e-7;  // same bar as Simplex::finish
@@ -101,14 +102,14 @@ constexpr double kPrimalShare = 0.2;
 Result run_one_work(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
                     const std::vector<char>* warm, double limit, bool use_dual, bool fallback) {
     WorkBudget& w = work_budget();
-    const auto t0 = std::chrono::steady_clock::now();
+    const Stopwatch sw;
     if (use_dual) return solve_lp_dual(md, lo, up, warm, limit);
     const long total_cap = w.cap;
     if (fallback) w.cap = w.used + std::max(1L, long(kPrimalShare * double(total_cap - w.used)));  // cap 0 means off, so at least 1
     Result r = solve_lp(md, lo, up, warm, limit);
     w.cap = total_cap;
     if (!fallback || r.status != Status::IterationLimit || r.message != "work limit" || w.used >= total_cap) return r;
-    const double spent = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    const double spent = sw();
     Result d = solve_lp_dual(md, lo, up, warm, limit - spent);
     d.iterations += r.iterations;
     d.message = "route=primal-work-budget-then-dual primal_iters=" + std::to_string(r.iterations) + "; dual simplex fallback: " + d.message;
@@ -119,10 +120,10 @@ Result run_one(const Model& md, const std::vector<double>& lo, const std::vector
                const std::vector<char>* warm, double limit, bool use_dual, bool fallback) {
     if (work_budget().cap) return run_one_work(md, lo, up, warm, limit, use_dual, fallback);
     if (use_dual) return solve_lp_dual(md, lo, up, warm, limit);
-    const auto t0 = std::chrono::steady_clock::now();
+    const Stopwatch sw;
     Result r = solve_lp(md, lo, up, warm, fallback ? kPrimalShare * limit : limit);
     if (!fallback || r.status != Status::TimeLimit) return r;
-    const double spent = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    const double spent = sw();
     std::fprintf(stderr, "primal simplex not finished after %.1f s, switching to dual simplex\n", spent);
     Result d = solve_lp_dual(md, lo, up, warm, limit - spent);
     d.iterations += r.iterations;
@@ -139,8 +140,8 @@ WorkBudget& work_budget() {
 
 Result solve_lp_gated(const Model& md, const std::vector<double>& lo, const std::vector<double>& up,
                       const std::vector<char>* warm, double time_limit_s, bool use_dual, bool primal_fallback) {
-    auto t0 = std::chrono::steady_clock::now();
-    auto left = [&] { return time_limit_s - std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(); };
+    Stopwatch sw;
+    auto left = [&] { return time_limit_s - sw(); };
     Result r = run_one(md, lo, up, warm, time_limit_s, use_dual, primal_fallback);
     if (r.status != Status::Optimal && r.status != Status::NumericalFailure) return r;
     std::string why;

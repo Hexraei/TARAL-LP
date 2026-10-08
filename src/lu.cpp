@@ -76,15 +76,15 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock:
         }
         int p = -1, q = -1;
         double pv = 0, best_cost = 0;
-        auto consider = [&](int i, int j, double v, double cmax) {
-            if (std::abs(v) < kTiny || std::abs(v) < kThreshold * cmax) return;
+        auto consider = [&](int i, int j, double v, double col_mx) {
+            if (std::abs(v) < kTiny || std::abs(v) < kThreshold * col_mx) return;
             double cost = double(rows[i].size() - 1) * double(acol[j].size() - 1);
             if (p < 0 || cost < best_cost || (cost == best_cost && std::abs(v) > std::abs(pv)))
                 p = i, q = j, pv = v, best_cost = cost;
         };
         auto consider_col = [&](int j) {
-            double cmax = col_max(j);
-            for (const Cell& e : acol[j]) consider(e.index, j, e.value, cmax);
+            double col_mx = col_max(j);
+            for (const Cell& e : acol[j]) consider(e.index, j, e.value, col_mx);
         };
 
         while (p < 0 && !col_single.empty()) {

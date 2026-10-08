@@ -27,11 +27,11 @@
 #include <cmath>
 #include <cstdio>
 #include <memory>
-#include <chrono>
 #include <queue>
 #include <random>
 
 #include "taral.hpp"
+#include "timing.hpp"
 #include "structural_integer.hpp"
 
 namespace {
@@ -855,11 +855,10 @@ private:
 }  // namespace
 
 MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, MilpOptions opt) {
-    auto t0 = std::chrono::steady_clock::now();
-    auto elapsed = [&] { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(); };
+    Stopwatch elapsed;
     MilpResult res;
     if (opt.integer_structure) {
-        auto deadline = t0 + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+        auto deadline = elapsed.start + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
             std::chrono::duration<double>(std::max(0.0,std::min(time_limit_s,1e8))));
         auto p = structural_integer::parity(model, deadline);
         if (p.kind == structural_integer::Proof::None) p=structural_integer::three_integer(model, deadline);

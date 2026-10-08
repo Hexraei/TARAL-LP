@@ -16,6 +16,7 @@
 #include <random>
 
 #include "taral.hpp"
+#include "timing.hpp"
 
 namespace {
 constexpr double kPrimalTol = 1e-9;   // leaving-row infeasibility
@@ -206,8 +207,7 @@ bool Dual::proves_infeasible(int r, const std::vector<double>& alpha_row, const 
 }
 
 Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
-    auto t0 = std::chrono::steady_clock::now();
-    auto elapsed = [&] { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(); };
+    Stopwatch elapsed;
     int N = n_ + m_;
     tlo_.assign(N, 0), tup_.assign(N, 0), c_.assign(N, 0), x_.assign(N, 0), d_.assign(N, 0);
     where_.assign(N, kLower), head_.resize(m_);
@@ -420,17 +420,17 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
         }
         double slope = infeas_r;
         int q = -1;
-        size_t start = 0;  // cands[start..] are the breakpoints not yet passed (unordered)
+        size_t bp = 0;  // cands[bp..] are the breakpoints not yet passed (unordered)
         flips.clear();
-        while (start < cands.size()) {
+        while (bp < cands.size()) {
             double hmax = kInf;
-            for (size_t k = start; k < cands.size(); ++k) hmax = std::min(hmax, cands[k].harris);
-            size_t end = size_t(std::partition(cands.begin() + start, cands.end(),
+            for (size_t k = bp; k < cands.size(); ++k) hmax = std::min(hmax, cands[k].harris);
+            size_t end = size_t(std::partition(cands.begin() + bp, cands.end(),
                                                [&](const Cand& c) { return c.ratio <= hmax; }) - cands.begin());
-            if (end == start) end = start + 1;
-            size_t pick = start;
+            if (end == bp) end = bp + 1;
+            size_t pick = bp;
             double drop = 0;
-            for (size_t k = start; k < end; ++k) {
+            for (size_t k = bp; k < end; ++k) {
                 if (std::abs(cands[k].a) > std::abs(cands[pick].a)) pick = k;
                 drop += (up_[cands[k].j] - lo_[cands[k].j]) * std::abs(cands[k].a);
             }
@@ -439,8 +439,8 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
                 break;
             }
             slope -= drop;
-            for (size_t k = start; k < end; ++k) flips.push_back(cands[k].j);
-            start = end;
+            for (size_t k = bp; k < end; ++k) flips.push_back(cands[k].j);
+            bp = end;
         }
         if (q < 0) {
             if (!fresh) {
@@ -543,7 +543,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
 
 Result solve_lp_dual(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
                      const std::vector<char>* warm_basis, double time_limit_s) {
-    auto t0 = std::chrono::steady_clock::now();
+    const Stopwatch sw;
     const Model* mp = &model;
     Model neg;
     if (model.maximize) {  // maximise f  ==  minimise -f
@@ -565,7 +565,7 @@ Result solve_lp_dual(const Model& model, const std::vector<double>& col_lo, cons
         return r;
     }
     // Primal clean-up from the dual basis with the true costs; it certifies the answer.
-    double left = time_limit_s - std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    double left = time_limit_s - sw();
     r = solve_lp(*mp, col_lo, col_up, dual.basis.empty() ? warm_basis : &dual.basis, left);
     std::string what = "dual " + std::to_string(dual.iterations) + " + primal " + std::to_string(r.iterations) +
                        " iterations" + (dual.message.empty() ? "" : " (" + dual.message + ")") +
