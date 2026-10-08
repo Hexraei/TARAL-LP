@@ -12,7 +12,7 @@
 
 namespace {
 constexpr double kThreshold = 0.1;
-constexpr double kTiny = 1e-11;  // below this a pivot is treated as zero (rank deficiency)
+constexpr double kTiny = 1e-11; // below this a pivot is treated as zero (rank deficiency)
 constexpr int kCandidates = 4;
 
 // One matrix entry as stored in the active submatrix. It exists twice, once in its row (index = column)
@@ -23,7 +23,7 @@ struct Cell {
     double value;
     int pos;
 };
-}  // namespace
+} // namespace
 
 bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock::time_point deadline) {
     m_ = m;
@@ -43,7 +43,7 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock:
             }
     std::vector<char> row_done(m, 0), col_done(m, 0);
     std::vector<int> where(m, -1);
-    std::vector<int> col_single, row_single;  // candidates that may have exactly one entry
+    std::vector<int> col_single, row_single; // candidates that may have exactly one entry
     for (int j = 0; j < m; ++j)
         if (acol[j].size() == 1) col_single.push_back(j);
     for (int i = 0; i < m; ++i)
@@ -56,7 +56,7 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock:
     for (int i = 0; i < m; ++i)
         if (!rows[i].empty()) rset.insert({rows[i].size(), i});
 
-    std::vector<double> cmax(m, -1);  // cached max |value| per active column, -1 = stale
+    std::vector<double> cmax(m, -1); // cached max |value| per active column, -1 = stale
     auto col_max = [&](int q) {
         if (cmax[q] < 0) {
             double mx = 0;
@@ -67,7 +67,7 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock:
     };
 
     for (int k = 0; k < m; ++k) {
-        if (Clock::now() > deadline) {  // one clock read per pivot: a dense nucleus makes pivots slow
+        if (Clock::now() > deadline) { // one clock read per pivot: a dense nucleus makes pivots slow
             timed_out = true;
             pivots_done = k;
             active_nnz = 0;
@@ -79,8 +79,7 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock:
         auto consider = [&](int i, int j, double v, double col_mx) {
             if (std::abs(v) < kTiny || std::abs(v) < kThreshold * col_mx) return;
             double cost = double(rows[i].size() - 1) * double(acol[j].size() - 1);
-            if (p < 0 || cost < best_cost || (cost == best_cost && std::abs(v) > std::abs(pv)))
-                p = i, q = j, pv = v, best_cost = cost;
+            if (p < 0 || cost < best_cost || (cost == best_cost && std::abs(v) > std::abs(pv))) p = i, q = j, pv = v, best_cost = cost;
         };
         auto consider_col = [&](int j) {
             double col_mx = col_max(j);
@@ -97,14 +96,14 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock:
             row_single.pop_back();
             if (!row_done[i] && rows[i].size() == 1) consider(i, rows[i][0].index, rows[i][0].value, col_max(rows[i][0].index));
         }
-        if (p < 0) {  // Markowitz search among the sparsest few active columns and rows
+        if (p < 0) { // Markowitz search among the sparsest few active columns and rows
             int bc[kCandidates], br[kCandidates], nc = 0, nr = 0;
             for (auto it = cset.begin(); it != cset.end() && nc < kCandidates; ++it) bc[nc++] = it->second;
             for (auto it = rset.begin(); it != rset.end() && nr < kCandidates; ++it) br[nr++] = it->second;
             for (int t = 0; t < nc; ++t) consider_col(bc[t]);
             for (int t = 0; t < nr; ++t)
                 for (const Cell& e : rows[br[t]]) consider(br[t], e.index, e.value, col_max(e.index));
-            if (p < 0)  // full scan before declaring rank deficiency
+            if (p < 0) // full scan before declaring rank deficiency
                 for (int j = 0; j < m; ++j)
                     if (!col_done[j]) consider_col(j);
         }
@@ -115,7 +114,7 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock:
         std::vector<int> mrows, mcols;
         for (const Cell& t : acol[q]) mrows.push_back(t.index), rset.erase({rows[t.index].size(), t.index});
         for (const Cell& e : rows[p]) mcols.push_back(e.index), cset.erase({acol[e.index].size(), e.index});
-        std::vector<Cell> urow;  // pos = where row p sits in that column's list
+        std::vector<Cell> urow; // pos = where row p sits in that column's list
         for (const Cell& e : rows[p])
             if (e.index != q) urow.push_back(e);
         U_.emplace_back();
@@ -148,12 +147,12 @@ bool SparseLU::factor(int m, const std::vector<std::vector<Entry>>& cols, Clock:
             for (const Cell& e : r) where[e.index] = -1;
             r[at] = r.back();
             r.pop_back();
-            if (at < int(r.size())) acol[r[at].index][r[at].pos].pos = at;  // the moved entry's twin
+            if (at < int(r.size())) acol[r[at].index][r[at].pos].pos = at; // the moved entry's twin
             if (r.size() == 1) row_single.push_back(i);
         }
         L_.push_back(lcol);
         for (const Cell& e : urow) {
-            cmax[e.index] = -1;  // values changed by the update above, and row p leaves the column
+            cmax[e.index] = -1; // values changed by the update above, and row p leaves the column
             std::vector<Cell>& col = acol[e.index];
             col[e.pos] = col.back();
             col.pop_back();

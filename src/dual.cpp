@@ -19,13 +19,13 @@
 #include "timing.hpp"
 
 namespace {
-constexpr double kPrimalTol = 1e-9;   // leaving-row infeasibility
-constexpr double kDualTol = 1e-9;     // reduced-cost feasibility (Harris tolerance)
-constexpr double kPivotTol = 1e-9;    // smallest |alpha_rj| considered in the ratio test
-constexpr double kPerturb = 5e-7;     // relative cost perturbation
+constexpr double kPrimalTol = 1e-9; // leaving-row infeasibility
+constexpr double kDualTol = 1e-9;   // reduced-cost feasibility (Harris tolerance)
+constexpr double kPivotTol = 1e-9;  // smallest |alpha_rj| considered in the ratio test
+constexpr double kPerturb = 5e-7;   // relative cost perturbation
 constexpr size_t kRefactorEvery = 120;
 constexpr long kMaxIterations = 50'000'000;
-constexpr long kStallIterations = 10000;  // without dual objective progress: hand over to the primal
+constexpr long kStallIterations = 10000; // without dual objective progress: hand over to the primal
 
 enum Where : char { kBasic, kLower, kUpper, kZero };
 
@@ -38,36 +38,35 @@ struct Eta {
 enum class Outcome { Optimal, Infeasible, TimeLimit, Fallback };
 
 class Dual {
-public:
+  public:
     Dual(const Model& md, const std::vector<double>& clo, const std::vector<double>& cup)
         : md_(md), clo_(clo), cup_(cup), m_(int(md.row_names.size())), n_(int(md.col_names.size())) {}
     Outcome run(double time_limit_s, const std::vector<char>* warm);
     long iterations = 0;
     std::vector<char> basis;
     std::string message;
-    double factor_s = 0, first_factor_s = 0;  // seconds in LU factorization (all, and the initial one)
+    double factor_s = 0, first_factor_s = 0; // seconds in LU factorization (all, and the initial one)
     long factors = 0;
-    std::string start_diag;  // warm starts only: what the starting basis looked like
+    std::string start_diag; // warm starts only: what the starting basis looked like
     long phase1_iters = 0;
     std::string timeout_info;
-    std::string note;  // warm-start fallback, kept apart from the later status messages
+    std::string note; // warm-start fallback, kept apart from the later status messages
 
-private:
+  private:
     const Model& md_;
     const std::vector<double>&clo_, &cup_;
     int m_, n_;
-    std::vector<double> tlo_, tup_;  // true bounds
+    std::vector<double> tlo_, tup_; // true bounds
     std::vector<double> lo_, up_, c_, x_, d_;
     std::vector<int> head_;
     std::vector<Where> where_;
-    std::vector<std::vector<Entry>> rows_;  // row-wise structural part of A: (column, value)
+    std::vector<std::vector<Entry>> rows_; // row-wise structural part of A: (column, value)
     SparseLU lu_;
     std::vector<Eta> etas_;
     SparseLU::Clock::time_point deadline_ = SparseLU::Clock::time_point::max();
-    bool timed_out_ = false;  // a factorization hit deadline_
+    bool timed_out_ = false; // a factorization hit deadline_
 
-    template <class F>
-    void for_col(int j, F f) const {
+    template <class F> void for_col(int j, F f) const {
         if (j < n_)
             for (const Entry& e : md_.cols[j]) f(e.index, e.value);
         else
@@ -98,10 +97,14 @@ private:
     // Nonbasic position that is dual feasible for reduced cost d under the current bounds.
     void place(int j) {
         bool fl = std::isfinite(lo_[j]), fu = std::isfinite(up_[j]);
-        if (fl && fu) where_[j] = (lo_[j] == up_[j] || d_[j] >= 0) ? kLower : kUpper;
-        else if (fl) where_[j] = kLower;
-        else if (fu) where_[j] = kUpper;
-        else where_[j] = kZero;
+        if (fl && fu)
+            where_[j] = (lo_[j] == up_[j] || d_[j] >= 0) ? kLower : kUpper;
+        else if (fl)
+            where_[j] = kLower;
+        else if (fu)
+            where_[j] = kUpper;
+        else
+            where_[j] = kZero;
         x_[j] = where_[j] == kLower ? lo_[j] : where_[j] == kUpper ? up_[j] : 0.0;
     }
     bool factor();
@@ -133,7 +136,7 @@ bool Dual::factor() {
                            std::to_string(lu_.active_nnz) + " entries left in the active submatrix";
             return false;
         }
-        for (int p : lu_.bad_pos) where_[head_[p]] = kLower;  // placed properly after compute_dual
+        for (int p : lu_.bad_pos) where_[head_[p]] = kLower; // placed properly after compute_dual
         for (size_t t = 0; t < lu_.bad_pos.size(); ++t) {
             int j = n_ + lu_.bad_rows[t];
             head_[lu_.bad_pos[t]] = j;
@@ -178,11 +181,15 @@ int Dual::repair_dual(bool shift) {
             continue;
         }
         double v = where_[j] == kLower ? std::min(0.0, d_[j]) : where_[j] == kUpper ? std::max(0.0, d_[j]) : d_[j];
-        if (!fl && !fu) where_[j] = kZero, x_[j] = 0;
-        else place(j);
+        if (!fl && !fu)
+            where_[j] = kZero, x_[j] = 0;
+        else
+            place(j);
         if (std::abs(v) <= kDualTol) continue;
-        if (shift) c_[j] -= v, d_[j] -= v;
-        else ++bad;
+        if (shift)
+            c_[j] -= v, d_[j] -= v;
+        else
+            ++bad;
     }
     return bad;
 }
@@ -237,7 +244,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             where_[j] = Where((*warm)[j]);
             if (where_[j] == kBasic) head_[p++] = j;
         }
-        deadline_ = start + limit / 4;  // a warm basis gets a quarter of the limit to factor
+        deadline_ = start + limit / 4; // a warm basis gets a quarter of the limit to factor
     } else {
         slack_basis();
     }
@@ -249,7 +256,8 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
         deadline_ = start + limit;
         timed_out_ = false;
         factored = factor();
-    } else deadline_ = start + limit;
+    } else
+        deadline_ = start + limit;
     if (!factored) {
         if (timed_out_) return Outcome::TimeLimit;
         message = "initial basis could not be factored";
@@ -259,7 +267,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
     {
         compute_dual();
         std::mt19937_64 rng(2718281);
-        double base = kPerturb;  // also for zero costs, which are otherwise entirely dual degenerate
+        double base = kPerturb; // also for zero costs, which are otherwise entirely dual degenerate
         for (int j = 0; j < N; ++j) {
             bool fl = std::isfinite(lo_[j]), fu = std::isfinite(up_[j]);
             if (lo_[j] == up_[j] || (!fl && !fu)) continue;
@@ -271,7 +279,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
     compute_dual();
     bool phase1 = false;
     const int dual_inf0 = repair_dual(false);
-    if (dual_inf0 > 0) {  // dual phase 1 on the box-bounded auxiliary problem
+    if (dual_inf0 > 0) { // dual phase 1 on the box-bounded auxiliary problem
         phase1 = true;
         for (int j = 0; j < N; ++j) {
             bool fl = std::isfinite(tlo_[j]), fu = std::isfinite(tup_[j]);
@@ -294,7 +302,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
                      std::to_string(pinf) + " primal infeasible basics (sum " + std::to_string(psum) + ")";
     }
 
-    std::vector<double> weight(m_, 1.0);  // dual steepest-edge weights ||e_r' B^{-1}||^2 (by position)
+    std::vector<double> weight(m_, 1.0); // dual steepest-edge weights ||e_r' B^{-1}||^2 (by position)
     std::vector<double> alpha_row(N, 0.0), unit, rho, col(m_), alpha, tau, delta(m_);
     std::vector<char> mark(N, 0);
     std::vector<int> touched;
@@ -306,9 +314,9 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
     std::vector<int> flips;
     bool fresh = true;
     int shifts = 0;
-    double best_obj = -kInf;  // dual objective (c'x of the current basic solution) at refactorizations
+    double best_obj = -kInf; // dual objective (c'x of the current basic solution) at refactorizations
     long progress_at = 0;
-    long refreshes = 0;  // refactorizations so far (a storm of them means the row/column computations disagree every iteration)
+    long refreshes = 0; // refactorizations so far (a storm of them means the row/column computations disagree every iteration)
     auto refresh = [&]() {
         ++refreshes;
         if (!factor()) return false;
@@ -327,12 +335,13 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             keep_basis();
             return Outcome::TimeLimit;
         }
-        if (work_budget().cap && work_budget().used >= work_budget().cap) {  // --work-limit: deterministic stop (denied entries are not counted)
+        if (work_budget().cap &&
+            work_budget().used >= work_budget().cap) { // --work-limit: deterministic stop (denied entries are not counted)
             message = "work limit";
             keep_basis();
             return Outcome::Fallback;
         }
-        if (refreshes > 200 + iterations / 30) {  // refactor storm: hand over to the primal long before the stall bound
+        if (refreshes > 200 + iterations / 30) { // refactor storm: hand over to the primal long before the stall bound
             message = "dual refactorization storm";
             keep_basis();
             return Outcome::Fallback;
@@ -374,7 +383,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
         }
         int leaving = head_[r];
         bool to_lower = x_[leaving] < lo_[leaving];
-        double sigma = to_lower ? -1.0 : 1.0;  // the dual step is t = sigma * theta, theta >= 0
+        double sigma = to_lower ? -1.0 : 1.0; // the dual step is t = sigma * theta, theta >= 0
 
         // Pivot row alpha_rj = rho' a_j for the nonbasics.
         unit.assign(m_, 0.0);
@@ -420,13 +429,13 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
         }
         double slope = infeas_r;
         int q = -1;
-        size_t bp = 0;  // cands[bp..] are the breakpoints not yet passed (unordered)
+        size_t bp = 0; // cands[bp..] are the breakpoints not yet passed (unordered)
         flips.clear();
         while (bp < cands.size()) {
             double hmax = kInf;
             for (size_t k = bp; k < cands.size(); ++k) hmax = std::min(hmax, cands[k].harris);
-            size_t end = size_t(std::partition(cands.begin() + bp, cands.end(),
-                                               [&](const Cand& c) { return c.ratio <= hmax; }) - cands.begin());
+            size_t end =
+                size_t(std::partition(cands.begin() + bp, cands.end(), [&](const Cand& c) { return c.ratio <= hmax; }) - cands.begin());
             if (end == bp) end = bp + 1;
             size_t pick = bp;
             double drop = 0;
@@ -434,7 +443,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
                 if (std::abs(cands[k].a) > std::abs(cands[pick].a)) pick = k;
                 drop += (up_[cands[k].j] - lo_[cands[k].j]) * std::abs(cands[k].a);
             }
-            if (!(slope - drop > kPrimalTol)) {  // includes an infinite range
+            if (!(slope - drop > kPrimalTol)) { // includes an infinite range
                 q = cands[pick].j;
                 break;
             }
@@ -473,15 +482,17 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
             }
         }
         ++iterations;
-        ++work_budget().used;  // work_used counts performed iterations
+        ++work_budget().used; // work_used counts performed iterations
 
         // Bound flips: x_B -= B^{-1} sum a_j dx_j.
         if (!flips.empty()) {
             std::fill(delta.begin(), delta.end(), 0.0);
             for (int j : flips) {
                 double dx;
-                if (where_[j] == kLower) where_[j] = kUpper, dx = up_[j] - lo_[j], x_[j] = up_[j];
-                else where_[j] = kLower, dx = lo_[j] - up_[j], x_[j] = lo_[j];
+                if (where_[j] == kLower)
+                    where_[j] = kUpper, dx = up_[j] - lo_[j], x_[j] = up_[j];
+                else
+                    where_[j] = kLower, dx = lo_[j] - up_[j], x_[j] = lo_[j];
                 for_col(j, [&](int i, double v) { delta[i] += v * dx; });
             }
             std::vector<double> dxb;
@@ -491,7 +502,7 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
 
         // Dual update: d_j -= t alpha_rj with t = d_q / alpha_rq; the leaving variable gets -t.
         double dq = d_[q];
-        if (dq * sigma * alpha_row[q] < 0) {  // slightly infeasible entering reduced cost: shift it to zero
+        if (dq * sigma * alpha_row[q] < 0) { // slightly infeasible entering reduced cost: shift it to zero
             c_[q] -= dq;
             dq = 0;
             ++shifts;
@@ -539,14 +550,14 @@ Outcome Dual::run(double time_limit_s, const std::vector<char>* warm) {
     return Outcome::Fallback;
 }
 
-}  // namespace
+} // namespace
 
 Result solve_lp_dual(const Model& model, const std::vector<double>& col_lo, const std::vector<double>& col_up,
                      const std::vector<char>* warm_basis, double time_limit_s) {
     const Stopwatch sw;
     const Model* mp = &model;
     Model neg;
-    if (model.maximize) {  // maximise f  ==  minimise -f
+    if (model.maximize) { // maximise f  ==  minimise -f
         neg = model;
         for (double& c : neg.cost) c = -c;
         neg.obj_const = -neg.obj_const;
@@ -567,12 +578,12 @@ Result solve_lp_dual(const Model& model, const std::vector<double>& col_lo, cons
     // Primal clean-up from the dual basis with the true costs; it certifies the answer.
     double left = time_limit_s - sw();
     r = solve_lp(*mp, col_lo, col_up, dual.basis.empty() ? warm_basis : &dual.basis, left);
-    std::string what = "dual " + std::to_string(dual.iterations) + " + primal " + std::to_string(r.iterations) +
-                       " iterations" + (dual.message.empty() ? "" : " (" + dual.message + ")") +
-                       (dual.note.empty() ? "" : "; " + dual.note) +
-                       (dual.start_diag.empty() ? "" : "; " + dual.start_diag + ", phase 1 " + std::to_string(dual.phase1_iters) + " iterations") +
-                       "; dual factor " + std::to_string(dual.factor_s) + " s in " + std::to_string(dual.factors) +
-                       " (first " + std::to_string(dual.first_factor_s) + " s)";
+    std::string what =
+        "dual " + std::to_string(dual.iterations) + " + primal " + std::to_string(r.iterations) + " iterations" +
+        (dual.message.empty() ? "" : " (" + dual.message + ")") + (dual.note.empty() ? "" : "; " + dual.note) +
+        (dual.start_diag.empty() ? "" : "; " + dual.start_diag + ", phase 1 " + std::to_string(dual.phase1_iters) + " iterations") +
+        "; dual factor " + std::to_string(dual.factor_s) + " s in " + std::to_string(dual.factors) + " (first " +
+        std::to_string(dual.first_factor_s) + " s)";
     r.message = r.message.empty() ? what : r.message + "; " + what;
     r.iterations += dual.iterations;
     if (model.maximize) {

@@ -41,7 +41,8 @@ using Vec = std::vector<double>;
 using Clock = std::chrono::steady_clock;
 constexpr double kBig = 1e20;
 const double kRho = std::getenv("IPM_RHO") ? std::atof(std::getenv("IPM_RHO")) : 1e-8;
-const double kDelta = std::getenv("IPM_DELTA") ? std::atof(std::getenv("IPM_DELTA")) : 1e-8;  // |bound| >= kBig counts as infinite (the HiGHS convention)
+const double kDelta =
+    std::getenv("IPM_DELTA") ? std::atof(std::getenv("IPM_DELTA")) : 1e-8; // |bound| >= kBig counts as infinite (the HiGHS convention)
 const double kSlow = std::getenv("IPM_SLOW") ? std::atof(std::getenv("IPM_SLOW")) : 0.9;
 const double kPivTol = std::getenv("IPM_PIV") ? std::atof(std::getenv("IPM_PIV")) : 1e-30;
 const double kPivRep = std::getenv("IPM_PIVREP") ? std::atof(std::getenv("IPM_PIVREP")) : 1e-10;
@@ -63,7 +64,7 @@ double norm_inf(const Vec& v) {
 // ponytail: no supervariables; add them if ordering time shows up on large problems.
 std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj, Clock::time_point deadline = Clock::time_point::max()) {
     std::vector<std::vector<int>> E(n), L(n);
-    std::vector<char> st(n, 0);  // 0 variable, 1 element, 2 absorbed element, 3 dense
+    std::vector<char> st(n, 0); // 0 variable, 1 element, 2 absorbed element, 3 dense
     const size_t dense = std::max<size_t>(16, static_cast<size_t>(10 * std::sqrt(static_cast<double>(n))));
     std::vector<int> order, dense_nodes;
     order.reserve(n);
@@ -77,8 +78,10 @@ std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj, Clock::time
         head[d] = i;
     };
     auto del = [&](int i) {
-        if (prv[i] >= 0) nxt[prv[i]] = nxt[i];
-        else head[deg[i]] = nxt[i];
+        if (prv[i] >= 0)
+            nxt[prv[i]] = nxt[i];
+        else
+            head[deg[i]] = nxt[i];
         if (nxt[i] >= 0) prv[nxt[i]] = prv[i];
     };
     int nleft = 0;
@@ -93,7 +96,7 @@ std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj, Clock::time
     std::vector<int> mark(n, 0), wflag(n, 0), w(n, 0), Lp;
     int stamp = 0, wstamp = 0, mindeg = 0;
     while (nleft > 0) {
-        if ((order.size() & 255) == 0 && Clock::now() > deadline) return {};  // empty: deadline passed
+        if ((order.size() & 255) == 0 && Clock::now() > deadline) return {}; // empty: deadline passed
         while (head[mindeg] < 0) ++mindeg;
         const int p = head[mindeg];
         del(p);
@@ -113,7 +116,7 @@ std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj, Clock::time
         st[p] = 1;
         order.push_back(p);
         --nleft;
-        ++wstamp;  // w[e] = |L_e \ L_p| for elements adjacent to L_p
+        ++wstamp; // w[e] = |L_e \ L_p| for elements adjacent to L_p
         for (int i : Lp)
             for (int e : E[i]) {
                 if (st[e] != 1) continue;
@@ -127,7 +130,7 @@ std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj, Clock::time
             size_t k = 0;
             for (int e : E[i]) {
                 if (st[e] != 1) continue;
-                if (w[e] == 0) {  // L_e inside L_p: absorb e into p
+                if (w[e] == 0) { // L_e inside L_p: absorb e into p
                     st[e] = 2;
                     std::vector<int>().swap(L[e]);
                     continue;
@@ -162,7 +165,7 @@ std::vector<int> amd_order(int n, std::vector<std::vector<int>> adj, Clock::time
 // regularisation on, a pivot whose sign is wrong or magnitude below dyn_eps is replaced by
 // sign * dyn_delta (quasi-definite systems are strongly factorisable in any symmetric order).
 class Ldl {
-public:
+  public:
     // Returns false when the deadline passes during ordering or symbolic counting.
     bool analyze(int n, const std::vector<int>& ei, const std::vector<int>& ej, const std::vector<int>& esrc,
                  const std::vector<signed char>& sign, Clock::time_point deadline = Clock::time_point::max()) {
@@ -272,7 +275,7 @@ public:
 
     int nreg = 0, nwrong = 0;
 
-private:
+  private:
     int n_ = 0;
     std::vector<int> perm_, Kp_, Ki_, Ksrc_, parent_, flag_, lnz_, pattern_, Li_;
     std::vector<signed char> sign_;
@@ -285,10 +288,10 @@ private:
 // Internal problem: min c'z + 0.5 z'Qz  s.t.  A z = b,  l <= z <= u  (infinite bounds are +-inf).
 struct Qp {
     int N = 0, M = 0;
-    std::vector<int> Ap, Ai;  // CSC, M x N
+    std::vector<int> Ap, Ai; // CSC, M x N
     Vec Ax;
-    Vec qd;                   // diagonal of Q
-    std::vector<int> qr, qc;  // strictly lower off-diagonal entries (qr > qc)
+    Vec qd;                  // diagonal of Q
+    std::vector<int> qr, qc; // strictly lower off-diagonal entries (qr > qc)
     Vec qv;
     Vec c, b, l, u;
 
@@ -319,12 +322,11 @@ struct RunOut {
     long iters = 0;
     std::string msg;
     long long fnnz = 0;
-    Vec ray;  // recession direction behind a DualInfeasible status (internal scale, max-norm 1)
+    Vec ray; // recession direction behind a DualInfeasible status (internal scale, max-norm 1)
 };
 
 // accept(z, y) re-checks a candidate on the original model and returns true when it passes.
-RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
-               const std::function<bool(const Vec&, const Vec&)>& accept) {
+RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline, const std::function<bool(const Vec&, const Vec&)>& accept) {
     const int N = P.N, M = P.M;
     RunOut out;
     std::vector<char> hl(N), hu(N);
@@ -362,14 +364,18 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
     for (int k = 0; k < nqo; ++k) V[N + k] = -P.qv[k];
     for (int p = 0; p < nza; ++p) V[N + nqo + p] = P.Ax[p];
     for (int i = 0; i < M; ++i) V[N + nqo + nza + i] = delta;
-    Vec theta(N, 0);  // Theta^-1 = zl/xl + zu/xu
+    Vec theta(N, 0); // Theta^-1 = zl/xl + zu/xu
     auto factor = [&]() {
         for (int j = 0; j < N; ++j) V[j] = -(P.qd[j] + theta[j] + rho);
-        if (std::getenv("IPM_DBG")) { double mx = 0, mn = INFINITY; for (int j = 0; j < N; ++j) mx = std::max(mx, theta[j]), mn = std::min(mn, theta[j]); std::fprintf(stderr, "  theta range %.3e %.3e\n", mn, mx); }
+        if (std::getenv("IPM_DBG")) {
+            double mx = 0, mn = INFINITY;
+            for (int j = 0; j < N; ++j) mx = std::max(mx, theta[j]), mn = std::min(mn, theta[j]);
+            std::fprintf(stderr, "  theta range %.3e %.3e\n", mn, mx);
+        }
         return ldl.factor(V, deadline, true);
     };
     Vec t1, t2, t3;
-    auto kkt_mul = [&](const Vec& v, Vec& r) {  // unregularised K v
+    auto kkt_mul = [&](const Vec& v, Vec& r) { // unregularised K v
         Vec vz(v.begin(), v.begin() + N), vy(v.begin() + N, v.end());
         P.mul_Q(vz, t1);
         P.mul_At(vy, t2);
@@ -379,7 +385,7 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
         for (int i = 0; i < M; ++i) r[N + i] = t3[i] + kDelta * kKeepDelta * vy[i];
     };
     Vec rr, dd, kv;
-    double ref_res = 0;  // relative residual of the last refined solve (for the log)
+    double ref_res = 0; // relative residual of the last refined solve (for the log)
     // Solve K sol = rhs with the unregularised K: restarted GMRES, right-preconditioned by the
     // regularised LDL^T factor (plain iterative refinement stalls when Theta^-1 << rho).
     const int gm = kRefMax;
@@ -412,7 +418,7 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
                 Zb[j] = Vb[j];
                 ldl.solve(Zb[j]);
                 kkt_mul(Zb[j], kv);
-                for (int i = 0; i <= j; ++i) {  // modified Gram-Schmidt
+                for (int i = 0; i <= j; ++i) { // modified Gram-Schmidt
                     double h = dot(kv, Vb[i]);
                     H[i][j] = h;
                     for (int k = 0; k < n; ++k) kv[k] -= h * Vb[i][k];
@@ -445,7 +451,7 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
             kkt_mul(trial, kv);
             double tn = 0;
             for (int k = 0; k < n; ++k) tn = std::max(tn, std::abs(rhs[k] - kv[k]));
-            if (!(tn < rn)) break;  // no improvement: keep the current solution
+            if (!(tn < rn)) break; // no improvement: keep the current solution
             sol.swap(trial);
             rn = tn;
             if (rn <= target || used < gm) break;
@@ -488,9 +494,12 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
             double s = P.c[j] + Qz[j] - Aty[j];
             if (hl[j]) xl[j] = z[j] - P.l[j], minx = std::min(minx, xl[j]);
             if (hu[j]) xu[j] = P.u[j] - z[j], minx = std::min(minx, xu[j]);
-            if (hl[j] && hu[j]) zl[j] = std::max(s, 0.0), zu[j] = std::max(-s, 0.0);
-            else if (hl[j]) zl[j] = s;
-            else if (hu[j]) zu[j] = -s;
+            if (hl[j] && hu[j])
+                zl[j] = std::max(s, 0.0), zu[j] = std::max(-s, 0.0);
+            else if (hl[j])
+                zl[j] = s;
+            else if (hu[j])
+                zu[j] = -s;
             if (hl[j]) minz = std::min(minz, zl[j]);
             if (hu[j]) minz = std::min(minz, zu[j]);
         }
@@ -517,7 +526,7 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
     const bool lp = nqo == 0 && norm_inf(P.qd) == 0;
     Vec rp(M), rl(N), ru(N), rd(N), rcl(N), rcu(N);
     Vec dz(N), dy(M), dxl(N), dxu(N), dzl(N), dzu(N);
-    Vec az(N), ay(M), axl(N), axu(N), azl(N), azu(N);  // affine direction
+    Vec az(N), ay(M), axl(N), axu(N), azl(N), azu(N); // affine direction
     auto newton = [&](Vec& Dz, Vec& Dy, Vec& Dxl, Vec& Dxu, Vec& Dzl, Vec& Dzu) {
         for (int j = 0; j < N; ++j) {
             double r1 = rd[j];
@@ -552,7 +561,7 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
 
     // Certificate tests on a candidate (normalised internally).
     Vec g, Ad, Qd;
-    auto farkas = [&](const Vec& yc) {  // y with b'y > sup_{l<=z<=u} (A'y)'z
+    auto farkas = [&](const Vec& yc) { // y with b'y > sup_{l<=z<=u} (A'y)'z
         double ny = norm_inf(yc);
         if (!(ny > 0) || !std::isfinite(ny)) return false;
         P.mul_At(yc, g);
@@ -561,16 +570,20 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
         for (int j = 0; j < N; ++j) {
             double gj = g[j] / ny;
             if (gj > 0) {
-                if (hu[j]) sup += gj * P.u[j];
-                else viol = std::max(viol, gj);
+                if (hu[j])
+                    sup += gj * P.u[j];
+                else
+                    viol = std::max(viol, gj);
             } else if (gj < 0) {
-                if (hl[j]) sup += gj * P.l[j];
-                else viol = std::max(viol, -gj);
+                if (hl[j])
+                    sup += gj * P.l[j];
+                else
+                    viol = std::max(viol, -gj);
             }
         }
         return viol <= 1e-9 && by - sup > 1e-6 * (1 + 1e-3 * std::abs(by) + 1e-3 * std::abs(sup));
     };
-    auto recession = [&](const Vec& dc) {  // A d = 0, Q d = 0, d in the bound cone, c'd < 0
+    auto recession = [&](const Vec& dc) { // A d = 0, Q d = 0, d in the bound cone, c'd < 0
         double nd = norm_inf(dc);
         if (!(nd > 0) || !std::isfinite(nd)) return false;
         Vec d(dc);
@@ -612,13 +625,23 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
         mu = nc ? mu / nc : 0;
         const double pres = std::max({norm_inf(rp), norm_inf(rl), norm_inf(ru)}) / (1 + bnorm);
         const double dres = norm_inf(rd) / (1 + cnorm);
-        if (std::getenv("IPM_DBG")) std::fprintf(stderr, "  rp %.2e rl %.2e ru %.2e rd %.2e y %.2e z %.2e zl %.2e zu %.2e\n", norm_inf(rp), norm_inf(rl), norm_inf(ru), norm_inf(rd), norm_inf(y), norm_inf(z), norm_inf(zl), norm_inf(zu));
-        if (std::getenv("IPM_DBG") && it % 10 == 9) { int jm = 0; for (int j = 0; j < N; ++j) if (std::abs(rd[j]) > std::abs(rd[jm])) jm = j; int nzc = P.Ap[jm + 1] - P.Ap[jm]; std::fprintf(stderr, "  maxrd j %d rd %.3e z %.3e l %.3e u %.3e xl %.3e zl %.3e xu %.3e zu %.3e nnzcol %d c %.3e\n", jm, rd[jm], z[jm], P.l[jm], P.u[jm], xl[jm], zl[jm], xu[jm], zu[jm], nzc, P.c[jm]); }
+        if (std::getenv("IPM_DBG"))
+            std::fprintf(stderr, "  rp %.2e rl %.2e ru %.2e rd %.2e y %.2e z %.2e zl %.2e zu %.2e\n", norm_inf(rp), norm_inf(rl),
+                         norm_inf(ru), norm_inf(rd), norm_inf(y), norm_inf(z), norm_inf(zl), norm_inf(zu));
+        if (std::getenv("IPM_DBG") && it % 10 == 9) {
+            int jm = 0;
+            for (int j = 0; j < N; ++j)
+                if (std::abs(rd[j]) > std::abs(rd[jm])) jm = j;
+            int nzc = P.Ap[jm + 1] - P.Ap[jm];
+            std::fprintf(stderr, "  maxrd j %d rd %.3e z %.3e l %.3e u %.3e xl %.3e zl %.3e xu %.3e zu %.3e nnzcol %d c %.3e\n", jm, rd[jm],
+                         z[jm], P.l[jm], P.u[jm], xl[jm], zl[jm], xu[jm], zu[jm], nzc, P.c[jm]);
+        }
         const double gap = std::abs(pobj - dobj) / (1 + std::abs(pobj));
         if (opt.verbose)
-            std::fprintf(stderr, "it %3ld pobj %+.10e dobj %+.10e pres %.2e dres %.2e gap %.2e mu %.2e reg %d"
-                         " ap %.2e ad %.2e kkt %.1e\n", it, pobj, dobj, pres, dres, gap, mu, ldl.nreg, last_ap,
-                         last_ad, ref_res);
+            std::fprintf(stderr,
+                         "it %3ld pobj %+.10e dobj %+.10e pres %.2e dres %.2e gap %.2e mu %.2e reg %d"
+                         " ap %.2e ad %.2e kkt %.1e\n",
+                         it, pobj, dobj, pres, dres, gap, mu, ldl.nreg, last_ap, last_ad, ref_res);
         if (!std::isfinite(pres + dres + gap + mu)) {
             out.msg = "non-finite iterate";
             break;
@@ -641,7 +664,7 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
             return out;
         }
         if (recession(z) || (it > 0 && recession(dz))) {
-            out.status = IpmStatus::DualInfeasible;  // ipm_solve promotes it to Unbounded only after re-checking on the original model
+            out.status = IpmStatus::DualInfeasible; // ipm_solve promotes it to Unbounded only after re-checking on the original model
             out.msg = "recession direction";
             return out;
         }
@@ -695,7 +718,8 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline,
         for (int i = 0; i < M; ++i) y[i] += ad * dy[i];
         last_ap = ap, last_ad = ad;
         double merit = std::max({pres, dres, gap});
-        if (merit < 0.9 * best_merit) best_merit = merit, stall = 0;
+        if (merit < 0.9 * best_merit)
+            best_merit = merit, stall = 0;
         else if (++stall > 30) {
             out.msg = "no progress in 30 iterations";
             break;
@@ -711,8 +735,8 @@ struct Measures {
 };
 
 // Original-model KKT measures in minimisation form (c, Q already multiplied by the sense).
-Measures measure(const Model& md, const Vec& c, const std::vector<QEntry>& Q, const Vec& clo, const Vec& cup,
-                 const Vec& rlo, const Vec& rup, const Vec& x, const Vec& y) {
+Measures measure(const Model& md, const Vec& c, const std::vector<QEntry>& Q, const Vec& clo, const Vec& cup, const Vec& rlo,
+                 const Vec& rup, const Vec& x, const Vec& y) {
     const size_t n = x.size(), m = rlo.size();
     Measures r;
     r.act.assign(m, 0);
@@ -746,11 +770,15 @@ Measures measure(const Model& md, const Vec& c, const std::vector<QEntry>& Q, co
     // up is finite, 0 if neither; its dual objective term is v*lo (v > 0) or v*up (v < 0).
     auto dual_term = [&](double v, double lo, double up) {
         if (v > 0) {
-            if (std::isfinite(lo)) r.dobj += v * lo;
-            else dv = std::max(dv, v);
+            if (std::isfinite(lo))
+                r.dobj += v * lo;
+            else
+                dv = std::max(dv, v);
         } else if (v < 0) {
-            if (std::isfinite(up)) r.dobj += v * up;
-            else dv = std::max(dv, -v);
+            if (std::isfinite(up))
+                r.dobj += v * up;
+            else
+                dv = std::max(dv, -v);
         }
     };
     for (size_t i = 0; i < m; ++i) dual_term(y[i], rlo[i], rup[i]);
@@ -800,8 +828,8 @@ bool q_convex(int n, const std::vector<QEntry>& q, double qref = 0) {
 // rho climbs a decade ladder starting at max|Q| / max_i |a_i|^2; the tolerance of the test stays tied to the original
 // max|Q|. On success Q is replaced by the penalised matrix and dc receives the cost shift per kept column.
 // Gives up (false) when A_E'A_E would be too large to form.
-bool convexify_on_equalities(int nk, const std::vector<int>& Kp, const std::vector<int>& Ki, const Vec& Kx,
-                             const std::vector<char>& is_eq, const Vec& beq, std::vector<QEntry>& Qk, Vec& dc) {
+bool convexify_on_equalities(int nk, const std::vector<int>& Kp, const std::vector<int>& Ki, const Vec& Kx, const std::vector<char>& is_eq,
+                             const Vec& beq, std::vector<QEntry>& Qk, Vec& dc) {
     const int mk = static_cast<int>(is_eq.size());
     std::vector<std::vector<std::pair<int, double>>> rowl(mk);
     for (int k = 0; k < nk; ++k)
@@ -816,7 +844,10 @@ bool convexify_on_equalities(int nk, const std::vector<int>& Kp, const std::vect
     }
     for (const QEntry& q : Qk) qmax = std::max(qmax, std::abs(q.value));
     if (amax2 == 0 || qmax == 0 || pairs > 2e6) return false;
-    struct Tri { int r, c; double v; };
+    struct Tri {
+        int r, c;
+        double v;
+    };
     auto before = [](const Tri& x, const Tri& y) { return x.r != y.r ? x.r < y.r : x.c < y.c; };
     std::vector<Tri> ata;
     ata.reserve(static_cast<size_t>(pairs));
@@ -831,21 +862,25 @@ bool convexify_on_equalities(int nk, const std::vector<int>& Kp, const std::vect
     std::sort(ata.begin(), ata.end(), before);
     std::vector<Tri> aa;
     for (const Tri& t : ata) {
-        if (!aa.empty() && aa.back().r == t.r && aa.back().c == t.c) aa.back().v += t.v;
-        else aa.push_back(t);
+        if (!aa.empty() && aa.back().r == t.r && aa.back().c == t.c)
+            aa.back().v += t.v;
+        else
+            aa.push_back(t);
     }
     std::vector<Tri> base;
     for (const QEntry& q : Qk) base.push_back({q.row, q.col, q.value});
     std::sort(base.begin(), base.end(), before);
-    auto build = [&](double rho) {  // merge of Q and rho A_E'A_E, one entry per (row, col)
+    auto build = [&](double rho) { // merge of Q and rho A_E'A_E, one entry per (row, col)
         std::vector<QEntry> out;
         size_t i = 0, j = 0;
         while (i < base.size() || j < aa.size()) {
             bool from_base = j >= aa.size() || (i < base.size() && !before(aa[j], base[i]));
             const Tri& t = from_base ? base[i] : aa[j];
             double v = from_base ? t.v : rho * t.v;
-            if (!out.empty() && out.back().row == t.r && out.back().col == t.c) out.back().value += v;
-            else out.push_back({t.r, t.c, v});
+            if (!out.empty() && out.back().row == t.r && out.back().col == t.c)
+                out.back().value += v;
+            else
+                out.push_back({t.r, t.c, v});
             (from_base ? i : j)++;
         }
         return out;
@@ -853,7 +888,7 @@ bool convexify_on_equalities(int nk, const std::vector<int>& Kp, const std::vect
     double rho = qmax / amax2;
     for (int step = 0; step < 9; ++step, rho *= 10) {
         if (!q_convex(nk, build(rho), qmax)) continue;
-        rho *= 4;  // margin over the first passing rung (a larger rho only helps: A_E'A_E is PSD)
+        rho *= 4; // margin over the first passing rung (a larger rho only helps: A_E'A_E is PSD)
         Qk = build(rho);
         for (int i = 0; i < mk; ++i)
             for (const auto& e : rowl[i]) dc[e.first] -= rho * e.second * beq[i];
@@ -862,19 +897,28 @@ bool convexify_on_equalities(int nk, const std::vector<int>& Kp, const std::vect
     return false;
 }
 
-}  // namespace
+} // namespace
 
 const char* ipm_status_name(IpmStatus s) {
     switch (s) {
-        case IpmStatus::Optimal: return "optimal";
-        case IpmStatus::Infeasible: return "infeasible";
-        case IpmStatus::Unbounded: return "unbounded";
-        case IpmStatus::DualInfeasible: return "dual_infeasible";
-        case IpmStatus::TimeLimit: return "time_limit";
-        case IpmStatus::IterationLimit: return "iteration_limit";
-        case IpmStatus::NumericalFailure: return "numerical_failure";
-        case IpmStatus::Nonconvex: return "nonconvex";
-        case IpmStatus::Unsupported: return "unsupported";
+    case IpmStatus::Optimal:
+        return "optimal";
+    case IpmStatus::Infeasible:
+        return "infeasible";
+    case IpmStatus::Unbounded:
+        return "unbounded";
+    case IpmStatus::DualInfeasible:
+        return "dual_infeasible";
+    case IpmStatus::TimeLimit:
+        return "time_limit";
+    case IpmStatus::IterationLimit:
+        return "iteration_limit";
+    case IpmStatus::NumericalFailure:
+        return "numerical_failure";
+    case IpmStatus::Nonconvex:
+        return "nonconvex";
+    case IpmStatus::Unsupported:
+        return "unsupported";
     }
     return "?";
 }
@@ -900,7 +944,7 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     res.x.assign(n0, 0);
     res.row_dual.assign(m0, 0);
 
-    auto finish = [&](const Vec& x, const Vec& y_min) {  // fill measures and model-sense outputs
+    auto finish = [&](const Vec& x, const Vec& y_min) { // fill measures and model-sense outputs
         Measures ms = measure(md, c, Q, clo, cup, rlo, rup, x, y_min);
         res.x = x;
         res.row_activity = ms.act;
@@ -924,8 +968,7 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
         if (clo[j] > cup[j] || clo[j] == INFINITY || cup[j] == -INFINITY)
             return infeasible("column " + md.col_names[j] + " has empty bounds");
     for (int i = 0; i < m0; ++i)
-        if (rlo[i] > rup[i] || rlo[i] == INFINITY || rup[i] == -INFINITY)
-            return infeasible("row " + md.row_names[i] + " has empty bounds");
+        if (rlo[i] > rup[i] || rlo[i] == INFINITY || rup[i] == -INFINITY) return infeasible("row " + md.row_names[i] + " has empty bounds");
 
     // ---- light presolve ----
     std::vector<char> fixed(n0);
@@ -933,15 +976,19 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     for (int j = 0; j < n0; ++j)
         if (clo[j] == cup[j]) fixed[j] = 1, x0[j] = clo[j];
     for (const QEntry& q : Q) {
-        if (fixed[q.row] && !fixed[q.col]) cadj[q.col] += q.value * x0[q.row];
-        else if (fixed[q.col] && !fixed[q.row]) cadj[q.row] += q.value * x0[q.col];
+        if (fixed[q.row] && !fixed[q.col])
+            cadj[q.col] += q.value * x0[q.row];
+        else if (fixed[q.col] && !fixed[q.row])
+            cadj[q.row] += q.value * x0[q.col];
     }
     Vec off(m0, 0);
     std::vector<int> cnt(m0, 0);
     for (int j = 0; j < n0; ++j)
         for (const Entry& e : md.cols[j]) {
-            if (fixed[j]) off[e.index] += e.value * x0[j];
-            else ++cnt[e.index];
+            if (fixed[j])
+                off[e.index] += e.value * x0[j];
+            else
+                ++cnt[e.index];
         }
     std::vector<int> rmap(m0, -1), rows;
     for (int i = 0; i < m0; ++i) {
@@ -959,7 +1006,7 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     for (const QEntry& q : Q)
         if (!fixed[q.row] && !fixed[q.col]) qtouch[q.row] = qtouch[q.col] = 1;
     std::vector<int> cmap(n0, -1), cols;
-    std::string ray_col;  // an empty column whose cost pushes it to an infinite bound
+    std::string ray_col; // an empty column whose cost pushes it to an infinite bound
     for (int j = 0; j < n0; ++j) {
         if (fixed[j]) continue;
         bool empty = !qtouch[j];
@@ -970,9 +1017,12 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
             continue;
         }
         double v;
-        if (cadj[j] > 0) v = clo[j];
-        else if (cadj[j] < 0) v = cup[j];
-        else v = std::min(std::max(0.0, clo[j]), cup[j]);
+        if (cadj[j] > 0)
+            v = clo[j];
+        else if (cadj[j] < 0)
+            v = cup[j];
+        else
+            v = std::min(std::max(0.0, clo[j]), cup[j]);
         if (!std::isfinite(v)) {
             ray_col = md.col_names[j];
             v = std::isfinite(clo[j]) ? clo[j] : std::isfinite(cup[j]) ? cup[j] : 0;
@@ -1051,7 +1101,7 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
 
     // ---- internal problem ----
     Qp P;
-    std::vector<int> slack_row;  // internal slack -> kept row
+    std::vector<int> slack_row; // internal slack -> kept row
     for (int i = 0; i < mk; ++i)
         if (rlo[rows[i]] != rup[rows[i]]) slack_row.push_back(i);
     P.N = nk + static_cast<int>(slack_row.size());
@@ -1065,8 +1115,10 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     P.qd.assign(P.N, 0);
     for (const QEntry& q : Qk) {
         double v = sig * q.value * D[q.row] * D[q.col];
-        if (q.row == q.col) P.qd[q.row] += v;
-        else P.qr.push_back(q.row), P.qc.push_back(q.col), P.qv.push_back(v);
+        if (q.row == q.col)
+            P.qd[q.row] += v;
+        else
+            P.qr.push_back(q.row), P.qc.push_back(q.col), P.qv.push_back(v);
     }
     P.c.assign(P.N, 0);
     P.l.resize(P.N), P.u.resize(P.N);
@@ -1119,8 +1171,10 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
                 for (int pp = P.Ap[j]; pp < P.Ap[j + 1]; ++pp) P.Ax[pp] /= row_scale;
             }
             RunOut retry = run_ipm(P, opt, deadline, accept);
-            if (retry.status == IpmStatus::Optimal) ro = std::move(retry);
-            else for (double& r : R) r /= row_scale;
+            if (retry.status == IpmStatus::Optimal)
+                ro = std::move(retry);
+            else
+                for (double& r : R) r /= row_scale;
         }
     } else {
         ro.status = IpmStatus::Optimal;
@@ -1128,8 +1182,10 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
     res.iterations = ro.iters;
     res.factor_nnz = ro.fnnz;
     res.message = ro.msg;
-    if (ro.z.size() == static_cast<size_t>(P.N) && ro.y.size() == static_cast<size_t>(P.M)) to_orig(ro.z, ro.y, x, yo);
-    else x = x0, yo.assign(m0, 0);
+    if (ro.z.size() == static_cast<size_t>(P.N) && ro.y.size() == static_cast<size_t>(P.M))
+        to_orig(ro.z, ro.y, x, yo);
+    else
+        x = x0, yo.assign(m0, 0);
     Measures ms = finish(x, yo);
     res.status = ro.status;
     if (res.status == IpmStatus::DualInfeasible) {
@@ -1141,8 +1197,8 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
         // If the returned iterate is not feasible, a zero-objective solve of the same constraints (c = 0, Q = 0) supplies a
         // point; it must pass the same check. Anything that fails stays DualInfeasible.
         auto ray_ok = [&]() {
-            const double rtol = opt.tol;  // same tolerance as the point check
-            if (ro.ray.size() != static_cast<size_t>(P.N) || nk == 0) return false;  // first nk entries: columns, rest: slacks
+            const double rtol = opt.tol;                                            // same tolerance as the point check
+            if (ro.ray.size() != static_cast<size_t>(P.N) || nk == 0) return false; // first nk entries: columns, rest: slacks
             Vec d(n0, 0);
             double nd = 0;
             for (int k = 0; k < nk; ++k) d[cols[k]] = ro.ray[k] * D[k], nd = std::max(nd, std::abs(d[cols[k]]));
@@ -1178,7 +1234,7 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
                 res.status = IpmStatus::Unbounded;
                 res.message = "recession direction and returned point verified on the original model";
             } else {
-                Model fm = md;  // same constraints, no objective
+                Model fm = md; // same constraints, no objective
                 std::fill(fm.cost.begin(), fm.cost.end(), 0.0);
                 fm.qobj.clear();
                 fm.obj_const = 0;
@@ -1189,7 +1245,8 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
                 if (fr.status == IpmStatus::Optimal && fr.x.size() == static_cast<size_t>(n0) &&
                     measure(md, c, Q, clo, cup, rlo, rup, fr.x, Vec(m0, 0)).pres <= opt.tol) {
                     res.status = IpmStatus::Unbounded;
-                    res.message = "recession direction verified; feasible point from a zero-objective solve, verified on the original model";
+                    res.message =
+                        "recession direction verified; feasible point from a zero-objective solve, verified on the original model";
                     finish(fr.x, Vec(m0, 0));
                 }
             }
@@ -1206,7 +1263,7 @@ IpmResult ipm_solve(const Model& md, const IpmOptions& opt) {
             res.message = "feasibility of the reduced problem could not be confirmed";
         }
     } else if (res.status == IpmStatus::Optimal) {
-        if (!(ms.pres <= opt.tol && ms.dres <= opt.tol && ms.gap <= opt.tol)) {  // e.g. the P.N == 0 path
+        if (!(ms.pres <= opt.tol && ms.dres <= opt.tol && ms.gap <= opt.tol)) { // e.g. the P.N == 0 path
             res.status = IpmStatus::NumericalFailure;
             res.message = "final original-model recheck failed";
         }

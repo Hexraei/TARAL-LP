@@ -35,20 +35,21 @@
 #include "structural_integer.hpp"
 
 namespace {
-constexpr double kIntTol = 1e-6;   // |x - round(x)| for an integral value
-constexpr double kFeasTol = 1e-6;  // row and bound violation, relative to 1 + |bound|
+constexpr double kIntTol = 1e-6;  // |x - round(x)| for an integral value
+constexpr double kFeasTol = 1e-6; // row and bound violation, relative to 1 + |bound|
 static_assert(kIntTol == kFeasTol, "violation() compares integrality on the feasibility scale");
-constexpr double kGapTol = 1e-6;   // optimal when objective - bound <= kGapTol * max(1, |objective|)
-constexpr int kRootPasses = 25;    // propagation passes (a pass visits every pending row once)
+constexpr double kGapTol = 1e-6; // optimal when objective - bound <= kGapTol * max(1, |objective|)
+constexpr int kRootPasses = 25;  // propagation passes (a pass visits every pending row once)
 constexpr int kNodePasses = 10;
-constexpr double kPropEps = 1e-6;  // integer bounds round outward by this much (plus a scale term)
-constexpr double kPropMax = 1e9;   // a derived bound beyond this is numerical noise: ignored
-constexpr double kPropPivot = 1e-9;  // coefficients below this are not used to derive bounds
-constexpr double kRcMin = 1e-7;      // never fix on a reduced cost with a smaller magnitude
-constexpr double kRcDualTol = 1e-7;  // dual infeasibility (scaled by 1 + max|cost|) that voids a basis for fixing
-constexpr int kMaxSplitDepth = 8;    // consecutive bisections of nodes whose LP failed, along one path
-constexpr size_t kMaxOpenChanges = 12'000'000;  // bound-change records held by open nodes (24 bytes each, ~0.3 GB): stop before running out of memory
-constexpr int kRcMaxBackoff = 4;     // after a call that fixes nothing, skip up to 2^4 - 1 later calls
+constexpr double kPropEps = 1e-6;   // integer bounds round outward by this much (plus a scale term)
+constexpr double kPropMax = 1e9;    // a derived bound beyond this is numerical noise: ignored
+constexpr double kPropPivot = 1e-9; // coefficients below this are not used to derive bounds
+constexpr double kRcMin = 1e-7;     // never fix on a reduced cost with a smaller magnitude
+constexpr double kRcDualTol = 1e-7; // dual infeasibility (scaled by 1 + max|cost|) that voids a basis for fixing
+constexpr int kMaxSplitDepth = 8;   // consecutive bisections of nodes whose LP failed, along one path
+constexpr size_t kMaxOpenChanges =
+    12'000'000;                  // bound-change records held by open nodes (24 bytes each, ~0.3 GB): stop before running out of memory
+constexpr int kRcMaxBackoff = 4; // after a call that fixes nothing, skip up to 2^4 - 1 later calls
 
 double tol_at(double z) { return kGapTol * std::max(1.0, std::abs(z)); }
 
@@ -87,11 +88,13 @@ struct Change {
 // Stable ordering is essential because earlier entries can be superseded by
 // both propagation and branch bounds. No constraints or nodes are discarded.
 void canonical_changes(std::vector<Change>& changes) {
-    std::stable_sort(changes.begin(),changes.end(),[](const Change&a,const Change&b){return a.j<b.j;});
-    size_t out=0;
-    for(size_t i=0;i<changes.size();) {
-        size_t e=i+1;while(e<changes.size() && changes[e].j==changes[i].j)++e;
-        changes[out++]=changes[e-1];i=e;
+    std::stable_sort(changes.begin(), changes.end(), [](const Change& a, const Change& b) { return a.j < b.j; });
+    size_t out = 0;
+    for (size_t i = 0; i < changes.size();) {
+        size_t e = i + 1;
+        while (e < changes.size() && changes[e].j == changes[i].j) ++e;
+        changes[out++] = changes[e - 1];
+        i = e;
     }
     changes.resize(out);
 }
@@ -99,72 +102,84 @@ void canonical_changes(std::vector<Change>& changes) {
 // Shared immutable domain trail. Queued siblings share common tightenings
 // instead of each holding a full root-relative map. Every 64 trail links a
 // canonical checkpoint bounds reconstruction and shared_ptr destruction depth.
-struct TrailStats { size_t records=0,nodes=0,peak_records=0,peak_nodes=0; };
+struct TrailStats {
+    size_t records = 0, nodes = 0, peak_records = 0, peak_nodes = 0;
+};
 struct DomainTrail {
     std::shared_ptr<const DomainTrail> parent;
     std::vector<Change> delta;
     std::shared_ptr<TrailStats> stats;
-    int links=0;
-    DomainTrail(std::shared_ptr<const DomainTrail> p,std::vector<Change> d,std::shared_ptr<TrailStats> st)
-        :parent(std::move(p)),delta(std::move(d)),stats(std::move(st)),links(parent?parent->links+1:1) {
-        stats->records+=delta.size();++stats->nodes;
-        stats->peak_records=std::max(stats->peak_records,stats->records);
-        stats->peak_nodes=std::max(stats->peak_nodes,stats->nodes);
+    int links = 0;
+    DomainTrail(std::shared_ptr<const DomainTrail> p, std::vector<Change> d, std::shared_ptr<TrailStats> st)
+        : parent(std::move(p)), delta(std::move(d)), stats(std::move(st)), links(parent ? parent->links + 1 : 1) {
+        stats->records += delta.size();
+        ++stats->nodes;
+        stats->peak_records = std::max(stats->peak_records, stats->records);
+        stats->peak_nodes = std::max(stats->peak_nodes, stats->nodes);
     }
-    ~DomainTrail(){stats->records-=delta.size();--stats->nodes;}
+    ~DomainTrail() {
+        stats->records -= delta.size();
+        --stats->nodes;
+    }
 };
 std::vector<Change> materialize(const std::shared_ptr<const DomainTrail>& t) {
     std::vector<const DomainTrail*> chain;
-    for(auto p=t.get();p;p=p->parent.get())chain.push_back(p);
+    for (auto p = t.get(); p; p = p->parent.get()) chain.push_back(p);
     std::vector<Change> out;
-    for(auto it=chain.rbegin();it!=chain.rend();++it)out.insert(out.end(),(*it)->delta.begin(),(*it)->delta.end());
-    canonical_changes(out);return out;
+    for (auto it = chain.rbegin(); it != chain.rend(); ++it) out.insert(out.end(), (*it)->delta.begin(), (*it)->delta.end());
+    canonical_changes(out);
+    return out;
 }
-void freeze_domain(std::vector<Change>& full,std::shared_ptr<const DomainTrail>& parent,
-                   const std::shared_ptr<TrailStats>& stats,bool clear) {
+void freeze_domain(std::vector<Change>& full, std::shared_ptr<const DomainTrail>& parent, const std::shared_ptr<TrailStats>& stats,
+                   bool clear) {
     canonical_changes(full);
-    auto old=materialize(parent);
-    std::vector<Change> delta;size_t at=0;
-    for(auto c:full){
-        while(at<old.size() && old[at].j<c.j)++at;
-        if(at==old.size() || old[at].j!=c.j || old[at].lo!=c.lo || old[at].up!=c.up)delta.push_back(c);
+    auto old = materialize(parent);
+    std::vector<Change> delta;
+    size_t at = 0;
+    for (auto c : full) {
+        while (at < old.size() && old[at].j < c.j) ++at;
+        if (at == old.size() || old[at].j != c.j || old[at].lo != c.lo || old[at].up != c.up) delta.push_back(c);
     }
     // Domains only tighten: an absent inherited interval would silently relax
     // a node. Fall back to a full checkpoint rather than trust this invariant.
-    bool missing=false;size_t f=0;
-    for(auto c:old){while(f<full.size() && full[f].j<c.j)++f;if(f==full.size() || full[f].j!=c.j)missing=true;}
-    if(missing || (parent && parent->links>=64) || delta.size()>=full.size()) {
-        parent=std::make_shared<const DomainTrail>(nullptr,full,stats);
-    }else if(!delta.empty()) {
-        parent=std::make_shared<const DomainTrail>(parent,std::move(delta),stats);
+    bool missing = false;
+    size_t f = 0;
+    for (auto c : old) {
+        while (f < full.size() && full[f].j < c.j) ++f;
+        if (f == full.size() || full[f].j != c.j) missing = true;
     }
-    if(clear){std::vector<Change>().swap(full);}
+    if (missing || (parent && parent->links >= 64) || delta.size() >= full.size()) {
+        parent = std::make_shared<const DomainTrail>(nullptr, full, stats);
+    } else if (!delta.empty()) {
+        parent = std::make_shared<const DomainTrail>(parent, std::move(delta), stats);
+    }
+    if (clear) {
+        std::vector<Change>().swap(full);
+    }
 }
 
 struct Node {
-    double bound;  // valid lower bound on every solution in this node (min form)
-    std::vector<Change> changes;  // bound tightenings relative to the root: branchings and propagation
-    std::shared_ptr<const std::vector<char>> basis;  // parent's optimal basis (warm start)
-    int dir = 0;      // last branching: -1 down, +1 up, 0 root
-    double dist = 0;  // distance the branched variable was moved (fraction)
-    int bj = -1;      // the branched variable
-    int depth = 0;    // number of branchings from the root
-    std::vector<int> seeds;  // columns whose bounds changed since the parent was propagated
-    int splits = 0;  // bisections in a row on this path (the node's LP failed, so its integer box was halved)
+    double bound;                                   // valid lower bound on every solution in this node (min form)
+    std::vector<Change> changes;                    // bound tightenings relative to the root: branchings and propagation
+    std::shared_ptr<const std::vector<char>> basis; // parent's optimal basis (warm start)
+    int dir = 0;                                    // last branching: -1 down, +1 up, 0 root
+    double dist = 0;                                // distance the branched variable was moved (fraction)
+    int bj = -1;                                    // the branched variable
+    int depth = 0;                                  // number of branchings from the root
+    std::vector<int> seeds;                         // columns whose bounds changed since the parent was propagated
+    int splits = 0; // bisections in a row on this path (the node's LP failed, so its integer box was halved)
     std::shared_ptr<const DomainTrail> trail = nullptr;
 };
 
-struct Worse {  // priority_queue keeps the smallest bound on top; deeper first on ties
-    bool operator()(const Node& a, const Node& b) const {
-        return a.bound != b.bound ? a.bound > b.bound : a.depth < b.depth;
-    }
+struct Worse { // priority_queue keeps the smallest bound on top; deeper first on ties
+    bool operator()(const Node& a, const Node& b) const { return a.bound != b.bound ? a.bound > b.bound : a.depth < b.depth; }
 };
 
 enum class End { Complete, TimeLimit, NodeLimit, RootUnbounded, RootFailed };
 
 // Search on a minimisation model. Integer column bounds are already rounded in root_lo/root_up.
 class Search {
-public:
+  public:
     Search(const Model& md, std::vector<double> root_lo, std::vector<double> root_up, double time_limit, long node_limit)
         : md_(md), rlo_(std::move(root_lo)), rup_(std::move(root_up)), limit_(time_limit), node_limit_(node_limit) {
         int m = int(md.row_lo.size());
@@ -179,32 +194,32 @@ public:
     bool has_inc = false;
     std::vector<double> inc;
     double z = kInf;      // incumbent objective
-    double bound = -kInf;  // proven global lower bound after run()
+    double bound = -kInf; // proven global lower bound after run()
     long nodes = 0, iters = 0, unresolved = 0;
-    long prop_tightened = 0;   // integer bounds tightened by propagation
-    long prop_crossed = 0;     // nodes whose propagated integer domain came out empty
-    long prop_crossed_lp_infeasible = 0;  // ... of which the LP then confirmed infeasible
-    long prop_pruned = 0;      // ... pruned without the LP (all of them unless --no-prop-prune)
-    long rc_fixed = 0, rc_skipped = 0;  // reduced-cost tightenings; nodes whose basis was not trusted
-    bool use_prop = true;      // false: plain branch and bound (the audit's oracle)
+    long prop_tightened = 0;             // integer bounds tightened by propagation
+    long prop_crossed = 0;               // nodes whose propagated integer domain came out empty
+    long prop_crossed_lp_infeasible = 0; // ... of which the LP then confirmed infeasible
+    long prop_pruned = 0;                // ... pruned without the LP (all of them unless --no-prop-prune)
+    long rc_fixed = 0, rc_skipped = 0;   // reduced-cost tightenings; nodes whose basis was not trusted
+    bool use_prop = true;                // false: plain branch and bound (the audit's oracle)
     bool use_rc = true;
-    bool prop_prune = true;    // prune an emptied domain directly; false: the LP decides (--no-prop-prune)
-    bool audit_prop = false;   // re-check every node whose propagated domain came out empty (debug/test)
+    bool prop_prune = true;  // prune an emptied domain directly; false: the LP decides (--no-prop-prune)
+    bool audit_prop = false; // re-check every node whose propagated domain came out empty (debug/test)
     // Audit of those nodes: the LP on the box the node had before propagating, and for the ones the
     // LP finds feasible a plain branch and bound over that box.
     long audit_nodes = 0, audit_lp_infeasible = 0, audit_lp_feasible = 0, audit_lp_other = 0;
     long audit_int_empty = 0, audit_int_feasible = 0, audit_int_undecided = 0, audit_cutoff = 0;
-    long audit_rc_checked = 0, audit_rc_bad = 0;  // reduced-cost fixings re-checked / found to cut off a better point
+    long audit_rc_checked = 0, audit_rc_bad = 0; // reduced-cost fixings re-checked / found to cut off a better point
     std::string note;
 
-private:
+  private:
     const Model& md_;
     std::vector<double> rlo_, rup_;
     double limit_;
     long node_limit_;
     std::chrono::steady_clock::time_point t0_ = std::chrono::steady_clock::now();
-    std::vector<std::vector<Entry>> rows_;  // row-wise A: (column, value)
-    std::vector<char> queued_, mark_;       // propagation scratch: row pending, column changed
+    std::vector<std::vector<Entry>> rows_; // row-wise A: (column, value)
+    std::vector<char> queued_, mark_;      // propagation scratch: row pending, column changed
     std::vector<int> work_, next_, changed_;
     int rc_idle_ = 0;       // consecutive reduced-cost calls that fixed nothing (backoff exponent)
     long rc_skip_left_ = 0; // calls still to skip; both reset when the incumbent improves
@@ -215,15 +230,15 @@ private:
     void audit_fixing(std::vector<double> lo, std::vector<double> up, int j, double cut_lo, double cut_up);
     void audit_pruned(const std::vector<double>& lo, const std::vector<double>& up);
 
-public:
+  public:
     // Feasibility Jump hook: called once, when no incumbent exists after a short while; returns a candidate
     // point (verified by offer()) or false. The argument is the time budget in seconds.
     std::function<bool(double, std::vector<double>&)> fj_hook;
     bool fj_tried = false;
     bool compact_nodes = false;
     bool persistent_nodes = false;
-    long peak_trail_records=0,peak_trail_nodes=0;
-    long peak_open_nodes=0,peak_open_changes=0,max_depth=0;
+    long peak_trail_records = 0, peak_trail_nodes = 0;
+    long peak_open_nodes = 0, peak_open_changes = 0, max_depth = 0;
     structural_integer::Grid grid;
     // Offer only an exactly integer candidate. A near-integer relaxation is not an incumbent.
     bool offer(const std::vector<double>& x) {
@@ -273,13 +288,19 @@ bool Search::propagate(std::vector<double>& lo, std::vector<double>& up, const s
             const double rl = md_.row_lo[i], ru = md_.row_up[i];
             const bool hl = std::isfinite(rl), hu = std::isfinite(ru);
             if (!hl && !hu) continue;
-            double minf = 0, maxf = 0;  // finite parts of the smallest and largest activity
-            int mini = 0, maxi = 0;     // terms that make them infinite
+            double minf = 0, maxf = 0; // finite parts of the smallest and largest activity
+            int mini = 0, maxi = 0;    // terms that make them infinite
             for (const Entry& e : rows_[i]) {
                 double a = e.value, l = lo[e.index], u = up[e.index];
                 double lowv = a > 0 ? l : u, highv = a > 0 ? u : l;
-                if (std::isfinite(lowv)) minf += a * lowv; else ++mini;
-                if (std::isfinite(highv)) maxf += a * highv; else ++maxi;
+                if (std::isfinite(lowv))
+                    minf += a * lowv;
+                else
+                    ++mini;
+                if (std::isfinite(highv))
+                    maxf += a * highv;
+                else
+                    ++maxi;
             }
             const bool can_up = hu && mini <= 1, can_lo = hl && maxi <= 1;
             if (!can_up && !can_lo) continue;
@@ -288,24 +309,28 @@ bool Search::propagate(std::vector<double>& lo, std::vector<double>& up, const s
                 double a = e.value;
                 if (!md_.is_int[j] || std::abs(a) < kPropPivot) continue;
                 double l = lo[j], u = up[j], nl = l, nu = u;
-                if (can_up) {  // a x_j <= ru - (smallest activity of the other terms)
+                if (can_up) { // a x_j <= ru - (smallest activity of the other terms)
                     double c = a > 0 ? a * l : a * u;
                     bool inf = !std::isfinite(c);
                     if (mini - inf == 0) {
                         double v = (ru - (minf - (inf ? 0.0 : c))) / a;
                         double eps = kPropEps + 1e-9 * (1 + std::abs(ru) + std::abs(minf)) / std::abs(a);
-                        if (a > 0) nu = std::min(nu, std::floor(v + eps));
-                        else nl = std::max(nl, std::ceil(v - eps));
+                        if (a > 0)
+                            nu = std::min(nu, std::floor(v + eps));
+                        else
+                            nl = std::max(nl, std::ceil(v - eps));
                     }
                 }
-                if (can_lo) {  // a x_j >= rl - (largest activity of the other terms)
+                if (can_lo) { // a x_j >= rl - (largest activity of the other terms)
                     double c = a > 0 ? a * u : a * l;
                     bool inf = !std::isfinite(c);
                     if (maxi - inf == 0) {
                         double v = (rl - (maxf - (inf ? 0.0 : c))) / a;
                         double eps = kPropEps + 1e-9 * (1 + std::abs(rl) + std::abs(maxf)) / std::abs(a);
-                        if (a > 0) nl = std::max(nl, std::ceil(v - eps));
-                        else nu = std::min(nu, std::floor(v + eps));
+                        if (a > 0)
+                            nl = std::max(nl, std::ceil(v - eps));
+                        else
+                            nu = std::min(nu, std::floor(v + eps));
                     }
                 }
                 if (std::abs(nl) > kPropMax) nl = l;
@@ -375,7 +400,7 @@ void Search::audit_pruned(const std::vector<double>& lo, const std::vector<doubl
         }
         return;
     }
-    Search imp(md_, lo, up, 60, 2'000'000);  // integer points exist: none may beat the incumbent
+    Search imp(md_, lo, up, 60, 2'000'000); // integer points exist: none may beat the incumbent
     imp.use_prop = false, imp.use_rc = false;
     imp.has_inc = true, imp.z = z;
     End ie = imp.run();
@@ -414,8 +439,7 @@ void Search::audit_fixing(std::vector<double> lo, std::vector<double> up, int j,
 // numerical noise from cutting off a point that could still win; if any nonbasic reduced cost has the
 // wrong sign by more than a tolerance the basis is not trusted and nothing is fixed. The columns
 // tightened are appended to `fixed`.
-void Search::fix_by_reduced_cost(const Result& r, std::vector<double>& lo, std::vector<double>& up,
-                                 std::vector<int>& fixed) {
+void Search::fix_by_reduced_cost(const Result& r, std::vector<double>& lo, std::vector<double>& up, std::vector<int>& fixed) {
     const int n = int(md_.cols.size()), m = int(md_.row_lo.size());
     const std::vector<char>& bs = r.basis;
     if (int(bs.size()) != n + m) return;
@@ -454,7 +478,7 @@ void Search::fix_by_reduced_cost(const Result& r, std::vector<double>& lo, std::
             dj = y[j - n];
         }
         double l = j < n ? lo[j] : md_.row_lo[j - n], u = j < n ? up[j] : md_.row_up[j - n];
-        if (l == u) continue;  // pinned: the sign of its reduced cost does not matter
+        if (l == u) continue; // pinned: the sign of its reduced cost does not matter
         bool bad = bs[j] == 1 ? dj < -dtol : bs[j] == 2 ? dj > dtol : std::abs(dj) > dtol;
         if (bad) {
             ++rc_skipped;
@@ -482,13 +506,13 @@ void Search::fix_by_reduced_cost(const Result& r, std::vector<double>& lo, std::
 
 End Search::run() {
     std::priority_queue<Node, std::vector<Node>, Worse> open;
-    auto trails=std::make_shared<TrailStats>();
-    auto enqueue=[&](Node node){
-        if(persistent_nodes)freeze_domain(node.changes,node.trail,trails,true);
+    auto trails = std::make_shared<TrailStats>();
+    auto enqueue = [&](Node node) {
+        if (persistent_nodes) freeze_domain(node.changes, node.trail, trails, true);
         open.push(std::move(node));
     };
-    std::vector<double> held;  // bounds of nodes that could not be resolved
-    double pruned = kInf;      // smallest bound among nodes pruned by bound
+    std::vector<double> held; // bounds of nodes that could not be resolved
+    double pruned = kInf;     // smallest bound among nodes pruned by bound
     int n = int(md_.cols.size());
     Node cur{-kInf, {}, nullptr, 0, 0, -1, 0, {}};
     // Pseudocosts: objective gain per unit of fractionality, per variable and direction.
@@ -501,34 +525,36 @@ End Search::run() {
         return all_cnt[d] ? all_sum[d] / double(all_cnt[d]) : 1.0;
     };
     bool have_cur = true;
-    int dive_steps=0;
-    size_t open_changes = 0;  // Full-map queue records, or live shared trail records when persistent.
+    int dive_steps = 0;
+    size_t open_changes = 0; // Full-map queue records, or live shared trail records when persistent.
     End end = End::Complete;
     std::vector<double> lo, up;
     for (;;) {
-        if(persistent_nodes)open_changes=trails->records;
+        if (persistent_nodes) open_changes = trails->records;
         if (compact_nodes) {
-            peak_open_nodes=std::max(peak_open_nodes,long(open.size()));
-            peak_open_changes=std::max(peak_open_changes,long(open_changes));
+            peak_open_nodes = std::max(peak_open_nodes, long(open.size()));
+            peak_open_changes = std::max(peak_open_changes, long(open_changes));
         }
         if (!have_cur) {
             if (open.empty()) break;
-            dive_steps=0;
+            dive_steps = 0;
             cur = open.top();
             open.pop();
-            if(persistent_nodes)cur.changes=materialize(cur.trail);
-            else open_changes -= std::min(open_changes, cur.changes.size());
+            if (persistent_nodes)
+                cur.changes = materialize(cur.trail);
+            else
+                open_changes -= std::min(open_changes, cur.changes.size());
         }
         have_cur = false;
-        if(persistent_nodes)open_changes=trails->records;
-        if (compact_nodes) max_depth=std::max(max_depth,long(cur.depth));
+        if (persistent_nodes) open_changes = trails->records;
+        if (compact_nodes) max_depth = std::max(max_depth, long(cur.depth));
         if (has_inc && cur.bound >= z - tol_at(z)) {
             pruned = std::min(pruned, cur.bound);
             continue;
         }
         if (fj_hook && !fj_tried && !has_inc && elapsed() >= std::min(0.5, 0.02 * limit_) &&
-            elapsed() + std::min(2.0, 0.05 * limit_) <= limit_) {  // the hook never runs past the time limit
-            fj_tried = true;  // pays only when the search has found nothing after 0.5 s; costs at most the time so far
+            elapsed() + std::min(2.0, 0.05 * limit_) <= limit_) { // the hook never runs past the time limit
+            fj_tried = true; // pays only when the search has found nothing after 0.5 s; costs at most the time so far
             std::vector<double> px;
             if (fj_hook(std::min(2.0, 0.05 * limit_), px)) offer(px);
             if (has_inc && cur.bound >= z - tol_at(z)) {
@@ -537,26 +563,29 @@ End Search::run() {
             }
         }
         if (open_changes > kMaxOpenChanges && fj_hook && !fj_tried && !has_inc &&
-            elapsed() + std::min(2.0, 0.05 * limit_) <= limit_) {  // last chance for an incumbent
+            elapsed() + std::min(2.0, 0.05 * limit_) <= limit_) { // last chance for an incumbent
             fj_tried = true;
             std::vector<double> px;
             if (fj_hook(std::min(2.0, 0.05 * limit_), px)) offer(px);
         }
-        if (open_changes > kMaxOpenChanges) {  // record budget; basis/queue overhead is not counted
+        if (open_changes > kMaxOpenChanges) { // record budget; basis/queue overhead is not counted
             end = End::NodeLimit;
-            note = "open-node memory cap reached (" + std::to_string(open.size()) + " open nodes, depth " + std::to_string(cur.depth) + "); search stopped, bound and incumbent are valid";
-            if(compact_nodes) {
-                peak_open_nodes=std::max(peak_open_nodes,long(open.size()+1));
-                peak_open_changes=std::max(peak_open_changes,long(persistent_nodes ? trails->records : open_changes+cur.changes.size()));
+            note = "open-node memory cap reached (" + std::to_string(open.size()) + " open nodes, depth " + std::to_string(cur.depth) +
+                   "); search stopped, bound and incumbent are valid";
+            if (compact_nodes) {
+                peak_open_nodes = std::max(peak_open_nodes, long(open.size() + 1));
+                peak_open_changes =
+                    std::max(peak_open_changes, long(persistent_nodes ? trails->records : open_changes + cur.changes.size()));
             }
             enqueue(std::move(cur));
             break;
         }
         if (elapsed() > limit_ || nodes >= node_limit_) {
             end = elapsed() > limit_ ? End::TimeLimit : End::NodeLimit;
-            if(compact_nodes) {
-                peak_open_nodes=std::max(peak_open_nodes,long(open.size()+1));
-                peak_open_changes=std::max(peak_open_changes,long(persistent_nodes ? trails->records : open_changes+cur.changes.size()));
+            if (compact_nodes) {
+                peak_open_nodes = std::max(peak_open_nodes, long(open.size() + 1));
+                peak_open_changes =
+                    std::max(peak_open_changes, long(persistent_nodes ? trails->records : open_changes + cur.changes.size()));
             }
             enqueue(std::move(cur));
             break;
@@ -569,7 +598,7 @@ End Search::run() {
         // its branching variable. The tightenings join the node's own change list (children copy
         // it, siblings do not see them).
         bool crossed = false;
-        const size_t kept = cur.changes.size();  // the node's changes before propagation
+        const size_t kept = cur.changes.size(); // the node's changes before propagation
         bool tightened = false;
         if (use_prop) {
             if (propagate(lo, up, is_root ? nullptr : &cur.seeds, is_root ? kRootPasses : kNodePasses)) {
@@ -597,7 +626,7 @@ End Search::run() {
                                  : solve_lp(md_, lo, up, nullptr, limit_ - elapsed());
             iters += q.iterations;
             if (cur.basis && q.status != Status::Optimal && q.status != Status::Infeasible && q.status != Status::TimeLimit) {
-                q = solve_lp(md_, lo, up, nullptr, limit_ - elapsed());  // cold retry
+                q = solve_lp(md_, lo, up, nullptr, limit_ - elapsed()); // cold retry
                 iters += q.iterations;
             }
             return q;
@@ -613,9 +642,10 @@ End Search::run() {
         }
         if (r.status == Status::TimeLimit) {
             end = End::TimeLimit;
-            if(compact_nodes) {
-                peak_open_nodes=std::max(peak_open_nodes,long(open.size()+1));
-                peak_open_changes=std::max(peak_open_changes,long(persistent_nodes ? trails->records : open_changes+cur.changes.size()));
+            if (compact_nodes) {
+                peak_open_nodes = std::max(peak_open_nodes, long(open.size() + 1));
+                peak_open_changes =
+                    std::max(peak_open_changes, long(persistent_nodes ? trails->records : open_changes + cur.changes.size()));
             }
             enqueue(std::move(cur));
             break;
@@ -635,16 +665,18 @@ End Search::run() {
             int sj = -1;
             double range = 0;
             for (int j = 0; j < n && cur.splits < kMaxSplitDepth; ++j)
-                if (md_.is_int[j] && std::isfinite(lo[j]) && std::isfinite(up[j]) && up[j] - lo[j] > range)
-                    sj = j, range = up[j] - lo[j];
+                if (md_.is_int[j] && std::isfinite(lo[j]) && std::isfinite(up[j]) && up[j] - lo[j] > range) sj = j, range = up[j] - lo[j];
             if (sj >= 0) {
                 double mid = std::floor((lo[sj] + up[sj]) / 2);
                 Node a{cur.bound, cur.changes, cur.basis, 0, 0, -1, cur.depth + 1, {sj}, cur.splits + 1}, b = a;
-                if(persistent_nodes)a.trail=b.trail=cur.trail;
+                if (persistent_nodes) a.trail = b.trail = cur.trail;
                 a.changes.push_back({sj, lo[sj], mid});
                 b.changes.push_back({sj, mid + 1, up[sj]});
-                if(compact_nodes){canonical_changes(a.changes);canonical_changes(b.changes);}
-                if(!persistent_nodes)open_changes += a.changes.size() + b.changes.size();
+                if (compact_nodes) {
+                    canonical_changes(a.changes);
+                    canonical_changes(b.changes);
+                }
+                if (!persistent_nodes) open_changes += a.changes.size() + b.changes.size();
                 enqueue(std::move(a));
                 enqueue(std::move(b));
                 continue;
@@ -655,7 +687,7 @@ End Search::run() {
             continue;
         }
         double b = structural_integer::lattice_bound(std::max(cur.bound, r.objective), grid);
-        if (cur.dir) {  // learn from the parent -> child objective change
+        if (cur.dir) { // learn from the parent -> child objective change
             int d = cur.dir > 0, j = cur.bj;
             double g = std::max(0.0, r.objective - cur.bound) / cur.dist;
             pc_sum[d][j] += g, ++pc_cnt[d][j], all_sum[d] += g, ++all_cnt[d];
@@ -667,11 +699,12 @@ End Search::run() {
         if (near_integer && elapsed() < limit_) {
             auto pl = lo, pu = up;
             bool in_box = true;
-            for (int j = 0; j < n; ++j) if (md_.is_int[j]) {
-                double v = std::round(r.x[j]);
-                if (v < lo[j] || v > up[j]) in_box = false;
-                pl[j] = pu[j] = v;
-            }
+            for (int j = 0; j < n; ++j)
+                if (md_.is_int[j]) {
+                    double v = std::round(r.x[j]);
+                    if (v < lo[j] || v > up[j]) in_box = false;
+                    pl[j] = pu[j] = v;
+                }
             if (in_box) {
                 Result polished = solve_lp(md_, pl, pu, nullptr, limit_ - elapsed());
                 iters += polished.iterations;
@@ -690,7 +723,7 @@ End Search::run() {
         for (int j = 0; j < n; ++j) {
             if (!md_.is_int[j]) continue;
             double f = r.x[j] - std::floor(r.x[j]);
-            if (f == 0.0) continue;  // even a tiny fractional value needs coverage if not gap-pruned
+            if (f == 0.0) continue; // even a tiny fractional value needs coverage if not gap-pruned
             // A tolerance-level residual on a fixed/out-of-domain column cannot
             // make two strictly smaller children. Try another covering split;
             // if none exists, retain this node as unresolved below.
@@ -701,7 +734,7 @@ End Search::run() {
             double sc = std::max(pseudo(0, j) * f, 1e-6) * std::max(pseudo(1, j) * (1 - f), 1e-6);
             if (sc > best) bj = j, best = sc;
         }
-        if (bj < 0) {  // integral LP point that failed the feasibility check
+        if (bj < 0) { // integral LP point that failed the feasibility check
             ++unresolved;
             held.push_back(b);
             note = blocked_fractional ? "near-integer node LP violates its branching domain"
@@ -716,7 +749,7 @@ End Search::run() {
             note = "near-integer node LP violates its branching domain";
             continue;
         }
-        std::vector<int> seeds{bj};  // the children propagate from the branching and from any fixing
+        std::vector<int> seeds{bj}; // the children propagate from the branching and from any fixing
         if (has_inc && use_rc) {
             // Each call refactorizes the basis. When calls keep fixing nothing, back off exponentially;
             // skipping a fixing is always valid, it only forgoes a tightening.
@@ -726,52 +759,63 @@ End Search::run() {
                 size_t at = seeds.size();
                 fix_by_reduced_cost(r, lo, up, seeds);
                 for (size_t t = at; t < seeds.size(); ++t) cur.changes.push_back({seeds[t], lo[seeds[t]], up[seeds[t]]});
-                if (seeds.size() > at) rc_idle_ = 0;
-                else rc_idle_ = std::min(rc_idle_ + 1, kRcMaxBackoff);
+                if (seeds.size() > at)
+                    rc_idle_ = 0;
+                else
+                    rc_idle_ = std::min(rc_idle_ + 1, kRcMaxBackoff);
                 rc_skip_left_ = (1L << rc_idle_) - 1;
             }
         }
-        if(compact_nodes) canonical_changes(cur.changes);
-        if(persistent_nodes)freeze_domain(cur.changes,cur.trail,trails,false);
+        if (compact_nodes) canonical_changes(cur.changes);
+        if (persistent_nodes) freeze_domain(cur.changes, cur.trail, trails, false);
         auto basis = std::make_shared<const std::vector<char>>(std::move(r.basis));
         double v = r.x[bj], fl = std::floor(v);
         Node down{b, cur.changes, basis, -1, v - fl, bj, cur.depth + 1, seeds},
             upn{b, std::move(cur.changes), basis, 1, fl + 1 - v, bj, cur.depth + 1, seeds};
-        if(persistent_nodes)down.trail=upn.trail=cur.trail;
+        if (persistent_nodes) down.trail = upn.trail = cur.trail;
         down.changes.push_back({bj, lo[bj], fl});
         upn.changes.push_back({bj, fl + 1, up[bj]});
-        if(compact_nodes){canonical_changes(down.changes);canonical_changes(upn.changes);}
+        if (compact_nodes) {
+            canonical_changes(down.changes);
+            canonical_changes(upn.changes);
+        }
         bool dive_up = v - fl >= 0.5;
-        if(compact_nodes && ++dive_steps>=64) {
+        if (compact_nodes && ++dive_steps >= 64) {
             // Return to global best bound every 64 successful branch steps.
             // Queue BOTH children with their valid inherited bounds, preserving
             // every subtree. Changing node order alone cannot justify pruning.
-            if(!persistent_nodes)open_changes += down.changes.size()+upn.changes.size();
-            enqueue(std::move(down));enqueue(std::move(upn));
+            if (!persistent_nodes) open_changes += down.changes.size() + upn.changes.size();
+            enqueue(std::move(down));
+            enqueue(std::move(upn));
             continue;
         }
-        if(!persistent_nodes)open_changes += (dive_up ? down : upn).changes.size();
+        if (!persistent_nodes) open_changes += (dive_up ? down : upn).changes.size();
         enqueue(dive_up ? std::move(down) : std::move(upn));
         cur = dive_up ? std::move(upn) : std::move(down);
         have_cur = true;
     }
-    if(persistent_nodes){peak_trail_records=long(trails->peak_records);peak_trail_nodes=long(trails->peak_nodes);peak_open_changes=peak_trail_records;}
+    if (persistent_nodes) {
+        peak_trail_records = long(trails->peak_records);
+        peak_trail_nodes = long(trails->peak_nodes);
+        peak_open_changes = peak_trail_records;
+    }
     bound = std::min(pruned, has_inc ? z : kInf);
     if (have_cur) bound = std::min(bound, cur.bound);
     if (!open.empty()) bound = std::min(bound, open.top().bound);
     for (double h : held)
-        if (!(has_inc && h >= z - tol_at(z))) bound = std::min(bound, h);
-        else --unresolved;  // pruned by the final incumbent after all
+        if (!(has_inc && h >= z - tol_at(z)))
+            bound = std::min(bound, h);
+        else
+            --unresolved; // pruned by the final incumbent after all
     return end;
 }
-
 
 // Feasibility Jump (Luteberget and Sartor), used only to seed an incumbent. Ignores the objective: it
 // looks for a point that satisfies every row, bound and integrality requirement, by moving one column at
 // a time to the value that minimises the weighted row violation, and raising the weights of violated rows
 // at a local minimum. Deterministic given the seed. The caller verifies the point before using it.
 class FeasJump {
-public:
+  public:
     FeasJump(const Model& md, const std::vector<double>& lo, const std::vector<double>& up)
         : M(md), lo_(lo), up_(up), n_(int(md.cols.size())), m_(int(md.row_lo.size())), rows_(m_) {
         for (int j = 0; j < n_; ++j)
@@ -826,12 +870,12 @@ public:
         return true;
     }
 
-private:
+  private:
     const Model& M;
     const std::vector<double>& lo_;
     const std::vector<double>& up_;
     int n_, m_;
-    std::vector<std::vector<Entry>> rows_;  // row-wise copy: (column, value)
+    std::vector<std::vector<Entry>> rows_; // row-wise copy: (column, value)
     std::vector<double> x_, act_, w_;
     std::vector<int> viol_, vpos_;
     double rv(int i, double a) const {
@@ -839,7 +883,8 @@ private:
         return a < lo - 1e-9 ? lo - a : (a > up + 1e-9 ? a - up : 0.0);
     }
     void setviol(int i, bool v) {
-        if (v && vpos_[i] < 0) vpos_[i] = int(viol_.size()), viol_.push_back(i);
+        if (v && vpos_[i] < 0)
+            vpos_[i] = int(viol_.size()), viol_.push_back(i);
         else if (!v && vpos_[i] >= 0) {
             int p = vpos_[i];
             viol_[p] = viol_.back();
@@ -871,8 +916,10 @@ private:
             if (f < bestf - 1e-12) bestf = f, bestv = r;
         };
         for (double c : cand) {
-            if (M.is_int[j]) consider(std::floor(c + 1e-9)), consider(std::ceil(c - 1e-9));
-            else consider(c);
+            if (M.is_int[j])
+                consider(std::floor(c + 1e-9)), consider(std::ceil(c - 1e-9));
+            else
+                consider(c);
         }
         best = bestv;
         gain = weighted(j, cur) - bestf;
@@ -887,30 +934,43 @@ private:
     }
 };
 
-}  // namespace
+} // namespace
 
 MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, MilpOptions opt) {
     Stopwatch elapsed;
     MilpResult res;
     if (opt.integer_structure) {
         auto deadline = elapsed.start + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-            std::chrono::duration<double>(std::max(0.0,std::min(time_limit_s,1e8))));
+                                            std::chrono::duration<double>(std::max(0.0, std::min(time_limit_s, 1e8))));
         auto p = structural_integer::parity(model, deadline);
-        if (p.kind == structural_integer::Proof::None) p=structural_integer::three_integer(model, deadline);
-        if (p.kind == structural_integer::Proof::Timeout) { res.status="time_limit";res.best_bound=-kInf;return res; }
-        if (p.kind == structural_integer::Proof::Infeasible) {
-            res.status="infeasible";res.best_bound=model.maximize ? -kInf : kInf;
-            res.structural_certificate=p.json;res.message="verified exact integer parity contradiction";return res;
+        if (p.kind == structural_integer::Proof::None) p = structural_integer::three_integer(model, deadline);
+        if (p.kind == structural_integer::Proof::Timeout) {
+            res.status = "time_limit";
+            res.best_bound = -kInf;
+            return res;
         }
-        if (p.kind == structural_integer::Proof::Optimal && violation(model,p.x)<=kFeasTol) {
-            res.status="optimal";res.has_solution=true;res.x=std::move(p.x);
-            res.objective=objective_of(model,res.x);res.best_bound=res.objective;res.gap=0;
-            res.structural_certificate=p.json;res.message="verified exact structural integer optimum";return res;
+        if (p.kind == structural_integer::Proof::Infeasible) {
+            res.status = "infeasible";
+            res.best_bound = model.maximize ? -kInf : kInf;
+            res.structural_certificate = p.json;
+            res.message = "verified exact integer parity contradiction";
+            return res;
+        }
+        if (p.kind == structural_integer::Proof::Optimal && violation(model, p.x) <= kFeasTol) {
+            res.status = "optimal";
+            res.has_solution = true;
+            res.x = std::move(p.x);
+            res.objective = objective_of(model, res.x);
+            res.best_bound = res.objective;
+            res.gap = 0;
+            res.structural_certificate = p.json;
+            res.message = "verified exact structural integer optimum";
+            return res;
         }
     }
     if (opt.integer_structure) time_limit_s = std::max(0.0, time_limit_s - elapsed());
     double sign = model.maximize ? -1 : 1;
-    Model md = model;  // minimisation form
+    Model md = model; // minimisation form
     md.maximize = false;
     for (double& c : md.cost) c *= sign;
     md.obj_const *= sign;
@@ -927,9 +987,9 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     }
 
     Search s(md, lo, up, time_limit_s, node_limit);
-    s.compact_nodes=opt.compact_nodes || opt.persistent_nodes;
-    s.persistent_nodes=opt.persistent_nodes;
-    if (opt.integer_structure) s.grid=structural_integer::objective_grid(md);
+    s.compact_nodes = opt.compact_nodes || opt.persistent_nodes;
+    s.persistent_nodes = opt.persistent_nodes;
+    if (opt.integer_structure) s.grid = structural_integer::objective_grid(md);
     // Incumbent seed: if the search still has no incumbent after a short while, up to four Feasibility Jump
     // restarts are tried (see Search::fj_hook). Only a point that passes violation() on the model being
     // solved becomes the incumbent; the search is otherwise unchanged. TARAL_NO_FJ=1 disables the hook.
@@ -938,7 +998,8 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
         fjp = std::make_unique<FeasJump>(md, lo, up);
         s.fj_hook = [&](double budget, std::vector<double>& x) {
             for (unsigned seed = 1; seed <= 4; ++seed) {
-                auto dl = std::chrono::steady_clock::now() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(budget / 4));
+                auto dl = std::chrono::steady_clock::now() +
+                          std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(budget / 4));
                 if (fjp->run(seed, dl, x)) return true;
             }
             return false;
@@ -950,15 +1011,17 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     res.prop_tightened = s.prop_tightened, res.prop_crossed = s.prop_crossed, res.prop_pruned = s.prop_pruned;
     res.prop_crossed_lp_infeasible = s.prop_crossed_lp_infeasible;
     res.rc_fixed = s.rc_fixed, res.rc_skipped = s.rc_skipped;
-    res.audit = {s.audit_nodes, s.audit_lp_infeasible, s.audit_lp_feasible, s.audit_lp_other,
-                 s.audit_int_empty, s.audit_int_feasible, s.audit_int_undecided, s.audit_cutoff,
-                 s.audit_rc_checked, s.audit_rc_bad};
-    res.compact_nodes_used=opt.compact_nodes || opt.persistent_nodes;
-    res.persistent_nodes_used=opt.persistent_nodes;
-    res.peak_trail_records=s.peak_trail_records;res.peak_trail_nodes=s.peak_trail_nodes;
-    res.peak_open_nodes=s.peak_open_nodes;res.peak_open_changes=s.peak_open_changes;res.max_depth=s.max_depth;
+    res.audit = {s.audit_nodes,        s.audit_lp_infeasible, s.audit_lp_feasible, s.audit_lp_other,   s.audit_int_empty,
+                 s.audit_int_feasible, s.audit_int_undecided, s.audit_cutoff,      s.audit_rc_checked, s.audit_rc_bad};
+    res.compact_nodes_used = opt.compact_nodes || opt.persistent_nodes;
+    res.persistent_nodes_used = opt.persistent_nodes;
+    res.peak_trail_records = s.peak_trail_records;
+    res.peak_trail_nodes = s.peak_trail_nodes;
+    res.peak_open_nodes = s.peak_open_nodes;
+    res.peak_open_changes = s.peak_open_changes;
+    res.max_depth = s.max_depth;
     res.message = s.note;
-    if (s.grid.step>0) res.structural_certificate=s.grid.json;
+    if (s.grid.step > 0) res.structural_certificate = s.grid.json;
     if (end == End::RootUnbounded) {
         // For rational data an unbounded relaxation plus one integer-feasible point means the MILP
         // is unbounded (the integer hull has the relaxation's recession cone, Meyer 1974). Look for
@@ -966,7 +1029,7 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
         Model feas = md;
         std::fill(feas.cost.begin(), feas.cost.end(), 0.0);
         Search f(feas, lo, up, time_limit_s - elapsed(), node_limit - s.nodes);
-        f.prop_prune = s.prop_prune, f.use_rc = false;  // the feasibility search has no objective to cut on
+        f.prop_prune = s.prop_prune, f.use_rc = false; // the feasibility search has no objective to cut on
         End fe = f.run();
         res.nodes += f.nodes, res.lp_iterations += f.iters;
         res.prop_tightened += f.prop_tightened, res.prop_crossed += f.prop_crossed, res.prop_pruned += f.prop_pruned;
@@ -998,7 +1061,7 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     }
     if (s.has_inc) {
         double v = violation(model, s.inc);
-        if (v > kFeasTol) {  // cannot happen if offer() is consistent; never report such a point
+        if (v > kFeasTol) { // cannot happen if offer() is consistent; never report such a point
             res.status = "numerical_failure";
             res.best_bound = sign * s.bound;
             res.message = "incumbent fails the original-model check by " + std::to_string(v);
@@ -1011,9 +1074,13 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     res.best_bound = sign * s.bound;
     if (s.has_inc) res.gap = std::abs(s.z - s.bound) / std::max(1.0, std::abs(s.z));
     bool proven = end == End::Complete && s.unresolved == 0;
-    if (end == End::TimeLimit) res.status = "time_limit";
-    else if (end == End::NodeLimit) res.status = "node_limit";
-    else if (!proven) res.status = "numerical_failure";
-    else res.status = s.has_inc ? "optimal" : "infeasible";
+    if (end == End::TimeLimit)
+        res.status = "time_limit";
+    else if (end == End::NodeLimit)
+        res.status = "node_limit";
+    else if (!proven)
+        res.status = "numerical_failure";
+    else
+        res.status = s.has_inc ? "optimal" : "infeasible";
     return res;
 }
