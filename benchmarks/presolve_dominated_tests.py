@@ -147,9 +147,10 @@ def check(path, tag, want_dom=None, want_dir=None, not_cols=()):
         if errs: problems.append("replay: " + "; ".join(errs[:2]))
         ops = [op for op in L["ops"] if op["type"] == "dominated_col"]
     else: problems.append("no log written")
-    if s1 == "optimal":  # re-audit the point in original space, fail closed
+    if s1 == "optimal":  # re-audit the point in original space, fail closed; audited_points counts clean audits only
+        pa = []  # audit-local errors
         if not os.path.exists(so):
-            problems.append("optimal reported but no .sol file written")
+            pa.append("optimal reported but no .sol file written")
         else:
             vals, dupes, bad = {}, 0, 0
             for ln in open(so):
@@ -159,33 +160,46 @@ def check(path, tag, want_dom=None, want_dir=None, not_cols=()):
                 if t[0] in vals: dupes += 1
                 try: vals[t[0]] = float(t[1])
                 except ValueError: bad += 1
-            if dupes: problems.append("duplicate .sol entries: %d" % dupes)
-            if bad: problems.append("malformed .sol lines: %d" % bad)
-            h = highspy.Highs(); h.setOptionValue("output_flag", False); h.readModel(rc.ic.normalize_mps(path)); lp = h.getLp()
-            av = np.asarray(lp.a_matrix_.value_, dtype=float)
-            cv = np.asarray(lp.col_cost_, dtype=float)
-            if not (np.all(np.isfinite(av)) and np.all(np.isfinite(cv))): problems.append("nonfinite model data in reference read")
-            names = list(lp.col_names_)
-            if set(vals) != set(names) or len(vals) != len(names):
-                problems.append(".sol coverage mismatch vs model columns")
-            elif not problems:
-                stats["audited_points"] += 1
-                x = np.array([vals[nm] for nm in names])
-                if not np.all(np.isfinite(x)):
-                    problems.append("nonfinite point values")
-                else:
-                    A = sp.csc_matrix((av, lp.a_matrix_.index_, lp.a_matrix_.start_), shape=(lp.num_row_, lp.num_col_))
-                    act = A @ x
-                    for i in range(lp.num_row_):
-                        for b, sgn in ((lp.row_lower_[i], 1), (lp.row_upper_[i], -1)):
-                            if math.isfinite(b) and abs(b) < 1e30 and sgn * (act[i] - b) < -1e-6 * (1 + abs(b)): problems.append("row %d violated" % i)
-                    for j in range(lp.num_col_):
-                        if math.isfinite(lp.col_lower_[j]) and lp.col_lower_[j] > -1e30 and x[j] < lp.col_lower_[j] - 1e-6 * (1 + abs(lp.col_lower_[j])): problems.append("col %d below lower" % j)
-                        if math.isfinite(lp.col_upper_[j]) and lp.col_upper_[j] < 1e30 and x[j] > lp.col_upper_[j] + 1e-6 * (1 + abs(lp.col_upper_[j])): problems.append("col %d above upper" % j)
-                    for j, nm in enumerate(names):  # full integer check from the replayer's own integer set
-                        if M["isint"][j] and abs(x[j] - round(x[j])) > 1e-6: problems.append("integer col %d (%s) not integral" % (j, nm))
-                    obj_pt = float(np.dot(cv, x) + lp.offset_)
-                    if o1 is None or abs(obj_pt - o1) > 1e-6 * (1 + abs(o1)): problems.append("objective from point %.9g != engine %.9g" % (obj_pt, o1))
+            if dupes: pa.append("duplicate .sol entries: %d" % dupes)
+            if bad: pa.append("malformed .sol lines: %d" % bad)
+            h = highspy.Highs(); h.setOptionValue("output_flag", False)
+            if h.readModel(rc.ic.normalize_mps(path)) != highspy.HighsStatus.kOk:
+                pa.append("reference model read failed")
+            else:
+                lp = h.getLp()
+                av = np.asarray(lp.a_matrix_.value_, dtype=float)
+                cv = np.asarray(lp.col_cost_, dtype=float)
+                if not (np.all(np.isfinite(av)) and np.all(np.isfinite(cv))): pa.append("nonfinite model data in reference read")
+                for bnm, barr in (("row_lower", lp.row_lower_), ("row_upper", lp.row_upper_), ("col_lower", lp.col_lower_), ("col_upper", lp.col_upper_)):
+                    if np.any(np.isnan(np.asarray(barr, dtype=float))): pa.append("NaN in model " + bnm)  # infinities are legitimate; NaN is not
+                if not math.isfinite(lp.offset_): pa.append("nonfinite model objective offset")
+                names = list(lp.col_names_)
+                if set(vals) != set(names) or len(vals) != len(names):
+                    pa.append(".sol coverage mismatch vs model columns")
+                elif not pa:
+                    x = np.array([vals[nm] for nm in names])
+                    if not np.all(np.isfinite(x)):
+                        pa.append("nonfinite point values")
+                    else:
+                        A = sp.csc_matrix((av, lp.a_matrix_.index_, lp.a_matrix_.start_), shape=(lp.num_row_, lp.num_col_))
+                        act = A @ x  # finite inputs can still overflow; the activities are checked before use
+                        if not np.all(np.isfinite(act)):
+                            pa.append("nonfinite row activities")
+                        else:
+                            for i in range(lp.num_row_):
+                                for b, sgn in ((lp.row_lower_[i], 1), (lp.row_upper_[i], -1)):
+                                    if math.isfinite(b) and abs(b) < 1e30 and sgn * (act[i] - b) < -1e-6 * (1 + abs(b)): pa.append("row %d violated" % i)
+                            for j in range(lp.num_col_):
+                                if math.isfinite(lp.col_lower_[j]) and lp.col_lower_[j] > -1e30 and x[j] < lp.col_lower_[j] - 1e-6 * (1 + abs(lp.col_lower_[j])): pa.append("col %d below lower" % j)
+                                if math.isfinite(lp.col_upper_[j]) and lp.col_upper_[j] < 1e30 and x[j] > lp.col_upper_[j] + 1e-6 * (1 + abs(lp.col_upper_[j])): pa.append("col %d above upper" % j)
+                            for j, nm in enumerate(names):  # full integer check from the replayer's own integer set
+                                if M["isint"][j] and abs(x[j] - round(x[j])) > 1e-6: pa.append("integer col %d (%s) not integral" % (j, nm))
+                            obj_pt = float(np.dot(cv, x) + lp.offset_)
+                            if not math.isfinite(obj_pt): pa.append("nonfinite recomputed objective")
+                            elif o1 is None or not math.isfinite(o1): pa.append("engine objective missing or nonfinite")
+                            elif abs(obj_pt - o1) > 1e-6 * (1 + abs(o1)): pa.append("objective from point %.9g != engine %.9g" % (obj_pt, o1))
+        if not pa: stats["audited_points"] += 1
+        problems.extend(pa)
     stats["dominated_ops"] += len(ops)
     for op in ops: stats["down" if op["v2"] == -1 else "up"] += 1; stats["int_cols"] += bool(M["isint"][op["col"]])
     if s1 == "infeasible": stats["presolve_infeasible"] += 1
