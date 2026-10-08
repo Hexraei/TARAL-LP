@@ -193,8 +193,8 @@ PresolveResult presolve_model(const Model& orig, std::chrono::steady_clock::time
             for (const Entry& e : orig.cols[j]) {
                 if (rrem[e.index] || e.value == 0) continue;
                 ++cnt;
-                if (e.value > 0) down_ok = down_ok && rlo[e.index] == -kInf, up_ok = up_ok && rup[e.index] == kInf;
-                else down_ok = down_ok && rup[e.index] == kInf, up_ok = up_ok && rlo[e.index] == -kInf;
+                if (e.value > 0) { down_ok = down_ok && rlo[e.index] == -kInf; up_ok = up_ok && rup[e.index] == kInf; }
+                else { down_ok = down_ok && rup[e.index] == kInf; up_ok = up_ok && rlo[e.index] == -kInf; }
             }
             if (cnt == 0) continue;  // no active row: fix_empty_col
             const double c = orig.maximize ? -orig.cost[j] : orig.cost[j];  // minimisation sense

@@ -1,12 +1,20 @@
 #!/usr/bin/env python3
 """Tests for the dominated_col presolve op (dual fixing). Usage: presolve_dominated_tests.py [path/to/taral] [n_random]
 Separate from presolve_tests.py so the primary suite counts (809 cases, 464 audited points) are unchanged.
-Oracle: HiGHS (highspy) on the ORIGINAL model, status and objective only. Every case: taral with --presolve agrees with the oracle
-(status; objective at relative 1e-6 when optimal), the log replays against the original model with the independent replayer
-(presolve_replay_check), and the reported point is re-audited from the .sol file against the original rows/bounds/integrality."""
+Oracle: HiGHS (highspy) on the ORIGINAL model, status and objective only. Cases WITHOUT a recorded explicit outcome:
+taral with --presolve must agree with the oracle (status; objective at relative 1e-6 when optimal), the log replays
+against the original model with the independent replayer (presolve_replay_check), and the reported point is re-audited
+in original space (.sol coverage exact, no duplicate entries, finite values, rows, bounds, integrality, and the
+objective recomputed from the point). Three seeded cases carry explicit recorded outcomes instead of oracle agreement:
+rand_202 and rand_265 (engine undecided: numerical_failure with and without --presolve, zero presolve ops; NOT oracle
+comparisons) and rand_250 (engine unbounded; the oracle's answers - infeasible with presolve on, optimal -19/3 with
+presolve off - are recorded as observed, and the 'oracle wrong' attribution is made only when the exact Fraction
+point/ray proof below passes). The all-pass result and the 307/176/102/115/61/59 counts recorded in
+docs/verified_presolve.md are prior branch-run claims, not rerun-verified here."""
 import copy, json, math, os, random, subprocess, sys, tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np, highspy
+import scipy.sparse as sp
 import presolve_replay_check as rc
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -14,7 +22,7 @@ BIN = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "build", "taral")
 NRAND = int(sys.argv[2]) if len(sys.argv) > 2 else 300
 TMP = tempfile.mkdtemp()
 fails = []
-stats = {"engine_undecided": 0, "oracle_wrong_exact_witness": 0, "oracle_compared": 0, "hand": 0, "random": 0, "dominated_ops": 0, "random_with_dominated": 0, "audited_points": 0, "down": 0, "up": 0, "int_cols": 0, "presolve_infeasible": 0, "presolve_unbounded": 0}
+stats = {"engine_undecided": 0, "engine_unbounded_witness_pending": 0, "oracle_wrong_exact_witness": 0, "oracle_compared": 0, "hand": 0, "random": 0, "dominated_ops": 0, "random_with_dominated": 0, "audited_points": 0, "down": 0, "up": 0, "int_cols": 0, "presolve_infeasible": 0, "presolve_unbounded": 0}
 def expect(name, cond, msg=""):
     print(("PASS " if cond else "FAIL ") + name + ("" if cond else " " + str(msg)))
     if not cond: fails.append(name)
@@ -39,12 +47,13 @@ def run(path, tag, extra):
     return st, obj, so, lg
 
 # Explicit per-case outcomes (no generic waiver). Neither class counts as an oracle comparison pass; both are counted separately in stats.
-KNOWN = {"rand_202": "engine_undecided", "rand_265": "engine_undecided", "rand_250": "oracle_wrong_exact_witness"}
+KNOWN = {"rand_202": "engine_undecided", "rand_265": "engine_undecided", "rand_250": "engine_unbounded_exact_witness"}
 undecided, oracle_wrong = [], []
 
 from fractions import Fraction as Fr
 def parse_mps_exact(path):
-    """Tiny independent exact reader for the generated models (free format, MIN/MAX default MIN, RHS/BOUNDS MI LO UP, INTORG markers)."""
+    """Tiny independent exact reader for the generated models (free format, MIN/MAX default MIN, RHS/BOUNDS MI LO UP, INTORG markers).
+    It covers only the syntax these generated models use; it is not a general MPS reader and not a general exact-proof facility."""
     rows, order, cols, cost, rhs, lo, up, ints = {}, [], {}, {}, {}, {}, {}, set()
     sec, inint, maxim, objrow = None, False, False, None
     for ln in open(path).read().splitlines():
@@ -76,8 +85,11 @@ def parse_mps_exact(path):
     return dict(rows=rows, order=order, cols=cols, cost=cost, rhs=rhs, lo=lo, up=up, ints=ints, maximize=maxim)
 
 def prove_unbounded(path, x, d):
-    """Exact (Fractions) proof that the model is unbounded: x is feasible (rows, bounds, integrality) and for every t >= 0 so is x + t*d
-    with an objective that strictly improves, so no optimum exists. Returns a list of problems (empty = proven)."""
+    """Exact (Fractions) proof that the model is unbounded: x is feasible (rows, bounds, integrality) and every admissible
+    step along d stays feasible with a strictly improving objective, so no optimum exists. Admissible step: any real
+    t >= 0 for continuous columns; a nonnegative INTEGER t whenever an integer column has a nonzero ray direction (x
+    and d are required integral on integer columns by the checks below, so x + t*d is integral for integer t).
+    Returns a list of problems (empty = proven)."""
     M = parse_mps_exact(path); pr = []
     names = list(M["cols"])
     if set(x) != set(names) or set(d) != set(names): return ["witness names do not match the model columns"]
@@ -109,11 +121,11 @@ def check(path, tag, want_dom=None, want_dir=None, not_cols=()):
         # numerical_failure (nonoptimal certificate guard) with and without --presolve, and presolve logs zero ops here
         if not (s0 == "numerical_failure" and s1 == "numerical_failure"): problems.append("known undecided case: plain %s presolve %s, expected numerical_failure both" % (s0, s1))
         stats["engine_undecided"] += 1; undecided.append(tag)
-    elif kind == "oracle_wrong_exact_witness":
-        # the HiGHS answers (presolve on: infeasible, presolve off: bounded optimal) are contradicted by an exact point + ray proof,
-        # see prove_unbounded below; the engine's unbounded is the supported answer
-        if not (s0 in UNB and s1 in UNB): problems.append("known oracle-wrong case: plain %s presolve %s, expected unbounded class both" % (s0, s1))
-        stats["oracle_wrong_exact_witness"] += 1; oracle_wrong.append(tag)
+    elif kind == "engine_unbounded_exact_witness":
+        # engine unbounded-class expected both ways; the 'oracle wrong' attribution is NOT made here - it is made only
+        # in the control block below, after the exact Fraction point/ray proof passes for the generated case
+        if not (s0 in UNB and s1 in UNB): problems.append("known exact-witness case: plain %s presolve %s, expected unbounded class both" % (s0, s1))
+        stats["engine_unbounded_witness_pending"] += 1
     else:
         stats["oracle_compared"] += 1
         if o == "optimal":
@@ -135,21 +147,45 @@ def check(path, tag, want_dom=None, want_dir=None, not_cols=()):
         if errs: problems.append("replay: " + "; ".join(errs[:2]))
         ops = [op for op in L["ops"] if op["type"] == "dominated_col"]
     else: problems.append("no log written")
-    if s1 == "optimal" and os.path.exists(so):  # re-audit the point in original space
-        val = dict(l.split() for l in open(so)); stats["audited_points"] += 1
-        h = highspy.Highs(); h.setOptionValue("output_flag", False); h.readModel(rc.ic.normalize_mps(path)); lp = h.getLp()
-        x = np.array([float(val[nm]) for nm in lp.col_names_])
-        A = rc.sp.csc_matrix((lp.a_matrix_.value_, lp.a_matrix_.index_, lp.a_matrix_.start_), shape=(lp.num_row_, lp.num_col_)) if hasattr(rc, "sp") else None
-        if A is not None:
-            act = A @ x
-            for i in range(lp.num_row_):
-                for b, sgn in ((lp.row_lower_[i], 1), (lp.row_upper_[i], -1)):
-                    if math.isfinite(b) and abs(b) < 1e30 and sgn * (act[i] - b) < -1e-6 * (1 + abs(b)): problems.append("row %d violated" % i)
-            for j in range(lp.num_col_):
-                if x[j] < lp.col_lower_[j] - 1e-6 * (1 + abs(lp.col_lower_[j])) and lp.col_lower_[j] > -1e30: problems.append("col %d below lower" % j)
-                if x[j] > lp.col_upper_[j] + 1e-6 * (1 + abs(lp.col_upper_[j])) and lp.col_upper_[j] < 1e30: problems.append("col %d above upper" % j)
-        for j, t in enumerate(lp.integrality_ if len(lp.integrality_) else []):
-            if t == highspy.HighsVarType.kInteger and abs(x[j] - round(x[j])) > 1e-6: problems.append("col %d not integral" % j)
+    if s1 == "optimal":  # re-audit the point in original space, fail closed
+        if not os.path.exists(so):
+            problems.append("optimal reported but no .sol file written")
+        else:
+            vals, dupes, bad = {}, 0, 0
+            for ln in open(so):
+                t = ln.split()
+                if not t: continue
+                if len(t) != 2: bad += 1; continue
+                if t[0] in vals: dupes += 1
+                try: vals[t[0]] = float(t[1])
+                except ValueError: bad += 1
+            if dupes: problems.append("duplicate .sol entries: %d" % dupes)
+            if bad: problems.append("malformed .sol lines: %d" % bad)
+            h = highspy.Highs(); h.setOptionValue("output_flag", False); h.readModel(rc.ic.normalize_mps(path)); lp = h.getLp()
+            av = np.asarray(lp.a_matrix_.value_, dtype=float)
+            cv = np.asarray(lp.col_cost_, dtype=float)
+            if not (np.all(np.isfinite(av)) and np.all(np.isfinite(cv))): problems.append("nonfinite model data in reference read")
+            names = list(lp.col_names_)
+            if set(vals) != set(names) or len(vals) != len(names):
+                problems.append(".sol coverage mismatch vs model columns")
+            elif not problems:
+                stats["audited_points"] += 1
+                x = np.array([vals[nm] for nm in names])
+                if not np.all(np.isfinite(x)):
+                    problems.append("nonfinite point values")
+                else:
+                    A = sp.csc_matrix((av, lp.a_matrix_.index_, lp.a_matrix_.start_), shape=(lp.num_row_, lp.num_col_))
+                    act = A @ x
+                    for i in range(lp.num_row_):
+                        for b, sgn in ((lp.row_lower_[i], 1), (lp.row_upper_[i], -1)):
+                            if math.isfinite(b) and abs(b) < 1e30 and sgn * (act[i] - b) < -1e-6 * (1 + abs(b)): problems.append("row %d violated" % i)
+                    for j in range(lp.num_col_):
+                        if math.isfinite(lp.col_lower_[j]) and lp.col_lower_[j] > -1e30 and x[j] < lp.col_lower_[j] - 1e-6 * (1 + abs(lp.col_lower_[j])): problems.append("col %d below lower" % j)
+                        if math.isfinite(lp.col_upper_[j]) and lp.col_upper_[j] < 1e30 and x[j] > lp.col_upper_[j] + 1e-6 * (1 + abs(lp.col_upper_[j])): problems.append("col %d above upper" % j)
+                    for j, nm in enumerate(names):  # full integer check from the replayer's own integer set
+                        if M["isint"][j] and abs(x[j] - round(x[j])) > 1e-6: problems.append("integer col %d (%s) not integral" % (j, nm))
+                    obj_pt = float(np.dot(cv, x) + lp.offset_)
+                    if o1 is None or abs(obj_pt - o1) > 1e-6 * (1 + abs(o1)): problems.append("objective from point %.9g != engine %.9g" % (obj_pt, o1))
     stats["dominated_ops"] += len(ops)
     for op in ops: stats["down" if op["v2"] == -1 else "up"] += 1; stats["int_cols"] += bool(M["isint"][op["col"]])
     if s1 == "infeasible": stats["presolve_infeasible"] += 1
@@ -254,19 +290,24 @@ for k in range(NRAND):
 def highs_run(path, presolve):
     h = highspy.Highs(); h.setOptionValue("output_flag", False); h.setOptionValue("presolve", presolve); h.readModel(rc.ic.normalize_mps(path)); h.run()
     return h.modelStatusToString(h.getModelStatus()), h.getInfo().objective_function_value
-if NRAND > 265:
-    for tag in ("rand_202", "rand_265"):  # engine UNDECIDED (not oracle passes): HiGHS says infeasible both ways, engine numerical_failure, zero presolve ops
-        pth = os.path.join(TMP, tag.replace("rand_", "r") + ".mps")
-        expect(tag + "_highs_presolve_on_off_infeasible", highs_run(pth, "on")[0] == "Infeasible" and highs_run(pth, "off")[0] == "Infeasible", str((highs_run(pth, "on"), highs_run(pth, "off"))))
-        lgp = os.path.join(TMP, tag + "_on_log.json")
-        expect(tag + "_zero_presolve_ops", os.path.exists(lgp) and not json.load(open(lgp))["ops"])
+def controls_undecided(tag):  # engine UNDECIDED (not oracle passes): HiGHS says infeasible both ways, engine numerical_failure, zero presolve ops
+    pth = os.path.join(TMP, tag.replace("rand_", "r") + ".mps")
+    expect(tag + "_highs_presolve_on_off_infeasible", highs_run(pth, "on")[0] == "Infeasible" and highs_run(pth, "off")[0] == "Infeasible", str((highs_run(pth, "on"), highs_run(pth, "off"))))
+    lgp = os.path.join(TMP, tag + "_on_log.json")
+    expect(tag + "_zero_presolve_ops", os.path.exists(lgp) and not json.load(open(lgp))["ops"])
+for k in (202, 265):
+    if k < NRAND: controls_undecided("rand_%d" % k)  # run each known case's controls whenever that case was generated
+if 250 < NRAND:
     pth = os.path.join(TMP, "r250.mps")
     on, off = highs_run(pth, "on"), highs_run(pth, "off")
     expect("rand_250_highs_answers_recorded", on[0] == "Infeasible" and off[0] == "Optimal" and abs(off[1] - (-19 / 3)) < 1e-6, str((on, off)))  # recorded as observed
     F = Fr
     x = {"X0": F(3), "X1": F(-2), "X2": F(5), "X3": F(-2), "X4": F(0), "X5": F(0)}
     d = {"X0": F(0), "X1": F(0), "X2": F(0), "X3": F(-2), "X4": F(0), "X5": F(1)}
-    expect("rand_250_exact_point_and_ray_prove_unbounded", prove_unbounded(pth, x, d) == [], str(prove_unbounded(pth, x, d)))
+    proof = prove_unbounded(pth, x, d)
+    expect("rand_250_exact_point_and_ray_prove_unbounded", proof == [], str(proof))
+    if proof == []:
+        stats["oracle_wrong_exact_witness"] += 1; oracle_wrong.append("rand_250")  # attribution only after the exact proof passes
     M250 = parse_mps_exact(pth)
     expect("rand_250_point_values_R0_R1_R2_obj", [sum(M250["cols"][c].get(r, 0) * x[c] for c in x) for r in ("R0", "R1", "R2")] == [5, -1, 11]
            and sum(M250["cost"].get(c, 0) * x[c] for c in x) == -11, "point row activities / objective differ from R0=5, R1=-1, R2=11, obj=-11")
