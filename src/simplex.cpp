@@ -10,6 +10,7 @@
 #include <random>
 
 #include "taral.hpp"
+#include "timing.hpp"
 
 namespace {
 constexpr double kPrimalTol = 1e-9;
@@ -213,8 +214,7 @@ Result Simplex::finish(Result r) {
 }
 
 Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
-    auto t0 = std::chrono::steady_clock::now();
-    auto elapsed = [&] { return std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count(); };
+    Stopwatch elapsed;
     Result res;
     int N = n_ + m_;
     lo_.assign(N, 0), up_.assign(N, 0), c_.assign(N, 0), x_.assign(N, 0);
@@ -418,17 +418,17 @@ Result Simplex::run(double time_limit_s, const std::vector<char>* warm) {
         double relaxed = kInf;
         for (int p = 0; p < m_; ++p) {
             if (std::abs(alpha[p]) < ptol) continue;
-            double g, b = blocking(p, g);
-            if (std::isfinite(b)) relaxed = std::min(relaxed, (std::abs(x_[head_[p]] - b) + kPrimalTol) / std::abs(g));
+            double g, bnd = blocking(p, g);
+            if (std::isfinite(bnd)) relaxed = std::min(relaxed, (std::abs(x_[head_[p]] - bnd) + kPrimalTol) / std::abs(g));
         }
         int r = -1;
         double theta = kInf, rbound = 0;
         for (int p = 0; p < m_; ++p) {
             if (std::abs(alpha[p]) < ptol) continue;
-            double g, b = blocking(p, g);
-            if (!std::isfinite(b)) continue;
-            double ratio = std::max(0.0, (b - x_[head_[p]]) / g);
-            if (ratio <= relaxed && (r < 0 || std::abs(alpha[p]) > std::abs(alpha[r]))) r = p, theta = ratio, rbound = b;
+            double g, bnd = blocking(p, g);
+            if (!std::isfinite(bnd)) continue;
+            double ratio = std::max(0.0, (bnd - x_[head_[p]]) / g);
+            if (ratio <= relaxed && (r < 0 || std::abs(alpha[p]) > std::abs(alpha[r]))) r = p, theta = ratio, rbound = bnd;
         }
         double range = up_[q] - lo_[q];  // inf unless boxed
         if (r < 0 && !std::isfinite(range)) {
