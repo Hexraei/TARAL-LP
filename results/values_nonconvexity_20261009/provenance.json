@@ -1,0 +1,10 @@
+{
+  "source_url": "https://raw.githubusercontent.com/YimingYAN/QP-Test-Problems/871cc300154cfb438acc20f52b2c585db3f11e31/QPS_Files/VALUES.QPS",
+  "source_commit": "871cc300154cfb438acc20f52b2c585db3f11e31",
+  "model_sha256": "3589091f3d73ed1680d2c06ed79b3c8f6d5959667bf07bb182c9246f90c80398",
+  "evidence_archive_sha256": "4a7bbe7fceeda18315132a13a0cc3f2e1887351bde1696747c7fd5f03a8004ce",
+  "engine_behavior_source_pin": "4cd9f93844e3530c641b2cdeb1d9b032323a8626",
+  "proof_arithmetic": "exact rational arithmetic over literal decimal coefficients",
+  "scope": "encoded pinned benchmark only; no optimum/reference/count claim",
+  "replay_dependencies": "Python standard library only"
+}
