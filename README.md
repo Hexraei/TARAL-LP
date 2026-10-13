@@ -2,17 +2,17 @@
 
 [Official website](https://taral-lp.vercel.app/) · [Canonical Kaggle notebook](https://www.kaggle.com/code/hexraei/taral-lp-prototype-and-measured-benchmarks)
 
-[![C++17 core](docs/assets/badge-cpp.svg)](src/) [![Netlib measured 93/93](docs/assets/badge-netlib.svg)](results/netlib_postmerge_58f77af/) [![MIPLIB 39/65 audited](docs/assets/badge-miplib.svg)](results/milp_paired_20261012/) [![QPLIB 19 measured](docs/assets/badge-qplib.svg)](results/qplib_widening_20261003/) [![Website](docs/assets/badge-website.svg)](https://taral-lp.vercel.app/) [![Kaggle notebook](docs/assets/badge-kaggle.svg)](https://www.kaggle.com/code/hexraei/taral-lp-prototype-and-measured-benchmarks) [![Proprietary license](docs/assets/badge-license.svg)](LICENSE)
+[![C++17 core](docs/assets/badge-cpp.svg)](src/) [![Netlib measured 93/93](docs/assets/badge-netlib.svg)](results/netlib_postmerge_58f77af/) [![MIPLIB 42/65 audited](docs/assets/badge-miplib.svg)](results/milp_paired_20261013/) [![QPLIB 19 measured](docs/assets/badge-qplib.svg)](results/qplib_widening_20261003/) [![Website](docs/assets/badge-website.svg)](https://taral-lp.vercel.app/) [![Kaggle notebook](docs/assets/badge-kaggle.svg)](https://www.kaggle.com/code/hexraei/taral-lp-prototype-and-measured-benchmarks) [![Proprietary license](docs/assets/badge-license.svg)](LICENSE)
 
 TARAL-LP is a from-scratch C++17 solver core for sparse industrial optimization: CPU linear programming (LP), mixed-integer linear programming (MILP) and convex quadratic programming (QP), with an approximate CUDA primal-dual hybrid gradient (PDHG) method for large continuous LPs. The evaluated CPU engine uses only the C++ standard library; HiGHS, SciPy and NumPy belong to benchmark tools, not the optimization engine. Experimental, not a production replacement for established solvers.
 
-## Measured results - October 12, 2026
+## Measured results - October 13, 2026
 
-**93/93 Netlib LP passes in each simplex mode. 39/65 MIPLIB 3 solver-optimal results in the latest independently audited experimental measurement.**
+**93/93 Netlib LP passes in each simplex mode. 42/65 MIPLIB 3 solver-optimal results in the latest independently audited experimental measurement.**
 
-All 65 mixed-integer cases were measured in three paired repeats at 300 seconds per case. Adding objective-integrality bound strengthening raises the expected-value count from 38 to 39 in every repeat, with `vpm1` the sole new solve. All 366 returned points pass independent checks on the original models. [Per-case results and conditions](results/milp_paired_20261012/).
+All 65 mixed-integer cases were measured in three paired repeats at 300 seconds per case. Adding multi-row aggregation raises the expected-value count from 39 to 42 in every repeat, with `pp08a`, `gesa2_o` and `pp08aCUTS` the only new solves. All 369 returned points pass independent checks on the original models. [Per-case results and conditions](results/milp_paired_20261013/).
 
-<sub>Numerical validation, not an exact optimality certificate; `vpm1` retains an inconclusive numerical cut check. At the 270-second margin the paired counts are 37/38; frozen-reference counts are 37/38. The 39/65 measurement is an experimental snapshot, not the unmodified main build.</sub>
+<sub>Numerical validation only; all three conversions retain numerical-INCONCLUSIVE cut checks. The aggregation result is 41/65 at the 270-second margin and 41/65 against frozen references; `p0548` is the near-cap exclusion. The 42/65 measurement is an experimental snapshot, not the unmodified main build.</sub>
 
 ## What sets TARAL-LP apart
 
@@ -27,10 +27,10 @@ Checked means measured or implemented in the named scope, not complete industria
 <details open>
 <summary>17 requirements, each mapped to evidence or implementation</summary>
 
-- [x] **LP, MILP and QP:** measured [Netlib](results/netlib_postmerge_58f77af/), [all 65 MIPLIB 3 cases](results/milp_paired_20261012/) and [QP measurements](results/qplib_widening_20261003/); limits remain.
+- [x] **LP, MILP and QP:** measured [Netlib](results/netlib_postmerge_58f77af/), [all 65 MIPLIB 3 cases](results/milp_paired_20261013/) and [QP measurements](results/qplib_widening_20261003/); limits remain.
 - [x] **Future solver classes:** non-shipping [convex MIQP experiment](experiments/r2_miqp/) (diagonal convex Q, minimization); [original measured package](results/r2_miqp_20261008/SUMMARY.md): 1000/1000 seeded random and 32/32 structured cases agree with exhaustive-enumeration/SLSQP reference within 1e-6 relative (max 5.4e-07). Separate review fix prevents false optimal claims on unresolved subtrees; those paths were not covered by the original corpus. No presolve, warm starts or cuts; nonlinear/MINLP not started.
 - [x] **Continuous methods:** measured [simplex, dual and interior-point paths](results/adversarial_4517277/); historical source snapshot, not a universal pass.
-- [x] **Mixed-integer search:** [latest paired measurement](results/milp_paired_20261012/): 39/65 solver-optimal with original-model point checks and expected-value agreement in all three repeats; 38 finish within 270 seconds. Experimental cuts and objective-integrality strengthening are separate from the checked-in [branch-and-bound engine](src/milp.cpp). [Earlier 65-case baseline](results/r4_miplib3_20261008/) remains historical evidence.
+- [x] **Mixed-integer search:** [latest paired measurement](results/milp_paired_20261013/): 42/65 solver-optimal with original-model point checks and expected-value agreement in all three repeats; 41 finish within 270 seconds. Experimental row aggregation, cuts and objective-integrality strengthening are separate from the checked-in [branch-and-bound engine](src/milp.cpp). [Earlier 65-case baseline](results/r4_miplib3_20261008/) remains historical evidence.
 - [x] **Sparse algebra:** prototype [own sparse factorization](src/); [34-instance scaling profile](results/r5_factorization_20261003/r5_summary.md) measured: fill ratio ~1.0 on network/PDS structure, mean refactorization about 1 microsecond per row, 21/34 solved optimal all matching HiGHS within 1e-6 relative, 13/34 timed out at the 300 s cap (HiGHS finished all of them); broader scalability work remains.
 - [ ] **Multi-core solve:** planned; evaluated CPU engine is single-threaded.
 - [x] **GPU method:** measured [approximate PDHG on T4](results/gpu_pdhg/t4_industrial_20261003/); no exact-solver speed advantage claimed.
@@ -39,7 +39,7 @@ Checked means measured or implemented in the named scope, not complete industria
 - [x] **Large models:** measured [GPU LPs up to 1,092,610 decision variables](results/gpu_pdhg/t4_industrial_20261003/ledger.csv), approximately; not consistent exact industrial-scale solves.
 - [x] **Difficult numerical models:** measured [seeded adversarial LP/MILP](results/adversarial_4517277/tests2_base_full.csv); failures and unresolved cases retained.
 - [x] **Basic interface:** [documented command-line and C++ interfaces](docs/interface.md), measured 31/31 command-line checks and one LP API example; stable versioning and broader integration coverage remain.
-- [x] **Standard benchmarks:** measured [Netlib](results/netlib_postmerge_58f77af/) and [all 65 MIPLIB 3 cases](results/milp_paired_20261012/); broader benchmark coverage planned.
+- [x] **Standard benchmarks:** measured [Netlib](results/netlib_postmerge_58f77af/) and [all 65 MIPLIB 3 cases](results/milp_paired_20261013/); broader benchmark coverage planned.
 - [x] **Established-solver comparison:** measured [HiGHS objective and feasibility checks](results/netlib_postmerge_58f77af/); no general speed claim.
 - [x] **Challenging large models:** measured [historical large-model stress](results/adversarial_4517277/tests2_methods_dual_full.csv); weak-relaxation industrial coverage remains incomplete.
 - [x] **Inspectable, extensible foundation:** [documented module layout, independent checks and measured API use](docs/foundation.md); proprietary evaluation access only, broader extension validation remains.
@@ -55,12 +55,14 @@ Checked means measured or implemented in the named scope, not complete industria
 
 ## Benchmarks
 
+The [October 12 mixed-integer measurement](results/milp_paired_20261012/) remains historical evidence. No broad speedup claim: the latest matched-solve median wall-time ratio is about 1.0041.
+
 | Measurement | Result | Evidence |
 | --- | --- | --- |
 | CPU Netlib, primal + dual | **93/93 each**, 92/93 at the tighter 1e-8 check, no wrong answers; evaluated source snapshot `58f77af` | [Primal](results/netlib_postmerge_58f77af/primal_ledger.csv), [dual](results/netlib_postmerge_58f77af/dual_ledger.csv) |
 | T4 PDHG, rail2586 / rail4284 | **Approximate, not verified optimal solves.** At stopping tolerance 1e-4: rail2586 110.4 s (original-row violation 9.7e-4); rail4284 143 s (original-row violation **1.2e-3**). Both original 1e-6 runs hit the 300 s cap. A later rail4284 K=1 row-feasible `near_optimal` run (violation under 1e-6) took 2677 s on a T4. Later-run figures are from the archived run-log transcript, not retained raw logs; no independent reference objective for rail4284. | [Per-case results and test conditions for the original runs](results/gpu_pdhg/t4_industrial_20261003/) |
 | T4 PDHG, PDS-100 | Approximate answer (`near_optimal`) at stopping tolerance 1e-4 in **8.7s**, but objective error **7.72e-4** and violation of the original constraints **1.02** | [CSV](results/gpu_pdhg/t4_industrial_20261003/ledger.csv) |
-| Latest MIPLIB 3, 65 cases x 3 paired repeats | **39/65 expected-value solves**, 38 within the 270s margin; all returned points independently checked. Experimental snapshot, not main. | [Ledger and numerical caveats](results/milp_paired_20261012/) |
+| Latest MIPLIB 3, 65 cases x 3 paired repeats | **42/65 expected-value solves**, 41 within the 270s margin; all returned points independently checked. Experimental snapshot, not main. | [Ledger and numerical caveats](results/milp_paired_20261013/) |
 | Historical MIPLIB selection, 40 measured cases | **6 objective + 7 infeasibility matches**; 26 time limits, 1 run without a machine-readable result, zero rows labeled wrong | [CSV and limits](results/miplib_widening_20261003/) |
 | Historical QPLIB selection, 19 measured candidates | **5 objective matches + 1 locally verified better point; 6 feasible engine-reported optima** where HiGHS had no optimal reference; [investigated discrepancies/limits](docs/limitations.md#qplib-measurements) | [Per-case results and test conditions](results/qplib_widening_20261003/) |
 | Historical adversarial LP, dual | **2903/2952 accepted**, including 29 accepted results with independently checked reference discrepancies; 15 objective failures, 34 cases with no verified answer; evaluated source snapshot `4517277` | [CSV](results/adversarial_4517277/tests2_methods_dual_full.csv) |

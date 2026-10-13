@@ -1,4 +1,6 @@
-# Mixed-integer benchmark measurement - October 12, 2026
+# Historical mixed-integer measurement - October 12, 2026
+
+Superseded as the latest experimental measurement by the [October 13 paired run](../milp_paired_20261013/). This record is retained unchanged below.
 
 All 65 MIPLIB 3 cases were run in three paired repeats, with a 300-second solver cap per case. Two configurations used the same experimental binary: mixed-integer rounding cuts in both, objective-integrality bound strengthening added to the second. These measurements are not a claim about the unmodified `main` build.
 
