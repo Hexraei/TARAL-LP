@@ -1,6 +1,6 @@
 # Mixed-integer benchmark measurement - October 13, 2026
 
-All 65 MIPLIB 3 cases were run in three paired repeats, with a 300-second solver cap per case. Two configurations used the same experimental binary: mixed-integer rounding cuts and objective-integrality bound strengthening in both, multi-row aggregation added to the second. This is an experimental snapshot, not the unmodified `main` build. The [October 12 measurement](../milp_paired_20261012/) is historical.
+All 65 MIPLIB 3 cases were run in three paired repeats, with a 300-second solver cap per case. Two configurations used the same experimental binary: mixed-integer rounding cuts and objective-integrality bound strengthening in both, multi-row aggregation added to the second. Measured before merge, then integrated into `main` on October 13. The original source received only warning annotations and an equivalent integer type alias; the checked-in source builds to the byte-identical audited solver under the pinned compiler and flags. Defaults remain unchanged. The [October 12 measurement](../milp_paired_20261012/) is historical.
 
 | Reference / counting rule | Control | Row aggregation |
 | --- | ---: | ---: |
@@ -17,6 +17,14 @@ Each row is identical across the three repeats. Only `pp08a`, `gesa2_o` and `pp0
 | pp08aCUTS | Capped, incumbent 7760 | 7350 | 3.340 / 3.358 / 3.385 |
 
 The conversions use the solver's existing relative-gap semantics. `gesa2_o` has final bound 25779832.924077682, below its objective; `pp08aCUTS` also has a small numerical gap. All three retain numerical-INCONCLUSIVE cut checks. `p0548` solves in both configurations at 282-289 seconds and is the sole solved case excluded by the 270-second margin. `qiu` reaches its reference value without closing the search and is never counted as solved.
+
+## Measured configuration and build
+
+```sh
+TARAL_MIR=1 TARAL_OBJINT=1 TARAL_MIR_AGG=1 TARAL_DIVE_ROUNDS=1
+```
+
+The paired run also enables trace output. Source integration does not turn these options on by default. Reproduction of the measured binary uses g++ 11.4.0 with `-O2 -std=c++17 -pthread src/*.cpp`; the repository's native `-O3` smoke build is a correctness check, not the same timing build.
 
 ## Independent checks and limits
 
@@ -35,4 +43,4 @@ Ubuntu 22.04-family host, four-vCPU Xeon Platinum 8272CL, 16 GB RAM; g++ 11.4.0,
 - Solver SHA256: `6a6ac74fb30c0fa09554cbe8ed6671017b6d31d95236ed0981d39164470d11f4`
 - Evidence archive SHA256: `e795b5c02cd87c294b316133e86bf4fbcb11ac684ae1083075156f466a0f9247`
 
-Two independent archive rebuilds reproduce the solver, verifier and source-manifest hashes. This folder contains a judge-facing extraction of the verified [per-case ledger](ledger.csv), not the full private evidence archive or an independently reproducible branch source package. No solver code is merged by this documentation update.
+Two independent archive rebuilds reproduce the solver, verifier and source-manifest hashes. This folder contains a judge-facing extraction of the verified [per-case ledger](ledger.csv), not the full private evidence archive or an independently reproducible branch source package. The solver stack was imported from archives into a provenance-bearing commit and merged on October 13; no earlier git history existed for this stack. A warning-only cleanup changes two source hashes but reproduces the exact audited binary. The [cleaned-source manifest](merged-source.sha256) records all 20 solver files. Cleanup archive SHA256: `f4c3d733d6926bf6842fe494f140b420fd31c0e95572d1c8326014ab2803946c`.
