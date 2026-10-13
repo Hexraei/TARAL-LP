@@ -16,6 +16,7 @@ set(TARAL_ENGINE_SOURCES
     src/lu.cpp
     src/main.cpp
     src/milp.cpp
+    src/mir_cuts.cpp
     src/mps.cpp
     src/nonoptimal_certificate.cpp
     src/presolve.cpp

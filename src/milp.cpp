@@ -31,8 +31,13 @@
 #include <random>
 
 #include "taral.hpp"
+#include "objint.hpp"
 #include "timing.hpp"
 #include "structural_integer.hpp"
+#include "exact_dyadic.hpp"
+#include "mir_cuts.hpp"
+#include <cstdlib>
+#include <cstring>
 
 namespace {
 constexpr double kIntTol = 1e-6;  // |x - round(x)| for an integral value
@@ -191,6 +196,15 @@ class Search {
     }
 
     End run();
+    // R12 (opt-in TARAL_OBJINT=1): when every cost is an integer on an INTEGER column, cost'x is integer for every
+    // integer-feasible x, so a node bound b may be rounded UP to ceil(b - obj_off - eps) + obj_off. eps is subtracted
+    // first, so a bound slightly above an integer is treated as that integer (never an over-round). Off: identity.
+    bool obj_int = false;
+    double obj_off = 0;
+    double eff_bound(double b) const {
+        if (!obj_int || !std::isfinite(b)) return b;
+        return objint_round_up(b, obj_off);
+    }
     bool has_inc = false;
     std::vector<double> inc;
     double z = kInf;      // incumbent objective
@@ -235,6 +249,13 @@ class Search {
     // point (verified by offer()) or false. The argument is the time budget in seconds.
     std::function<bool(double, std::vector<double>&)> fj_hook;
     bool fj_tried = false;
+    bool root_dive_tried = false;
+    long root_dive_nodes = 0;
+    long root_dive_exact_admitted = 0;
+    bool root_dive_final_round = false;
+    void root_rounding_dive(const Result& root, const std::vector<double>& lo, const std::vector<double>& up);
+    void root_dive_round0(const Result& root, const std::vector<double>& lo, const std::vector<double>& up);
+    void root_dive_round1(const Result& root, const std::vector<double>& lo, const std::vector<double>& up);
     bool compact_nodes = false;
     bool persistent_nodes = false;
     long peak_trail_records = 0, peak_trail_nodes = 0;
@@ -255,6 +276,149 @@ class Search {
         return false;
     }
 };
+
+// One incumbent-only root rounding dive. Private bounds, no search pruning or node status.
+void Search::root_dive_round0(const Result& root, const std::vector<double>& lo, const std::vector<double>& up) {
+    root_dive_tried = true;
+    const bool trace = std::getenv("TARAL_DIVE_TRACE") != nullptr;
+    struct Receipt {
+        Search& search; bool enabled; std::chrono::steady_clock::time_point started = std::chrono::steady_clock::now();
+        ~Receipt() { if (enabled) std::fprintf(stderr, "ROOT_DIVE nodes=%ld exact_admitted=%ld final_round=%d seconds=%.9f\n",
+            search.root_dive_nodes, search.root_dive_exact_admitted, int(search.root_dive_final_round),
+            std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count()); }
+    } receipt{*this, trace};
+    const double budget = std::min(2.0, 0.01 * limit_);
+    const double remaining = limit_ - elapsed();
+    if (budget < 0.001 || remaining < budget + 0.05) return;
+    const auto deadline = std::chrono::steady_clock::now() +
+        std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(budget));
+    if (std::chrono::steady_clock::now() >= deadline) return;
+    auto dl = lo, du = up;
+    if (std::chrono::steady_clock::now() >= deadline) return;
+    Result point = root;
+    if (std::chrono::steady_clock::now() >= deadline) return;
+    for (int attempt = 0; attempt < 32; ++attempt) {
+        if (std::chrono::steady_clock::now() >= deadline || elapsed() >= limit_ || nodes >= node_limit_) break;
+        int chosen = -1; double nearest = kInf;
+        for (size_t j = 0; j < md_.cols.size(); ++j) {
+            if (j % 256 == 0 && (std::chrono::steady_clock::now() >= deadline || elapsed() >= limit_)) return;
+            if (!md_.is_int[j] || dl[j] == du[j] || !std::isfinite(point.x[j])) continue;
+            double target = std::round(point.x[j]);
+            if (target < dl[j] || target > du[j]) continue;
+            double distance = std::abs(point.x[j] - target);
+            // Fix nearest coordinates first, deterministic index tie-break.
+            if (distance < nearest) nearest = distance, chosen = int(j);
+        }
+        if (chosen < 0) break;
+        dl[chosen] = du[chosen] = std::round(point.x[chosen]);
+        // Resolve the complete rounding assignment on the final iteration rather
+        // than introduce another heuristic or leave an untested partial point.
+        if (attempt == 31) {
+            root_dive_final_round = true;
+            for (size_t j = 0; j < md_.cols.size(); ++j) if (md_.is_int[j]) {
+                if (j % 256 == 0 && (std::chrono::steady_clock::now() >= deadline || elapsed() >= limit_)) return;
+                double target = std::round(point.x[j]);
+                if (target < dl[j] || target > du[j]) return;
+                dl[j] = du[j] = target;
+            }
+        }
+        double left = std::min(limit_ - elapsed(),
+            std::chrono::duration<double>(deadline - std::chrono::steady_clock::now()).count());
+        if (left <= 0) break;
+        Result q = solve_lp(md_, dl, du, &point.basis, left);
+        ++root_dive_nodes; ++nodes; iters += q.iterations;
+        if (q.status != Status::Optimal || q.x.size() != md_.cols.size()) break;
+        // Do not repair or tolerate this point. Base offer's rounding is a no-op
+        // for a candidate admitted here, because integer coordinates are exact.
+        if (exact_dyadic::feasible(md_, q.x, deadline) && std::chrono::steady_clock::now() < deadline) {
+            ++root_dive_exact_admitted;
+            if (trace) {
+                std::fprintf(stderr, "DIVE_EXACT_POINT size=%zu", q.x.size());
+                for (double v : q.x) std::fprintf(stderr, " %a", v);
+                std::fprintf(stderr, "\n");
+            }
+            if (std::chrono::steady_clock::now() >= deadline) break;
+            offer(q.x);
+        }
+        point = std::move(q);
+    }
+}
+// R10: TARAL_DIVE_ROUNDS=2 runs a second, batch-rule round after the unchanged R8-2 round. Unset/1/invalid: R8-2 only.
+void Search::root_rounding_dive(const Result& root, const std::vector<double>& lo, const std::vector<double>& up) {
+    root_dive_round0(root, lo, up);
+    const char* e = std::getenv("TARAL_DIVE_ROUNDS");
+    if (e && e[0] == '2' && e[1] == 0) root_dive_round1(root, lo, up);
+}
+
+// Round 1: same dive from the root, but each step fixes EVERY unfixed integer coordinate already within 1e-6 of an
+// in-bounds integer (the single nearest fractional one only when there is none). Private bounds; exact gate on the
+// original model before offer(); no prune/bound/status effect from the dive itself. Own window, cooperative timing.
+void Search::root_dive_round1(const Result& root, const std::vector<double>& lo, const std::vector<double>& up) {
+    const bool trace = std::getenv("TARAL_DIVE_TRACE") != nullptr;
+    long r1_nodes = 0, r1_adm = 0; bool r1_final = false;
+    struct Receipt {
+        bool enabled; long &nd, &adm; bool& fin; std::chrono::steady_clock::time_point started = std::chrono::steady_clock::now();
+        ~Receipt() { if (enabled) std::fprintf(stderr, "ROOT_DIVE_R1 nodes=%ld exact_admitted=%ld final_round=%d seconds=%.9f\n", nd, adm, int(fin),
+            std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count()); }
+    } receipt{trace, r1_nodes, r1_adm, r1_final};
+    const double budget = std::min(2.0, 0.01 * limit_);
+    const double remaining = limit_ - elapsed();
+    if (budget < 0.001 || remaining < budget + 0.05 || nodes >= node_limit_) return;
+    const auto deadline = std::chrono::steady_clock::now() +
+        std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(budget));
+    auto dl = lo, du = up;
+    if (std::chrono::steady_clock::now() >= deadline) return;
+    Result point = root;
+    if (std::chrono::steady_clock::now() >= deadline) return;
+    for (int attempt = 0; attempt < 32; ++attempt) {
+        if (std::chrono::steady_clock::now() >= deadline || elapsed() >= limit_ || nodes >= node_limit_) break;
+        int chosen = -1; double nearest = kInf; size_t batch_fixed = 0;
+        for (size_t j = 0; j < md_.cols.size(); ++j) {
+            if (j % 256 == 0 && (std::chrono::steady_clock::now() >= deadline || elapsed() >= limit_)) return;
+            if (!md_.is_int[j] || dl[j] == du[j] || !std::isfinite(point.x[j])) continue;
+            double target = std::round(point.x[j]);
+            if (target < dl[j] || target > du[j]) continue;
+            double distance = std::abs(point.x[j] - target);
+            if (distance <= 1e-6) { dl[j] = du[j] = target; ++batch_fixed; continue; }
+            if (distance < nearest) nearest = distance, chosen = int(j);
+        }
+        if (batch_fixed == 0) {
+            if (chosen < 0) break;
+            dl[chosen] = du[chosen] = std::round(point.x[chosen]);
+        }
+        if (attempt == 31) {
+            r1_final = true;
+            for (size_t j = 0; j < md_.cols.size(); ++j) if (md_.is_int[j]) {
+                if (j % 256 == 0 && (std::chrono::steady_clock::now() >= deadline || elapsed() >= limit_)) return;
+                double target = std::round(point.x[j]);
+                if (target < dl[j] || target > du[j]) return;
+                dl[j] = du[j] = target;
+            }
+        }
+        double left = std::min(limit_ - elapsed(),
+            std::chrono::duration<double>(deadline - std::chrono::steady_clock::now()).count());
+        if (left <= 0) break;
+        Result q = solve_lp(md_, dl, du, &point.basis, left);
+        ++r1_nodes; ++nodes; iters += q.iterations;
+        if (q.status != Status::Optimal || q.x.size() != md_.cols.size()) {
+            if (trace) std::fprintf(stderr, "DIVE_R1_STOP attempt=%d status=%s\n", attempt, status_name(q.status));
+            break;
+        }
+        if (exact_dyadic::feasible(md_, q.x, deadline) && std::chrono::steady_clock::now() < deadline) {
+            ++r1_adm;
+            if (trace) {
+                std::fprintf(stderr, "DIVE_R1_EXACT_POINT size=%zu", q.x.size());
+                for (double v : q.x) std::fprintf(stderr, " %a", v);
+                std::fprintf(stderr, "\n");
+            }
+            if (std::chrono::steady_clock::now() >= deadline) break;
+            offer(q.x);
+        } else if (trace) {
+            std::fprintf(stderr, "DIVE_R1_REJECT attempt=%d gate=false\n", attempt);
+        }
+        point = std::move(q);
+    }
+}
 
 // Activity-based bound propagation on the integer columns. From each row's activity range (smallest
 // and largest value of a'x over the current bounds) every integer column gets the bound the row's
@@ -548,8 +712,8 @@ End Search::run() {
         have_cur = false;
         if (persistent_nodes) open_changes = trails->records;
         if (compact_nodes) max_depth = std::max(max_depth, long(cur.depth));
-        if (has_inc && cur.bound >= z - tol_at(z)) {
-            pruned = std::min(pruned, cur.bound);
+        if (has_inc && eff_bound(cur.bound) >= z - tol_at(z)) {
+            pruned = std::min(pruned, eff_bound(cur.bound));
             continue;
         }
         if (fj_hook && !fj_tried && !has_inc && elapsed() >= std::min(0.5, 0.02 * limit_) &&
@@ -557,8 +721,8 @@ End Search::run() {
             fj_tried = true; // pays only when the search has found nothing after 0.5 s; costs at most the time so far
             std::vector<double> px;
             if (fj_hook(std::min(2.0, 0.05 * limit_), px)) offer(px);
-            if (has_inc && cur.bound >= z - tol_at(z)) {
-                pruned = std::min(pruned, cur.bound);
+            if (has_inc && eff_bound(cur.bound) >= z - tol_at(z)) {
+                pruned = std::min(pruned, eff_bound(cur.bound));
                 continue;
             }
         }
@@ -692,6 +856,8 @@ End Search::run() {
             double g = std::max(0.0, r.objective - cur.bound) / cur.dist;
             pc_sum[d][j] += g, ++pc_cnt[d][j], all_sum[d] += g, ++all_cnt[d];
         }
+        if (cur.depth == 0 && !root_dive_tried && std::getenv("TARAL_NO_ROOT_DIVE") == nullptr)
+            root_rounding_dive(r, lo, up);
         offer(r.x);
         bool near_integer = true;
         for (int j = 0; j < n; ++j)
@@ -711,8 +877,8 @@ End Search::run() {
                 if (polished.status == Status::Optimal) offer(polished.x);
             }
         }
-        if (has_inc && b >= z - tol_at(z)) {
-            pruned = std::min(pruned, b);
+        if (has_inc && eff_bound(b) >= z - tol_at(z)) {
+            pruned = std::min(pruned, eff_bound(b));
             continue;
         }
         // Pseudocost product score; uninitialised variables use the average. Before any
@@ -720,6 +886,7 @@ End Search::run() {
         int bj = -1;
         double best = -1;
         bool blocked_fractional = false;
+        bool has_genuine_fractional = false;
         for (int j = 0; j < n; ++j) {
             if (!md_.is_int[j]) continue;
             double f = r.x[j] - std::floor(r.x[j]);
@@ -730,6 +897,15 @@ End Search::run() {
             if (std::floor(r.x[j]) >= up[j] || std::ceil(r.x[j]) <= lo[j]) {
                 blocked_fractional = true;
                 continue;
+            }
+            // Keep ordinary fractional branching ahead of numerical residuals.
+            // Residual covering splits remain available if no ordinary split exists.
+            bool genuine = std::min(f, 1 - f) > kIntTol;
+            if (has_genuine_fractional && !genuine) continue;
+            if (genuine && !has_genuine_fractional) {
+                has_genuine_fractional = true;
+                best = -1;
+                bj = -1;
             }
             double sc = std::max(pseudo(0, j) * f, 1e-6) * std::max(pseudo(1, j) * (1 - f), 1e-6);
             if (sc > best) bj = j, best = sc;
@@ -803,7 +979,7 @@ End Search::run() {
     if (have_cur) bound = std::min(bound, cur.bound);
     if (!open.empty()) bound = std::min(bound, open.top().bound);
     for (double h : held)
-        if (!(has_inc && h >= z - tol_at(z)))
+        if (!(has_inc && eff_bound(h) >= z - tol_at(z)))
             bound = std::min(bound, h);
         else
             --unresolved; // pruned by the final incumbent after all
@@ -938,6 +1114,7 @@ class FeasJump {
 
 MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, MilpOptions opt) {
     Stopwatch elapsed;
+    const double limit_total_s = time_limit_s; // absolute budget: the clock starts at solve_milp entry
     MilpResult res;
     if (opt.integer_structure) {
         auto deadline = elapsed.start + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
@@ -986,9 +1163,91 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
         }
     }
 
+    // Opt-in root c-MIR / flow-cover cuts (TARAL_MIR is exactly "1"). Cuts are derived only from the ORIGINAL rows (the
+    // first m0 rows; appended cut rows are never sources) and appended to the working model before the search. The
+    // search, LP code and result checks are unchanged and every reported point is still checked against the original
+    // model. The clock starts at solve_milp entry: the remaining Search limit is limit_total - elapsed() (one absolute deadline).
+    std::string mir_note;
+    bool mir_active = false;
+    const double mir_t0 = elapsed();
+    {
+        const char* e = std::getenv("TARAL_MIR");
+        if (e && std::strcmp(e, "1") == 0 && md.has_integers() && md.qobj.empty()) {
+            mir_active = true;
+            // one absolute deadline: the budget is measured from solve_milp entry (model copy and bound setup included)
+            double budget = std::min(0.05 * limit_total_s, 10.0);
+            budget = std::min(budget, limit_total_s - elapsed());
+            auto dl = std::chrono::steady_clock::now() + std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(std::max(0.0, budget)));
+            const char* dump = std::getenv("TARAL_MIR_DUMP");
+            FILE* df = dump ? std::fopen(dump, "w") : nullptr;
+            MirStats mst;
+            // R14 opt-in knob: TARAL_MIR_AGG exactly "1" (only with TARAL_MIR=1) enables path aggregation of up to 4 rows
+            const char* ea = std::getenv("TARAL_MIR_AGG");
+            const int max_agg = (ea && std::strcmp(ea, "1") == 0) ? 4 : 0;
+            double b0 = 0, b_last = 0;
+            bool have_b0 = false, last_batch_solved = true;
+            int rounds = 0;
+            long added = 0;
+            const int m0 = int(md.row_lo.size());
+            double prev = -kInf;
+            for (int round = 0; round < 10; ++round) {
+                double left = std::chrono::duration<double>(dl - std::chrono::steady_clock::now()).count();
+                if (left < 0.05) break;
+                double lp_cap = round == 0 ? std::min(left, 0.01 * time_limit_s) : left;
+                if (lp_cap < 0.05) break;
+                Result q = solve_lp(md, lo, up, nullptr, lp_cap);
+                if (q.status != Status::Optimal || q.x.size() != md.cols.size()) break;
+                last_batch_solved = true;
+                if (!have_b0) b0 = q.objective, have_b0 = true;
+                b_last = q.objective;
+                if (round >= 2 && q.objective - prev < 1e-4 * std::max(1.0, std::abs(q.objective))) break;
+                prev = q.objective;
+                int cap = int(std::min<long>(300, std::max<long>(50, long(m0) / 2)));
+                if (added + cap > std::max<long>(1000, long(m0) * 2)) break;
+                auto cuts = separate_mir(md, lo, up, q.x, m0, cap, 1e-4, dl, &mst, max_agg);
+                if (cuts.empty()) break;
+                for (const MirCut& c : cuts) {
+                    int r = int(md.row_lo.size());
+                    md.row_lo.push_back(-kInf), md.row_up.push_back(c.rhs), md.row_names.push_back("mir" + std::to_string(r));
+                    for (size_t k = 0; k < c.idx.size(); ++k) md.cols[c.idx[k]].push_back({r, c.val[k]});
+                    if (df) {
+                        std::fprintf(df, "%a %zu", c.rhs, c.idx.size());
+                        for (size_t k = 0; k < c.idx.size(); ++k) std::fprintf(df, " %d %a", c.idx[k], c.val[k]);
+                        std::fprintf(df, "\n");
+                    }
+                }
+                added += long(cuts.size());
+                ++rounds;
+                last_batch_solved = false;
+            }
+            if (df) {
+                std::fprintf(df, "# END cuts=%ld fp_ok=%d timeouts=%ld\n", added, mst.fp_ok ? 1 : 0, mst.timeouts);
+                std::fclose(df);
+            }
+            char buf[260];
+            std::snprintf(buf, sizeof buf, "[mir: rounds=%d cuts=%ld last_solved_lp_bound %.9g -> %.9g last_batch_solved=%d sec=%.2f vub=%ld rej_num=%ld rej_dom=%ld timeouts=%ld fp_ok=%d]",
+                          rounds, added, sign * b0, sign * b_last, last_batch_solved ? 1 : 0, elapsed() - mir_t0, mst.vub_used,
+                          mst.cuts_rejected_numerics, mst.cuts_rejected_domain, mst.timeouts, mst.fp_ok ? 1 : 0);
+            mir_note = buf;
+            if (max_agg > 0) {
+                char b2[96];
+                std::snprintf(b2, sizeof b2, "[mir_agg: tried=%ld cuts_found=%ld]", mst.agg_tried, mst.agg_cuts);
+                mir_note += b2;
+            }
+            if (std::getenv("TARAL_MIR_TRACE")) std::fprintf(stderr, "%s\n", mir_note.c_str());
+            time_limit_s = limit_total_s - elapsed(); // remaining of the single absolute budget (no double subtraction)
+            if (time_limit_s <= 0) {
+                res.status = "time_limit";
+                res.best_bound = -sign * kInf;
+                res.message = "time limit reached during setup " + mir_note;
+                return res;
+            }
+        }
+    }
     Search s(md, lo, up, time_limit_s, node_limit);
     s.compact_nodes = opt.compact_nodes || opt.persistent_nodes;
-    s.persistent_nodes = opt.persistent_nodes;
+    // Share immutable domains independently of the opt-in compact search cadence.
+    s.persistent_nodes = true;
     if (opt.integer_structure) s.grid = structural_integer::objective_grid(md);
     // Incumbent seed: if the search still has no incumbent after a short while, up to four Feasibility Jump
     // restarts are tried (see Search::fj_hook). Only a point that passes violation() on the model being
@@ -1006,6 +1265,20 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
         };
     }
     s.audit_prop = opt.audit_prop, s.prop_prune = !opt.no_prop_prune;
+    {   // R12: exact integrality of the objective, read from the model being solved (opt-in, exactly "1")
+        const char* oi = std::getenv("TARAL_OBJINT");
+        if (oi && std::strcmp(oi, "1") == 0 && md.qobj.empty() && md.has_integers()) {
+            bool ok = std::isfinite(md.obj_const) && std::abs(md.obj_const) <= 1e9;
+            for (size_t j = 0; ok && j < md.cost.size(); ++j) {
+                double c = md.cost[j];
+                if (c == 0.0) continue;
+                if (!md.is_int[j] || !std::isfinite(c) || c != std::round(c) || std::abs(c) > 1e9) ok = false;
+            }
+            s.obj_int = ok, s.obj_off = ok ? md.obj_const : 0.0;
+            if (std::getenv("TARAL_OBJINT_TRACE")) std::fprintf(stderr, "[objint: active=%d offset=%g]\n", ok ? 1 : 0, s.obj_off);
+            if (ok) mir_note += (mir_note.empty() ? "" : " ") + std::string("[objint: active offset=") + std::to_string(s.obj_off) + "]";
+        }
+    }
     End end = s.run();
     res.nodes = s.nodes, res.lp_iterations = s.iters, res.unresolved_nodes = s.unresolved;
     res.prop_tightened = s.prop_tightened, res.prop_crossed = s.prop_crossed, res.prop_pruned = s.prop_pruned;
@@ -1014,13 +1287,13 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
     res.audit = {s.audit_nodes,        s.audit_lp_infeasible, s.audit_lp_feasible, s.audit_lp_other,   s.audit_int_empty,
                  s.audit_int_feasible, s.audit_int_undecided, s.audit_cutoff,      s.audit_rc_checked, s.audit_rc_bad};
     res.compact_nodes_used = opt.compact_nodes || opt.persistent_nodes;
-    res.persistent_nodes_used = opt.persistent_nodes;
+    res.persistent_nodes_used = s.persistent_nodes;
     res.peak_trail_records = s.peak_trail_records;
     res.peak_trail_nodes = s.peak_trail_nodes;
     res.peak_open_nodes = s.peak_open_nodes;
     res.peak_open_changes = s.peak_open_changes;
     res.max_depth = s.max_depth;
-    res.message = s.note;
+    res.message = s.note + (mir_note.empty() ? "" : (s.note.empty() ? "" : " ") + mir_note);
     if (s.grid.step > 0) res.structural_certificate = s.grid.json;
     if (end == End::RootUnbounded) {
         // For rational data an unbounded relaxation plus one integer-feasible point means the MILP
@@ -1028,7 +1301,9 @@ MilpResult solve_milp(const Model& model, double time_limit_s, long node_limit, 
         // such a point with a zero objective.
         Model feas = md;
         std::fill(feas.cost.begin(), feas.cost.end(), 0.0);
-        Search f(feas, lo, up, time_limit_s - elapsed(), node_limit - s.nodes);
+        // MIR path: the single absolute budget (limit_total_s - elapsed(), never negative). Knob unset: the legacy expression, unchanged.
+        const double fb_limit = mir_active ? std::max(0.0, limit_total_s - elapsed()) : time_limit_s - elapsed();
+        Search f(feas, lo, up, fb_limit, node_limit - s.nodes);
         f.prop_prune = s.prop_prune, f.use_rc = false; // the feasibility search has no objective to cut on
         End fe = f.run();
         res.nodes += f.nodes, res.lp_iterations += f.iters;
