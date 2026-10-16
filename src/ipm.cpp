@@ -25,6 +25,7 @@
 #pragma GCC optimize("fp-contract=off")
 #endif
 #include "ipm.hpp"
+#include "ipm_super.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -33,6 +34,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <functional>
+#include <memory>
 #include <numeric>
 
 namespace {
@@ -213,6 +215,12 @@ class Ldl {
         pattern_.assign(n, 0);
         D_.assign(n, 0);
         x_.assign(n, 0);
+        sup_.reset();
+        if (want_super_ && n > 0) {
+            double fl = 0;
+            for (int k = 0; k < n; ++k) fl += static_cast<double>(lnz_[k]) * lnz_[k];
+            if (fl >= super_min_flops_) enable_super(fl);
+        }
         return true;
     }
 
@@ -221,6 +229,20 @@ class Ldl {
 
     // Returns false when the deadline passes.
     bool factor(const Vec& V, Clock::time_point deadline, bool regularize) {
+        if (sup_ && regularize) {
+            Vp_.resize(Ksrc_.size());
+            for (size_t p = 0; p < Ksrc_.size(); ++p) Vp_[p] = V[Ksrc_[p]];
+            if (!sup_->factor(Vp_, deadline, kPivTol, kPivRep, kPivAbs)) return false;
+            nreg = sup_->nreg(), nwrong = 0;
+            if (sup_->all_finite()) return true;
+            // The supernodal factor produced a non-finite entry (pivot decisions near the regularisation threshold are
+            // rounding-sensitive): drop to the scalar kernel for the rest of this solve. The elimination order and the
+            // scalar structures stay consistent with the relabelled matrix (see enable_super).
+            sup_.reset();
+            flag_.assign(n_, -1);
+            std::fill(lnz_.begin(), lnz_.end(), 0);
+            if (std::getenv("TARAL_QP_SUPER_VERBOSE")) std::fprintf(stderr, "ipm: supernodal factor non-finite, scalar fallback\n");
+        }
         if (Li_.size() != static_cast<size_t>(nnz_l())) Li_.resize(nnz_l()), Lx_.resize(nnz_l());
         nreg = 0, nwrong = 0;
         for (int k = 0; k < n_; ++k) {
@@ -262,6 +284,11 @@ class Ldl {
 
     void solve(Vec& b) const {
         for (int k = 0; k < n_; ++k) x_[k] = b[perm_[k]];
+        if (sup_) {
+            sup_->solve(x_);
+            for (int k = 0; k < n_; ++k) b[perm_[k]] = x_[k];
+            return;
+        }
         for (int k = 0; k < n_; ++k) {
             const double xk = x_[k];
             if (xk != 0)
@@ -277,8 +304,47 @@ class Ldl {
     }
 
     int nreg = 0, nwrong = 0;
+    // Opt-in (TARAL_QP_SUPER=1): supernodal factor for large KKT systems. Set before analyze().
+    void request_super(double min_flops) { want_super_ = true, super_min_flops_ = min_flops; }
+    bool super_active() const { return static_cast<bool>(sup_); }
 
   private:
+    // Relabel the elimination order by an elimination-tree post-order (the same tree, so the same fill and pivot
+    // sequence per subtree), then hand the structure to the supernodal kernel.
+    void enable_super(double) {
+        const int n = n_;
+        std::vector<int> post = taral_qp_super::etree_postorder(parent_), inv(n);
+        for (int k = 0; k < n; ++k) inv[post[k]] = k;
+        std::vector<int> cnt(lnz_), cKp(n + 1, 0);
+        for (int k = 0; k < n; ++k)
+            for (int p = Kp_[k]; p < Kp_[k + 1]; ++p) ++cKp[std::max(inv[Ki_[p]], inv[k]) + 1];
+        for (int k = 0; k < n; ++k) cKp[k + 1] += cKp[k];
+        std::vector<int> cKi(Ki_.size()), cSrc(Ki_.size()), pos(cKp.begin(), cKp.end() - 1);
+        for (int k = 0; k < n; ++k)
+            for (int p = Kp_[k]; p < Kp_[k + 1]; ++p) {
+                int a = inv[Ki_[p]], b = inv[k], q = pos[std::max(a, b)]++;
+                cKi[q] = std::min(a, b);
+                cSrc[q] = Ksrc_[p];
+            }
+        std::vector<signed char> csign(n);
+        std::vector<int> cperm(n), cpar(n, -1), ccnt(n);
+        for (int k = 0; k < n; ++k) {
+            csign[inv[k]] = sign_[k];
+            cperm[inv[k]] = perm_[k];
+            ccnt[inv[k]] = cnt[k];
+            cpar[inv[k]] = parent_[k] >= 0 ? inv[parent_[k]] : -1;
+        }
+        Kp_.swap(cKp), Ki_.swap(cKi), Ksrc_.swap(cSrc), sign_.swap(csign), perm_.swap(cperm);
+        parent_.swap(cpar);
+        Lp_.assign(n + 1, 0);
+        for (int k = 0; k < n; ++k) Lp_[k + 1] = Lp_[k] + ccnt[k];
+        sup_.reset(new taral_qp_super::SuperLdl);
+        sup_->analyze(n, Kp_, Ki_, sign_, parent_, ccnt);
+    }
+    bool want_super_ = false;
+    double super_min_flops_ = 2e8;
+    std::unique_ptr<taral_qp_super::SuperLdl> sup_;
+    Vec Vp_;
     int n_ = 0;
     std::vector<int> perm_, Kp_, Ki_, Ksrc_, parent_, flag_, lnz_, pattern_, Li_;
     std::vector<signed char> sign_;
@@ -349,6 +415,10 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline, c
         for (int p = P.Ap[j]; p < P.Ap[j + 1]; ++p) ei.push_back(N + P.Ai[p]), ej.push_back(j), es.push_back(N + nqo + p);
     for (int i = 0; i < M; ++i) ei.push_back(N + i), ej.push_back(N + i), es.push_back(N + nqo + nza + i), sign[N + i] = 1;
     Ldl ldl;
+    if (const char* sv = std::getenv("TARAL_QP_SUPER"); sv && std::string(sv) == "1") {
+        const char* mf = std::getenv("TARAL_QP_SUPER_MIN_FLOPS");
+        ldl.request_super(mf ? std::atof(mf) : 2e8);
+    }
     if (!ldl.analyze(N + M, ei, ej, es, sign, deadline)) {
         out.status = IpmStatus::TimeLimit;
         return out;

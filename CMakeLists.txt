@@ -12,6 +12,7 @@ set(TARAL_ENGINE_SOURCES
     src/dual.cpp
     src/explain.cpp
     src/ipm.cpp
+    src/ipm_super.cpp
     src/kkt_gate.cpp
     src/lu.cpp
     src/main.cpp
