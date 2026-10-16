@@ -15,4 +15,6 @@ JSON is the machine-readable result format. Warm starts reuse a previous solutio
 - 8991: the raw gate label `WRONG` was adjudicated using a local reproduction. Positive curvature (Gershgorin lower bound 2.0) and interior stationarity (gradient 1.12e-12) place the reproduced engine point numerically at the unique global minimum. The recorded HiGHS reference stopped short by 5.97e-6 absolute. This is not an established engine wrong answer; the raw CSV remains unchanged. See [diagnostic, inputs and limits](adjudication_8991.md).
 - 9008 produced no JSON after 480.17s despite the requested 120s engine cap. Several ordinary `time_limit` rows also exceed 120s (10038:140.68s,8500:124.83s,8547:121.89s,8602:120.30s). A requested cap is not a guaranteed hard wall.
 
+**October 16, 2026 update.** QPLIB_8602 has since reached engine-reported optimal with the opt-in `TARAL_QP_SUPER=1` supernodal kernel (merged to `main` October 16; audited run record: [../qplib_qp_super_20261016/](../qplib_qp_super_20261016/)). The count of the 19 candidates reaching engine-reported optimal is now 13. QPLIB_8500 remains unsolved. The historical rows above and in `ledger.csv` are unchanged.
+
 [Raw CSV](ledger.csv) · [Recorded provenance](provenance.json) · [Limitations](../../docs/limitations.md#qplib-measurements)

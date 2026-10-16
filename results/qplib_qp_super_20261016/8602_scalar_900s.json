@@ -1,0 +1,1 @@
+{"status": "optimal", "objective": 27353.387205546063, "dual_objective": 27353.387192656668, "primal_res": 1.009e-12, "dual_res": 0.000e+00, "gap": 4.712e-10, "max_row_viol": 1.009e-12, "max_bound_viol": 0.000e+00, "iterations": 14, "wall_s": 474.114269, "message": ""}

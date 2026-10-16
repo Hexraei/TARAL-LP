@@ -1,0 +1,5 @@
+cols read 34552/34552  objective 27353.38720554609  row_viol abs 1.009e-12 rel 1.009e-12  bound_viol abs 0.000e+00
+min eig check skipped; Q symmetric nnz 34552  sym err 0.0
+free cols 31092 active rows 52983
+stationarity on free cols: ||r||inf 1.678e-02  rel 1.044e-02  lsqr istop 2 itn 738
+reduced cost sign viol: at lower 3.140e-01, at upper 0.000e+00

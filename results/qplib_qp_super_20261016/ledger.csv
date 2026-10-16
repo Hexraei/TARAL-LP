@@ -1,0 +1,2 @@
+case,verdict,engine_status,engine_obj,engine_wall,best_bound,nodes,row_viol,bound_viol,int_viol,ref_status,ref_obj,ref_wall,download_sha256,mps_sha256
+8602,optimal,optimal,27353.387205546067,112.47,,,1.009e-12,0.0,0.0,,,,cb452aeece377ea346095498267ed30fb184a432820f980a22441b603db45231,ef338fd9b14a9fd84d178242d609653eb3458fb75fca27dacbee181e43d919b6
