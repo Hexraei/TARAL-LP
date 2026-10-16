@@ -48,6 +48,9 @@ const double kPivTol = std::getenv("IPM_PIV") ? std::atof(std::getenv("IPM_PIV")
 const double kPivRep = std::getenv("IPM_PIVREP") ? std::atof(std::getenv("IPM_PIVREP")) : 1e-10;
 const double kPivAbs = std::getenv("IPM_PIVABS") ? std::atof(std::getenv("IPM_PIVABS")) : 2e-7;
 const double kKeepDelta = std::getenv("IPM_KEEPD") ? std::atof(std::getenv("IPM_KEEPD")) : 1;
+// R17 opt-in (TARAL_QP_DEADLINE exactly "1"): the GMRES/refinement loop of kkt_solve checks the deadline between preconditioner
+// solves and the Newton step is abandoned (time_limit) when it expired mid-solve. Knob unset: no extra clock reads, no behaviour change.
+const bool kQpDeadline = [] { const char* e = std::getenv("TARAL_QP_DEADLINE"); return e && e[0] == '1' && e[1] == 0; }();
 const int kRefMax = std::getenv("IPM_REF") ? std::atoi(std::getenv("IPM_REF")) : 30;
 
 double norm_inf(const Vec& v) {
@@ -397,13 +400,16 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline, c
         for (size_t k = 0; k < a.size(); ++k) s += a[k] * b[k];
         return s;
     };
+    bool solve_expired = false;
     auto kkt_solve = [&](const Vec& rhs, Vec& sol) {
         const int n = N + M;
         sol = rhs;
         ldl.solve(sol);
+        if (kQpDeadline && Clock::now() > deadline) { solve_expired = true; return; }
         const double target = 1e-15 * (1 + norm_inf(rhs));
         double rn = INFINITY;
         for (int restart = 0; restart < 4; ++restart) {
+            if (kQpDeadline && Clock::now() > deadline) { solve_expired = true; break; }
             kkt_mul(sol, kv);
             rr.resize(n);
             for (int k = 0; k < n; ++k) rr[k] = rhs[k] - kv[k];
@@ -415,6 +421,7 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline, c
             gg[0] = beta;
             int used = 0;
             for (int j = 0; j < gm; ++j) {
+                if (kQpDeadline && Clock::now() > deadline) { solve_expired = true; break; }
                 Zb[j] = Vb[j];
                 ldl.solve(Zb[j]);
                 kkt_mul(Zb[j], kv);
@@ -684,6 +691,10 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline, c
         }
         for (int j = 0; j < N; ++j) rcl[j] = hl[j] ? -xl[j] * zl[j] : 0, rcu[j] = hu[j] ? -xu[j] * zu[j] : 0;
         newton(az, ay, axl, axu, azl, azu);
+        if (kQpDeadline && solve_expired) {
+            out.status = IpmStatus::TimeLimit;
+            break;
+        }
         double ap, ad;
         steps(axl, axu, azl, azu, ap, ad);
         if (lp == false) ap = ad = std::min(ap, ad);
@@ -701,6 +712,10 @@ RunOut run_ipm(const Qp& P, const IpmOptions& opt, Clock::time_point deadline, c
                 if (hu[j]) rcu[j] = sigma * mu - xu[j] * zu[j] - axu[j] * azu[j];
             }
             newton(dz, dy, dxl, dxu, dzl, dzu);
+            if (kQpDeadline && solve_expired) {
+                out.status = IpmStatus::TimeLimit;
+                break;
+            }
             steps(dxl, dxu, dzl, dzu, ap, ad);
         } else {
             dz = az, dy = ay;
