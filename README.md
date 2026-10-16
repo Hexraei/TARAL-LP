@@ -10,9 +10,13 @@ TARAL-LP is a from-scratch C++17 solver core for sparse industrial optimization:
 
 **93/93 Netlib LP passes in each simplex mode. 42/65 MIPLIB 3 solver-optimal results in the latest independently audited opt-in measurement.**
 
-All 65 mixed-integer cases were measured in three paired repeats at 300 seconds per case. Adding multi-row aggregation raises the expected-value count from 39 to 42 in every repeat, with `pp08a`, `gesa2_o` and `pp08aCUTS` the only new solves. All 369 returned points pass independent checks on the original models. [Per-case results and conditions](results/milp_paired_20261013/).
+All 65 mixed-integer cases were measured in three paired repeats at 300 seconds per case. Adding multi-row aggregation raises the expected-value count from 39 to 42 in every repeat, with `pp08a`, `gesa2_o` and `pp08aCUTS` the only new solves. The 42/65 expected-value count was reproduced on a second host. All 369 returned points pass independent checks on the original models. [Per-case results and conditions](results/milp_paired_20261013/).
 
 <sub>Numerical validation only; all three conversions retain numerical-INCONCLUSIVE cut checks. The aggregation result is 41/65 at the 270-second margin and 41/65 against frozen references; `p0548` is the near-cap exclusion. Measured before the October 13 merge; checked-in solver bytes match the audited binary after a warning-only cleanup. The 42/65 result uses the measured opt-in configuration, not unchanged defaults.</sub>
+
+**60-second read.** At a 60-second per-case limit, the same measured opt-in configuration reaches 28/65 solver-optimal, against 23/65 for the control (binary sha256 `6a6ac74fb30c0fa09554cbe8ed6671017b6d31d95236ed0981d39164470d11f4`; g++ 11.4.0, `-O2 -std=c++17 -pthread`). Solver-optimal means the relative-gap stopping rule closed the search within the numerical gap tolerance; it is not a rigorous optimality certificate.
+
+<sub>Time-limited counts depend on host speed; the 300-second counts above are the stable reference.</sub>
 
 ## What sets TARAL-LP apart
 
